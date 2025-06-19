@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+
+spring:
+  mvc:
+    path match:
+      matching-strategy: ant_path_matcher
+  web:
+    resources:
+      static-locations: file:media, classpath:/static
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/pageon?serverTimezone=UTC&useSSL=false
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+
+  security:
+    user:
+      name: user
+      password: 1111
