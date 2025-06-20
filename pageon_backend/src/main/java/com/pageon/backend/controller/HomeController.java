@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api")
 public class HomeController {
 
-    @GetMapping
+    @GetMapping("/test")
     public String test() {
         return "spring boot, react 연동 확인";
     }
