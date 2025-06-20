@@ -1,34 +1,17 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-import axios from "axios";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SignupEmail from './pages/SignupEmail';
+import Home from './pages/Home';
+import Signup from './pages/Signup'
 
 function App() {
-  const [email, setemail] = useState();
-  const [psw, setpsw] = useState();
-  const [testStr, setTestStr] = useState("");
-
-  function callback(str) {
-      setTestStr(str);
-  }
-
-  useEffect(() => {
-      axios
-          .get("/api/test")
-          .then((Response) => {
-              callback(Response.data);
-          })
-          .catch((Error) => {
-              console.log(Error);
-          });
-  }, []);
-
   return (
-      <div className="App">
-          <div>
-              api/test == {">"}
-              {testStr}
-          </div>
-      </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path='/signup' element={<Signup />} />
+        <Route path="/signup/email" element={<SignupEmail />} />
+      </Routes>
+    </Router>
   );
 }
 

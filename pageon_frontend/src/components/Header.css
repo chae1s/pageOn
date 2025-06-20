@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600&display=swap');
+
+.home-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  height: 64px;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.logo {
+  font-size: 1.8rem;
+  letter-spacing: -1px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-list {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-link {
+  font-size: 1rem;
+  color: #444;
+  padding: 8px 0;
+  transition: color var(--transition);
+  position: relative;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--hover-color);
+}
+
+/* signup-btn, login-btn 스타일 통일 및 간격 축소 */
+.signup-btn,
+.login-btn {
+  background: none;
+  color: #444;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-right: 4px;
+  transition: 
+    background var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.signup-btn:last-child,
+.login-btn:last-child {
+  margin-right: 0;
+}
+
+
+@media (max-width: 900px) {
+  .header-inner {
+    max-width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-inner {
+    height: 52px;
+    padding: 0 8px;
+  }
+  .logo {
+    font-size: 1.1rem;
+  }
+  .nav-list {
+    gap: 16px;
+  }
+  .signup-btn,
+  .login-btn {
+    padding: 6px 8px;
+    font-size: 0.95rem;
+  }
+}
