@@ -1,5 +1,6 @@
 package com.pageon.backend.entity;
 
+import com.pageon.backend.entity.enums.Provider;
 import com.pageon.backend.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,6 @@ public class Users {
     )
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(
@@ -40,6 +40,14 @@ public class Users {
     private Integer pointBalance = 0;
 
     private Role role;
+
+    // email, kakao, naver, google
+    @Column(unique = true)
+    private Provider provider;
+
+    // 소셜 로그인 시 제공받는 id
+    @Column(unique = true)
+    private Long providerId;
 
     @OneToMany(mappedBy = "user")
     private List<Webtoons> webtoons = new ArrayList<>();

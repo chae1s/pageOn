@@ -1,12 +1,14 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.dto.SocialSignupDto;
 import com.pageon.backend.dto.UserSignupDto;
 import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.enums.Provider;
 import com.pageon.backend.entity.enums.Role;
 import com.pageon.backend.repository.UserRepository;
+import com.pageon.backend.security.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +33,30 @@ public class UserService {
                 .nickname(signupDto.getNickname())
                 .birthDate(birthDate)
                 .role(Role.ROLE_USER)
+                .provider(Provider.EMAIL)
                 .build();
 
         userRepository.save(users);
 
-        log.info("회원가입 완료 email:{}, nickname: {}", users.getEmail(), users.getNickname());
+        log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
+    }
+
+    public void signupSocial(CustomOAuth2User auth2User, SocialSignupDto signupDto) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate birthDate = LocalDate.parse(signupDto.getBirthDate(), formatter);
+
+        Users users = Users.builder()
+                .email(signupDto.getEmail())
+                .nickname(signupDto.getNickname())
+                .birthDate(birthDate)
+                .role(Role.ROLE_USER)
+                .provider(auth2User.getProvider())
+                .providerId(auth2User.getProviderId())
+                .build();
+
+        userRepository.save(users);
+
+        log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
     }
 
     public boolean isEmailDuplicate(String email) {

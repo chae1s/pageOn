@@ -8,7 +8,7 @@ function Header() {
   const navigate = useNavigate();
 
   const handleSignupClick = () => {
-    navigate("/signup");
+    navigate("/users/signup");
   };
 
   return (
