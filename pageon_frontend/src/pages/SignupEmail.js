@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Header from "../components/Header";
 import "../styles/reset.css";
 import "../styles/global.css";
@@ -9,16 +10,21 @@ function SignupEmail() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
     nickname: "",
-    birthdate: "",
+    birthDate: "",
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [isEmailDuplicate, setIsEmailDuplicate] = useState(false);
+  const [isCheckingNickname, setIsCheckingNickname] = useState(false);
+  const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
   const navigate = useNavigate();
 
   const validate = useCallback((data, checkRequired = false) => {
     const newErrors = {};
-    const { email, password, confirmPassword, nickname, birthdate } = data;
+    // destructure birthDate instead of birthdate
+    const { email, password, confirmPassword, nickname, birthDate } = data;
 
     // Email validation
     if (checkRequired && !email) {
@@ -54,17 +60,17 @@ function SignupEmail() {
       newErrors.nickname = "닉네임을 입력해주세요.";
     }
 
-    // Birthdate validation
-    if (checkRequired && !birthdate) {
-      newErrors.birthdate = "생년월일을 입력해주세요.";
-    } else if (birthdate) {
-      if (birthdate.length !== 8) {
-        newErrors.birthdate = "생년월일은 8자리로 입력해주세요.";
+    // BirthDate validation
+    if (checkRequired && !birthDate) {
+      newErrors.birthDate = "생년월일을 입력해주세요.";
+    } else if (birthDate) {
+      if (birthDate.length !== 8) {
+        newErrors.birthDate = "생년월일은 8자리로 입력해주세요.";
       } else {
-        const year = birthdate.substring(0, 4);
-        const month = birthdate.substring(4, 6);
-        const day = birthdate.substring(6, 8);
-        const birthDate = new Date(
+        const year = birthDate.substring(0, 4);
+        const month = birthDate.substring(4, 6);
+        const day = birthDate.substring(6, 8);
+        const birthDateObj = new Date(
           parseInt(year, 10),
           parseInt(month, 10) - 1,
           parseInt(day, 10)
@@ -73,32 +79,130 @@ function SignupEmail() {
         today.setHours(0, 0, 0, 0);
 
         if (
-          birthDate.getFullYear() !== parseInt(year, 10) ||
-          birthDate.getMonth() !== parseInt(month, 10) - 1 ||
-          birthDate.getDate() !== parseInt(day, 10)
+          birthDateObj.getFullYear() !== parseInt(year, 10) ||
+          birthDateObj.getMonth() !== parseInt(month, 10) - 1 ||
+          birthDateObj.getDate() !== parseInt(day, 10)
         ) {
-          newErrors.birthdate = "유효하지 않은 생년월일입니다.";
-        } else if (birthDate > today) {
-          newErrors.birthdate = "유효하지 않은 생년월일입니다.";
+          newErrors.birthDate = "유효하지 않은 생년월일입니다.";
+        } else if (birthDateObj > today) {
+          newErrors.birthDate = "유효하지 않은 생년월일입니다.";
         }
       }
     }
     return newErrors;
   }, []);
 
+  const checkEmailDuplicate = async (email) => {
+    if (!email) return;
+    
+    setIsCheckingEmail(true);
+    try {
+      const response = await axios.get(`/api/users/check-email?email=${encodeURIComponent(email)}`);
+      console.log(response)
+      if (response.data.isEmailDuplicate) {
+        console.log("이메일 중복")
+        setIsEmailDuplicate(true);
+        setErrors(prev => ({
+          ...prev,
+          email: "이미 사용 중인 이메일입니다."
+        }));
+      } else {
+        setIsEmailDuplicate(false);
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.email;
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      console.error("Email check error:", error);
+      setIsEmailDuplicate(true);
+      setErrors(prev => ({
+        ...prev,
+        email: "이미 사용중인 이메일입니다."
+      }));
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
+  const checkNicknameDuplicate = async (nickname) => {
+    if (!nickname) return;
+    console.log("닉네임")
+    setIsCheckingNickname(true);
+    try {
+      const response = await axios.get(`/api/users/check-nickname?nickname=${encodeURIComponent(nickname)}`);
+      console.log(response)
+      if (response.data.isNicknameDuplicate) {
+        console.log("닉네임 중복")
+        setIsNicknameDuplicate(true);
+        setErrors(prev => ({
+          ...prev,
+          nickname: "이미 사용 중인 닉네임입니다."
+        }));
+      } else {
+        setIsNicknameDuplicate(false);
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.nickname;
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      console.error("Nickname check error:", error);
+      setIsNicknameDuplicate(true);
+      setErrors(prev => ({
+        ...prev,
+        nickname: "이미 사용중인 닉네임입니다."
+      }));
+    } finally {
+      setIsCheckingNickname(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // If the input name is "birthdate", map it to "birthDate" in formData
+    const mappedName = name === "birthdate" ? "birthDate" : name;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: value,
+      [mappedName]: value,
     }));
+    
+    // 이메일이 변경되면 중복 상태 초기화
+    if (name === "email") {
+      setIsEmailDuplicate(false);
+    }
+    
+    // 닉네임이 변경되면 중복 상태 초기화
+    if (name === "nickname") {
+      setIsNicknameDuplicate(false);
+    }
+  };
+
+  const handleEmailBlur = (e) => {
+    const email = e.target.value.trim();
+    if (email) {
+      // 이메일 유효성 검사를 먼저 수행
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(email)) {
+        checkEmailDuplicate(email);
+      }
+    }
+  };
+
+  const handleNicknameBlur = (e) => {
+    const nickname = e.target.value.trim();
+    if (nickname) {
+      checkNicknameDuplicate(nickname);
+    }
   };
 
   useEffect(() => {
     setErrors(validate(formData));
   }, [formData, validate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const finalErrors = validate(formData, true);
@@ -108,10 +212,30 @@ function SignupEmail() {
       return;
     }
 
-    // In a real application, you would send this data to a server.
-    console.log("Signup data submitted:", formData);
-    alert("회원가입이 완료되었습니다.");
-    navigate("/");
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('/api/users/signup', {
+        email: formData.email,
+        password: formData.password,
+        nickname: formData.nickname,
+        birthDate: formData.birthDate,
+      });
+
+      console.log("Signup successful:", response.data);
+      alert("회원가입이 완료되었습니다.");
+      navigate("/");
+    } catch (error) {
+      console.error("Signup error:", error);
+      if (error.response) {
+        console.error("Signup failed:", error.response.data);
+        alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      } else {
+        alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isPasswordMatch =
@@ -119,19 +243,45 @@ function SignupEmail() {
     formData.confirmPassword &&
     formData.password === formData.confirmPassword;
 
-  const getInputClassName = (fieldName) => {
-    if (errors[fieldName]) {
-      return "input-error";
-    }
-    if (formData[fieldName] && !errors[fieldName]) {
-      return "input-success";
-    }
-    return "";
-  };
+    const getInputClassName = (fieldName) => {
+      // Map "birthdate" to "birthDate" for input className logic
+      const mappedFieldName = fieldName === "birthdate" ? "birthDate" : fieldName;
+      const value = formData[mappedFieldName]?.trim() ?? "";
+    
+      if (fieldName === "email") {
+        if (isEmailDuplicate) {
+          return "input-error";
+        }
+        if (errors.email) {
+          return "input-error";
+        }
+        if (value && !errors.email && !isEmailDuplicate) {
+          return "input-success";
+        }
+      }
+
+      if (fieldName === "nickname") {
+        if (isNicknameDuplicate) {
+          return "input-error";
+        }
+        if (errors.nickname) {
+          return "input-error";
+        }
+        if (value && !errors.nickname && !isNicknameDuplicate) {
+          return "input-success";
+        }
+      }
+    
+      if (errors[mappedFieldName]) return "input-error";
+      if (value && !errors[mappedFieldName]) return "input-success";
+    
+      return "";
+    };
 
   const isFormValid =
     Object.values(formData).every((value) => value.trim() !== "") &&
-    Object.keys(errors).length === 0;
+    Object.keys(errors).length === 0 &&
+    !isEmailDuplicate;
 
   return (
     <div className="signup-page-container">
@@ -149,6 +299,7 @@ function SignupEmail() {
                 className={`form-input ${getInputClassName("email")}`}
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleEmailBlur}
                 placeholder="이메일을 입력해주세요"
                 required
               />
@@ -197,6 +348,7 @@ function SignupEmail() {
                 className={getInputClassName("nickname")}
                 value={formData.nickname}
                 onChange={handleChange}
+                onBlur={handleNicknameBlur}
                 placeholder="사용하실 닉네임을 입력해주세요"
                 required
               />
@@ -211,22 +363,22 @@ function SignupEmail() {
                 id="birthdate"
                 name="birthdate"
                 className={getInputClassName("birthdate")}
-                value={formData.birthdate}
+                value={formData.birthDate}
                 onChange={handleChange}
                 placeholder="생년월일 8자리 (YYYYMMDD)"
                 maxLength="8"
                 required
               />
-              {errors.birthdate && (
-                <p className="error-message">{errors.birthdate}</p>
+              {errors.birthDate && (
+                <p className="error-message">{errors.birthDate}</p>
               )}
             </div>
             <button
               type="submit"
               className="submit-btn"
-              disabled={!isFormValid}
+              disabled={!isFormValid || isLoading}
             >
-              가입하기
+              {isLoading ? "가입 중..." : "가입하기"}
             </button>
           </form>
           <div className="login-link">
