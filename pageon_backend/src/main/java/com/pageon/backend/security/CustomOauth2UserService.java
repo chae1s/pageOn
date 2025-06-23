@@ -2,6 +2,7 @@ package com.pageon.backend.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pageon.backend.dto.oauth.GoogleSignupDto;
 import com.pageon.backend.dto.oauth.KakaoSignupDto;
 import com.pageon.backend.dto.oauth.NaverSignupDto;
 import com.pageon.backend.dto.oauth.OAuth2Response;
@@ -27,8 +28,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
-
-        log.info("OAuth2User Attributes: {}", oAuth2User.getAttributes().get("response"));
+        System.out.println(oAuth2User.getAttributes());
+        log.info("OAuth2User Attributes: {}", oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
@@ -44,6 +45,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
             oAuth2Response = new NaverSignupDto(attribute);
+        } else if (registrationId.equals("google")) {
+            log.info("google 로그인");
+            oAuth2Response = new GoogleSignupDto(oAuth2User.getAttributes());
         }
 
         return new CustomOAuth2User(oAuth2User, oAuth2Response);

@@ -20,6 +20,10 @@ function SignUp() {
     window.location.href = "http://localhost:8080/oauth2/authorization/naver";
   };
 
+  const handleGoogleSignupClick = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+  };
+
   return (
     <div className="signup-page-container">
       <Header />
@@ -41,7 +45,12 @@ function SignUp() {
             >
               카카오 계정으로 가입하기
             </button>
-            <button className="social-btn google">구글계정으로 가입하기</button>
+            <button
+              className="social-btn google"
+              onClick={handleGoogleSignupClick}
+            >
+              구글계정으로 가입하기
+            </button>
           </div>
 
           <div className="divider">
