@@ -47,7 +47,7 @@ public class Users {
 
     // 소셜 로그인 시 제공받는 id
     @Column(unique = true)
-    private Long providerId;
+    private String providerId;
 
     @OneToMany(mappedBy = "user")
     private List<Webtoons> webtoons = new ArrayList<>();

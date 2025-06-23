@@ -28,7 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         Provider provider = oAuth2User.getProvider();
-        Long providerId = oAuth2User.getProviderId();
+        String providerId = oAuth2User.getProviderId();
 
         log.info("{} 로그인 성공", provider);
         Optional<Users> userOptional = userRepository.findByProviderAndProviderId(provider, providerId);

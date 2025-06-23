@@ -16,6 +16,10 @@ function SignUp() {
     window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
   };
 
+  const handleNaverSignupClick = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+  };
+
   return (
     <div className="signup-page-container">
       <Header />
@@ -25,7 +29,12 @@ function SignUp() {
           <p className="subtitle">SNS 계정으로 간편하게 시작하세요.</p>
 
           <div className="social-buttons">
-            <button className="social-btn naver">네이버 계정으로 가입하기</button>
+            <button
+              className="social-btn naver"
+              onClick={handleNaverSignupClick}
+            >
+              네이버 계정으로 가입하기
+            </button>
             <button
               className="social-btn kakao"
               onClick={handleKakaoSignupClick}

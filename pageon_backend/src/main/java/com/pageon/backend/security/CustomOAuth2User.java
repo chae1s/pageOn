@@ -35,7 +35,7 @@ public class CustomOAuth2User implements OAuth2User {
         return oAuth2Response.getProvider();
     }
 
-    public Long getProviderId() {
-        return Long.parseLong(oAuth2Response.getProviderId());
+    public String getProviderId() {
+        return oAuth2Response.getProviderId();
     }
 }
