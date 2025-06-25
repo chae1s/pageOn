@@ -6,6 +6,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -73,6 +75,19 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("email", String.class);
+    }
+
+    public void sendTokens(HttpServletResponse response, String accessToken, String refreshToken) {
+
+        response.setHeader("Authorization", "Bearer " + accessToken);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(60 * 60 * 24 * 180);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+
+        response.addCookie(cookie);
     }
 
 
