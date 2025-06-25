@@ -49,9 +49,12 @@
   color: var(--hover-color);
 }
 
-/* signup-btn, login-btn 스타일 통일 및 간격 축소 */
+/* 버튼 스타일 통일 및 간격 축소: 회원가입, 로그인, 내 서재, 내 정보, 로그아웃 */
 .signup-btn,
-.login-btn {
+.login-btn,
+.my-library-btn,
+.my-info-btn,
+.logout-btn {
   background: none;
   color: #444;
   border: none;
@@ -68,11 +71,18 @@
   cursor: pointer;
 }
 
+/* 버튼 순서에 따라 margin-right 조정: 
+   - 항상 오른쪽 버튼(마지막 버튼)은 margin-right: 0;
+   - 로그인/로그아웃 자리에 오는 버튼은 .logout-btn, 
+     회원가입/내 정보 자리에 오는 버튼은 .my-info-btn
+*/
 .signup-btn:last-child,
-.login-btn:last-child {
+.login-btn:last-child,
+.my-library-btn:last-child,
+.my-info-btn:last-child,
+.logout-btn:last-child {
   margin-right: 0;
 }
-
 
 @media (max-width: 900px) {
   .header-inner {
@@ -94,7 +104,10 @@
     gap: 16px;
   }
   .signup-btn,
-  .login-btn {
+  .login-btn,
+  .my-library-btn,
+  .my-info-btn,
+  .logout-btn {
     padding: 6px 8px;
     font-size: 0.95rem;
   }

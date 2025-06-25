@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class SocialSignupDto {
+public class UserSocialSignupDto {
     private String providerId;
     private Provider provider;
 

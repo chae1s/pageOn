@@ -174,14 +174,9 @@
   margin: 24px 0;
 }
 
+/* Remove the line in the divider */
 .divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: #ddd;
+  display: none;
 }
 
 .divider span {

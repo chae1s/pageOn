@@ -1,14 +1,23 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.SocialSignupDto;
+import com.pageon.backend.dto.JwtDto;
+import com.pageon.backend.dto.UserLoginRequestDto;
+import com.pageon.backend.dto.UserSocialSignupDto;
 import com.pageon.backend.dto.UserSignupDto;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
 import com.pageon.backend.entity.enums.Role;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomOAuth2User;
+import com.pageon.backend.security.CustomUserDetails;
+import com.pageon.backend.security.JwtProvider;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +31,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+    private final AuthenticationManager authenticationManager;
 
     public void signup(UserSignupDto signupDto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -41,7 +52,7 @@ public class UserService {
         log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
     }
 
-    public void signupSocial(CustomOAuth2User auth2User, SocialSignupDto signupDto) {
+    public void signupSocial(CustomOAuth2User auth2User, UserSocialSignupDto signupDto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         LocalDate birthDate = LocalDate.parse(signupDto.getBirthDate(), formatter);
 
@@ -67,5 +78,47 @@ public class UserService {
     public boolean isNicknameDuplicate(String nickname) {
         log.info("닉네임 중복 확인");
         return userRepository.existsByNickname(nickname);
+    }
+
+    public JwtDto login(UserLoginRequestDto loginDto, HttpServletResponse response) {
+        boolean loginCheck = false;
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getEmail(), loginDto.getPassword()
+                )
+        );
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        // 로그인 시 토큰 생성
+        String accessToken = jwtProvider.generateAccessToken(userDetails.getId(), userDetails.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(userDetails.getId());
+        if (accessToken != null && refreshToken != null) {
+            log.info("토큰 발급 완료");
+            loginCheck = true;
+        }
+
+        JwtDto jwtDto = new JwtDto(loginCheck, accessToken);
+
+        sendTokens(response, accessToken, refreshToken);
+
+        // refresh token 저장
+
+        return jwtDto;
+
+    }
+
+    private void sendTokens(HttpServletResponse response, String accessToken, String refreshToken) {
+
+        response.setHeader("Authorization", "Bearer " + accessToken);
+
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(60 * 60 * 24 * 180);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+
+        response.addCookie(cookie);
     }
 }

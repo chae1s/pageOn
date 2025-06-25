@@ -1,20 +1,22 @@
 package com.pageon.backend.config;
 
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.security.CustomOauth2UserService;
-import com.pageon.backend.security.OAuth2SuccessHandler;
+import com.pageon.backend.security.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Slf4j
 @Configuration
@@ -24,7 +26,9 @@ public class SecurityConfig {
 
     private final CustomCorsConfigurationSource configurationSource;
     private final CustomOauth2UserService customOauth2UserService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JwtProvider jwtProvider;
 
 
 
@@ -37,8 +41,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(configurationSource))
                 .csrf(csrfConfig -> csrfConfig.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**", "/oauth2/**", "/login/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/**").permitAll()
                 )
                 .formLogin(FormLoginConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
@@ -52,6 +55,8 @@ public class SecurityConfig {
                         .authorizationEndpoint(authorization -> authorization.baseUri("/oauth2/authorization"))
                         .permitAll()
                 )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService), UsernamePasswordAuthenticationFilter.class)
 
         ;
 
@@ -62,5 +67,15 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+
+        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder());
+
+        return builder.build();
     }
 }

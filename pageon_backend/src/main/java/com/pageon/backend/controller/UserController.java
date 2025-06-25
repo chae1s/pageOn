@@ -1,10 +1,13 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.SocialSignupDto;
+import com.pageon.backend.dto.JwtDto;
+import com.pageon.backend.dto.UserLoginRequestDto;
+import com.pageon.backend.dto.UserSocialSignupDto;
 import com.pageon.backend.dto.UserSignupDto;
 import com.pageon.backend.security.CustomOAuth2User;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +34,7 @@ public class UserController {
     }
 
     @PostMapping("/signup/social")
-    public ResponseEntity<Void> socialSignup(@Valid @RequestBody SocialSignupDto signupDto) {
+    public ResponseEntity<Void> socialSignup(@Valid @RequestBody UserSocialSignupDto signupDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info(authentication.getName());
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
@@ -54,6 +57,13 @@ public class UserController {
         return ResponseEntity.ok(Map.of("isNicknameDuplicate", isNicknameDuplicate));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, JwtDto>> login(@RequestBody UserLoginRequestDto loginDto, HttpServletResponse response) {
+        log.info("로그인");
+        JwtDto jwtDto = userService.login(loginDto, response);
+
+        return ResponseEntity.ok(Map.of("success", jwtDto));
+    }
 
 
 

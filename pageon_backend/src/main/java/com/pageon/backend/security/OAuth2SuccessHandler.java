@@ -27,6 +27,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+
+        /* 이메일 로그인 사용자 정보 조회 */
+
+
+        /* 소셜 로그인 사용자 정보 조회 */
         Provider provider = oAuth2User.getProvider();
         String providerId = oAuth2User.getProviderId();
 
