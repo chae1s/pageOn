@@ -101,7 +101,7 @@ public class UserService {
 
         JwtDto jwtDto = new JwtDto(loginCheck, accessToken);
 
-        sendTokens(response, accessToken, refreshToken);
+        jwtProvider.sendTokens(response, accessToken, refreshToken);
 
         // refresh token 저장
 
@@ -109,16 +109,5 @@ public class UserService {
 
     }
 
-    private void sendTokens(HttpServletResponse response, String accessToken, String refreshToken) {
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
-
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(60 * 60 * 24 * 180);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
-    }
 }

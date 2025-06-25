@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/reset.css";
 import "../styles/global.css";
@@ -7,8 +7,17 @@ import "./Header.css";
 function Header() {
   const navigate = useNavigate();
 
-  // accessToken이 localStorage에 있으면 로그인 상태로 간주
-  const isLoggedIn = !!localStorage.getItem("accessToken");
+  // 로그인 상태를 state로 관리 (로그아웃 시 즉시 반영)
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
+
+  useEffect(() => {
+    // 다른 탭에서 로그아웃/로그인 시 동기화
+    const handleStorage = () => {
+      setIsLoggedIn(!!localStorage.getItem("accessToken"));
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const handleSignupClick = () => {
     navigate("/users/signup");
@@ -26,6 +35,16 @@ function Header() {
   const handleMyInfoClick = () => {
     // 내 정보 페이지로 이동 (예: /my-info)
     navigate("/my-info");
+  };
+
+  const handleLogoutClick = () => {
+    const confirmed = window.confirm("로그아웃 하시겠습니까?");
+    if (confirmed) {
+      localStorage.removeItem("accessToken");
+      setIsLoggedIn(false);
+      // 필요시 홈으로 이동
+      navigate("/", { replace: true });
+    }
   };
 
   return (
@@ -47,7 +66,7 @@ function Header() {
             <>
               <button className="my-library-btn" onClick={handleMyLibraryClick}>내 서재</button>
               <button className="my-info-btn" onClick={handleMyInfoClick}>내 정보</button>
-              <button className="logout-btn">로그아웃</button>
+              <button className="logout-btn" onClick={handleLogoutClick}>로그아웃</button>
             </>
           ) : (
             <>
