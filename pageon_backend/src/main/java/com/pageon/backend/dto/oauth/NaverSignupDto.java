@@ -19,4 +19,9 @@ public class NaverSignupDto implements OAuth2Response {
     public String getProviderId() {
         return attribute.get("id").toString();
     }
+
+    @Override
+    public String getEmail() {
+        return attribute.get("email").toString();
+    }
 }

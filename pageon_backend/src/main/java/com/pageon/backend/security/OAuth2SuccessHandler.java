@@ -40,25 +40,20 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Users user = userRepository.findByProviderAndProviderId(provider, providerId).orElse(null);
 
-        if (user != null) {
-            log.info(oAuth2User.getName());
-            String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
-            String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+        log.info(oAuth2User.getName());
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
-            log.info("소셜로그인 토큰 발행");
+        log.info("소셜로그인 토큰 발행");
 
-            jwtProvider.sendTokens(response, accessToken, refreshToken);
-            String redirectUrl = UriComponentsBuilder
-                    .fromUriString("http://localhost:3000/oauth/callback")
-                    .queryParam("accessToken", accessToken)
-                    .build()
-                    .toUriString();
+        jwtProvider.sendTokens(response, accessToken, refreshToken);
+        String redirectUrl = UriComponentsBuilder
+                .fromUriString("http://localhost:3000/oauth/callback")
+                .queryParam("accessToken", accessToken)
+                .build()
+                .toUriString();
 
-            response.sendRedirect(redirectUrl);
-
-        } else {
-            response.sendRedirect("http://localhost:3000/users/signup/social");
-        }
+        response.sendRedirect(redirectUrl);
 
     }
 }

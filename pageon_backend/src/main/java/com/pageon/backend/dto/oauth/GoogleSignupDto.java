@@ -19,4 +19,9 @@ public class GoogleSignupDto implements OAuth2Response {
     public String getProviderId() {
         return attribute.get("sub").toString();
     }
+
+    @Override
+    public String getEmail() {
+        return attribute.get("email").toString();
+    }
 }

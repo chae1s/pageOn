@@ -1,5 +1,7 @@
 package com.pageon.backend.dto.oauth;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pageon.backend.entity.enums.Provider;
 import lombok.RequiredArgsConstructor;
 
@@ -20,4 +22,13 @@ public class KakaoSignupDto implements OAuth2Response {
         return attribute.get("id").toString();
     }
 
+    @Override
+    public String getEmail() {
+        Object account = attribute.get("kakao_account");
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> attribute = mapper.convertValue(account, new TypeReference<>() {});
+
+        return attribute.get("email").toString();
+    }
 }
