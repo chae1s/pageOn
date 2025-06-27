@@ -1,10 +1,11 @@
 package com.pageon.backend.dto;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserLoginRequestDto {
+public class FindPasswordRequest {
     private String email;
-    private String password;
+
 }

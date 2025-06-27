@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class KakaoSignupDto implements OAuth2Response {
+public class KakaoSignupRequest implements OAuthUserInfoResponse {
 
     private final Map<String, Object> attribute;
 

@@ -1,6 +1,6 @@
 package com.pageon.backend.security;
 
-import com.pageon.backend.dto.oauth.OAuth2Response;
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.enums.Provider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2User oAuth2User;
-    private final OAuth2Response oAuth2Response;
+    private final OAuthUserInfoResponse oAuth2Response;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

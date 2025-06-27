@@ -2,11 +2,10 @@ package com.pageon.backend.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pageon.backend.dto.UserSocialSignupDto;
-import com.pageon.backend.dto.oauth.GoogleSignupDto;
-import com.pageon.backend.dto.oauth.KakaoSignupDto;
-import com.pageon.backend.dto.oauth.NaverSignupDto;
-import com.pageon.backend.dto.oauth.OAuth2Response;
+import com.pageon.backend.dto.oauth.GoogleSignupRequest;
+import com.pageon.backend.dto.oauth.KakaoSignupRequest;
+import com.pageon.backend.dto.oauth.NaverSignupRequest;
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Role;
 import com.pageon.backend.repository.UserRepository;
@@ -18,8 +17,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -40,11 +37,11 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuth2Response oAuth2Response = null;
+        OAuthUserInfoResponse oAuth2Response = null;
 
         if (registrationId.equals("kakao")) {
             log.info("kakao 로그인");
-            oAuth2Response = new KakaoSignupDto(oAuth2User.getAttributes());
+            oAuth2Response = new KakaoSignupRequest(oAuth2User.getAttributes());
             existingUser(oAuth2Response);
         } else if (registrationId.equals("naver")) {
             log.info("naver 로그인");
@@ -52,11 +49,11 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
-            oAuth2Response = new NaverSignupDto(attribute);
+            oAuth2Response = new NaverSignupRequest(attribute);
             existingUser(oAuth2Response);
         } else if (registrationId.equals("google")) {
             log.info("google 로그인");
-            oAuth2Response = new GoogleSignupDto(oAuth2User.getAttributes());
+            oAuth2Response = new GoogleSignupRequest(oAuth2User.getAttributes());
 
             existingUser(oAuth2Response);
         }
@@ -64,7 +61,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         return new CustomOAuth2User(oAuth2User, oAuth2Response);
     }
 
-    private void existingUser(OAuth2Response response) {
+    private void existingUser(OAuthUserInfoResponse response) {
         log.info(response.getEmail());
 
         Optional<Users> user = userRepository.findByProviderAndProviderId(response.getProvider(), response.getProviderId());
@@ -77,7 +74,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     }
 
-    private Users signupSocial(OAuth2Response response) {
+    private void signupSocial(OAuthUserInfoResponse response) {
 
         Users users = Users.builder()
                 .email(response.getEmail())
@@ -91,7 +88,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
 
-        return users;
     }
 
     private String generateRandomNickname() {

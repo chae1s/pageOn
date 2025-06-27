@@ -38,7 +38,6 @@ function Login() {
 
       // 백엔드에서 success라는 이름의 jwtDto를 받음
       const jwtDto = response.data.success;
-      console.log(jwtDto.accessToken)
       if (jwtDto && jwtDto.isLogin) {
         // 로그인 성공: accessToken을 localStorage에 저장
         localStorage.setItem("accessToken", jwtDto.accessToken);

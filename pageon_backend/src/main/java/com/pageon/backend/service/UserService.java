@@ -1,18 +1,15 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.JwtDto;
-import com.pageon.backend.dto.UserLoginRequestDto;
-import com.pageon.backend.dto.UserSocialSignupDto;
-import com.pageon.backend.dto.UserSignupDto;
+import com.pageon.backend.dto.*;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
 import com.pageon.backend.entity.enums.Role;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.security.CustomOAuth2User;
 import com.pageon.backend.security.CustomUserDetails;
 import com.pageon.backend.security.JwtProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +20,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -33,8 +34,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
+    private final MailService mailService;
 
-    public void signup(UserSignupDto signupDto) {
+    @Transactional
+    public void signup(SignupRequest signupDto) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         LocalDate birthDate = LocalDate.parse(signupDto.getBirthDate(), formatter);
 
@@ -62,7 +65,7 @@ public class UserService {
         return userRepository.existsByNickname(nickname);
     }
 
-    public JwtDto login(UserLoginRequestDto loginDto, HttpServletResponse response) {
+    public JwtTokenResponse login(LoginRequest loginDto, HttpServletResponse response) {
         boolean loginCheck = false;
 
         Authentication authentication = authenticationManager.authenticate(
@@ -81,13 +84,13 @@ public class UserService {
             loginCheck = true;
         }
 
-        JwtDto jwtDto = new JwtDto(loginCheck, accessToken);
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(loginCheck, accessToken);
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
         // refresh token 저장
 
-        return jwtDto;
+        return jwtTokenResponse;
 
     }
 
@@ -97,5 +100,43 @@ public class UserService {
         response.addCookie(cookie);
     }
 
+    @Transactional
+    public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
+        Map<String, String> result = new HashMap<>();
+        Optional<Users> optionalUsers = userRepository.findByEmail(passwordDto.getEmail());
+        if (optionalUsers.isPresent()) {
+            Users user = optionalUsers.get();
+            if (user.getProvider() == Provider.EMAIL) {
+                // provider가 email일 때, 임시 비밀번호 생성 후 db에 저장
+                String tempPassword = generateRandomPassword();
+                user.updatePassword(passwordEncoder.encode(tempPassword));
+                // 임시 비밀번호를 담은 메일 발송
+                mailService.sendTemporaryPassword(user.getEmail(), tempPassword);
+                result.put("type", "email");
+                result.put("message", "임시 비밀번호가 메일로 발송되었습니다.");
+            } else {
+                result.put("type", "social");
+                result.put("message", String.format("%s로 회원가입된 이메일입니다.", user.getProvider()));
+            }
+        } else {
+            result.put("type", "noUser");
+            result.put("message", "회원가입되지 않은 이메일입니다.");
+        }
+
+        return result;
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        Random random = new Random();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
+        return sb.toString();
+    }
 
 }

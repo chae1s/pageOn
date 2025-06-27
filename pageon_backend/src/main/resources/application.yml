@@ -73,3 +73,18 @@ spring:
             user-name-attribute: response
   config:
     import: classpath:jwt.yml
+
+
+  mail:
+    host: smtp.gmail.com
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+    default-encoding: UTF-8
+    port: 587

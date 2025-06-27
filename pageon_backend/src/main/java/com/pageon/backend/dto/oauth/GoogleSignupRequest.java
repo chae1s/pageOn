@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class GoogleSignupDto implements OAuth2Response {
+public class GoogleSignupRequest implements OAuthUserInfoResponse {
 
     private final Map<String, Object> attribute;
 

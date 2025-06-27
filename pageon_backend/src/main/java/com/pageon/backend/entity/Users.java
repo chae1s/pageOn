@@ -42,7 +42,6 @@ public class Users {
     private Role role;
 
     // email, kakao, naver, google
-    @Column(unique = true)
     private Provider provider;
 
     // 소셜 로그인 시 제공받는 id
@@ -63,5 +62,9 @@ public class Users {
 
     @OneToMany(mappedBy = "user")
     private List<Ratings> ratings = new ArrayList<>();
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 
 }

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class NaverSignupDto implements OAuth2Response {
+public class NaverSignupRequest implements OAuthUserInfoResponse {
 
     private final Map<String, Object> attribute;
 

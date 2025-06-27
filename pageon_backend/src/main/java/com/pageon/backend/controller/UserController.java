@@ -1,10 +1,6 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.JwtDto;
-import com.pageon.backend.dto.UserLoginRequestDto;
-import com.pageon.backend.dto.UserSocialSignupDto;
-import com.pageon.backend.dto.UserSignupDto;
-import com.pageon.backend.security.CustomOAuth2User;
+import com.pageon.backend.dto.*;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,8 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -28,7 +22,7 @@ public class UserController {
     private final CustomOauth2UserService customOauth2UserService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@Valid @RequestBody UserSignupDto signupDto) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest signupDto) {
         userService.signup(signupDto);
         return ResponseEntity.ok().build();
     }
@@ -48,11 +42,11 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, JwtDto>> login(@RequestBody UserLoginRequestDto loginDto, HttpServletResponse response) {
+    public ResponseEntity<Map<String, JwtTokenResponse>> login(@RequestBody LoginRequest loginDto, HttpServletResponse response) {
         log.info("로그인");
-        JwtDto jwtDto = userService.login(loginDto, response);
+        JwtTokenResponse jwtTokenResponse = userService.login(loginDto, response);
 
-        return ResponseEntity.ok(Map.of("success", jwtDto));
+        return ResponseEntity.ok(Map.of("success", jwtTokenResponse));
     }
 
     @GetMapping("/logout")
@@ -61,6 +55,13 @@ public class UserController {
         userService.logout(response);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/find-password")
+    public ResponseEntity<Map<String, String>> passwordFind(@RequestBody FindPasswordRequest passwordDto) {
+        Map<String, String> result = userService.passwordFind(passwordDto);
+
+        return ResponseEntity.ok(result);
     }
 
 
