@@ -1,9 +1,13 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.*;
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
+import com.pageon.backend.entity.Role;
+import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.Role;
+import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomUserDetails;
 import com.pageon.backend.security.JwtProvider;
@@ -35,25 +39,37 @@ public class UserService {
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
+    private final RoleService roleService;
 
     @Transactional
-    public void signup(SignupRequest signupDto) {
+    public void signup(SignupRequest request) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        LocalDate birthDate = LocalDate.parse(signupDto.getBirthDate(), formatter);
+        LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
 
-        Users users = Users.builder()
-                .email(signupDto.getEmail())
-                .password(passwordEncoder.encode(signupDto.getPassword()))
-                .nickname(signupDto.getNickname())
-                .birthDate(birthDate)
-                .role(Role.ROLE_USER)
-                .provider(Provider.EMAIL)
-                .build();
+        Users users = createUser(request);
+
+        roleService.assignDefaultRole(users);
 
         userRepository.save(users);
 
         log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
     }
+
+
+    private Users createUser(SignupRequest request) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
+
+        return Users.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .nickname(request.getNickname())
+                .birthDate(birthDate)
+                .provider(Provider.EMAIL)
+                .build();
+
+    }
+
 
     public boolean isEmailDuplicate(String email) {
         log.info("이메일 중복 확인");
@@ -77,7 +93,7 @@ public class UserService {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         // 로그인 시 토큰 생성
-        String accessToken = jwtProvider.generateAccessToken(userDetails.getId(), userDetails.getRole());
+        String accessToken = jwtProvider.generateAccessToken(userDetails.getId(), userDetails.getRoleType());
         String refreshToken = jwtProvider.generateRefreshToken(userDetails.getId());
         if (accessToken != null && refreshToken != null) {
             log.info("토큰 발급 완료");

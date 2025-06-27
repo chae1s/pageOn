@@ -7,8 +7,11 @@ import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.Role;
+import com.pageon.backend.entity.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
+import com.pageon.backend.service.RoleService;
+import com.pageon.backend.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -27,6 +30,7 @@ import java.util.Random;
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final RoleService roleService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -64,7 +68,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     private void existingUser(OAuthUserInfoResponse response) {
         log.info(response.getEmail());
 
-        Optional<Users> user = userRepository.findByProviderAndProviderId(response.getProvider(), response.getProviderId());
+        Optional<Users> user = userRepository.findWithRolesByProviderAndProviderId(response.getProvider(), response.getProviderId());
 
         if (user.isPresent()) {
             return;
@@ -74,15 +78,17 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     }
 
-    private void signupSocial(OAuthUserInfoResponse response) {
+    @Transactional
+    public void signupSocial(OAuthUserInfoResponse response) {
 
         Users users = Users.builder()
                 .email(response.getEmail())
                 .nickname(generateRandomNickname())
-                .role(Role.ROLE_USER)
                 .provider(response.getProvider())
                 .providerId(response.getProviderId())
                 .build();
+
+        roleService.assignDefaultRole(users);
 
         userRepository.save(users);
 

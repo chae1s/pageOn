@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.Role;
+import com.pageon.backend.entity.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
@@ -37,7 +39,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(this.users.getRole().name()));
+        return this.users.getUserRoles().stream()
+                .map(userRole -> new SimpleGrantedAuthority(userRole.getRole().getRoleType().name())).collect(Collectors.toList());
     }
 
     @Override
@@ -54,7 +57,8 @@ public class CustomUserDetails implements UserDetails {
         return this.users.getId();
     }
 
-    public Role getRole() {
-        return this.users.getRole();
+    public List<RoleType> getRoleType() {
+        return this.users.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
     }
 }

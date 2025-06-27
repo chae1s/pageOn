@@ -1,9 +1,10 @@
 package com.pageon.backend.security;
 
+import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
+import com.pageon.backend.entity.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -38,10 +40,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("{} 로그인 성공", provider);
 
-        Users user = userRepository.findByProviderAndProviderId(provider, providerId).orElse(null);
+        Users user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
+        List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
         log.info(oAuth2User.getName());
-        String accessToken = jwtProvider.generateAccessToken(user.getId(), user.getRole());
+        String accessToken = jwtProvider.generateAccessToken(user.getId(), roleTypes);
         String refreshToken = jwtProvider.generateRefreshToken(user.getId());
 
         log.info("소셜로그인 토큰 발행");

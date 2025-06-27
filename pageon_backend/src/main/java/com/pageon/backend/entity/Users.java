@@ -1,7 +1,7 @@
 package com.pageon.backend.entity;
 
 import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.Role;
+import com.pageon.backend.entity.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -39,8 +39,6 @@ public class Users {
 
     private Integer pointBalance = 0;
 
-    private Role role;
-
     // email, kakao, naver, google
     private Provider provider;
 
@@ -62,6 +60,10 @@ public class Users {
 
     @OneToMany(mappedBy = "user")
     private List<Ratings> ratings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<UserRole> userRoles = new ArrayList<>();
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;

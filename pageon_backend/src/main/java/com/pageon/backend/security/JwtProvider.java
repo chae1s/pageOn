@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 
-import com.pageon.backend.entity.enums.Role;
+import com.pageon.backend.entity.enums.RoleType;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -47,12 +48,12 @@ public class JwtProvider {
 
 
     /* Access Token 발급 */
-    public String generateAccessToken(Long id, Role role) {
+    public String generateAccessToken(Long id, List<RoleType> roleTypes) {
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(String.valueOf(id))
                 .claim("id", id)
-                .claim("role", role)
+                .claim("roles", roleTypes)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRES_IN))
                 .signWith(accessKey, SignatureAlgorithm.HS256)

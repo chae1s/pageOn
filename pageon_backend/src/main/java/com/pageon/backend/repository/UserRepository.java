@@ -3,6 +3,8 @@ package com.pageon.backend.repository;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -11,7 +13,9 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Boolean existsByNickname(String nickname);
 
-    Optional<Users> findByProviderAndProviderId(Provider provider, String providerId);
+    @Query("SELECT u FROM Users u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.provider = :provider AND u.providerId = :providerId")
+    Optional<Users> findWithRolesByProviderAndProviderId(@Param("provider") Provider provider, @Param("providerId") String providerId);
+
 
     Optional<Users> findByEmail(String email);
 

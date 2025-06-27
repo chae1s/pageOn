@@ -1,0 +1,33 @@
+package com.pageon.backend.entity;
+
+import com.pageon.backend.entity.enums.RoleType;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@SuperBuilder
+@DynamicUpdate
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    private List<UserRole> userRoles = new ArrayList<>();
+
+}
