@@ -33,16 +33,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/signup/social")
-    public ResponseEntity<Void> socialSignup(@Valid @RequestBody UserSocialSignupDto signupDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info(authentication.getName());
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        userService.signupSocial(oAuth2User, signupDto);
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/check-email")
     public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam("email") String email) {
         boolean isEmailDuplicate = userService.isEmailDuplicate(email);
@@ -63,6 +53,14 @@ public class UserController {
         JwtDto jwtDto = userService.login(loginDto, response);
 
         return ResponseEntity.ok(Map.of("success", jwtDto));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+
+        userService.logout(response);
+
+        return ResponseEntity.ok().build();
     }
 
 

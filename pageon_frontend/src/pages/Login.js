@@ -69,6 +69,11 @@ function Login() {
     window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
+  // 비밀번호 찾기 버튼 클릭 시
+  const handleFindPassword = () => {
+    navigate("/users/find-password");
+  };
+
   // 아이콘 SVG 컴포넌트
   const KakaoIcon = () => (
     <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
@@ -125,6 +130,7 @@ function Login() {
     transition: "box-shadow 0.2s",
   };
 
+  
   return (
     <div className="signup-page-container">
       <Header />
@@ -171,6 +177,14 @@ function Login() {
               style={{ marginTop: "16px" }}
             >
               로그인
+            </button>
+            {/* 비밀번호 찾기 버튼 추가 */}
+            <button
+              type="button"
+              onClick={handleFindPassword}
+              className="password-btn"
+            >
+              비밀번호 찾기
             </button>
           </form>
           <div className="divider" style={{ margin: "24px 0 16px 0" }}>

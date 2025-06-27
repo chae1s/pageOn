@@ -37,13 +37,23 @@ function Header() {
     navigate("/my-info");
   };
 
-  const handleLogoutClick = () => {
-    const confirmed = window.confirm("로그아웃 하시겠습니까?");
-    if (confirmed) {
-      localStorage.removeItem("accessToken");
-      setIsLoggedIn(false);
-      // 필요시 홈으로 이동
-      navigate("/", { replace: true });
+  const handleLogoutClick = async () => {
+    alert("로그아웃 하시겠습니까?");
+    // GET 방식으로 로그아웃 API 호출
+    try {
+      const response = await fetch("/api/users/logout", {
+        method: "GET",
+        credentials: "include", // 쿠키 등 인증정보 필요시
+      });
+      if (response.ok) {
+        localStorage.removeItem("accessToken");
+        setIsLoggedIn(false);
+        navigate("/", { replace: true });
+      } else {
+        alert("로그아웃에 실패했습니다.");
+      }
+    } catch (error) {
+      alert("로그아웃 중 오류가 발생했습니다.");
     }
   };
 

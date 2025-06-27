@@ -52,24 +52,6 @@ public class UserService {
         log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
     }
 
-    public void signupSocial(CustomOAuth2User auth2User, UserSocialSignupDto signupDto) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        LocalDate birthDate = LocalDate.parse(signupDto.getBirthDate(), formatter);
-
-        Users users = Users.builder()
-                .email(signupDto.getEmail())
-                .nickname(signupDto.getNickname())
-                .birthDate(birthDate)
-                .role(Role.ROLE_USER)
-                .provider(auth2User.getProvider())
-                .providerId(auth2User.getProviderId())
-                .build();
-
-        userRepository.save(users);
-
-        log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
-    }
-
     public boolean isEmailDuplicate(String email) {
         log.info("이메일 중복 확인");
         return userRepository.existsByEmail(email);
@@ -107,6 +89,12 @@ public class UserService {
 
         return jwtDto;
 
+    }
+
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
 
