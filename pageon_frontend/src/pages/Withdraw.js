@@ -31,11 +31,13 @@ function Withdraw() {
 
   // 탈퇴 이유 옵션들
   const withdrawReasons = [
-    "서비스 이용 빈도가 낮음",
-    "다른 서비스를 이용하게 됨",
-    "개인정보 보호 우려",
-    "서비스 품질에 불만족",
-    "계정 보안 문제",
+    "원하는 작품이 부족해서",
+    "회원 혜택이 부족해서",
+    "시스템 오류가 잦아서",
+    "불만, 불편 사항에 대한 응대가 늦어서",
+    "자주 사용하지 않아서",
+    "개인 정보 및 보안이 우려되어서",
+    "중복 가입으로 계정 정리가 필요해서",
     "기타"
   ];
 
@@ -72,21 +74,27 @@ function Withdraw() {
 
     setIsSubmitting(true);
     try {
-      // 실제 API 호출 (예시)
       const finalReason = withdrawReason === "기타" ? otherReason : withdrawReason;
-      await axios.post("/api/users/withdraw", { 
+      const response = await axios.post("/api/users/withdraw", { 
         password,
         withdrawReason: finalReason
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        }
       });
-      alert("회원탈퇴가 완료되었습니다.");
-      // 로그인 페이지로 이동
-      window.location.href = "/login";
-    } catch (error) {
-      if (error.response?.status === 401) {
-        setPasswordMsg("비밀번호가 일치하지 않습니다.");
+      
+      if (response.data.isDeleted) {
+        alert(response.data.message);
+        // localStorage에서 accessToken 제거
+        localStorage.removeItem("accessToken");
+        // 홈페이지로 이동
+        window.location.href = "/";
       } else {
-        alert("회원탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.");
+        setPasswordMsg(response.data.message);
       }
+    } catch (error) {
+      setPasswordMsg("회원탈퇴 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -146,7 +154,7 @@ function Withdraw() {
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <input
                     type="password"
-                    className={`withdraw-input ${passwordMsg ? 'input-error' : (password ? 'input-success' : '')}`}
+                    className="withdraw-input"
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="비밀번호를 입력해주세요"

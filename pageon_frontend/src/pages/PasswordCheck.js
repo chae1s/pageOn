@@ -10,10 +10,7 @@ function PasswordCheck() {
   const [error, setError] = useState("");
   const [resetEmail, setResetEmail] = useState("");
   const [resetMsg, setResetMsg] = useState("");
-  const location = useLocation();
   const navigate = useNavigate();
-  const params = new URLSearchParams(location.search);
-  const next = params.get("next");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,13 +29,8 @@ function PasswordCheck() {
       });
       
       if (response.data.isCorrect) {
-        if (next === "edit") {
-          navigate("/users/edit");
-        } else if (next === "withdraw") {
-          navigate("/users/withdraw");
-        } else {
-          alert("비밀번호 확인 완료!");
-        }
+        sessionStorage.setItem("passwordVerified", "true");
+        navigate("/users/edit");
       } else {
         setError("비밀번호가 일치하지 않습니다.");
       }

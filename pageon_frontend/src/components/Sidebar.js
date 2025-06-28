@@ -34,10 +34,10 @@ function Sidebar({ active }) {
               <div>내 정보</div>
               <ul>
                 <li>
-                  <a href="/users/password-check?next=edit" className={active === "edit" ? "sidebar-link-active" : undefined}>내 정보 수정</a>
+                  <a href="/users/password-check" className={active === "edit" ? "sidebar-link-active" : undefined}>내 정보 수정</a>
                 </li>
                 <li>
-                  <a href="/users/password-check?next=withdraw">회원탈퇴</a>
+                  <a href="/users/withdraw">회원탈퇴</a>
                 </li>
                 <li>
                   <a href="#edit-profile">1:1 문의</a>

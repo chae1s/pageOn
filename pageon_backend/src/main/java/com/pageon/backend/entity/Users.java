@@ -46,6 +46,10 @@ public class Users {
     @Column(unique = true)
     private String providerId;
 
+    // Soft Delete
+    @Column(nullable = false)
+    private Boolean isDeleted;
+
     @OneToMany(mappedBy = "user")
     private List<Webtoons> webtoons = new ArrayList<>();
 
@@ -71,6 +75,14 @@ public class Users {
 
     public void updateNickname(String newNickname) {
         this.nickname = newNickname;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void deleteEmail(String deleteEmail) {
+        this.email = deleteEmail;
     }
 
 }

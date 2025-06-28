@@ -62,6 +62,7 @@ public class UserService {
                 .nickname(request.getNickname())
                 .birthDate(birthDate)
                 .provider(Provider.EMAIL)
+                .isDeleted(false)
                 .build();
 
     }
@@ -115,7 +116,7 @@ public class UserService {
     @Transactional
     public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
         Map<String, String> result = new HashMap<>();
-        Optional<Users> optionalUsers = userRepository.findByEmail(passwordDto.getEmail());
+        Optional<Users> optionalUsers = userRepository.findByEmailAndIsDeletedFalse(passwordDto.getEmail());
         if (optionalUsers.isPresent()) {
             Users user = optionalUsers.get();
             if (user.getProvider() == Provider.EMAIL) {
@@ -152,22 +153,20 @@ public class UserService {
     }
 
     public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
-        log.info(principalUser.getUsername());
-        log.info(principalUser.getName());
-        Users users = userRepository.findByEmail(principalUser.getUsername()).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
 
         return UserInfoResponse.fromEntity(users);
     }
 
     public boolean checkPassword(Long id, String password) {
-        Users users = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
 
         return passwordEncoder.matches(password, users.getPassword());
     }
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        Users users = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
         log.info(request.getNickname());
         if (request.getNickname() != null && !request.getNickname().isBlank()) {
             users.updateNickname(request.getNickname());
@@ -184,5 +183,26 @@ public class UserService {
         }
 
         return passwordEncoder.encode(request.getPassword());
+    }
+
+    @Transactional
+    public Map<String, Object> deleteAccount(Long id, String password) {
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Map<String, Object> result = new HashMap<>();
+        if (passwordEncoder.matches(password, users.getPassword())) {
+            // 회원 탈퇴
+            users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
+            users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
+            users.delete();
+            result.put("isDeleted", true);
+            result.put("message", "계정이 삭제되었습니다.");
+        } else {
+            // 에러 메세지 전송
+            result.put("isDeleted", false);
+            result.put("message", "비밀번호가 일치하지 않습니다.");
+            log.info("삭제 실패");
+        }
+
+        return result;
     }
 }

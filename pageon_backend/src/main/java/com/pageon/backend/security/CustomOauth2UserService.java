@@ -85,6 +85,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                 .nickname(generateRandomNickname())
                 .provider(response.getProvider())
                 .providerId(response.getProviderId())
+                .isDeleted(false)
                 .build();
 
         roleService.assignDefaultRole(users);

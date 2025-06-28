@@ -86,4 +86,11 @@ public class UserController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<Map<String, Object>> deleteAccount(@AuthenticationPrincipal PrincipalUser principalUser, @RequestBody Map<String, String> body) {
+
+        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), body.get("password")));
+
+    }
 }

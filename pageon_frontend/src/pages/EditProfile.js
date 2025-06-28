@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function EditProfile() {
   const [userInfo, setUserInfo] = useState(null);
@@ -15,6 +16,16 @@ function EditProfile() {
   const [passwordMsg, setPasswordMsg] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordConfirmMsg, setPasswordConfirmMsg] = useState("");
+  const navigate = useNavigate();
+
+  // 비밀번호 확인 여부 체크
+  useEffect(() => {
+    const isPasswordVerified = sessionStorage.getItem("passwordVerified");
+    if (!isPasswordVerified) {
+      navigate("/users/password-check");
+      return;
+    }
+  }, [navigate]);
 
   // 사용자 정보 가져오기
   useEffect(() => {
