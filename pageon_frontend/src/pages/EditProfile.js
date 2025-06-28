@@ -1,0 +1,172 @@
+import React, { useState } from "react";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import "./MyPage.css";
+import axios from "axios";
+
+// 예시 사용자 정보 (실제 서비스에서는 API로 받아옴)
+const mockUser = {
+  email: "user@example.com",
+  nickname: "기존닉네임",
+  birthDate: "19900101"
+};
+
+function EditProfile() {
+  const [nickname, setNickname] = useState(mockUser.nickname);
+  const [isCheckingNickname, setIsCheckingNickname] = useState(false);
+  const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
+  const [nicknameMsg, setNicknameMsg] = useState("");
+  const [hasNicknameFocused, setHasNicknameFocused] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [passwordConfirmMsg, setPasswordConfirmMsg] = useState("");
+
+  // 닉네임 중복확인
+  const checkNicknameDuplicate = async () => {
+    if (!nickname) {
+      setNicknameMsg("닉네임을 입력해주세요.");
+      return;
+    }
+    setIsCheckingNickname(true);
+    try {
+      const response = await axios.get(`/api/users/check-nickname?nickname=${encodeURIComponent(nickname)}`);
+      if (response.data.isNicknameDuplicate) {
+        setIsNicknameDuplicate(true);
+        setNicknameMsg("이미 사용 중인 닉네임입니다.");
+      } else {
+        setIsNicknameDuplicate(false);
+        setNicknameMsg("사용 가능한 닉네임입니다.");
+      }
+    } catch (error) {
+      setIsNicknameDuplicate(true);
+      setNicknameMsg("닉네임 중복확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsCheckingNickname(false);
+    }
+  };
+
+  // 닉네임 변경 핸들러
+  const handleNicknameChange = (e) => {
+    const newNickname = e.target.value;
+    setNickname(newNickname);
+    
+    // 닉네임이 비어있거나 원래 값과 같으면 메시지 초기화
+    if (!newNickname || newNickname === mockUser.nickname) {
+      setNicknameMsg("");
+    } else {
+      // 닉네임이 변경되면 메시지 초기화
+      setNicknameMsg("");
+    }
+  };
+
+  // 닉네임 blur 핸들러
+  const handleNicknameBlur = () => {
+    if (hasNicknameFocused && nickname && nickname !== mockUser.nickname) {
+      checkNicknameDuplicate();
+    }
+  };
+
+  // 닉네임 focus 핸들러
+  const handleNicknameFocus = () => {
+    setHasNicknameFocused(true);
+  };
+
+  // 비밀번호 유효성 검사
+  const validatePassword = (pw) => {
+    if (!pw) return "";
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#\-?$%&^])[a-zA-Z0-9!@#\-?$%&^]{8,}$/;
+    if (!passwordRegex.test(pw)) {
+      return "비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.";
+    }
+    return "";
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordMsg(validatePassword(value));
+    // 비밀번호 변경 시 확인값도 다시 체크
+    setPasswordConfirmMsg(value && passwordConfirm && value !== passwordConfirm ? "비밀번호가 일치하지 않습니다." : "");
+  };
+
+  const handlePasswordConfirmChange = (e) => {
+    const value = e.target.value;
+    setPasswordConfirm(value);
+    setPasswordConfirmMsg(password && value !== password ? "비밀번호가 일치하지 않습니다." : "");
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="mypage-container">
+        <Sidebar active="edit" />
+        <div className="mypage-main">
+          <div className="edit-profile-container">
+            <h2 className="edit-profile-title">내 정보 수정</h2>
+            <form className="edit-profile-form">
+              {/* 이메일 */}
+              <div className="edit-profile-row">
+                <label className="edit-profile-label">이메일</label>
+                <span className="edit-profile-value">{mockUser.email}</span>
+                <button type="button" className="edit-profile-auth-btn">본인인증 하기</button>
+              </div>
+              {/* 비밀번호 */}
+              <div className="edit-profile-row">
+                <label className="edit-profile-label">비밀번호</label>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <input
+                    type="password"
+                    className={`edit-profile-input ${passwordMsg ? 'input-error' : (password ? 'input-success' : '')}`}
+                    value={password}
+                    onChange={handlePasswordChange}
+                    autoComplete="new-password"
+                  />
+                  {passwordMsg && <div className="edit-profile-msg" style={{ color: 'var(--error-color)' }}>{passwordMsg}</div>}
+                </div>
+              </div>
+              {/* 비밀번호 확인 */}
+              <div className="edit-profile-row">
+                <label className="edit-profile-label">비밀번호 확인</label>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <input
+                    type="password"
+                    className={`edit-profile-input ${passwordConfirmMsg ? 'input-error' : (passwordConfirm ? 'input-success' : '')}`}
+                    value={passwordConfirm}
+                    onChange={handlePasswordConfirmChange}
+                    autoComplete="new-password"
+                  />
+                  {passwordConfirmMsg && <div className="edit-profile-msg" style={{ color: 'var(--error-color)' }}>{passwordConfirmMsg}</div>}
+                </div>
+              </div>
+              {/* 닉네임 */}
+              <div className="edit-profile-row">
+                <label className="edit-profile-label">닉네임</label>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <input
+                    type="text"
+                    className={`edit-profile-input ${nickname ? (isNicknameDuplicate ? 'input-error' : 'input-success') : ''}`}
+                    value={nickname}
+                    onChange={handleNicknameChange}
+                    onBlur={handleNicknameBlur}
+                    onFocus={handleNicknameFocus}
+                    maxLength={16}
+                  />
+                  {nicknameMsg && <div className="edit-profile-msg" style={{ color: isNicknameDuplicate ? 'var(--error-color)' : '#2563eb' }}>{nicknameMsg}</div>}
+                </div>
+              </div>
+              {/* 생년월일 */}
+              <div className="edit-profile-row">
+                <label className="edit-profile-label">생년월일</label>
+                <span className="edit-profile-value">{mockUser.birthDate}</span>
+              </div>
+              <button type="submit" className="edit-profile-submit-btn">수정하기</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default EditProfile; 

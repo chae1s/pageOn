@@ -1,0 +1,822 @@
+.mypage-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: none;
+  display: flex;
+  gap: 40px;
+  min-height: 600px;
+  align-items: flex-start; /* 사이드바와 메인 컨텐츠의 상단을 맞춤 */
+}
+
+/* ===== Main content styles ===== */
+.mypage-main {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 1em;
+}
+
+/* ===== Header section styles ===== */
+.mypage-header {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+}
+
+.mypage-user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.mypage-nickname {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 24px;
+  color: #444;
+}
+
+.mypage-point-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.mypage-point-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.mypage-point-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.mypage-today-works {
+  padding: 0;
+}
+
+.mypage-today-works p {
+  margin: 0;
+  color: #6c757d;
+  text-align: center;
+  font-style: italic;
+}
+
+.today-works-list {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 8px;
+  overflow-x: hidden;
+  justify-content: space-between;
+}
+
+.today-work-item {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 8px 8px 8px;
+  min-width: 120px;
+  max-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  flex: 1;
+}
+
+.today-work-item:hover,
+.today-work-item:focus {
+  /* 호버 효과 제거 */
+}
+
+.today-work-img {
+  width: 104px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: #f4f4f4;
+}
+
+.today-work-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 5px;
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.2;
+  width: 100%;
+}
+
+.today-work-author {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.mypage-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+  color: #222;
+}
+
+.mypage-section {
+  margin-bottom: 36px;
+}
+
+.mypage-section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+.mypage-section-title-text {
+  flex: 0 0 auto;
+  z-index: 1;
+}
+.mypage-section-title-line {
+  flex: 1 1 auto;
+  height: 1px;
+  background: #e0e4ea;
+  margin: 0 16px;
+  display: block;
+}
+.mypage-viewall-btn {
+  color: #b0b8c1;
+  background: none;
+  border: none;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 0;
+}
+.mypage-viewall-btn:hover {
+  text-decoration: underline;
+  background: #f4f6fa;
+}
+
+.mypage-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.mypage-info-list li {
+  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #444;
+}
+
+.mypage-point {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #4e7cff;
+  background: #f5f8ff;
+  padding: 14px 20px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.mypage-library-list,
+.mypage-comments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mypage-library-list li {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #444;
+}
+
+.mypage-library-title {
+  font-weight: 500;
+  color: #222;
+}
+.mypage-library-author {
+  margin-left: 6px;
+  color: #888;
+  font-size: 0.97em;
+}
+
+.mypage-comments-list li {
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.mypage-comment-content {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+.mypage-comment-meta {
+  font-size: 0.92rem;
+  color: #999;
+}
+
+@media (max-width: 900px) {
+  .mypage-container {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch; /* 모바일에서는 기본값으로 */
+  }
+  .mypage-user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .mypage-point-display {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .mypage-container {
+    max-width: 98vw;
+    padding: 16px 4vw 24px 4vw;
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+  }
+  .mypage-header {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .mypage-nickname {
+    font-size: 1.4rem;
+  }
+  .mypage-point-value {
+    font-size: 1.2rem;
+  }
+  .mypage-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  .mypage-section-title {
+    font-size: 1rem;
+    padding-left: 7px;
+  }
+  .mypage-point {
+    font-size: 1.05rem;
+    padding: 10px 12px;
+  }
+  .today-works-list {
+    gap: 10px;
+  }
+  .today-work-item {
+    min-width: 100px;
+    max-width: 100px;
+    padding: 10px 6px 6px 6px;
+  }
+  .today-work-img {
+    width: 88px;
+    height: 125px;
+  }
+  .today-work-title {
+    font-size: 0.8rem;
+  }
+  .today-work-author {
+    font-size: 0.75rem;
+  }
+}
+
+.mypage-summary-container {
+  display: flex;
+  border: 1.5px solid #e0e4ea;
+  border-radius: 6px;
+  background: #fff;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+.mypage-summary-left {
+  background: #f6faff;
+  padding: 32px 24px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.mypage-logout-btn {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #444;
+  border-radius: 4px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.mypage-summary-right {
+  flex: 1;
+  padding: 24px 32px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.mypage-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+.mypage-summary-item {
+  flex: 1;
+  text-align: center;
+}
+.mypage-summary-item .icon {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+.mypage-summary-item .label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.mypage-summary-item .value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 2px;
+}
+.mypage-summary-item .desc {
+  font-size: 0.95rem;
+  color: #888;
+  margin-top: 10px;
+}
+.mypage-charge-link {
+  color: #b0b8c1;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.92em;
+}
+.mypage-charge-link:hover {
+  text-decoration: underline;
+}
+.mypage-logout-link {
+  color: #3973b8;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.mypage-logout-link:hover {
+  text-decoration: underline;
+}
+@media (max-width: 700px) {
+  .mypage-summary-container {
+    flex-direction: column;
+    padding: 0;
+  }
+  .mypage-summary-left {
+    min-width: 0;
+    width: 100%;
+    padding: 20px 12px;
+    align-items: flex-start;
+  }
+  .mypage-summary-right {
+    padding: 16px 8px;
+  }
+  .mypage-summary-row {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .mypage-summary-item {
+    margin-bottom: 12px;
+  }
+}
+
+.mypage-value-unit {
+  font-size: 0.75em;
+  font-weight: 400;
+  color: #888;
+  margin-left: 2px;
+  vertical-align: baseline;
+  position: static;
+}
+
+.password-check-container {
+  max-width: 400px;
+  margin: 60px auto 0;
+  padding: 32px;
+  background: #fff;
+  border-radius: 12px;
+}
+.password-check-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+.password-check-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.password-check-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+.password-check-error {
+  color: var(--error-color);
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+.password-check-btn {
+  width: 100%;
+  background: #A0C4FF;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  margin-top: 24px;
+}
+
+.password-check-reset-box {
+  margin-top: 32px;
+  text-align: center;
+}
+.password-check-reset-label {
+  font-size: 0.98rem;
+  color: #888;
+}
+.password-check-reset-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.password-check-reset-btn {
+  background: #A0C4FF;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 500;
+  font-size: 0.98rem;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.password-check-reset-msg {
+  margin-top: 10px;
+  font-size: 0.97rem;
+  color: #2563eb;
+}
+
+.password-check-reset-guide {
+  display: block;
+  margin-bottom: 0;
+  color: #888;
+  font-size: 0.98rem;
+}
+
+.password-check-reset-btn-simple {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 0;
+  text-decoration: none;
+}
+.password-check-reset-btn-simple:hover {
+  text-decoration: none;
+  color: #333;
+}
+
+.edit-profile-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 32px 32px 32px;
+  background: #fff;
+  border-radius: 12px;
+}
+.edit-profile-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.edit-profile-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 16px;
+  min-height: 60px;
+}
+.edit-profile-label {
+  flex: 0 0 120px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 12px;
+}
+.edit-profile-value {
+  flex: 1;
+  color: #666;
+  margin-top: 12px;
+}
+.edit-profile-auth-btn {
+  background: none;
+  border: none;
+  outline: none;
+  color: #FC5858;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 12px;
+}
+.edit-profile-auth-btn:hover {
+  background: #f4f6fa;
+}
+.edit-profile-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  height: 48px;
+  box-sizing: border-box;
+}
+.edit-profile-check-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.edit-profile-check-btn:hover {
+  background: #f4f6fa;
+}
+.edit-profile-msg {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  position: relative;
+  left: 0;
+}
+
+.input-error {
+  border-color: #FC5858 !important;
+}
+.input-success {
+  border-color: #A0C4FF !important;
+}
+
+.edit-profile-submit-btn {
+  width: 33.33%;
+  background: #528efa;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 0;
+  font-weight: 600;
+  font-size: 1.08rem;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: background 0.15s;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.edit-profile-submit-btn:hover {
+  background: #7bb0fa;
+}
+
+/* ===== Withdraw page styles ===== */
+.withdraw-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 32px 32px 32px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.withdraw-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.withdraw-warning {
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.withdraw-warning p {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.withdraw-warning ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.withdraw-warning li {
+  color: #444;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.withdraw-point-info {
+  margin-top: 8px;
+  margin-left: 20px;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.withdraw-point-value {
+  color: #FC5858;
+  font-weight: 600;
+}
+
+.withdraw-reason-section {
+  margin-bottom: 32px;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.withdraw-reason-title {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.withdraw-reason-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+.withdraw-reason-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.withdraw-reason-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.withdraw-reason-text {
+  font-size: 0.95rem;
+  color: #444;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.withdraw-other-reason-container {
+  margin-left: 24px;
+  margin-top: 4px;
+}
+
+.withdraw-other-reason {
+  width: 300px;
+  padding: 4px 0;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.9rem;
+  margin-left: 8px;
+  background: none;
+}
+
+.withdraw-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.withdraw-submit-btn {
+  padding: 10px 20px;
+  background: #528efa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.withdraw-submit-btn:hover:not(:disabled) {
+  background: #4a7fd8;
+}
+
+.withdraw-submit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.withdraw-cancel-btn {
+  padding: 10px 20px;
+  background: none;
+  color: #666;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.withdraw-cancel-btn:hover {
+  color: #333;
+}
+
+.withdraw-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.withdraw-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  gap: 8px;
+  min-height: 60px;
+}
+
+.withdraw-label {
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+  margin-left: 8px;
+}
+
+.withdraw-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  height: 48px;
+  box-sizing: border-box;
+}
+
+.withdraw-msg {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  position: relative;
+  left: 0;
+}

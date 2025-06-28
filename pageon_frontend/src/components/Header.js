@@ -29,12 +29,13 @@ function Header() {
 
   const handleMyLibraryClick = () => {
     // 내 서재 페이지로 이동 (예: /my-library)
-    navigate("/my-library");
+    navigate("/users/my-library");
   };
 
   const handleMyInfoClick = () => {
-    // 내 정보 페이지로 이동 (예: /my-info)
-    navigate("/my-info");
+
+    // 마이페이지로 이동
+    navigate("/users/my-page");
   };
 
   const handleLogoutClick = async () => {
@@ -75,8 +76,7 @@ function Header() {
           {isLoggedIn ? (
             <>
               <button className="my-library-btn" onClick={handleMyLibraryClick}>내 서재</button>
-              <button className="my-info-btn" onClick={handleMyInfoClick}>내 정보</button>
-              <button className="logout-btn" onClick={handleLogoutClick}>로그아웃</button>
+              <button className="my-info-btn" onClick={handleMyInfoClick}>마이페이지</button>
             </>
           ) : (
             <>
