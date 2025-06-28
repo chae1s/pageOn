@@ -1,20 +1,57 @@
 package com.pageon.backend.security;
 
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.enums.Provider;
 import com.pageon.backend.entity.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
-
+public class PrincipalUser implements UserDetails, OAuth2User {
     private final Users users;
+    private final OAuthUserInfoResponse oAuthUserInfoResponse;
+
+    public PrincipalUser(Users user) {
+        this.users = user;
+        this.oAuthUserInfoResponse = null;
+    }
+
+    public Users getUsers() {
+        return users;
+    }
+    @Override
+    public Map<String, Object> getAttributes() {
+        if (oAuthUserInfoResponse == null) {
+            return Map.of();
+        }
+        return Map.of(
+                "email", oAuthUserInfoResponse.getEmail(),
+                "provider", oAuthUserInfoResponse.getProvider(),
+                "providerID", oAuthUserInfoResponse.getProviderId()
+        );
+    }
+
+    @Override
+    public String getName() {
+        return this.users.getEmail();
+    }
+
+    public Provider getProvider() {
+        return oAuthUserInfoResponse.getProvider();
+    }
+
+    public String getProviderId() {
+        return oAuthUserInfoResponse.getProviderId();
+    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -60,4 +97,5 @@ public class CustomUserDetails implements UserDetails {
         return this.users.getUserRoles().stream()
                 .map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
     }
+
 }

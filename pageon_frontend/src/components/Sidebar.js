@@ -3,10 +3,14 @@ import "./Header.css";
 import "./Sidebar.css";
 
 function Sidebar({ active }) {
+  const handleMyPageClick = () => {
+    window.location.href = "/users/my-page";
+  };
+
   return (
     <div className="mypage-sidebar">
       {/* 사이드바 */}
-      <h3>마이 페이지</h3>
+      <h3 onClick={handleMyPageClick} style={{ cursor: 'pointer' }}>마이 페이지</h3>
       <aside>
         <nav>
           <ul>

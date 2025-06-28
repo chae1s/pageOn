@@ -2,6 +2,7 @@ package com.pageon.backend.repository;
 
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,11 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findWithRolesByProviderAndProviderId(@Param("provider") Provider provider, @Param("providerId") String providerId);
 
 
+    @EntityGraph(attributePaths = {
+            "userRoles", "userRoles.role"
+    })
     Optional<Users> findByEmail(String email);
+
+    Optional<Users> findById(Long id);
 
 }

@@ -30,12 +30,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
 
 
         /* 소셜 로그인 사용자 정보 조회 */
-        Provider provider = oAuth2User.getProvider();
-        String providerId = oAuth2User.getProviderId();
+        Provider provider = principalUser.getProvider();
+        String providerId = principalUser.getProviderId();
 
 
         log.info("{} 로그인 성공", provider);
@@ -43,9 +43,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Users user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
-        log.info(oAuth2User.getName());
-        String accessToken = jwtProvider.generateAccessToken(user.getId(), roleTypes);
-        String refreshToken = jwtProvider.generateRefreshToken(user.getId());
+        log.info(principalUser.getName());
+        String accessToken = jwtProvider.generateAccessToken(user.getEmail(), roleTypes);
+        String refreshToken = jwtProvider.generateRefreshToken(user.getEmail());
 
         log.info("소셜로그인 토큰 발행");
 

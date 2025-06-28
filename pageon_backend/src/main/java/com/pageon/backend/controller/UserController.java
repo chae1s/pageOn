@@ -2,12 +2,14 @@ package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.*;
 import com.pageon.backend.security.CustomOauth2UserService;
+import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -64,6 +66,24 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal PrincipalUser principalUser) {
 
+        return ResponseEntity.ok(userService.getMyInfo(principalUser));
+    }
 
+    @PostMapping("/check-password")
+    public ResponseEntity<Map<String, Boolean>> checkPassword(@AuthenticationPrincipal PrincipalUser user, @RequestBody Map<String, String> body) {
+        String password = body.get("password");
+        boolean isCorrect = userService.checkPassword(user.getId(), password);
+
+        return ResponseEntity.ok(Map.of("isCorrect", isCorrect));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<Void> updateProfile(@AuthenticationPrincipal PrincipalUser principalUser, @RequestBody UserUpdateRequest request) {
+        userService.updateProfile(principalUser.getId(), request);
+
+        return ResponseEntity.ok().build();
+    }
 }

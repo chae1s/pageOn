@@ -181,8 +181,7 @@
   margin-left: 0;
 }
 .mypage-viewall-btn:hover {
-  text-decoration: underline;
-  background: #f4f6fa;
+  /* 호버 효과 제거 */
 }
 
 .mypage-info-list {

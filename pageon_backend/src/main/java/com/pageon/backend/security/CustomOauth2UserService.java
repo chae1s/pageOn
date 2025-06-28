@@ -42,11 +42,11 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         OAuthUserInfoResponse oAuth2Response = null;
-
+        Users users = null;
         if (registrationId.equals("kakao")) {
             log.info("kakao 로그인");
             oAuth2Response = new KakaoSignupRequest(oAuth2User.getAttributes());
-            existingUser(oAuth2Response);
+            users = existingUser(oAuth2Response);
         } else if (registrationId.equals("naver")) {
             log.info("naver 로그인");
             Object response = oAuth2User.getAttributes().get("response");
@@ -54,32 +54,31 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
             oAuth2Response = new NaverSignupRequest(attribute);
-            existingUser(oAuth2Response);
+            users = existingUser(oAuth2Response);
         } else if (registrationId.equals("google")) {
             log.info("google 로그인");
             oAuth2Response = new GoogleSignupRequest(oAuth2User.getAttributes());
 
-            existingUser(oAuth2Response);
+            users = existingUser(oAuth2Response);
         }
 
-        return new CustomOAuth2User(oAuth2User, oAuth2Response);
+        return new PrincipalUser(users, oAuth2Response);
     }
 
-    private void existingUser(OAuthUserInfoResponse response) {
+    private Users existingUser(OAuthUserInfoResponse response) {
         log.info(response.getEmail());
 
         Optional<Users> user = userRepository.findWithRolesByProviderAndProviderId(response.getProvider(), response.getProviderId());
 
         if (user.isPresent()) {
-            return;
+            return user.get();
         }
 
-        signupSocial(response);
-
+        return signupSocial(response);
     }
 
     @Transactional
-    public void signupSocial(OAuthUserInfoResponse response) {
+    public Users signupSocial(OAuthUserInfoResponse response) {
 
         Users users = Users.builder()
                 .email(response.getEmail())
@@ -93,6 +92,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         userRepository.save(users);
 
         log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
+
+        return users;
 
     }
 

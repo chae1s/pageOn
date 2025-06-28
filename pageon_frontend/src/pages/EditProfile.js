@@ -1,18 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
 import axios from "axios";
 
-// 예시 사용자 정보 (실제 서비스에서는 API로 받아옴)
-const mockUser = {
-  email: "user@example.com",
-  nickname: "기존닉네임",
-  birthDate: "19900101"
-};
-
 function EditProfile() {
-  const [nickname, setNickname] = useState(mockUser.nickname);
+  const [userInfo, setUserInfo] = useState(null);
+  const [nickname, setNickname] = useState("");
   const [isCheckingNickname, setIsCheckingNickname] = useState(false);
   const [isNicknameDuplicate, setIsNicknameDuplicate] = useState(false);
   const [nicknameMsg, setNicknameMsg] = useState("");
@@ -21,6 +15,24 @@ function EditProfile() {
   const [passwordMsg, setPasswordMsg] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordConfirmMsg, setPasswordConfirmMsg] = useState("");
+
+  // 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get("/api/users/me", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        setUserInfo(response.data);
+        setNickname(response.data.nickname || "");
+      } catch (error) {
+        alert("사용자 정보를 불러오지 못했습니다.");
+      }
+    };
+    fetchUserInfo();
+  }, []);
 
   // 닉네임 중복확인
   const checkNicknameDuplicate = async () => {
@@ -52,7 +64,7 @@ function EditProfile() {
     setNickname(newNickname);
     
     // 닉네임이 비어있거나 원래 값과 같으면 메시지 초기화
-    if (!newNickname || newNickname === mockUser.nickname) {
+    if (!newNickname || newNickname === userInfo?.nickname) {
       setNicknameMsg("");
     } else {
       // 닉네임이 변경되면 메시지 초기화
@@ -62,7 +74,7 @@ function EditProfile() {
 
   // 닉네임 blur 핸들러
   const handleNicknameBlur = () => {
-    if (hasNicknameFocused && nickname && nickname !== mockUser.nickname) {
+    if (hasNicknameFocused && nickname && nickname !== userInfo?.nickname) {
       checkNicknameDuplicate();
     }
   };
@@ -96,6 +108,40 @@ function EditProfile() {
     setPasswordConfirmMsg(password && value !== password ? "비밀번호가 일치하지 않습니다." : "");
   };
 
+  // 폼 제출 핸들러
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const updateData = {};
+      if (nickname !== userInfo?.nickname) {
+        updateData.nickname = nickname;
+      }
+      if (password) {
+        updateData.password = password;
+      }
+      const response = await axios.patch("/api/users/me", updateData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      if (response.status === 200) {
+        alert("내 정보가 수정되었습니다.");
+        // 수정된 정보로 userInfo 업데이트
+        setUserInfo(prev => ({ ...prev, ...updateData }));
+        // 비밀번호 필드 초기화
+        setPassword("");
+        setPasswordConfirm("");
+        setPasswordMsg("");
+        setPasswordConfirmMsg("");
+      }
+    } catch (error) {
+      alert("정보 수정 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <>
       <Header />
@@ -104,11 +150,11 @@ function EditProfile() {
         <div className="mypage-main">
           <div className="edit-profile-container">
             <h2 className="edit-profile-title">내 정보 수정</h2>
-            <form className="edit-profile-form">
+            <form className="edit-profile-form" onSubmit={handleSubmit}>
               {/* 이메일 */}
               <div className="edit-profile-row">
                 <label className="edit-profile-label">이메일</label>
-                <span className="edit-profile-value">{mockUser.email}</span>
+                <span className="edit-profile-value">{userInfo?.email}</span>
                 <button type="button" className="edit-profile-auth-btn">본인인증 하기</button>
               </div>
               {/* 비밀번호 */}
@@ -158,7 +204,7 @@ function EditProfile() {
               {/* 생년월일 */}
               <div className="edit-profile-row">
                 <label className="edit-profile-label">생년월일</label>
-                <span className="edit-profile-value">{mockUser.birthDate}</span>
+                <span className="edit-profile-value">{userInfo?.birthDate}</span>
               </div>
               <button type="submit" className="edit-profile-submit-btn">수정하기</button>
             </form>

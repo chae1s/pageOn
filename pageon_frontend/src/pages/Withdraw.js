@@ -1,15 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
 import axios from "axios";
 
 function Withdraw() {
+  const [userInfo, setUserInfo] = useState(null);
   const [password, setPassword] = useState("");
   const [passwordMsg, setPasswordMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [withdrawReason, setWithdrawReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
+
+  // 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axios.get("/api/users/me", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        setUserInfo(response.data);
+      } catch (error) {
+        alert("사용자 정보를 불러오지 못했습니다.");
+      }
+    };
+    fetchUserInfo();
+  }, []);
 
   // 탈퇴 이유 옵션들
   const withdrawReasons = [
@@ -21,28 +39,17 @@ function Withdraw() {
     "기타"
   ];
 
-  // 비밀번호 유효성 검사
-  const validatePassword = (pw) => {
-    if (!pw) return "비밀번호를 입력해주세요.";
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#\-?$%&^])[a-zA-Z0-9!@#\-?$%&^]{8,}$/;
-    if (!passwordRegex.test(pw)) {
-      return "비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.";
-    }
-    return "";
-  };
-
   const handlePasswordChange = (e) => {
     const value = e.target.value;
     setPassword(value);
-    setPasswordMsg(validatePassword(value));
+    setPasswordMsg("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const validationMsg = validatePassword(password);
-    if (validationMsg) {
-      setPasswordMsg(validationMsg);
+    if (!password) {
+      setPasswordMsg("비밀번호를 입력해주세요.");
       return;
     }
 
@@ -100,7 +107,7 @@ function Withdraw() {
                 <li>• 보유한 포인트와 쿠폰이 모두 소멸됩니다.
                   <div className="withdraw-point-info">
                     <span>현재 내 잔여 포인트: </span>
-                    <span className="withdraw-point-value">1,250P</span>
+                    <span className="withdraw-point-value">{userInfo?.pointBalance?.toLocaleString() || "0"}P</span>
                   </div>
                 </li>
                 <li>• 탈퇴 후에는 복구할 수 없습니다.</li>

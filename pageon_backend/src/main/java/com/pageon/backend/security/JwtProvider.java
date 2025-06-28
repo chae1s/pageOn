@@ -35,11 +35,11 @@ public class JwtProvider {
     }
 
     /* Refresh Token 발급 */
-    public String generateRefreshToken(Long id) {
+    public String generateRefreshToken(String email) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(String.valueOf(id))
-                .claim("id", id)
+                .setSubject(email)
+                .claim("email", email)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_EXPIRES_IN))
                 .signWith(refreshKey, SignatureAlgorithm.HS256)
@@ -48,11 +48,11 @@ public class JwtProvider {
 
 
     /* Access Token 발급 */
-    public String generateAccessToken(Long id, List<RoleType> roleTypes) {
+    public String generateAccessToken(String email, List<RoleType> roleTypes) {
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(String.valueOf(id))
-                .claim("id", id)
+                .setSubject(email)
+                .claim("email", email)
                 .claim("roles", roleTypes)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRES_IN))

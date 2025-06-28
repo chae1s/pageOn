@@ -1,16 +1,11 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.*;
-import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.entity.Role;
-import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.RoleType;
-import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.security.CustomUserDetails;
 import com.pageon.backend.security.JwtProvider;
+import com.pageon.backend.security.PrincipalUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -19,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -90,11 +86,11 @@ public class UserService {
                 )
         );
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
 
         // 로그인 시 토큰 생성
-        String accessToken = jwtProvider.generateAccessToken(userDetails.getId(), userDetails.getRoleType());
-        String refreshToken = jwtProvider.generateRefreshToken(userDetails.getId());
+        String accessToken = jwtProvider.generateAccessToken(principalUser.getUsername(), principalUser.getRoleType());
+        String refreshToken = jwtProvider.generateRefreshToken(principalUser.getUsername());
         if (accessToken != null && refreshToken != null) {
             log.info("토큰 발급 완료");
             loginCheck = true;
@@ -155,4 +151,38 @@ public class UserService {
         return sb.toString();
     }
 
+    public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
+        log.info(principalUser.getUsername());
+        log.info(principalUser.getName());
+        Users users = userRepository.findByEmail(principalUser.getUsername()).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+
+        return UserInfoResponse.fromEntity(users);
+    }
+
+    public boolean checkPassword(Long id, String password) {
+        Users users = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+
+        return passwordEncoder.matches(password, users.getPassword());
+    }
+
+    @Transactional
+    public void updateProfile(Long id, UserUpdateRequest request) {
+        Users users = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        log.info(request.getNickname());
+        if (request.getNickname() != null && !request.getNickname().isBlank()) {
+            users.updateNickname(request.getNickname());
+        }
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            users.updatePassword(validatePassword(request));
+        }
+    }
+
+    private String validatePassword(UserUpdateRequest request) {
+        if (!request.getPassword().matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#\\-?$%&^])[a-zA-Z0-9!@#\\-?$%&^]{8,}$")) {
+            throw new IllegalArgumentException("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.");
+        }
+
+        return passwordEncoder.encode(request.getPassword());
+    }
 }

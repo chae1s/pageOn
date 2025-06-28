@@ -3,58 +3,38 @@ import Header from "../components/Header";
 import "./MyPage.css";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import axios from "axios";
 
 function MyPage() {
   const [userInfo, setUserInfo] = useState(null);
-  const [point, setPoint] = useState(null);
   const [library, setLibrary] = useState([]);
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
       try {
         // 내 정보
-        const userRes = await fetch("/api/users/me", {
+        const userRes = await axios.get("/api/users/me", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
-        const userData = await userRes.json();
-        setUserInfo(userData);
-
-        // 내 포인트
-        const pointRes = await fetch("/api/users/point", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        const pointData = await pointRes.json();
-        setPoint(pointData.point);
-
-        // 내 서재
-        const libraryRes = await fetch("/api/users/library", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        const libraryData = await libraryRes.json();
-        setLibrary(libraryData.items || []);
-
-        // 내 댓글
-        const commentsRes = await fetch("/api/users/comments", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        const commentsData = await commentsRes.json();
-        setComments(commentsData.comments || []);
+        setUserInfo(userRes.data);
       } catch (err) {
         alert("마이페이지 정보를 불러오지 못했습니다.");
-      } finally {
-        setLoading(false);
+        return;
+      }
+
+      try {
+        // 내 서재
+        const libraryRes = await axios.get("/api/users/library", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        setLibrary(libraryRes.data.items || []);
+      } catch (err) {
+        console.log("서재 정보를 불러오지 못했습니다.");
       }
     }
     fetchData();
@@ -64,11 +44,10 @@ function MyPage() {
     e.preventDefault();
     if (!window.confirm("로그아웃 하시겠습니까?")) return;
     try {
-      const response = await fetch("/api/users/logout", {
-        method: "GET",
-        credentials: "include",
+      const response = await axios.get("/api/users/logout", {
+        withCredentials: true,
       });
-      if (response.ok) {
+      if (response.status === 200) {
         localStorage.removeItem("accessToken");
         navigate("/", { replace: true });
       } else {
@@ -79,22 +58,11 @@ function MyPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <div>
-          <h2>마이페이지</h2>
-          <p>로딩 중...</p>
-        </div>
-      </>
-    );
-  }
-
-  // 안전하게 point가 숫자인지 확인 후 toLocaleString 사용
+  // 안전하게 pointBalance가 숫자인지 확인 후 toLocaleString 사용
   const renderPoint = () => {
-    if (typeof point === "number" && !isNaN(point)) {
-      return point.toLocaleString();
+    const pointBalance = userInfo?.pointBalance;
+    if (typeof pointBalance === "number" && !isNaN(pointBalance)) {
+      return pointBalance.toLocaleString();
     }
     return "0";
   };
