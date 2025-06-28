@@ -168,7 +168,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+.env
 
-jwt.yml
 
-# End of https://www.toptal.com/developers/gitignore/api/java,intellij+all,gradle
+# End of https://www.toptal.com/developers/gitignore/api/java,intellij+all,gradle.env
