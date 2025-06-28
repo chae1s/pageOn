@@ -4,6 +4,7 @@ import com.pageon.backend.dto.*;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -88,9 +89,15 @@ public class UserController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<Map<String, Object>> deleteAccount(@AuthenticationPrincipal PrincipalUser principalUser, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> deleteAccount(
+            @AuthenticationPrincipal PrincipalUser principalUser, @RequestBody Map<String, String> body, HttpServletRequest request
+    ) {
 
-        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), body.get("password")));
+        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), body.get("password"), request));
+
+    }
+
+    public void deleteSocialAccount(@AuthenticationPrincipal PrincipalUser principalUser) {
 
     }
 }

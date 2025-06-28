@@ -7,16 +7,23 @@ import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import com.pageon.backend.security.PrincipalUser;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +43,12 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
     private final RoleService roleService;
+
+    @Value("${spring.security.oauth2.client.registration.naver.client-id}")
+    private String naverClientId;
+
+    @Value("${spring.security.oauth2.client.registration.naver.client-secret}")
+    private String naverClientSecret;
 
     @Transactional
     public void signup(SignupRequest request) {
@@ -186,23 +199,107 @@ public class UserService {
     }
 
     @Transactional
-    public Map<String, Object> deleteAccount(Long id, String password) {
+    public Map<String, Object> deleteAccount(Long id, String password, HttpServletRequest request) {
         Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+
         Map<String, Object> result = new HashMap<>();
-        if (passwordEncoder.matches(password, users.getPassword())) {
-            // 회원 탈퇴
-            users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
-            users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
-            users.delete();
-            result.put("isDeleted", true);
-            result.put("message", "계정이 삭제되었습니다.");
+        if (users.getProvider() == Provider.EMAIL) {
+            return deleteEmailAccount(users, password);
         } else {
-            // 에러 메세지 전송
-            result.put("isDeleted", false);
-            result.put("message", "비밀번호가 일치하지 않습니다.");
-            log.info("삭제 실패");
+            return deleteSocialAccount(users, request);
         }
 
-        return result;
+    }
+
+    // provider가 email일 때 계정 삭제 메소드
+    private Map<String, Object> deleteEmailAccount(Users users, String password) {
+        Map<String, Object> result = new HashMap<>();
+        log.info("이메일 계정 삭제");
+        if (passwordEncoder.matches(password, users.getPassword())) {
+            // 회원 탈퇴
+            return softDeleteAccount(users, "계정이 삭제되었습니다.");
+        } else {
+            // 에러 메세지 전송
+            return Map.of(
+                    "isDeleted", false,
+                    "message", "비밀번호가 일치하지 않습니다."
+            );
+        }
+    }
+
+    // provider가 email이 아닐때 즉, 소셜로그인일 때 계정 삭제 메소드
+    private Map<String, Object> deleteSocialAccount(Users users, HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        log.info("소셜 계정 삭제");
+        String accessToken = jwtProvider.resolveToken(request);
+        switch (users.getProvider()) {
+            case KAKAO -> {
+                unlinkKakao(accessToken);
+                return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.");
+            }
+            case NAVER -> {
+                unlinkNaver(accessToken);
+                return softDeleteAccount(users, "네이버 계정이 삭제되었습니다.");
+            }
+            case GOOGLE -> {
+                unlinkGoogle(accessToken);
+                return softDeleteAccount(users, "구글 계정이 삭제되었습니다.");
+            }
+            default -> throw new IllegalArgumentException("지원하지 않는 소셜로그인입니다.");
+        }
+    }
+
+    // 삭제 계정 DB 변경
+    private Map<String, Object> softDeleteAccount(Users users, String message) {
+        // 회원 탈퇴
+        users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
+        users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
+        users.delete();
+
+        return Map.of(
+                "isDeleted", true,
+                "message", message
+        );
+    }
+
+    // 카카오 연결 끊기
+    private void unlinkKakao(String accessToken) {
+        String url = "https://kapi.kakao.com/v1/user/unlink";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        sendUnlinkRequest(url, headers, "카카오");
+    }
+
+    // 네이버 연결 끊기
+    private void unlinkNaver(String accessToken) {
+        String url = String.format("https://nid.naver.com/oauth2.0/token?grant_type=delete&client_id=%s&client_secret=%s&access_token=%s&service_provider=NAVER",
+                naverClientId, naverClientSecret, accessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        sendUnlinkRequest(url, headers, "네이버");
+    }
+
+    // 구글 연결 끊기
+    private void unlinkGoogle(String accessToken) {
+        String url = String.format("https://oauth2.googleapis.com/revoke?token=%s", accessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        sendUnlinkRequest(url, headers, "구글");
+    }
+
+    private void sendUnlinkRequest(String url, HttpHeaders headers, String provider) {
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = new RestTemplate().postForEntity(url, request, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException(String.format("%s연결 해제 실패", provider));
+        }
     }
 }

@@ -50,7 +50,7 @@ function Withdraw() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!password) {
+    if (userInfo?.provider === "Email" && !password) {
       setPasswordMsg("비밀번호를 입력해주세요.");
       return;
     }
@@ -75,10 +75,16 @@ function Withdraw() {
     setIsSubmitting(true);
     try {
       const finalReason = withdrawReason === "기타" ? otherReason : withdrawReason;
-      const response = await axios.post("/api/users/withdraw", { 
-        password,
+      const requestData = {
         withdrawReason: finalReason
-      }, {
+      };
+      
+      // Provider가 Email인 경우에만 비밀번호 포함
+      if (userInfo?.provider === "Email") {
+        requestData.password = password;
+      }
+
+      const response = await axios.post("/api/users/withdraw", requestData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         }
@@ -149,20 +155,22 @@ function Withdraw() {
               </div>
             </div>
             <form className="withdraw-form" onSubmit={handleSubmit}>
-              <div className="withdraw-row">
-                <label className="withdraw-label">비밀번호</label>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <input
-                    type="password"
-                    className="withdraw-input"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="비밀번호를 입력해주세요"
-                    autoComplete="current-password"
-                  />
-                  {passwordMsg && <div className="withdraw-msg" style={{ color: 'var(--error-color)' }}>{passwordMsg}</div>}
+              {userInfo?.provider === "EMAIL" && (
+                <div className="withdraw-row">
+                  <label className="withdraw-label">비밀번호</label>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <input
+                      type="password"
+                      className="withdraw-input"
+                      value={password}
+                      onChange={handlePasswordChange}
+                      placeholder="비밀번호를 입력해주세요"
+                      autoComplete="current-password"
+                    />
+                    {passwordMsg && <div className="withdraw-msg" style={{ color: 'var(--error-color)' }}>{passwordMsg}</div>}
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="withdraw-buttons">
                 <button 
                   type="submit" 
