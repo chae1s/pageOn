@@ -2,20 +2,24 @@ package com.pageon.backend.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pageon.backend.dto.AccessToken;
+import com.pageon.backend.dto.Token;
 import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.service.RoleService;
-import com.pageon.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -31,13 +35,16 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final OAuth2AuthorizedClientService authorizedClientService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        log.info("OAuth2User Attributes: {}", oAuth2User.getAttributes());
+
+        log.info("OAuth2User Attributes: {}", userRequest.getClientRegistration());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
@@ -60,8 +67,11 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             oAuth2Response = new GoogleSignupRequest(oAuth2User.getAttributes());
 
             users = existingUser(oAuth2Response);
+        } else {
+            throw new RuntimeException("소셜 로그인 실패");
         }
 
+        setAccessToken(userRequest.getAccessToken(), users);
         return new PrincipalUser(users, oAuth2Response);
     }
 
@@ -110,5 +120,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         }
 
         return sb.toString();
+    }
+
+    private void setAccessToken(OAuth2AccessToken oAuth2AccessToken, Users users) {
+        String accessToken = oAuth2AccessToken.getTokenValue();
+
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Token socialAccessToken = new Token().updateSocialAccessToken(users.getId(), accessToken);
+        valueOperations.set(String.format("%d_%s_accessToken", users.getId(), users.getProviderId()), socialAccessToken);
     }
 }

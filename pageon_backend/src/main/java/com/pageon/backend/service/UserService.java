@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +45,7 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
     private final RoleService roleService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -93,7 +96,7 @@ public class UserService {
 
     public JwtTokenResponse login(LoginRequest loginDto, HttpServletResponse response) {
         boolean loginCheck = false;
-
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDto.getEmail(), loginDto.getPassword()
@@ -115,15 +118,39 @@ public class UserService {
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
         // refresh token 저장
+        Token token = new Token().updateRefreshToken(principalUser.getId(), refreshToken);
+        valueOperations.set(String.format("%d_%s_refreshToken", principalUser.getId(), principalUser.getUsername()), token);
+
 
         return jwtTokenResponse;
 
     }
 
-    public void logout(HttpServletResponse response) {
+    public void logout(PrincipalUser principalUser, HttpServletResponse response) {
+        Users users = userRepository.findByIdAndIsDeletedFalse(principalUser.getId()).orElseThrow(
+                () -> new UsernameNotFoundException("존재하지 않는 사용자입니다.")
+        );
+
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+
+        deleteToken(users);
+    }
+
+    private void deleteToken(Users users) {
+        String redisTokenKey;
+        if (users.getProvider() == Provider.EMAIL) {
+            redisTokenKey = String.format("%d_%s_refreshToken", users.getId(), users.getEmail());
+        } else {
+            redisTokenKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
+        }
+
+        Token token = (Token) redisTemplate.opsForValue().get(redisTokenKey);
+
+        if (token.getId().equals(users.getId())) {
+            redisTemplate.delete(redisTokenKey);
+        }
     }
 
     @Transactional
@@ -231,18 +258,19 @@ public class UserService {
     private Map<String, Object> deleteSocialAccount(Users users, HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         log.info("소셜 계정 삭제");
-        String accessToken = jwtProvider.resolveToken(request);
+        String redisKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
+        Token token = (Token) redisTemplate.opsForValue().get(redisKey);
         switch (users.getProvider()) {
             case KAKAO -> {
-                unlinkKakao(accessToken);
+                unlinkKakao(token.getSocialAccessToken());
                 return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.");
             }
             case NAVER -> {
-                unlinkNaver(accessToken);
+                unlinkNaver(token.getSocialAccessToken());
                 return softDeleteAccount(users, "네이버 계정이 삭제되었습니다.");
             }
             case GOOGLE -> {
-                unlinkGoogle(accessToken);
+                unlinkGoogle(token.getSocialAccessToken());
                 return softDeleteAccount(users, "구글 계정이 삭제되었습니다.");
             }
             default -> throw new IllegalArgumentException("지원하지 않는 소셜로그인입니다.");

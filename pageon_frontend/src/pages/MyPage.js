@@ -46,6 +46,9 @@ function MyPage() {
     try {
       const response = await axios.get("/api/users/logout", {
         withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
       });
       if (response.status === 200) {
         localStorage.removeItem("accessToken");
@@ -78,7 +81,7 @@ function MyPage() {
             {/* 상단 정보 (닉네임, 포인트) */}
             <div className="mypage-summary-container">
               <div className="mypage-summary-left">
-                <div className="mypage-nickname">{userInfo?.nickname || "사용자"}님</div>
+                <div className="mypage-nickname">{userInfo?.nickname}</div>
                 <a href="#logout" className="mypage-logout-link" onClick={handleLogoutClick}>로그아웃</a>
               </div>
               <div className="mypage-summary-right">

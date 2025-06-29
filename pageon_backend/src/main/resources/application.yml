@@ -18,9 +18,6 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -30,13 +27,13 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
 
+
+
   security:
     oauth2:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_APIKEY}
-            client-secret: ${KAKAO_CLIENTSECRET}
             provider: kakao
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8080/login/oauth2/code/kakao
@@ -45,16 +42,12 @@ spring:
             client-name: Kakao
             client-authentication-method: client_secret_post
           naver:
-            client-id: ${NAVER_CLIENTID}
-            client-secret: ${NAVER_CLIENTSECRET}
             client-name: Naver
             redirect-uri: http://localhost:8080/login/oauth2/code/naver
             scope:
               - email
             authorization-grant-type: authorization_code
           google:
-            client-id: ${GOOGLE_CLIENTID}
-            client-secret: ${GOOGLE_CLIENTSECRET}
             scope:
               - email
             redirect-uri: http://localhost:8080/login/oauth2/code/google
@@ -75,8 +68,6 @@ spring:
 
   mail:
     host: smtp.gmail.com
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -86,8 +77,11 @@ spring:
           auth: true
     default-encoding: UTF-8
     port: 587
-
-jwt:
-  secret:
-    refresh: ${JWT_REFRESH}
-    access: ${JWT_ACCESS}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  profiles:
+    active: dev
+  config:
+    import: optional:classpath:application-${spring.profiles.active}.yml
