@@ -85,4 +85,8 @@ public class Users {
         this.email = deleteEmail;
     }
 
+    public void deleteProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
-import axios from "axios";
+import axios from '../lib/axios';
 import { useNavigate } from "react-router-dom";
 
 function EditProfile() {
@@ -21,7 +21,9 @@ function EditProfile() {
   // 비밀번호 확인 여부 체크
   useEffect(() => {
     const isPasswordVerified = sessionStorage.getItem("passwordVerified");
-    if (!isPasswordVerified) {
+    const provider = localStorage.getItem("provider");
+    // Only redirect to password-check if provider is EMAIL
+    if (provider === "EMAIL" && !isPasswordVerified) {
       navigate("/users/password-check");
       return;
     }
@@ -31,11 +33,7 @@ function EditProfile() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const response = await axios.get("/api/users/me");
         setUserInfo(response.data);
         setNickname(response.data.nickname || "");
       } catch (error) {
@@ -131,12 +129,7 @@ function EditProfile() {
       if (password) {
         updateData.password = password;
       }
-      const response = await axios.patch("/api/users/me", updateData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      const response = await axios.patch("/api/users/me", updateData);
 
       if (response.status === 200) {
         alert("내 정보가 수정되었습니다.");

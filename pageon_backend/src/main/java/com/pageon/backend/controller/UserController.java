@@ -53,9 +53,9 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal PrincipalUser principalUser, HttpServletResponse response) {
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
 
-        userService.logout(principalUser, response);
+        userService.logout(principalUser, request, response);
 
         return ResponseEntity.ok().build();
     }

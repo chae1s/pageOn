@@ -7,6 +7,8 @@ function Sidebar({ active }) {
     window.location.href = "/users/my-page";
   };
 
+  
+
   return (
     <div className="mypage-sidebar">
       {/* 사이드바 */}
@@ -34,7 +36,9 @@ function Sidebar({ active }) {
               <div>내 정보</div>
               <ul>
                 <li>
-                  <a href="/users/password-check" className={active === "edit" ? "sidebar-link-active" : undefined}>내 정보 수정</a>
+                  <a href="/users/password-check">
+                    내 정보 수정
+                  </a>
                 </li>
                 <li>
                   <a href="/users/withdraw">회원탈퇴</a>

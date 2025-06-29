@@ -70,11 +70,29 @@ public class JwtProvider {
         return true;
     }
 
+    public boolean validateRefreshToken(String refreshToken) {
+        Jwts.parserBuilder()
+                .setSigningKey(refreshKey)
+                .build()
+                .parseClaimsJws(refreshToken);
+
+        return true;
+    }
+
     public String getUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(accessKey)
                 .build()
                 .parseClaimsJws(token)
+                .getBody()
+                .get("email", String.class);
+    }
+
+    public String getUsernameRefreshToken(String refreshToken) {
+        return Jwts.parserBuilder()
+                .setSigningKey(refreshKey)
+                .build()
+                .parseClaimsJws(refreshToken)
                 .getBody()
                 .get("email", String.class);
     }

@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import "./MyPage.css";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import axios from "axios";
+import axios from '../lib/axios';
 
 function MyPage() {
   const [userInfo, setUserInfo] = useState(null);
@@ -14,11 +14,7 @@ function MyPage() {
     async function fetchData() {
       try {
         // 내 정보
-        const userRes = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const userRes = await axios.get("/api/users/me");
         setUserInfo(userRes.data);
       } catch (err) {
         alert("마이페이지 정보를 불러오지 못했습니다.");
@@ -27,11 +23,7 @@ function MyPage() {
 
       try {
         // 내 서재
-        const libraryRes = await axios.get("/api/users/library", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const libraryRes = await axios.get("/api/users/library");
         setLibrary(libraryRes.data.items || []);
       } catch (err) {
         console.log("서재 정보를 불러오지 못했습니다.");
@@ -45,10 +37,7 @@ function MyPage() {
     if (!window.confirm("로그아웃 하시겠습니까?")) return;
     try {
       const response = await axios.get("/api/users/logout", {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
+        withCredentials: true
       });
       if (response.status === 200) {
         localStorage.removeItem("accessToken");

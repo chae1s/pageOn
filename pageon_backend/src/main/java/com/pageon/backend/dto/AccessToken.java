@@ -14,8 +14,15 @@ import org.springframework.data.redis.core.index.Indexed;
 @AllArgsConstructor
 @RedisHash(value = "accessToken")
 public class AccessToken {
-    @Id
-    private String providerId;
-    @Indexed
+
+    private Long id;
+
     private String accessToken;
+
+    public AccessToken updateAccessToken(Long id, String accessToken) {
+        this.id = id;
+        this.accessToken = accessToken;
+
+        return this;
+    }
 }

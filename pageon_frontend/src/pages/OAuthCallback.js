@@ -9,9 +9,15 @@ function OAuthCallback() {
     // 쿼리 파라미터에서 토큰 추출
     const params = new URLSearchParams(location.search);
     const accessToken = params.get("accessToken");
+    const provider = params.get("provider")
     
     if (accessToken != null) {
       localStorage.setItem("accessToken", accessToken);
+    }
+
+    if (provider != null) {
+      localStorage.setItem("provider", provider)
+      console.log(provider)
     }
 
     

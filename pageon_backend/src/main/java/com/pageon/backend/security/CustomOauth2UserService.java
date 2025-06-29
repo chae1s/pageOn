@@ -3,7 +3,7 @@ package com.pageon.backend.security;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pageon.backend.dto.AccessToken;
-import com.pageon.backend.dto.Token;
+import com.pageon.backend.dto.TokenInfo;
 import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
@@ -35,7 +35,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
-    private final OAuth2AuthorizedClientService authorizedClientService;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -126,7 +125,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String accessToken = oAuth2AccessToken.getTokenValue();
 
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-        Token socialAccessToken = new Token().updateSocialAccessToken(users.getId(), accessToken);
+        AccessToken socialAccessToken = new AccessToken().updateAccessToken(users.getId(), accessToken);
         valueOperations.set(String.format("%d_%s_accessToken", users.getId(), users.getProviderId()), socialAccessToken);
     }
+
 }

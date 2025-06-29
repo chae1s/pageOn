@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
-import axios from "axios";
+import axios from '../lib/axios';
 
 function Withdraw() {
   const [userInfo, setUserInfo] = useState(null);
@@ -16,11 +16,7 @@ function Withdraw() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get("/api/users/me", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const response = await axios.get("/api/users/me");
         setUserInfo(response.data);
       } catch (error) {
         alert("사용자 정보를 불러오지 못했습니다.");
@@ -50,7 +46,7 @@ function Withdraw() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (userInfo?.provider === "Email" && !password) {
+    if (userInfo?.provider === "EMAIL" && !password) {
       setPasswordMsg("비밀번호를 입력해주세요.");
       return;
     }
@@ -80,15 +76,11 @@ function Withdraw() {
       };
       
       // Provider가 Email인 경우에만 비밀번호 포함
-      if (userInfo?.provider === "Email") {
+      if (userInfo?.provider === "EMAIL") {
         requestData.password = password;
       }
 
-      const response = await axios.post("/api/users/withdraw", requestData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        }
-      });
+      const response = await axios.post("/api/users/withdraw", requestData);
       
       if (response.data.isDeleted) {
         alert(response.data.message);

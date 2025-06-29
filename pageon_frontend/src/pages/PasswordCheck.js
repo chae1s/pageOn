@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "./MyPage.css";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from '../lib/axios';
 
 function PasswordCheck() {
   const [password, setPassword] = useState("");
@@ -11,6 +11,14 @@ function PasswordCheck() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetMsg, setResetMsg] = useState("");
   const navigate = useNavigate();
+
+  // Redirect non-EMAIL providers to /users/edit
+  React.useEffect(() => {
+    const provider = localStorage.getItem("provider");
+    if (provider && provider !== "EMAIL") {
+      navigate("/users/edit", { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +30,6 @@ function PasswordCheck() {
     try {
       const response = await axios.post("/api/users/check-password", {
         password: password
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        }
       });
       
       if (response.data.isCorrect) {

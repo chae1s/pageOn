@@ -111,22 +111,22 @@ public class UserService {
         if (accessToken != null && refreshToken != null) {
             log.info("토큰 발급 완료");
             loginCheck = true;
+
+            // refresh token 저장
+            TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(principalUser.getId(), principalUser.getUsername());
+            valueOperations.set(refreshToken, tokenInfo);
         }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(loginCheck, accessToken);
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(loginCheck, accessToken, principalUser.getUsers().getProvider());
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
-
-        // refresh token 저장
-        Token token = new Token().updateRefreshToken(principalUser.getId(), refreshToken);
-        valueOperations.set(String.format("%d_%s_refreshToken", principalUser.getId(), principalUser.getUsername()), token);
 
 
         return jwtTokenResponse;
 
     }
 
-    public void logout(PrincipalUser principalUser, HttpServletResponse response) {
+    public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
         Users users = userRepository.findByIdAndIsDeletedFalse(principalUser.getId()).orElseThrow(
                 () -> new UsernameNotFoundException("존재하지 않는 사용자입니다.")
         );
@@ -135,21 +135,28 @@ public class UserService {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
-        deleteToken(users);
+        deleteToken(getRefreshToken(request), users);
     }
 
-    private void deleteToken(Users users) {
-        String redisTokenKey;
-        if (users.getProvider() == Provider.EMAIL) {
-            redisTokenKey = String.format("%d_%s_refreshToken", users.getId(), users.getEmail());
-        } else {
-            redisTokenKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
+    private String getRefreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
 
-        Token token = (Token) redisTemplate.opsForValue().get(redisTokenKey);
+        throw new RuntimeException("refresh Token 없음");
+    }
 
-        if (token.getId().equals(users.getId())) {
-            redisTemplate.delete(redisTokenKey);
+    private void deleteToken(String refreshToken, Users users) {
+
+        TokenInfo tokenInfo = (TokenInfo) redisTemplate.opsForValue().get(refreshToken);
+
+        if (tokenInfo.getUserId().equals(users.getId())) {
+            redisTemplate.delete(refreshToken);
         }
     }
 
@@ -231,20 +238,22 @@ public class UserService {
 
         Map<String, Object> result = new HashMap<>();
         if (users.getProvider() == Provider.EMAIL) {
-            return deleteEmailAccount(users, password);
+
+            return deleteEmailAccount(users, password, request);
         } else {
+
             return deleteSocialAccount(users, request);
         }
 
     }
 
     // provider가 email일 때 계정 삭제 메소드
-    private Map<String, Object> deleteEmailAccount(Users users, String password) {
+    private Map<String, Object> deleteEmailAccount(Users users, String password, HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
         log.info("이메일 계정 삭제");
         if (passwordEncoder.matches(password, users.getPassword())) {
             // 회원 탈퇴
-            return softDeleteAccount(users, "계정이 삭제되었습니다.");
+            return softDeleteAccount(users, "계정이 삭제되었습니다.", null, request);
         } else {
             // 에러 메세지 전송
             return Map.of(
@@ -259,31 +268,38 @@ public class UserService {
         Map<String, Object> result = new HashMap<>();
         log.info("소셜 계정 삭제");
         String redisKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
-        Token token = (Token) redisTemplate.opsForValue().get(redisKey);
+        AccessToken accessToken = (AccessToken) redisTemplate.opsForValue().get(redisKey);
         switch (users.getProvider()) {
             case KAKAO -> {
-                unlinkKakao(token.getSocialAccessToken());
-                return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.");
+                unlinkKakao(accessToken.getAccessToken());
+                return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.", redisKey, request);
             }
             case NAVER -> {
-                unlinkNaver(token.getSocialAccessToken());
-                return softDeleteAccount(users, "네이버 계정이 삭제되었습니다.");
+                unlinkNaver(accessToken.getAccessToken());
+                return softDeleteAccount(users, "네이버 계정이 삭제되었습니다.", redisKey, request);
             }
             case GOOGLE -> {
-                unlinkGoogle(token.getSocialAccessToken());
-                return softDeleteAccount(users, "구글 계정이 삭제되었습니다.");
+                unlinkGoogle(accessToken.getAccessToken());
+                return softDeleteAccount(users, "구글 계정이 삭제되었습니다.", redisKey, request);
             }
             default -> throw new IllegalArgumentException("지원하지 않는 소셜로그인입니다.");
         }
     }
 
     // 삭제 계정 DB 변경
-    private Map<String, Object> softDeleteAccount(Users users, String message) {
+    private Map<String, Object> softDeleteAccount(Users users, String message, String redisKey, HttpServletRequest request) {
         // 회원 탈퇴
         users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
         users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
+        if (users.getProvider() != Provider.EMAIL) {
+            users.deleteProviderId(String.format("delete_%s_%d", users.getProviderId(), users.getId()));
+            // 소셜로그인의 access token 삭제
+            redisTemplate.delete(redisKey);
+        }
         users.delete();
 
+        // 로그인 시 받은 refresh token 삭제
+        deleteToken(getRefreshToken(request), users);
         return Map.of(
                 "isDeleted", true,
                 "message", message

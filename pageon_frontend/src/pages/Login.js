@@ -41,6 +41,7 @@ function Login() {
       if (jwtDto && jwtDto.isLogin) {
         // 로그인 성공: accessToken을 localStorage에 저장
         localStorage.setItem("accessToken", jwtDto.accessToken);
+        localStorage.setItem("provider", jwtDto.provider)
         // 로그인 성공 후 메인 페이지로 이동 (혹은 원하는 경로)
         alert("로그인에 성공하였습니다.")
         navigate("/");
