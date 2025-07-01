@@ -37,6 +37,7 @@ public class Users {
     private String nickname;
     private LocalDate birthDate;
 
+    @Builder.Default
     private Integer pointBalance = 0;
 
     // email, kakao, naver, google
@@ -50,23 +51,28 @@ public class Users {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Webtoons> webtoons = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Comments> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Likes> likes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<PointTransactions> pointTransactions = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Ratings> ratings = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserRole> userRoles = new ArrayList<>();
 
     public void updatePassword(String newPassword) {
@@ -88,5 +94,17 @@ public class Users {
     public void deleteProviderId(String providerId) {
         this.providerId = providerId;
     }
+
+    public Users(String email, String password, String nickname, LocalDate birthDate, Integer pointBalance, Provider provider, boolean isDeleted) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.birthDate = birthDate;
+        this.pointBalance = pointBalance;
+        this.provider = provider;
+        this.isDeleted = isDeleted;
+        this.userRoles = new ArrayList<>();
+    }
+
 
 }

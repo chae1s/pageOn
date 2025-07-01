@@ -2,10 +2,7 @@ package com.pageon.backend.entity;
 
 import com.pageon.backend.entity.enums.RoleType;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -27,7 +24,12 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
 
+    @Builder.Default
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private List<UserRole> userRoles = new ArrayList<>();
+
+    public Role(String roleType) {
+        this.roleType = RoleType.valueOf(roleType);
+    }
 
 }

@@ -26,6 +26,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
+    defer-datasource-initialization: true
 
 
 
@@ -85,3 +86,7 @@ spring:
     active: dev
   config:
     import: optional:classpath:application-${spring.profiles.active}.yml
+
+  sql:
+    init:
+      mode: always
