@@ -21,13 +21,13 @@ function Sidebar({ active }) {
               <div>책</div>
               <ul>
                 <li>
-                  <a href="#favorite-books">관심 작품</a>
+                  <a href="/library/favorites">관심 작품</a>
                 </li>
                 <li>
-                  <a href="#recent-books">최근 조회 작품</a>
+                  <a href="/library/recent-viewed">최근 조회 작품</a>
                 </li>
                 <li>
-                  <a href="#my-comments">내가 쓴 댓글</a>
+                  <a href="/library/my-comments">내가 쓴 댓글</a>
                 </li>
               </ul>
             </li>

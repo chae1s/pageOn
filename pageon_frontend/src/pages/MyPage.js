@@ -3,12 +3,93 @@ import Header from "../components/Header";
 import "./MyPage.css";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import BookGrid from "../components/BookGrid";
 import axios from '../lib/axios';
 
 function MyPage() {
   const [userInfo, setUserInfo] = useState(null);
   const [library, setLibrary] = useState([]);
   const navigate = useNavigate();
+  const [books] = useState([
+    {
+      id: 1,
+      coverUrl: 'https://via.placeholder.com/140x200?text=작품+1',
+      title: '임시 작품 제목 1',
+      author: '작가A'
+    },
+    {
+      id: 2,
+      coverUrl: 'https://via.placeholder.com/140x200?text=작품+2',
+      title: '임시 작품 제목 2',
+      author: '작가B'
+    },
+    {
+      id: 3,
+      coverUrl: 'https://via.placeholder.com/140x200?text=작품+3',
+      title: '임시 작품 제목 3',
+      author: '작가C'
+    },
+    {
+      id: 4,
+      coverUrl: 'https://via.placeholder.com/140x200?text=작품+4',
+      title: '임시 작품 제목 4',
+      author: '작가D'
+    },
+    {
+      id: 5,
+      coverUrl: 'https://via.placeholder.com/140x200?text=작품+5',
+      title: '임시 작품 제목 5',
+      author: '작가E'
+    },
+    {
+        id: 6,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+5',
+        title: '임시 작품 제목 5',
+        author: '작가E'
+    },
+    {
+        id: 1,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+1',
+        title: '임시 작품 제목 1',
+        author: '작가A'
+      },
+      {
+        id: 2,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+2',
+        title: '임시 작품 제목 2',
+        author: '작가B'
+      },
+      {
+        id: 3,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+3',
+        title: '임시 작품 제목 3',
+        author: '작가C'
+      },
+      {
+        id: 4,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+4',
+        title: '임시 작품 제목 4',
+        author: '작가D'
+      },
+      {
+        id: 5,
+        coverUrl: 'https://via.placeholder.com/140x200?text=작품+5',
+        title: '임시 작품 제목 5',
+        author: '작가E'
+      },
+      {
+          id: 6,
+          coverUrl: 'https://via.placeholder.com/140x200?text=작품+5',
+          title: '임시 작품 제목 5',
+          author: '작가E'
+      },
+      {
+          id: 6,
+          coverUrl: 'https://via.placeholder.com/140x200?text=작품+5',
+          title: '임시 작품 제목 5',
+          author: '작가E'
+      }
+  ]);
 
   useEffect(() => {
     async function fetchData() {
@@ -102,21 +183,7 @@ function MyPage() {
                   <span className="mypage-section-title-line"></span>
                   <a href="#favorite-books" className="mypage-viewall-btn">전체보기</a>
                 </div>
-                <div className="mypage-today-works">
-                  <div className="today-works-list">
-                    {[1,2,3,4,5,6].map((i) => (
-                      <div key={i} className="today-work-item">
-                        <img
-                          src={`https://via.placeholder.com/140x200?text=작품+${i}`}
-                          alt={`오늘 업데이트된 작품 ${i}`}
-                          className="today-work-img"
-                        />
-                        <div className="today-work-title">오늘 업데이트된 작품 제목 {i}</div>
-                        <div className="today-work-author">작가명</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <BookGrid books={books}/>
             </section>
             
         </div>

@@ -9,6 +9,9 @@ import MyPage from './pages/MyPage';
 import PasswordCheck from './pages/PasswordCheck';
 import EditProfile from './pages/EditProfile';
 import Withdraw from './pages/Withdraw';
+import FavoriteWorks from './pages/FavoriteWorks';
+import RecentViewedWorks from './pages/RecentViewedWorks';
+import MyComments from './pages/MyComments';
 
 function App() {
   return (
@@ -24,6 +27,9 @@ function App() {
         <Route path="/users/password-check" element={<PasswordCheck />} />
         <Route path="/users/edit" element={<EditProfile />} />
         <Route path="/users/withdraw" element={<Withdraw />} />
+        <Route path="/library/favorites" element={<FavoriteWorks />} />
+        <Route path="/library/recent-viewed" element={<RecentViewedWorks />} />
+        <Route path="/library/my-comments" element={<MyComments />} />
       </Routes>
     </Router>
   );

@@ -1,5 +1,5 @@
 .mypage-sidebar {
-  width: 220px;
+  max-width: 220px;
   min-width: 180px;
   background: #fff;
   font-size: 1rem;

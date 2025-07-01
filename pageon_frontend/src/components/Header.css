@@ -10,43 +10,78 @@
 }
 
 .header-inner {
-  max-width: 1100px;
+  width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   height: 64px;
+  padding: 0 30px;
   justify-content: space-between;
-  padding: 0 24px;
 }
+
 
 .logo {
   font-size: 1.8rem;
   letter-spacing: -1px;
-  display: flex;
   align-items: center;
   gap: 4px;
   font-family: 'Outfit', sans-serif;
   font-weight: 600;
   cursor: pointer;
-}
-
-.nav-list {
+  width: 120px;
   display: flex;
-  gap: 32px;
   align-items: center;
 }
 
-.nav-link {
-  font-size: 1rem;
-  color: #444;
-  padding: 8px 0;
-  transition: color var(--transition);
-  position: relative;
+.logo span {
+  align-items: center;
 }
 
-.nav-link:hover,
-.nav-link:focus {
-  color: var(--hover-color);
+.nav-list {
+  gap: 32px;
+  display: flex;
+  width: 450px;
+  
+}
+
+.nav_list .nav-link {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.books-search-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  height: 36px;
+}
+
+.books-search-input {
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  height: 100%;
+  line-height: 1;
+  background: transparent;
+}
+
+.books-search-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  padding: 0 8px;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 /* 버튼 스타일 통일 및 간격 축소: 회원가입, 로그인, 내 서재, 내 정보, 로그아웃 */
@@ -59,7 +94,7 @@
   color: #444;
   border: none;
   border-radius: var(--border-radius);
-  padding: 8px 16px;
+  padding: 8px 8px;
   font-size: 1rem;
   font-weight: 500;
   margin-right: 4px;

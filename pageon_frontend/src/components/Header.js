@@ -61,29 +61,52 @@ function Header() {
   return (
     <header className="home-header">
       <div className="header-inner">
-        <a href="/" className="logo">
-          <span>pageOn</span>
-        </a>
-        <nav>
-          <ul className="nav-list">
-            <li><a href="/" className="nav-link">홈</a></li>
-            <li><a href="#" className="nav-link">웹툰</a></li>
-            <li><a href="#" className="nav-link">웹소설</a></li>
-            <li><a href="#" className="nav-link">이벤트</a></li>
-          </ul>
-        </nav>
-        <div>
-          {isLoggedIn ? (
-            <>
-              <button className="my-library-btn" onClick={handleMyLibraryClick}>내 서재</button>
-              <button className="my-info-btn" onClick={handleMyInfoClick}>마이페이지</button>
-            </>
-          ) : (
-            <>
-              <button className="signup-btn" onClick={handleSignupClick}>회원가입</button>
-              <button className="login-btn" onClick={handleLoginClick}>로그인</button>
-            </>
-          )}
+        <div className="logo">
+          <a href="/" >
+            <span>pageOn</span>
+          </a>
+        </div>
+        <div className="nav-list">
+          <a>
+           <span href="/" className="nav-link">홈</span>
+          </a>
+          <a>
+           <span href="/" className="nav-link">웹툰</span>
+          </a>
+          <a>
+           <span href="/" className="nav-link">웹소설</span>
+          </a>
+          <a>
+           <span href="/" className="nav-link">이벤트</span>
+          </a>
+        </div>
+        <div className="header-right">
+          <div className="books-search-wrapper">
+            <input
+              className="books-search-input"
+              type="text"
+              placeholder="작품명, 작가명 검색"
+            />
+            <button className="books-search-btn" type="button">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <circle cx="9" cy="9" r="7" stroke="#b0b0b0" strokeWidth="2"/>
+                <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#b0b0b0" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <div>
+            {isLoggedIn ? (
+              <>
+                <button className="my-library-btn" onClick={handleMyLibraryClick}>내 서재</button>
+                <button className="my-info-btn" onClick={handleMyInfoClick}>마이페이지</button>
+              </>
+            ) : (
+              <>
+                <button className="signup-btn" onClick={handleSignupClick}>회원가입</button>
+                <button className="login-btn" onClick={handleLoginClick}>로그인</button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>
