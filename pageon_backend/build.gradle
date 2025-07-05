@@ -43,6 +43,9 @@ dependencies {
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.opencsv:opencsv:5.9'
+	implementation 'software.amazon.awssdk:s3:2.25.20'
+	implementation 'software.amazon.awssdk:auth:2.25.20'
+	implementation 'software.amazon.awssdk:regions:2.25.20'
 
 }
 

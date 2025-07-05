@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.io.Writer;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +52,8 @@ public class Users {
     @Column(nullable = false)
     private Boolean isDeleted;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "user")
-    private List<Webtoons> webtoons = new ArrayList<>();
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Creators creators;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")

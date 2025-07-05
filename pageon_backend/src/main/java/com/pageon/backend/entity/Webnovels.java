@@ -1,5 +1,6 @@
 package com.pageon.backend.entity;
 
+import com.pageon.backend.entity.enums.SeriesStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,18 +21,15 @@ public class Webnovels {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    private String author;
     private  String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private Users user;
+    @JoinColumn(name = "creator_id")
+    private Creators creator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "genre_id")
-    private Genres genre;
-
-    private String viewCount;
+    private String cover;
+    private SeriesStatus status;
+    private Integer viewCount;
 
 
 
