@@ -41,7 +41,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(configurationSource))
                 .csrf(csrfConfig -> csrfConfig.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(
+                                "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
+                                "/api/users/login", "/api/users/find-password"
+                        ).permitAll()
+                        .requestMatchers("/api/**").authenticated()
                 )
                 .formLogin(FormLoginConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2

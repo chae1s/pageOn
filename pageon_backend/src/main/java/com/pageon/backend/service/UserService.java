@@ -46,6 +46,7 @@ public class UserService {
     private final MailService mailService;
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RestTemplate restTemplate;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -131,11 +132,11 @@ public class UserService {
                 () -> new UsernameNotFoundException("존재하지 않는 사용자입니다.")
         );
 
+        deleteToken(getRefreshToken(request), users);
+
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
-
-        deleteToken(getRefreshToken(request), users);
     }
 
     private String getRefreshToken(HttpServletRequest request) {
@@ -265,7 +266,6 @@ public class UserService {
 
     // provider가 email이 아닐때 즉, 소셜로그인일 때 계정 삭제 메소드
     private Map<String, Object> deleteSocialAccount(Users users, HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
         log.info("소셜 계정 삭제");
         String redisKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
         AccessToken accessToken = (AccessToken) redisTemplate.opsForValue().get(redisKey);
@@ -340,7 +340,7 @@ public class UserService {
     private void sendUnlinkRequest(String url, HttpHeaders headers, String provider) {
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = new RestTemplate().postForEntity(url, request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException(String.format("%s연결 해제 실패", provider));

@@ -3,9 +3,13 @@ package com.pageon.backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignupRequest {
 
     @Email(message = "유효한 이메일 형식이 아닙니다.")
