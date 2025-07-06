@@ -3,7 +3,6 @@ package com.pageon.backend.security;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pageon.backend.dto.AccessToken;
-import com.pageon.backend.dto.TokenInfo;
 import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
@@ -16,9 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -31,8 +30,9 @@ import java.util.Random;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomOauth2UserService extends DefaultOAuth2UserService {
+public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
+    private final DefaultOAuth2UserService delegate;
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -40,38 +40,38 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        OAuth2User oAuth2User = super.loadUser(userRequest);
-
-
-        log.info("OAuth2User Attributes: {}", userRequest.getClientRegistration());
+        OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuthUserInfoResponse oAuth2Response = null;
+        OAuthUserInfoResponse userInfoResponse = null;
         Users users = null;
-        if (registrationId.equals("kakao")) {
-            log.info("kakao 로그인");
-            oAuth2Response = new KakaoSignupRequest(oAuth2User.getAttributes());
-            users = existingUser(oAuth2Response);
-        } else if (registrationId.equals("naver")) {
-            log.info("naver 로그인");
-            Object response = oAuth2User.getAttributes().get("response");
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
-            oAuth2Response = new NaverSignupRequest(attribute);
-            users = existingUser(oAuth2Response);
-        } else if (registrationId.equals("google")) {
-            log.info("google 로그인");
-            oAuth2Response = new GoogleSignupRequest(oAuth2User.getAttributes());
+        switch (registrationId) {
+            case "kakao" -> {
+                userInfoResponse = new KakaoSignupRequest(oAuth2User.getAttributes());
+                users = existingUser(userInfoResponse);
+            }
+            case "naver" -> {
+                Object response = oAuth2User.getAttributes().get("response");
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
-            users = existingUser(oAuth2Response);
-        } else {
-            throw new RuntimeException("소셜 로그인 실패");
+                userInfoResponse = new NaverSignupRequest(attribute);
+                users = existingUser(userInfoResponse);
+            }
+            case "google" -> {
+                userInfoResponse = new GoogleSignupRequest(oAuth2User.getAttributes());
+
+                users = existingUser(userInfoResponse);
+            }
+
+            default -> throw new RuntimeException("소셜 로그인 실패");
+
         }
 
         setAccessToken(userRequest.getAccessToken(), users);
-        return new PrincipalUser(users, oAuth2Response);
+        return new PrincipalUser(users, userInfoResponse);
     }
 
     private Users existingUser(OAuthUserInfoResponse response) {

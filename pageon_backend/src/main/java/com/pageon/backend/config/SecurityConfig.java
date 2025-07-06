@@ -1,8 +1,6 @@
 package com.pageon.backend.config;
 
-import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.*;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
