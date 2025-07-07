@@ -59,7 +59,7 @@ public class AuthService {
     private String extractRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
 
-        if (cookies != null) return null;
+        if (cookies == null) return null;
 
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("refreshToken")) {
