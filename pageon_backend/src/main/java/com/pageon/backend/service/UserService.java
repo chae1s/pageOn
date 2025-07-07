@@ -10,6 +10,8 @@ import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import com.pageon.backend.security.PrincipalUser;
@@ -63,9 +65,6 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequest request) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
-
         Users users = createUser(request);
 
         roleService.assignDefaultRole(users);
@@ -136,7 +135,7 @@ public class UserService {
 
     public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
         Users users = userRepository.findByIdAndIsDeletedFalse(principalUser.getId()).orElseThrow(
-                () -> new UsernameNotFoundException("존재하지 않는 사용자입니다.")
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
         deleteToken(getRefreshToken(request), users);
@@ -156,7 +155,7 @@ public class UserService {
             }
         }
 
-        throw new RuntimeException("refresh Token 없음");
+        throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
     }
 
     private void deleteToken(String refreshToken, Users users) {
@@ -208,20 +207,26 @@ public class UserService {
     }
 
     public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
-        Users users = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByEmailAndIsDeletedFalse(
+                principalUser.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         return UserInfoResponse.fromEntity(users);
     }
 
     public boolean checkPassword(Long id, String password) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         return passwordEncoder.matches(password, users.getPassword());
     }
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
         log.info(request.getNickname());
         if (request.getNickname() != null && !request.getNickname().isBlank()) {
             users.updateNickname(request.getNickname());
@@ -234,7 +239,7 @@ public class UserService {
 
     private String validatePassword(UserUpdateRequest request) {
         if (!request.getPassword().matches("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#\\-?$%&^])[a-zA-Z0-9!@#\\-?$%&^]{8,}$")) {
-            throw new IllegalArgumentException("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.");
+            throw new CustomException(ErrorCode.PASSWORD_POLICY_VIOLATION);
         }
 
         return passwordEncoder.encode(request.getPassword());
@@ -242,7 +247,9 @@ public class UserService {
 
     @Transactional
     public Map<String, Object> deleteAccount(Long id, String password, HttpServletRequest request) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         Map<String, Object> result = new HashMap<>();
         if (users.getProvider() == Provider.EMAIL) {
@@ -289,7 +296,7 @@ public class UserService {
                 unlinkGoogle(accessToken.getAccessToken());
                 return softDeleteAccount(users, "구글 계정이 삭제되었습니다.", redisKey, request);
             }
-            default -> throw new IllegalArgumentException("지원하지 않는 소셜로그인입니다.");
+            default -> throw new CustomException(ErrorCode.OAUTH_PROVIDER_MISMATCH);
         }
     }
 
@@ -350,7 +357,7 @@ public class UserService {
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException(String.format("%s연결 해제 실패", provider));
+            throw new CustomException(ErrorCode.OAUTH_UNLINK_FAILED);
         }
     }
 }

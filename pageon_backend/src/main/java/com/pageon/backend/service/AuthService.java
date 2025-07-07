@@ -4,6 +4,8 @@ import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import jakarta.servlet.http.Cookie;
@@ -29,19 +31,21 @@ public class AuthService {
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null) {
-            throw new RuntimeException("쿠키에 Refresh Token이 없습니다.");
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
 
         TokenInfo tokenInfo = (TokenInfo) redisTemplate.opsForValue().get(refreshToken);
         if (tokenInfo == null) {
-            throw new RuntimeException("유효하지 않은 Refresh Token입니다.");
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
         // refreshToken에서 가져온 email
         String email = jwtProvider.getUsernameRefreshToken(refreshToken);
 
-        Users users = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        Users users = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
         if (!users.getId().equals(tokenInfo.getUserId())) {
-            throw new RuntimeException("refresh token 소유자가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.TOKEN_USER_MISMATCH);
         }
 
         List<RoleType> roleTypes = users.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).toList();
