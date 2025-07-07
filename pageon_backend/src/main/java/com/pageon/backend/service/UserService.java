@@ -31,11 +31,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -102,8 +102,6 @@ public class UserService {
     }
 
     public JwtTokenResponse login(LoginRequest loginDto, HttpServletResponse response) {
-        boolean loginCheck = false;
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDto.getEmail(), loginDto.getPassword()
@@ -115,16 +113,19 @@ public class UserService {
         // 로그인 시 토큰 생성
         String accessToken = jwtProvider.generateAccessToken(principalUser.getUsername(), principalUser.getRoleType());
         String refreshToken = jwtProvider.generateRefreshToken(principalUser.getUsername());
-        if (accessToken != null && refreshToken != null) {
-            log.info("토큰 발급 완료");
-            loginCheck = true;
-
-            // refresh token 저장
-            TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(principalUser.getId(), principalUser.getUsername());
-            valueOperations.set(refreshToken, tokenInfo);
+        if (accessToken == null || refreshToken == null) {
+            throw new CustomException(ErrorCode.TOKEN_GENERATION_FAILED);
         }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(loginCheck, accessToken, principalUser.getUsers().getProvider());
+        try {
+            // refresh token 저장
+            TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(principalUser.getId(), principalUser.getUsername());
+            redisTemplate.opsForValue().set(refreshToken, tokenInfo, Duration.ofDays(180));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
+
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getProvider());
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
