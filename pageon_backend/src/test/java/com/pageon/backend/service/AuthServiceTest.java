@@ -3,7 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.base.enums.Provider;
+import com.pageon.backend.common.enums.Provider;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import jakarta.servlet.http.Cookie;

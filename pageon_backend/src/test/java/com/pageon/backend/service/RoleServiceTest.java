@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.base.enums.RoleType;
+import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;

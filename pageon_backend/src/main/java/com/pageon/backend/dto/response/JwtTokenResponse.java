@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.common.base.enums.Provider;
+import com.pageon.backend.common.enums.Provider;
 import lombok.Data;
 
 @Data

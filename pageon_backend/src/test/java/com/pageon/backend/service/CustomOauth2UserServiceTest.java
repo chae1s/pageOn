@@ -6,7 +6,7 @@ import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.base.enums.Provider;
+import com.pageon.backend.common.enums.Provider;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;

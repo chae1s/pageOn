@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.base.enums.RoleType;
+import com.pageon.backend.common.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

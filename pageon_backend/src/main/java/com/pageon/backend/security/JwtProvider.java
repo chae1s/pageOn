@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 
-import com.pageon.backend.common.base.enums.RoleType;
+import com.pageon.backend.common.enums.RoleType;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

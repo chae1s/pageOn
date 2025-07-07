@@ -2,8 +2,8 @@ package com.pageon.backend.security;
 
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.base.enums.Provider;
-import com.pageon.backend.common.base.enums.RoleType;
+import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
