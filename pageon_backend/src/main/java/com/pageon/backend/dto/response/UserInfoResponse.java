@@ -1,7 +1,7 @@
-package com.pageon.backend.dto;
+package com.pageon.backend.dto.response;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.Provider;
+import com.pageon.backend.common.base.enums.Provider;
 import lombok.Data;
 
 import java.time.LocalDate;

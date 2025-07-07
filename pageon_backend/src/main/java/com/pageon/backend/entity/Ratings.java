@@ -1,6 +1,5 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;

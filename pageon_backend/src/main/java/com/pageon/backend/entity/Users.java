@@ -1,13 +1,11 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.common.base.enums.Provider;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.io.Writer;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

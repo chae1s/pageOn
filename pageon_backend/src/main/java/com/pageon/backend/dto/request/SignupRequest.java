@@ -1,4 +1,4 @@
-package com.pageon.backend.dto;
+package com.pageon.backend.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

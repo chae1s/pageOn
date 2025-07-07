@@ -1,7 +1,7 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.Provider;
+import com.pageon.backend.common.base.enums.Provider;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,10 +1,10 @@
-package com.pageon.backend.config.data;
+package com.pageon.backend.config;
 
 import com.opencsv.CSVReader;
 import com.pageon.backend.entity.*;
-import com.pageon.backend.entity.enums.CreatorType;
-import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.common.base.enums.CreatorType;
+import com.pageon.backend.common.base.enums.Provider;
+import com.pageon.backend.common.base.enums.RoleType;
 import com.pageon.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.entity.enums.SeriesStatus;
+import com.pageon.backend.common.base.enums.SeriesStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

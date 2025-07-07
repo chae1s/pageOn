@@ -2,7 +2,7 @@ package com.pageon.backend.dto.oauth;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pageon.backend.entity.enums.Provider;
+import com.pageon.backend.common.base.enums.Provider;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;

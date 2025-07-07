@@ -1,11 +1,18 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.*;
+import com.pageon.backend.dto.request.FindPasswordRequest;
+import com.pageon.backend.dto.request.LoginRequest;
+import com.pageon.backend.dto.request.SignupRequest;
+import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.response.UserInfoResponse;
+import com.pageon.backend.dto.token.AccessToken;
+import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.Provider;
-import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.common.base.enums.Provider;
+import com.pageon.backend.common.base.enums.RoleType;
 import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;

@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.entity.base.BaseTimeEntity;
+import com.pageon.backend.common.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

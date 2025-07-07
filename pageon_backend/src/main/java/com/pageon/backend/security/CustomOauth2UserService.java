@@ -2,7 +2,7 @@ package com.pageon.backend.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pageon.backend.dto.AccessToken;
+import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;

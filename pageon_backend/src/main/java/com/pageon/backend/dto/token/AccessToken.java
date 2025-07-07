@@ -1,12 +1,10 @@
-package com.pageon.backend.dto;
+package com.pageon.backend.dto.token;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 @Getter
 @Builder

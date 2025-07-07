@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.entity.enums.CreatorType;
+import com.pageon.backend.common.base.enums.CreatorType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;

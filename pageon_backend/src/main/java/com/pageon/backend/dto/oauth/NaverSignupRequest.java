@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.oauth;
 
-import com.pageon.backend.entity.enums.Provider;
+import com.pageon.backend.common.base.enums.Provider;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;

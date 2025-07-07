@@ -1,4 +1,4 @@
-package com.pageon.backend.entity.base;
+package com.pageon.backend.common.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

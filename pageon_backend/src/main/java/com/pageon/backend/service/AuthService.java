@@ -1,9 +1,9 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.JwtTokenResponse;
-import com.pageon.backend.dto.TokenInfo;
+import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.common.base.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import jakarta.servlet.http.Cookie;
@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

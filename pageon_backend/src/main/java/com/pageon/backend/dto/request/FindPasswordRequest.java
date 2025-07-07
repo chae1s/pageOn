@@ -1,4 +1,4 @@
-package com.pageon.backend.dto;
+package com.pageon.backend.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

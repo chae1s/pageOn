@@ -3,7 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.entity.enums.RoleType;
+import com.pageon.backend.common.base.enums.RoleType;
 import com.pageon.backend.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

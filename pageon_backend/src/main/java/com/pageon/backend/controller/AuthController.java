@@ -1,6 +1,6 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.JwtTokenResponse;
+import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
