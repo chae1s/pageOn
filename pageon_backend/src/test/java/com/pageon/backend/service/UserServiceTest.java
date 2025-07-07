@@ -13,6 +13,8 @@ import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.common.enums.Provider;
 import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
@@ -123,22 +125,23 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("ROLE_USER가 DB에 없을 경우 예외 발생")
-    void signup_withoutRole_shouldThrowException() {
+    @DisplayName("ROLE_USER가 DB에 없을 경우 CustomException 발생")
+    void signup_withoutRole_shouldThrowCustomException() {
         // given
         roleRepository.deleteAll();
 
         SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
 
-        doThrow(new RuntimeException("기본 권한이 없습니다.")).when(roleService).assignDefaultRole(any(Users.class));
+        doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(Users.class));
 
         //when + then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.signup(signupRequest);
 
         });
 
-        assertEquals("기본 권한이 없습니다.", exception.getMessage());
+        assertEquals("기본 권한이 없습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.ROLE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
     
@@ -338,19 +341,19 @@ public class UserServiceTest {
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(mockPrincipalUser);
 
-        when(mockPrincipalUser.getUsers()).thenReturn(user);
-
         when(jwtProvider.generateAccessToken(any(), any())).thenReturn(null);
         when(jwtProvider.generateRefreshToken(any())).thenReturn("refresh-token");
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //when
-        JwtTokenResponse result = userService.login(loginRequest, response);
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            userService.login(loginRequest, response);
+        });
 
         // then
-        assertFalse(result.getIsLogin(), "loginCheck는 false여야 합니다.");
-        assertNull(result.getAccessToken(), "accessToken은 null이어야 합니다.");
+        assertEquals("Refresh Token 또는 Access Token 생성에 실패했습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.TOKEN_GENERATION_FAILED, ErrorCode.valueOf(exception.getErrorCode()));
     }
 
     @Test
@@ -372,20 +375,32 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("토큰 발급에 성공했지만 redis에 저장 중 예외 발생")
-    void login_whenRedisStorageFails_shouldThrowException() {
+    @DisplayName("토큰 발급에 성공했지만 redis에 저장 중 CustomException 발생")
+    void login_whenRedisStorageFails_shouldThrowCustomException() {
         // given
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
 
-        when(redisTemplate.opsForValue()).thenThrow(new RuntimeException("Redis 연결 실패"));
+        Authentication authentication = mock(Authentication.class);
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(mockPrincipalUser);
+        when(mockPrincipalUser.getUsername()).thenReturn("test@mail.com");
+        when(mockPrincipalUser.getId()).thenReturn(1L);
+
+        when(jwtProvider.generateAccessToken(any(), any())).thenReturn("access-token");
+        when(jwtProvider.generateRefreshToken(any())).thenReturn("refresh-token");
+
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        when(redisTemplate.opsForValue()).thenThrow(new CustomException(ErrorCode.REDIS_CONNECTION_FAILED));
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.login(loginRequest, response);
         });
 
         // then
-        assertEquals("Redis 연결 실패", exception.getMessage());
+        assertEquals("Redis 연결에 실패했습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.REDIS_CONNECTION_FAILED, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
     
@@ -437,27 +452,28 @@ public class UserServiceTest {
     }
     
     @Test
-    @DisplayName("존재하지 않는 사용자일 경우 UsernameNotFoundException")
-    void logout_withNonExistUser_shouldThrowUsernameNotFoundException() {
+    @DisplayName("존재하지 않는 사용자일 경우 CustomException 발생")
+    void logout_withNonExistUser_shouldThrowCustomException() {
         // given
         Long userId = 1L;
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
            userService.logout(mockPrincipalUser, request, response);
         });
         
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
     @Test
-    @DisplayName("refreshToken이 없으면 RuntimeException 발생")
-    void logout_withoutRefreshToken_shouldThrowRuntimeException() {
+    @DisplayName("refreshToken이 없으면 CustomException 발생")
+    void logout_withoutRefreshToken_shouldThrowCustomException() {
         // given
         Long userId = 1L;
 
@@ -484,12 +500,13 @@ public class UserServiceTest {
         });
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.logout(mockPrincipalUser, request, response);
         });
 
         // then
-        assertEquals("refresh Token 없음", exception.getMessage());
+        assertEquals("Refresh Token이 존재하지 않습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.REFRESH_TOKEN_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
 
@@ -603,20 +620,21 @@ public class UserServiceTest {
     }
     
     @Test
-    @DisplayName("존재하지 않는 사용자의 정보를 조회하면 UsernameNotFoundException 발생")
-    void getMyInfo_withInvalidPrincipal_shouldThrowUsernameNotFoundException() {
+    @DisplayName("존재하지 않는 사용자의 정보를 조회하면 CustomException 발생")
+    void getMyInfo_withInvalidPrincipal_shouldThrowCustomException() {
         // given
         String email = "test@mail.com";
 
         when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.getMyInfo(mockPrincipalUser);
         });
         
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
@@ -648,19 +666,20 @@ public class UserServiceTest {
     }
     
     @Test
-    @DisplayName("존재하지 않는 사용자를 조회하면 UsernameNotFoundException 발생")
-    void checkPassword_withInvalidUser_shouldThrowUsernameNotFoundException() {
+    @DisplayName("존재하지 않는 사용자를 조회하면 CustomException 발생")
+    void checkPassword_withInvalidUser_shouldThrowCustomException() {
         // given
         String password = "encodePassword";
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.checkPassword(1L, password);
         });
         
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
@@ -783,27 +802,28 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자 ID로 수정 시 UsernameNotFoundException 발생")
-    void updateProfile_withInvalidUserId_shouldThrowUsernameNotFoundException() {
+    @DisplayName("존재하지 않는 사용자 ID로 수정 시 CustomException 발생")
+    void updateProfile_withInvalidUserId_shouldThrowCustomException() {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
            userService.updateProfile(userId, userUpdateRequest);
         });
 
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
     @Test
     @DisplayName("비밀번호 형식이 유효하지 않을 경우 예외 발생")
-    void updateProfile_withInvalidPassword_shouldThrowIllegalArgumentException() {
+    void updateProfile_withInvalidPassword_shouldThrowCustomException() {
         // given
         Long userId = 1L;
         Users user = Users.builder()
@@ -824,12 +844,13 @@ public class UserServiceTest {
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(invalidPassword, null);
 
         //when
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             userService.updateProfile(userId, userUpdateRequest);
         });
 
         // then
-        assertEquals("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.", exception.getMessage());
+        assertEquals("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.PASSWORD_POLICY_VIOLATION, ErrorCode.valueOf(exception.getErrorCode()));
     }
 
     @Test
@@ -905,8 +926,8 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용장일 경우 UsernameNotFoundException 발생")
-    void deleteAccount_withInvalidUser_shouldThrowUsernameNotFoundException() {
+    @DisplayName("존재하지 않는 사용장일 경우 CustomException 발생")
+    void deleteAccount_withInvalidUser_shouldThrowCustomException() {
         // given
         Long userId = 1L;
         String password = "password";

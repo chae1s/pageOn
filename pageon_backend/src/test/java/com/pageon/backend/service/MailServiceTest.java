@@ -1,5 +1,7 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,28 @@ class MailServiceTest {
         assertEquals("[pageOn]임시 비밀번호 안내", simpleMailMessage.getSubject());
         assertTrue(simpleMailMessage.getText().contains(tempPassword));
         
+    }
+
+
+    @Test
+    @DisplayName("임시 비밀번호 메일 전송에 실패해 CustomException 발생")
+    void sendTemporaryPassword_shouldThrowCustomException() {
+        // given
+        String email = "test@mail.com";
+        String tempPassword = "testPassword";
+
+        doThrow(new CustomException(ErrorCode.MAIL_SEND_FAILED)).when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            mailService.sendTemporaryPassword(email, tempPassword);
+        });
+
+        // then
+        assertEquals("메일 전송에 실패했습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.MAIL_SEND_FAILED, ErrorCode.valueOf(exception.getErrorCode()));
+
+
     }
     
     

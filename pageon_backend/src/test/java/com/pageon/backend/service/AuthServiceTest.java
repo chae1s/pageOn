@@ -4,6 +4,8 @@ import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
 import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import jakarta.servlet.http.Cookie;
@@ -87,24 +89,25 @@ class AuthServiceTest {
     }
     
     @Test
-    @DisplayName("cookie 안에 refreshToken이 존재하지 않을 때 RuntimeException 발생")
-    void reissueToken_withNoExistingRefreshToken_shouldThrowRuntimeException() {
+    @DisplayName("cookie 안에 refreshToken이 존재하지 않을 때 CustomException 발생")
+    void reissueToken_withNoExistingRefreshToken_shouldThrowCustomException() {
         // given
         when(request.getCookies()).thenReturn(new Cookie[]{});
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             authService.reissueToken(request, response);
         });
         
         // then
-        assertEquals("쿠키에 Refresh Token이 없습니다.", exception.getMessage());
+        assertEquals("Refresh Token이 존재하지 않습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.REFRESH_TOKEN_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
     @Test
-    @DisplayName("redis에 refreshToken로 저장된 정보가 존재하지 않을 때 RuntimeException 발생")
-    void reissueToken_withNoExistingTokenInfo_shouldThrowRuntimeException() {
+    @DisplayName("redis에 refreshToken로 저장된 정보가 존재하지 않을 때 CustomException 발생")
+    void reissueToken_withNoExistingTokenInfo_shouldThrowCustomException() {
         // given
         String refreshToken = "sample-refresh-token";
         when(request.getCookies()).thenReturn(new Cookie[]{
@@ -115,12 +118,13 @@ class AuthServiceTest {
         when(valueOperations.get(refreshToken)).thenReturn(null);
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             authService.reissueToken(request, response);
         });
         
         // then
-        assertEquals("유효하지 않은 Refresh Token입니다.", exception.getMessage());
+        assertEquals("유효하지 않은 토큰입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.INVALID_TOKEN, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
@@ -140,21 +144,22 @@ class AuthServiceTest {
 
         String cookieEmail = "cookie_test@mail.com";
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn(cookieEmail);
-        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             authService.reissueToken(request, response);
         });
         
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
     
     @Test
-    @DisplayName("cookie에서 가져온 refresh token의 user 정보와 redis에서 가져온 user 정보가 일치하지 않으면 RuntimeException 발생")
-    void reissueToken_withNotMatchUserInformation_shouldThrowRuntimeException() {
+    @DisplayName("cookie에서 가져온 refresh token의 user 정보와 redis에서 가져온 user 정보가 일치하지 않으면 CustomException 발생")
+    void reissueToken_withNotMatchUserInformation_shouldThrowCustomException() {
         // given
         String refreshToken = "sample-refresh-token";
         when(request.getCookies()).thenReturn(new Cookie[]{
@@ -178,12 +183,13 @@ class AuthServiceTest {
 
 
         //when
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             authService.reissueToken(request, response);
         });
 
         // then
-        assertEquals("refresh token 소유자가 일치하지 않습니다.", exception.getMessage());
+        assertEquals("토큰 사용자 정보가 일치하지 않습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.TOKEN_USER_MISMATCH, ErrorCode.valueOf(exception.getErrorCode()));
         
         
     }

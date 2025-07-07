@@ -15,9 +15,14 @@ public enum ErrorCode {
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
 
     // 토큰
+    TOKEN_GENERATION_FAILED("Refresh Token 또는 Access Token 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     REFRESH_TOKEN_NOT_FOUND("Refresh Token이 존재하지 않습니다.", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN("유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_USER_MISMATCH("토큰 사용자 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+
+    // 외부 시스템 오류
+    REDIS_CONNECTION_FAILED("Redis 연결에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MAIL_SEND_FAILED("메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     private final String errorMessage;
