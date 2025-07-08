@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -40,6 +41,8 @@ public class CreatorService {
                 () -> new CustomException(ErrorCode.ROLE_NOT_FOUND)
         );
 
+        if (!creatorRequest.getAgreedToAiPolicy()) throw new CustomException(ErrorCode.AI_POLICY_NOT_AGREED);
+
         Optional<Creators> optionalCreator = creatorRepository.findByUser(user);
         if (optionalCreator.isEmpty()) {
             // userrole에 ROLE_CREATOR 추가
@@ -53,7 +56,9 @@ public class CreatorService {
             Creators creators = Creators.builder()
                     .user(user)
                     .penName(creatorRequest.getPenName())
-                    .creatorType()
+                    .creatorType(CreatorType.valueOf(creatorRequest.getCreatorType()))
+                    .agreedToAiPolicy(creatorRequest.getAgreedToAiPolicy())
+                    .aiPolicyAgreedAt(LocalDateTime.now())
                     .build();
 
             creatorRepository.save(creators);

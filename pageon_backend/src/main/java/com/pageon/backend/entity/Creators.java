@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,9 @@ public class Creators {
 
     @Builder.Default
     private Boolean isActive = true;
+    // AI 콘텐츠 약관 동의 여부
+    private Boolean agreedToAiPolicy;
+    private LocalDateTime aiPolicyAgreedAt;
 
     @Builder.Default
     @OneToMany(mappedBy = "creator")

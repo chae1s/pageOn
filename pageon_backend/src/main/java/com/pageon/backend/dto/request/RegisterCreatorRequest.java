@@ -13,4 +13,6 @@ public class RegisterCreatorRequest {
     private String penName;
     @NotBlank(message = "타입을 선택해주세요.")
     private String creatorType;
+    @NotBlank(message = "약관에 동의해주세요.")
+    private Boolean agreedToAiPolicy;
 }

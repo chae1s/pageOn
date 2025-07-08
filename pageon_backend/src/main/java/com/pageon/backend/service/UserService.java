@@ -85,6 +85,7 @@ public class UserService {
                 .birthDate(birthDate)
                 .provider(Provider.EMAIL)
                 .isDeleted(false)
+                .terms_agreed(request.getTermsAgreed())
                 .build();
 
     }

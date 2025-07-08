@@ -88,7 +88,7 @@ class CreatorServiceTest {
         when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
 
-        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
         ArgumentCaptor<Creators> creatorCaptor = ArgumentCaptor.forClass(Creators.class);
         
         //when
@@ -112,7 +112,7 @@ class CreatorServiceTest {
         when(mockPrincipalUser.getUsername()).thenReturn(email);
         when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             creatorService.registerCreator(mockPrincipalUser, creatorRequest);
@@ -146,7 +146,7 @@ class CreatorServiceTest {
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
         when(creatorRepository.findByUser(user)).thenThrow(new CustomException(ErrorCode.ALREADY_HAS_CREATOR_ROLE));
 
-        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             creatorService.registerCreator(mockPrincipalUser, creatorRequest);
@@ -155,6 +155,47 @@ class CreatorServiceTest {
         // then
         assertEquals("이미 창작자 권한이 존재합니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.ALREADY_HAS_CREATOR_ROLE, ErrorCode.valueOf(exception.getErrorCode()));
+        
+    }
+    
+    @Test
+    @DisplayName("창작자 등록을 할 때 약관에 동의하지 않으면 CustomException 발생")
+    void registerCreator_withoutAgreeingToAiPolicy_shouldThrowCustomException() {
+        // given
+        String email = "test@mail.com";
+        Users user = Users.builder()
+                .id(1L)
+                .email("test@mail.com")
+                .nickname("nickname")
+                .isDeleted(false)
+                .userRoles(new ArrayList<>())
+                .build();
+
+        Role role = Role.builder()
+                .id(1L)
+                .roleType(RoleType.ROLE_USER)
+                .build();
+
+        Role creatorRole = Role.builder()
+                .id(2L)
+                .roleType(RoleType.ROLE_CREATOR)
+                .build();
+        UserRole userRole = new UserRole(1L, user, role);
+        user.getUserRoles().add(userRole);
+
+        when(mockPrincipalUser.getUsername()).thenReturn(email);
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
+
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", false);
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            creatorService.registerCreator(mockPrincipalUser, creatorRequest);
+        });
+        
+        // then
+        assertEquals("AI 콘텐츠 등록 약관에 동의하지 않았습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.AI_POLICY_NOT_AGREED, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
 

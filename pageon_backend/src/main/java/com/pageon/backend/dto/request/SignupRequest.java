@@ -32,4 +32,5 @@ public class SignupRequest {
             message = "생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다."
     )
     private String birthDate;
+    private Boolean termsAgreed;
 }

@@ -50,6 +50,9 @@ public class Users {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(nullable = false)
+    private Boolean terms_agreed;
+
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Creators creators;
 
@@ -102,6 +105,7 @@ public class Users {
         this.provider = provider;
         this.isDeleted = isDeleted;
         this.userRoles = new ArrayList<>();
+        this.terms_agreed = true;
     }
 
 

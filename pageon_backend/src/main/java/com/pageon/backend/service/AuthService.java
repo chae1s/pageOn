@@ -12,12 +12,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -28,6 +30,7 @@ public class AuthService {
 
 
     public JwtTokenResponse reissueToken(HttpServletRequest request, HttpServletResponse response) {
+        log.info("access token 만료, refresh token으로 새로운 access token 발급");
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null) {

@@ -373,6 +373,23 @@ function SignupEmail() {
                 <p className="error-message">{errors.birthDate}</p>
               )}
             </div>
+            <div className="terms-group">
+              <label htmlFor="termsAgreed" className="terms-label">
+                <input
+                  type="checkbox"
+                  id="termsAgreed"
+                  name="termsAgreed"
+                  checked={formData.termsAgreed}
+                  onChange={handleChange}
+                  className={getInputClassName("termsAgreed")}
+                  required
+                />
+                <span className="term-message">본 이용약관 및 AI 콘텐츠 관련 고지사항을 모두 확인하였으며, 이에 동의합니다.</span>
+              </label>
+              {errors.termsAgreed && (
+                <p className="error-message">{errors.termsAgreed}</p>
+              )}
+            </div>
             <button
               type="submit"
               className="submit-btn"

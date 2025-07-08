@@ -101,7 +101,7 @@ public class UserServiceTest {
     @DisplayName("모든 정보가 유효할 때 회원가입 성공")
     void signup_withValidInfo_shouldSucceed() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -130,7 +130,7 @@ public class UserServiceTest {
         // given
         roleRepository.deleteAll();
 
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
 
         doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(Users.class));
 
@@ -149,7 +149,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 기본 권한 UserRole 함께 저장")
     void signup_shouldCreateUserRoleWithDefaultRole() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
         doAnswer(invocation -> {
@@ -181,7 +181,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 provider는 EMAIL, providerId는 null로 저장")
     void signup_shouldSetProviderAsEmailAndProviderIdAsNull() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -202,7 +202,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("회원가입 시 IsDeleted는 false로 저장")
     void signup_shouldSetIsDeletedAsFalseByDefault() {
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402");
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
