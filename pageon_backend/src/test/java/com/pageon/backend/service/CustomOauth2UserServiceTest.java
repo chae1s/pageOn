@@ -149,7 +149,7 @@ class CustomOauth2UserServiceTest {
         );
         when(request.getAccessToken()).thenReturn(oAuth2AccessToken);
 
-        when(delegate.loadUser(request)).thenReturn(oAuth2User);
+        when(delegate.loadUser(any())).thenReturn(oAuth2User);
 
         Users user = Users.builder()
                 .id(1L)

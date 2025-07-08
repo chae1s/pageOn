@@ -55,7 +55,6 @@ public class UserService {
     private final MailService mailService;
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RestTemplate restTemplate;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -354,6 +353,7 @@ public class UserService {
 
     private void sendUnlinkRequest(String url, HttpHeaders headers, String provider) {
         HttpEntity<Void> request = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 

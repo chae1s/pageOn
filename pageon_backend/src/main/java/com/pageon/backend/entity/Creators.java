@@ -19,7 +19,7 @@ public class Creators {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(nullable = false)
     private String penName;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -27,7 +27,9 @@ public class Creators {
     private Users user;
     // 웹툰, 웹소설 작가 구분
     private CreatorType creatorType;
-    private Boolean isActive;
+
+    @Builder.Default
+    private Boolean isActive = true;
 
     @Builder.Default
     @OneToMany(mappedBy = "creator")

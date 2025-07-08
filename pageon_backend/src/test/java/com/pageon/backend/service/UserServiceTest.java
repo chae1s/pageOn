@@ -140,7 +140,7 @@ public class UserServiceTest {
 
         });
 
-        assertEquals("기본 권한이 없습니다.", exception.getErrorMessage());
+        assertEquals("존재하지 않는 권한입니다", exception.getErrorMessage());
         assertEquals(ErrorCode.ROLE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }

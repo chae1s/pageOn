@@ -1,0 +1,162 @@
+package com.pageon.backend.service;
+
+import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.dto.request.RegisterCreatorRequest;
+import com.pageon.backend.entity.Creators;
+import com.pageon.backend.entity.Role;
+import com.pageon.backend.entity.UserRole;
+import com.pageon.backend.entity.Users;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.CreatorRepository;
+import com.pageon.backend.repository.RoleRepository;
+import com.pageon.backend.repository.UserRepository;
+import com.pageon.backend.security.PrincipalUser;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@Transactional
+@ActiveProfiles("test")
+@DisplayName("CreatorService 단위 테스트")
+@ExtendWith(MockitoExtension.class)
+class CreatorServiceTest {
+    @InjectMocks
+    private CreatorService creatorService;
+    @Mock
+    private CreatorRepository creatorRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private RoleRepository roleRepository;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    private PrincipalUser mockPrincipalUser;
+    
+    @BeforeEach
+    void setUp() {
+        creatorRepository.deleteAll();
+        
+        mockPrincipalUser = mock(PrincipalUser.class);
+    }
+    
+    @Test
+    @DisplayName("로그인한 유저가 올바른 정보를 입력하면 창작자 등록 성공")
+    void registerCreator_withValidInput_shouldSucceed() {
+        // given
+        String email = "test@mail.com";
+        Users user = Users.builder()
+                .id(1L)
+                .email("test@mail.com")
+                .nickname("nickname")
+                .isDeleted(false)
+                .userRoles(new ArrayList<>())
+                .build();
+
+        Role role = Role.builder()
+                .id(1L)
+                .roleType(RoleType.ROLE_USER)
+                .build();
+
+        Role creatorRole = Role.builder()
+                .id(2L)
+                .roleType(RoleType.ROLE_CREATOR)
+                .build();
+
+        UserRole userRole = new UserRole(1L, user, role);
+        user.getUserRoles().add(userRole);
+
+        when(mockPrincipalUser.getUsername()).thenReturn(email);
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
+
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        ArgumentCaptor<Creators> creatorCaptor = ArgumentCaptor.forClass(Creators.class);
+        
+        //when
+        creatorService.registerCreator(mockPrincipalUser, creatorRequest);
+        
+        // then
+        verify(creatorRepository).save(creatorCaptor.capture());
+        Creators savedCreator = creatorCaptor.getValue();
+
+        assertEquals(RoleType.ROLE_CREATOR, savedCreator.getUser().getUserRoles().get(1).getRole().getRoleType());
+        assertEquals("필명", savedCreator.getPenName());
+        assertTrue(savedCreator.getIsActive());
+    }
+    
+    @Test
+    @DisplayName("DB에서 로그인한 유저의 정보를 찾을 수 없을 경우 CustomException 발생")
+    void registerCreator_whenUserNotFound_shouldThrowCustomException() {
+        // given
+        String email = "test@mail.com";
+
+        when(mockPrincipalUser.getUsername()).thenReturn(email);
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            creatorService.registerCreator(mockPrincipalUser, creatorRequest);
+        });
+        
+        // then
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("로그인한 유저가 이미 creator 권한이 있을 경우 CustomException 발생")
+    void registerCreator_whenUserAlreadyHasCreatorRole_shouldThrowException() {
+        // given
+        String email = "test@mail.com";
+        Users user = Users.builder()
+                .id(1L)
+                .email("test@mail.com")
+                .nickname("nickname")
+                .isDeleted(false)
+                .build();
+
+        Role creatorRole = Role.builder()
+                .id(2L)
+                .roleType(RoleType.ROLE_CREATOR)
+                .build();
+
+        when(mockPrincipalUser.getUsername()).thenReturn(email);
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
+        when(creatorRepository.findByUser(user)).thenThrow(new CustomException(ErrorCode.ALREADY_HAS_CREATOR_ROLE));
+
+        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "webnovel");
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            creatorService.registerCreator(mockPrincipalUser, creatorRequest);
+        });
+
+        // then
+        assertEquals("이미 창작자 권한이 존재합니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.ALREADY_HAS_CREATOR_ROLE, ErrorCode.valueOf(exception.getErrorCode()));
+        
+    }
+
+
+}
