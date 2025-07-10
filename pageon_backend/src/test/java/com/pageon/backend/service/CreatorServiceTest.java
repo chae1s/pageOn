@@ -1,6 +1,5 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.Provider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.dto.request.RegisterCreatorRequest;
 import com.pageon.backend.entity.Creators;
@@ -22,12 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 

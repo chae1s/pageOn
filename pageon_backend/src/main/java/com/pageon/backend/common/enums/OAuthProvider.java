@@ -1,5 +1,5 @@
 package com.pageon.backend.common.enums;
 
-public enum Provider {
+public enum OAuthProvider {
     EMAIL, KAKAO, NAVER, GOOGLE;
 }

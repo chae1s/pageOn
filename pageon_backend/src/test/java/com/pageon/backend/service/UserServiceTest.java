@@ -11,7 +11,7 @@ import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -194,7 +194,7 @@ public class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
         Users savedUser = userCaptor.getValue();
 
-        assertEquals(savedUser.getProvider(), Provider.EMAIL, "Provider가 EMAIL입니다.");
+        assertEquals(savedUser.getOAuthProvider(), OAuthProvider.EMAIL, "Provider가 EMAIL입니다.");
         
         assertNull(savedUser.getProviderId(), "ProviderId가 null입니다.");
     }
@@ -290,7 +290,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -316,7 +316,7 @@ public class UserServiceTest {
         // then
         assertTrue(result.getIsLogin(), "login check는 true여야 합니다.");
         assertEquals("access-token", result.getAccessToken(), "accessToken이 올바르지 않습니다.");
-        assertEquals(Provider.EMAIL, result.getProvider(), "provider는 EMAIL이어야 합니다.");
+        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider(), "provider는 EMAIL이어야 합니다.");
 
     }
 
@@ -329,7 +329,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -415,7 +415,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -458,7 +458,7 @@ public class UserServiceTest {
         Long userId = 1L;
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -483,7 +483,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -523,7 +523,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -546,7 +546,7 @@ public class UserServiceTest {
     void passwordFind_withSocialProviderUser_shouldReturnSocialMessage() {
         // given
         String email = "test@mail.com";
-        Provider provider = Provider.NAVER;
+        OAuthProvider provider = OAuthProvider.NAVER;
         FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
 
         Users user = Users.builder()
@@ -555,7 +555,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(provider)
+                .oAuthProvider(provider)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -567,7 +567,7 @@ public class UserServiceTest {
 
         // then
         assertEquals("social", result.get("type"));
-        assertEquals(String.format("%s로 회원가입된 이메일입니다.", user.getProvider()), result.get("message"));
+        assertEquals(String.format("%s로 회원가입된 이메일입니다.", user.getOAuthProvider()), result.get("message"));
 
     }
 
@@ -600,7 +600,7 @@ public class UserServiceTest {
                 .password("encodePassword")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -626,7 +626,7 @@ public class UserServiceTest {
         String email = "test@mail.com";
 
         when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.getMyInfo(mockPrincipalUser);
@@ -649,7 +649,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -671,7 +671,7 @@ public class UserServiceTest {
         // given
         String password = "encodePassword";
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.checkPassword(1L, password);
@@ -694,7 +694,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -721,7 +721,7 @@ public class UserServiceTest {
                 .password("password")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -751,7 +751,7 @@ public class UserServiceTest {
                 .password("password")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -782,7 +782,7 @@ public class UserServiceTest {
                 .password("password")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -807,7 +807,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.empty());
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         //when
@@ -832,7 +832,7 @@ public class UserServiceTest {
                 .password("password")
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -865,7 +865,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -906,7 +906,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
@@ -958,7 +958,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.KAKAO)
+                .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
                 .isDeleted(false)
@@ -1006,7 +1006,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.NAVER)
+                .oAuthProvider(OAuthProvider.NAVER)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
                 .isDeleted(false)
@@ -1054,7 +1054,7 @@ public class UserServiceTest {
                 .password(password)
                 .nickname("nickname")
                 .birthDate(LocalDate.of(1995, 4, 3))
-                .provider(Provider.GOOGLE)
+                .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
                 .isDeleted(false)

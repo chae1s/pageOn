@@ -2,7 +2,7 @@ package com.pageon.backend.security;
 
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,7 +35,7 @@ public class PrincipalUser implements UserDetails, OAuth2User {
         }
         return Map.of(
                 "email", oAuthUserInfoResponse.getEmail(),
-                "provider", oAuthUserInfoResponse.getProvider(),
+                "provider", oAuthUserInfoResponse.getOAuthProvider(),
                 "providerID", oAuthUserInfoResponse.getProviderId()
         );
     }
@@ -45,8 +45,8 @@ public class PrincipalUser implements UserDetails, OAuth2User {
         return this.users.getEmail();
     }
 
-    public Provider getProvider() {
-        return oAuthUserInfoResponse.getProvider();
+    public OAuthProvider getProvider() {
+        return oAuthUserInfoResponse.getOAuthProvider();
     }
 
     public String getProviderId() {

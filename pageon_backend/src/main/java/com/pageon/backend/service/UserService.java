@@ -9,7 +9,7 @@ import com.pageon.backend.dto.response.UserInfoResponse;
 import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -70,7 +69,7 @@ public class UserService {
 
         userRepository.save(users);
 
-        log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
+        log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getOAuthProvider());
     }
 
 
@@ -83,7 +82,7 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .birthDate(birthDate)
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .isDeleted(false)
                 .terms_agreed(request.getTermsAgreed())
                 .build();
@@ -125,7 +124,7 @@ public class UserService {
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getProvider());
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider());
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
@@ -174,7 +173,7 @@ public class UserService {
         Optional<Users> optionalUsers = userRepository.findByEmailAndIsDeletedFalse(passwordDto.getEmail());
         if (optionalUsers.isPresent()) {
             Users user = optionalUsers.get();
-            if (user.getProvider() == Provider.EMAIL) {
+            if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
                 // provider가 email일 때, 임시 비밀번호 생성 후 db에 저장
                 String tempPassword = generateRandomPassword();
                 user.updatePassword(passwordEncoder.encode(tempPassword));
@@ -184,7 +183,7 @@ public class UserService {
                 result.put("message", "임시 비밀번호가 메일로 발송되었습니다.");
             } else {
                 result.put("type", "social");
-                result.put("message", String.format("%s로 회원가입된 이메일입니다.", user.getProvider()));
+                result.put("message", String.format("%s로 회원가입된 이메일입니다.", user.getOAuthProvider()));
             }
         } else {
             result.put("type", "noUser");
@@ -252,8 +251,7 @@ public class UserService {
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        Map<String, Object> result = new HashMap<>();
-        if (users.getProvider() == Provider.EMAIL) {
+        if (users.getOAuthProvider() == OAuthProvider.EMAIL) {
 
             return deleteEmailAccount(users, password, request);
         } else {
@@ -265,7 +263,6 @@ public class UserService {
 
     // provider가 email일 때 계정 삭제 메소드
     private Map<String, Object> deleteEmailAccount(Users users, String password, HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
         log.info("이메일 계정 삭제");
         if (passwordEncoder.matches(password, users.getPassword())) {
             // 회원 탈퇴
@@ -284,7 +281,7 @@ public class UserService {
         log.info("소셜 계정 삭제");
         String redisKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
         AccessToken accessToken = (AccessToken) redisTemplate.opsForValue().get(redisKey);
-        switch (users.getProvider()) {
+        switch (users.getOAuthProvider()) {
             case KAKAO -> {
                 unlinkKakao(accessToken.getAccessToken());
                 return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.", redisKey, request);
@@ -306,7 +303,10 @@ public class UserService {
         // 회원 탈퇴
         users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
         users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
-        if (users.getProvider() != Provider.EMAIL) {
+
+        // 본인인증 데이터 제거
+        users.updateIdentityVerification(null, null, null, null, null, false, null);
+        if (users.getOAuthProvider() != OAuthProvider.EMAIL) {
             users.deleteProviderId(String.format("delete_%s_%d", users.getProviderId(), users.getId()));
             // 소셜로그인의 access token 삭제
             redisTemplate.delete(redisKey);

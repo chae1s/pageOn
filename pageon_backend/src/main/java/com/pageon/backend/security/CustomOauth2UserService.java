@@ -77,7 +77,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     private Users existingUser(OAuthUserInfoResponse response) {
         log.info(response.getEmail());
 
-        Optional<Users> user = userRepository.findWithRolesByProviderAndProviderId(response.getProvider(), response.getProviderId());
+        Optional<Users> user = userRepository.findWithRolesByProviderAndProviderId(response.getOAuthProvider(), response.getProviderId());
 
         if (user.isPresent()) {
             return user.get();
@@ -92,7 +92,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         Users users = Users.builder()
                 .email(response.getEmail())
                 .nickname(generateRandomNickname())
-                .provider(response.getProvider())
+                .oAuthProvider(response.getOAuthProvider())
                 .providerId(response.getProviderId())
                 .isDeleted(false)
                 .build();
@@ -101,7 +101,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         userRepository.save(users);
 
-        log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
+        log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getOAuthProvider());
 
         return users;
 

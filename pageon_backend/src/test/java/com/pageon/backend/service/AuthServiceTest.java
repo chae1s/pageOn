@@ -3,7 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,7 +71,7 @@ class AuthServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .isDeleted(false)
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
         when(userRepository.findByEmailAndIsDeletedFalse("test@mail.com")).thenReturn(Optional.of(user));
 
@@ -83,7 +82,7 @@ class AuthServiceTest {
         
         // then
         assertEquals("reissue-access-token", result.getAccessToken());
-        assertEquals(Provider.EMAIL, result.getProvider());
+        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider());
         assertTrue(result.getIsLogin());
         
     }
@@ -177,7 +176,7 @@ class AuthServiceTest {
                 .id(2L)
                 .email(cookieEmail)
                 .isDeleted(false)
-                .provider(Provider.EMAIL)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
         when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenReturn(Optional.of(user));
 

@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -58,7 +57,7 @@ public class AuthService {
 
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        return new JwtTokenResponse(true, accessToken, users.getProvider());
+        return new JwtTokenResponse(true, accessToken, users.getOAuthProvider());
 
     }
 

@@ -1,7 +1,7 @@
 package com.pageon.backend.config;
 
 import com.opencsv.CSVReader;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
@@ -65,7 +65,7 @@ public class InitUserData implements ApplicationRunner {
                         line[2],
                         birthDate,
                         Integer.valueOf(line[4]),
-                        Provider.valueOf(line[5]),
+                        OAuthProvider.valueOf(line[5]),
                         Boolean.valueOf(line[7])
                 );
                 List<RoleType> roleTypes = Arrays.stream(line[8].split(","))

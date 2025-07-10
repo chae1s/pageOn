@@ -2,7 +2,7 @@ package com.pageon.backend.security;
 
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
 import jakarta.servlet.ServletException;
@@ -37,7 +37,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 
         /* 소셜 로그인 사용자 정보 조회 */
-        Provider provider = principalUser.getProvider();
+        OAuthProvider provider = principalUser.getProvider();
         String providerId = principalUser.getProviderId();
 
 

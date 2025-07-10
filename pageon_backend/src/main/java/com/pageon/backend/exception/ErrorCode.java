@@ -14,6 +14,16 @@ public enum ErrorCode {
     OAUTH_PROVIDER_MISMATCH("지원하지 않는 OAuth Provider입니다.", HttpStatus.BAD_REQUEST),
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
 
+    // 본인인증
+    INVALID_VERIFICATION_METHOD("지원하지 않는 본인인증 방식입니다.", HttpStatus.BAD_REQUEST),
+    IDENTITY_VERIFICATION_ID_NOT_MATCH("전달된 인증 ID가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    OTP_PAYLOAD_NOT_FOUND("OTP 정보가 존재하지 않거나 만료되었습니다.", HttpStatus.NOT_FOUND),
+    OTP_NOT_MATCH("전달된 OTP가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    IDENTITY_ALREADY_VERIFIED("이미 본인인증을 완료한 사용자입니다.", HttpStatus.CONFLICT),
+    PHONE_NUMBER_ALREADY_VERIFIED("해당 전화번호는 이미 본인인증에 사용되었습니다.", HttpStatus.CONFLICT),
+    // 메세지 전송
+    MESSAGE_SEND_FAILED("문자 메시지 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
     // 창작자
     PEN_NAME_REQUIRED("필명은 반드시 입력해야 합니다.", HttpStatus.BAD_REQUEST),
     ALREADY_HAS_CREATOR_ROLE("이미 창작자 권한이 존재합니다.", HttpStatus.BAD_REQUEST),

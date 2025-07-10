@@ -6,7 +6,7 @@ import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;
@@ -81,7 +81,7 @@ class CustomOauth2UserServiceTest {
         // then
         assertEquals("test@kakao.com", newUser.getEmail());
         assertFalse(newUser.getIsDeleted());
-        assertEquals(Provider.KAKAO, newUser.getProvider());
+        assertEquals(OAuthProvider.KAKAO, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
     }
@@ -101,7 +101,7 @@ class CustomOauth2UserServiceTest {
         // then
         assertEquals("test@naver.com", newUser.getEmail());
         assertFalse(newUser.getIsDeleted());
-        assertEquals(Provider.NAVER, newUser.getProvider());
+        assertEquals(OAuthProvider.NAVER, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
     }
@@ -121,7 +121,7 @@ class CustomOauth2UserServiceTest {
         // then
         assertEquals("test@gmail.com", newUser.getEmail());
         assertFalse(newUser.getIsDeleted());
-        assertEquals(Provider.GOOGLE, newUser.getProvider());
+        assertEquals(OAuthProvider.GOOGLE, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
     }
@@ -155,14 +155,14 @@ class CustomOauth2UserServiceTest {
                 .id(1L)
                 .email("test@kakao.com")
                 .nickname("카카오")
-                .provider(Provider.KAKAO)
+                .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("123456")
                 .isDeleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        when(userRepository.findWithRolesByProviderAndProviderId(Provider.KAKAO, "123456")).thenReturn(Optional.of(user));
+        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.KAKAO, "123456")).thenReturn(Optional.of(user));
 
         
         //when
@@ -205,14 +205,14 @@ class CustomOauth2UserServiceTest {
                 .id(1L)
                 .email("test@naver.com")
                 .nickname("네이버")
-                .provider(Provider.NAVER)
+                .oAuthProvider(OAuthProvider.NAVER)
                 .providerId("123456")
                 .isDeleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        when(userRepository.findWithRolesByProviderAndProviderId(Provider.NAVER, "123456")).thenReturn(Optional.of(user));
+        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.NAVER, "123456")).thenReturn(Optional.of(user));
 
 
         //when
@@ -253,14 +253,14 @@ class CustomOauth2UserServiceTest {
                 .id(1L)
                 .email("test@google.com")
                 .nickname("구글")
-                .provider(Provider.GOOGLE)
+                .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId("123456")
                 .isDeleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        when(userRepository.findWithRolesByProviderAndProviderId(Provider.GOOGLE, "123456")).thenReturn(Optional.of(user));
+        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.GOOGLE, "123456")).thenReturn(Optional.of(user));
 
 
         //when

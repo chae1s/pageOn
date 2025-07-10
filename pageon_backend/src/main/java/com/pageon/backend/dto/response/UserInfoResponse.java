@@ -1,7 +1,7 @@
 package com.pageon.backend.dto.response;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ public class UserInfoResponse {
     private String nickname;
     private LocalDate birthDate;
     private Integer pointBalance;
-    private Provider provider;
+    private OAuthProvider provider;
 
     public static UserInfoResponse fromEntity(Users users) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
@@ -20,7 +20,7 @@ public class UserInfoResponse {
         userInfoResponse.setNickname(users.getNickname());
         userInfoResponse.setBirthDate(users.getBirthDate());
         userInfoResponse.setPointBalance(users.getPointBalance());
-        userInfoResponse.setProvider(users.getProvider());
+        userInfoResponse.setProvider(users.getOAuthProvider());
 
         return userInfoResponse;
     }

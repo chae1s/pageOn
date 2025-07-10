@@ -1,7 +1,7 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +14,8 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Boolean existsByNickname(String nickname);
 
-    @Query("SELECT u FROM Users u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.provider = :provider AND u.providerId = :providerId")
-    Optional<Users> findWithRolesByProviderAndProviderId(@Param("provider") Provider provider, @Param("providerId") String providerId);
+    @Query("SELECT u FROM Users u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.oAuthProvider = :provider AND u.providerId = :providerId")
+    Optional<Users> findWithRolesByProviderAndProviderId(@Param("oAuthProvider") OAuthProvider oAuthProvider, @Param("providerId") String providerId);
 
 
     @EntityGraph(attributePaths = {
@@ -24,5 +24,11 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmailAndIsDeletedFalse(String email);
 
     Optional<Users> findByIdAndIsDeletedFalse(Long id);
+
+    Boolean existsByPhoneNumberAndIsPhoneVerifiedTrue(String phoneNumber);
+
+    Boolean existsByEmailAndIsPhoneVerifiedTrue(String email);
+
+
 
 }

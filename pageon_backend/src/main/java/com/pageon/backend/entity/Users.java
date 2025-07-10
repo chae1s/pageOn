@@ -1,6 +1,8 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.Gender;
+import com.pageon.backend.common.enums.IdentityProvider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -40,7 +42,7 @@ public class Users {
     private Integer pointBalance = 0;
 
     // email, kakao, naver, google
-    private Provider provider;
+    private OAuthProvider oAuthProvider;
 
     // 소셜 로그인 시 제공받는 id
     @Column(unique = true)
@@ -52,6 +54,16 @@ public class Users {
 
     @Column(nullable = false)
     private Boolean terms_agreed;
+
+    // 본인인증 추가 정보
+    private String name;
+    @Column(unique = true)
+    private String phoneNumber;
+    private Gender gender;
+    private String di;
+    private Boolean isPhoneVerified;
+    private IdentityProvider identityProvider;
+
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Creators creators;
@@ -96,13 +108,23 @@ public class Users {
         this.providerId = providerId;
     }
 
-    public Users(String email, String password, String nickname, LocalDate birthDate, Integer pointBalance, Provider provider, boolean isDeleted) {
+    public void updateIdentityVerification(String name, String phoneNumber, LocalDate birthDate, Gender gender, String di, boolean isPhoneVerified, IdentityProvider identityProvider) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.di = di;
+        this.isPhoneVerified = isPhoneVerified;
+        this.identityProvider = identityProvider;
+    }
+
+    public Users(String email, String password, String nickname, LocalDate birthDate, Integer pointBalance, OAuthProvider provider, boolean isDeleted) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.birthDate = birthDate;
         this.pointBalance = pointBalance;
-        this.provider = provider;
+        this.oAuthProvider = provider;
         this.isDeleted = isDeleted;
         this.userRoles = new ArrayList<>();
         this.terms_agreed = true;
