@@ -30,6 +30,14 @@ public class CreatorService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
+    public boolean checkIdentityVerification(PrincipalUser principalUser) {
+        if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
+            return true;
+        }
+
+        throw new
+    }
+
     @Transactional
     public void registerCreator(PrincipalUser principalUser, RegisterCreatorRequest creatorRequest) {
         String email = principalUser.getUsername();
