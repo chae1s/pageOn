@@ -54,6 +54,7 @@ public class UserService {
     private final MailService mailService;
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final RestTemplate restTemplate;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -74,14 +75,11 @@ public class UserService {
 
 
     private Users createUser(SignupRequest request) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
 
         return Users.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
-                .birthDate(birthDate)
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .isDeleted(false)
                 .terms_agreed(request.getTermsAgreed())
@@ -354,7 +352,6 @@ public class UserService {
 
     private void sendUnlinkRequest(String url, HttpHeaders headers, String provider) {
         HttpEntity<Void> request = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 

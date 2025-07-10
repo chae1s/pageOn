@@ -26,11 +26,5 @@ public class SignupRequest {
     @NotBlank(message = "닉네임을 입력해주세요.")
     private String nickname;
 
-    @NotBlank(message = "생년월일을 입력해주세요.")
-    @Pattern(
-            regexp = "^\\d{8}$",
-            message = "생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다."
-    )
-    private String birthDate;
     private Boolean termsAgreed;
 }

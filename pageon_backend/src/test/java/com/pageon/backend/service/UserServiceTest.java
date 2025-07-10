@@ -101,7 +101,7 @@ public class UserServiceTest {
     @DisplayName("모든 정보가 유효할 때 회원가입 성공")
     void signup_withValidInfo_shouldSucceed() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -119,7 +119,6 @@ public class UserServiceTest {
         assertEquals("test@mail.com", savedUser.getEmail());
         assertEquals("nickname", savedUser.getNickname());
         assertEquals("encodePassword", savedUser.getPassword());
-        assertEquals(LocalDate.of(1995, 4, 2), savedUser.getBirthDate());
         assertFalse(savedUser.getIsDeleted());
         
     }
@@ -130,7 +129,7 @@ public class UserServiceTest {
         // given
         roleRepository.deleteAll();
 
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
 
         doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(Users.class));
 
@@ -140,7 +139,7 @@ public class UserServiceTest {
 
         });
 
-        assertEquals("존재하지 않는 권한입니다", exception.getErrorMessage());
+        assertEquals("존재하지 않는 권한입니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.ROLE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
@@ -149,7 +148,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 기본 권한 UserRole 함께 저장")
     void signup_shouldCreateUserRoleWithDefaultRole() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
         doAnswer(invocation -> {
@@ -181,7 +180,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 provider는 EMAIL, providerId는 null로 저장")
     void signup_shouldSetProviderAsEmailAndProviderIdAsNull() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -202,7 +201,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("회원가입 시 IsDeleted는 false로 저장")
     void signup_shouldSetIsDeletedAsFalseByDefault() {
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950402", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(Users.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -289,7 +288,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -328,7 +326,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -414,7 +411,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -482,7 +478,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -522,7 +517,6 @@ public class UserServiceTest {
                 .email(email)
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -554,7 +548,6 @@ public class UserServiceTest {
                 .email(email)
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(provider)
                 .providerId(null)
                 .pointBalance(0)
@@ -599,7 +592,6 @@ public class UserServiceTest {
                 .email(email)
                 .password("encodePassword")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -615,7 +607,6 @@ public class UserServiceTest {
         // then
         assertEquals(email, userInfoResponse.getEmail());
         assertEquals("nickname", userInfoResponse.getNickname());
-        assertEquals(LocalDate.of(1995, 4, 3), userInfoResponse.getBirthDate());
         
     }
     
@@ -648,7 +639,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -693,7 +683,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -720,7 +709,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -750,7 +738,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -781,7 +768,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -831,7 +817,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -864,7 +849,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -905,7 +889,6 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
@@ -957,7 +940,6 @@ public class UserServiceTest {
                 .email("test@kakao.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
@@ -1005,7 +987,6 @@ public class UserServiceTest {
                 .email("test@naver.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.NAVER)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
@@ -1053,7 +1034,6 @@ public class UserServiceTest {
                 .email("test@gmail.com")
                 .password(password)
                 .nickname("nickname")
-                .birthDate(LocalDate.of(1995, 4, 3))
                 .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
