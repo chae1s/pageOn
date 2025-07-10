@@ -13,6 +13,8 @@ public class UserInfoResponse {
     private LocalDate birthDate;
     private Integer pointBalance;
     private OAuthProvider provider;
+    private String name;
+    private boolean isPhoneVerified;
 
     public static UserInfoResponse fromEntity(Users users) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
@@ -21,7 +23,8 @@ public class UserInfoResponse {
         userInfoResponse.setBirthDate(users.getBirthDate());
         userInfoResponse.setPointBalance(users.getPointBalance());
         userInfoResponse.setProvider(users.getOAuthProvider());
-
+        userInfoResponse.setName(users.getName());
+        userInfoResponse.setPhoneVerified(users.getIsPhoneVerified());
         return userInfoResponse;
     }
 }
