@@ -44,23 +44,18 @@ public class Webtoon {
     private String cover;
     // 연재 요일
     private DayOfWeek publishDay;
-    // 대여 금액
-    private Integer rentalPrice;
-    // 구매 금액
-    private Integer purchasePrice;
+
     // 연재, 완결, 휴재
     private SeriesStatus status;
     private Long viewCount;
 
-    public Webtoon(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String publishDay, Integer rentalPrice, Integer purchasePrice, String status, Long viewCount) {
+    public Webtoon(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String publishDay, String status, Long viewCount) {
         this.title = title;
         this.description = description;
         this.keywords = keywords;
         this.creator = creator;
         this.cover = cover;
         this.publishDay = DayOfWeek.valueOf(publishDay);
-        this.rentalPrice = rentalPrice;
-        this.purchasePrice = purchasePrice;
         this.status = SeriesStatus.valueOf(status);
         this.viewCount = viewCount;
 

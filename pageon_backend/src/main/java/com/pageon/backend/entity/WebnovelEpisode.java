@@ -31,4 +31,7 @@ public class WebnovelEpisode extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    // 구매 금액
+    private Integer purchasePrice;
+
 }

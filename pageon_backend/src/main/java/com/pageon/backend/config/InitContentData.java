@@ -136,7 +136,6 @@ public class InitContentData implements ApplicationRunner {
                         creator,
                         s3Url,
                         line[5],
-                        Integer.parseInt(line[6]),
                         line[7],
                         Long.parseLong(line[8])
                 );
@@ -178,8 +177,6 @@ public class InitContentData implements ApplicationRunner {
                         creator,
                         s3Url,
                         line[7],
-                        Integer.parseInt(line[8]),
-                        Integer.parseInt(line[9]),
                         line[5],
                         Long.parseLong(line[6])
                 );

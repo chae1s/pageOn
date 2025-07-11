@@ -29,4 +29,9 @@ public class WebtoonEpisode extends BaseTimeEntity {
     private String episodeTitle;
     private String imageUrls;
 
+    // 대여 금액
+    private Integer rentalPrice;
+    // 구매 금액
+    private Integer purchasePrice;
+
 }
