@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -43,21 +43,21 @@ public class AuthService {
         // refreshToken에서 가져온 email
         String email = jwtProvider.getUsernameRefreshToken(refreshToken);
 
-        Users users = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
+        User user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
-        if (!users.getId().equals(tokenInfo.getUserId())) {
+        if (!user.getId().equals(tokenInfo.getUserId())) {
             throw new CustomException(ErrorCode.TOKEN_USER_MISMATCH);
         }
 
-        List<RoleType> roleTypes = users.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).toList();
+        List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).toList();
 
         // 새로운 accessToken 발급
         String accessToken = jwtProvider.generateAccessToken(email, roleTypes);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        return new JwtTokenResponse(true, accessToken, users.getOAuthProvider());
+        return new JwtTokenResponse(true, accessToken, user.getOAuthProvider());
 
     }
 

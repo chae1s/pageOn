@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -15,16 +15,16 @@ import org.springframework.stereotype.Service;
 public class RoleService {
     private final RoleRepository roleRepository;
 
-    public void assignDefaultRole(Users users) {
+    public void assignDefaultRole(User user) {
         Role role = roleRepository.findByRoleType(RoleType.ROLE_USER).orElseThrow(
                 () -> new CustomException(ErrorCode.ROLE_NOT_FOUND)
         );
 
         UserRole userRole = UserRole.builder()
-                .user(users)
+                .user(user)
                 .role(role)
                 .build();
 
-        users.getUserRoles().add(userRole);
+        user.getUserRoles().add(userRole);
     }
 }

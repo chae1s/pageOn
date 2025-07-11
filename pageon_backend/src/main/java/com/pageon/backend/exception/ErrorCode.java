@@ -24,10 +24,12 @@ public enum ErrorCode {
     // 메세지 전송
     MESSAGE_SEND_FAILED("문자 메시지 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    // 창작자
+    // 작가
+    AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR("작가 등록을 위해서는 본인인증이 필요합니다.", HttpStatus.FORBIDDEN),
     PEN_NAME_REQUIRED("필명은 반드시 입력해야 합니다.", HttpStatus.BAD_REQUEST),
     ALREADY_HAS_CREATOR_ROLE("이미 창작자 권한이 존재합니다.", HttpStatus.BAD_REQUEST),
     AI_POLICY_NOT_AGREED("AI 콘텐츠 등록 약관에 동의하지 않았습니다.", HttpStatus.BAD_REQUEST),
+    CREATER_NOT_FOUND("존재하지 않는 작가입니다.", HttpStatus.NOT_FOUND),
 
     // 토큰
     TOKEN_GENERATION_FAILED("Refresh Token 또는 Access Token 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -37,7 +39,11 @@ public enum ErrorCode {
 
     // 외부 시스템 오류
     REDIS_CONNECTION_FAILED("Redis 연결에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    MAIL_SEND_FAILED("메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR)
+    MAIL_SEND_FAILED("메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    S3_UPLOAD_FAILED("S3 업로드 중 오류가 발생했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // file
+    FILE_PROCESSING_ERROR("파일의 MIME 타입을 읽는 데 실패했습니다.", HttpStatus.BAD_REQUEST)
     ;
 
     private final String errorMessage;

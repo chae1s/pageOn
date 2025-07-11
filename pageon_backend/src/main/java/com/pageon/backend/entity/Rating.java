@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.common.base.BaseTimeEntity;
+import com.pageon.backend.common.enums.ContentType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -9,9 +9,11 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Builder
 @DynamicUpdate
+@Table(name = "ratings")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class PointTransactions extends BaseTimeEntity {
+public class Rating {
+    // 평점 테이블
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,12 +21,10 @@ public class PointTransactions extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
 
-    private String type;    // 충전인지 사용인지 구분
-    private Integer amount;
-    private String description;
-    private String  targetType;
-    private Integer targetId;
+    private ContentType contentType;     // 댓글달린 작품이 웹툰인지 웹소설인지 표시
+    private Integer contentId;
 
+    private Integer score;
 }

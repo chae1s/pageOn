@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.Data;
 
@@ -16,15 +16,15 @@ public class UserInfoResponse {
     private String name;
     private boolean isPhoneVerified;
 
-    public static UserInfoResponse fromEntity(Users users) {
+    public static UserInfoResponse fromEntity(User user) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
-        userInfoResponse.setEmail(users.getEmail());
-        userInfoResponse.setNickname(users.getNickname());
-        userInfoResponse.setBirthDate(users.getBirthDate());
-        userInfoResponse.setPointBalance(users.getPointBalance());
-        userInfoResponse.setProvider(users.getOAuthProvider());
-        userInfoResponse.setName(users.getName());
-        userInfoResponse.setPhoneVerified(users.getIsPhoneVerified());
+        userInfoResponse.setEmail(user.getEmail());
+        userInfoResponse.setNickname(user.getNickname());
+        userInfoResponse.setBirthDate(user.getBirthDate());
+        userInfoResponse.setPointBalance(user.getPointBalance());
+        userInfoResponse.setProvider(user.getOAuthProvider());
+        userInfoResponse.setName(user.getName());
+        userInfoResponse.setPhoneVerified(user.getIsPhoneVerified());
         return userInfoResponse;
     }
 }

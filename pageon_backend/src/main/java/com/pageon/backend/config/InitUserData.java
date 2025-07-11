@@ -5,7 +5,7 @@ import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,13 +55,10 @@ public class InitUserData implements ApplicationRunner {
             csvReader.readNext();       // 첫 줄 skip
             String [] line;
             while ((line = csvReader.readNext()) != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                LocalDate birthDate = LocalDate.parse(line[3].replaceAll("-", ""), formatter);
-                Users users = new Users(
+                User user = new User(
                         line[0],
                         passwordEncoder.encode(line[1]),
                         line[2],
-                        birthDate,
                         Integer.valueOf(line[4]),
                         OAuthProvider.valueOf(line[5]),
                         Boolean.valueOf(line[7])
@@ -77,14 +72,14 @@ public class InitUserData implements ApplicationRunner {
                     Role role = roleRepository.findByRoleType(roleType).orElseThrow(() -> new RuntimeException("role 없음"));
 
                     UserRole userRole = UserRole.builder()
-                            .user(users)
+                            .user(user)
                             .role(role)
                             .build();
 
-                    users.getUserRoles().add(userRole);
+                    user.getUserRoles().add(userRole);
                 });
 
-                userRepository.save(users);
+                userRepository.save(user);
 
             }
 

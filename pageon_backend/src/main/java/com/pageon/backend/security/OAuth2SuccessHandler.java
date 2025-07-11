@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
@@ -43,7 +43,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("{} 로그인 성공", provider);
 
-        Users user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
         log.info(principalUser.getName());
@@ -65,7 +65,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     }
 
-    private void setRefreshToken(Users users, String refreshToken) {
+    private void setRefreshToken(User users, String refreshToken) {
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
 
         // refresh token 저장

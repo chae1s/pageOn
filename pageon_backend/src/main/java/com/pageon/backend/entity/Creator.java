@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.common.enums.CreatorType;
+import com.pageon.backend.common.enums.ContentType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -13,9 +13,10 @@ import java.util.List;
 @Getter
 @Builder
 @DynamicUpdate
+@Table(name = "creators")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Creators {
+public class Creator {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +26,9 @@ public class Creators {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
     // 웹툰, 웹소설 작가 구분
-    private CreatorType creatorType;
+    private ContentType creatorType;
 
     @Builder.Default
     private Boolean isActive = true;
@@ -37,13 +38,13 @@ public class Creators {
 
     @Builder.Default
     @OneToMany(mappedBy = "creator")
-    private List<Webtoons> webtoons = new ArrayList<>();
+    private List<Webtoon> webtoons = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "creator")
-    private List<Webnovels> webnovels = new ArrayList<>();
+    private List<Webnovel> webnovels = new ArrayList<>();
 
-    public Creators(String penName, Users users, CreatorType creatorType, boolean isActive) {
+    public Creator(String penName, User users, ContentType creatorType, boolean isActive) {
         this.penName = penName;
         this.user = users;
         this.creatorType = creatorType;

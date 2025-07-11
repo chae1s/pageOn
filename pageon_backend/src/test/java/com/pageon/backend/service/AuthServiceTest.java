@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -67,7 +67,7 @@ class AuthServiceTest {
         when(valueOperations.get(refreshToken)).thenReturn(tokenInfo);
 
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn("test@mail.com");
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .isDeleted(false)
@@ -172,7 +172,7 @@ class AuthServiceTest {
 
         String cookieEmail = "cookie_test@mail.com";
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn(cookieEmail);
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(2L)
                 .email(cookieEmail)
                 .isDeleted(false)

@@ -1,12 +1,11 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.IdentityProvider;
 import com.pageon.backend.dto.common.IdentityVerificationCustomer;
 import com.pageon.backend.dto.payload.OtpVerificationPayload;
 import com.pageon.backend.dto.request.IdentityVerificationRequest;
 import com.pageon.backend.dto.request.IdentityVerificationResultRequest;
 import com.pageon.backend.dto.response.IdentityVerificationIdResponse;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -59,7 +58,7 @@ class PortOneServiceTest {
     void whenAuthenticatedUserInitiatesVerification_thenIdentityVerificationIdIsGenerated() {
         // given
         String email = "test@mail.com";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("password")
@@ -97,7 +96,7 @@ class PortOneServiceTest {
     @DisplayName("로그인한 유저가 이미 본인인증을 완료했을 경우 CustomException 발생")
     void createIdentityVerificationId_whenIsPhoneVerifiedTrue_shouldThrowCustomException() {
         // given
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -124,7 +123,7 @@ class PortOneServiceTest {
         // given
         String email = "test@mail.com";
         String expectedId = "identity-verification-id";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("password")
@@ -185,7 +184,7 @@ class PortOneServiceTest {
         // given
         String identityVerificationId = "somdId";
         String phoneNumber = "01011111111";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -217,7 +216,7 @@ class PortOneServiceTest {
         // given
         String email = "test@mail.com";
         String expectedId = "identity-verification-id";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("password")
@@ -248,7 +247,7 @@ class PortOneServiceTest {
         String id = "identity-verification-id";
         String redisId = "redis-identity-verification-id";
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("password")
@@ -275,15 +274,15 @@ class PortOneServiceTest {
     }
     
     @Test
-    @DisplayName("받아온 otp가 일치할 때 users DB Update")
-    void verifyOtpAndUpdateUser_withMatchOtp_shouldUpdateUsers() {
+    @DisplayName("받아온 otp가 일치할 때 user DB Update")
+    void verifyOtpAndUpdateUser_withMatchOtp_shouldUpdateUser() {
         // given
         // 프론트에서 온 otp 번호
         String sendOtp = "493029";
         String identityVerificationId = "identity-verification-id";
         String redisOtp = "493029";
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -337,7 +336,7 @@ class PortOneServiceTest {
         String identityVerificationId = "identity-verification-id";
         String redisOtp = "493029";
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -368,7 +367,7 @@ class PortOneServiceTest {
         String identityVerificationId = "identity-verification-id";
         String redisOtp = "493029";
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")

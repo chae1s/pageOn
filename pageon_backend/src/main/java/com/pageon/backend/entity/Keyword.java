@@ -4,13 +4,17 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Getter
 @Builder
 @DynamicUpdate
+@Table(name = "keywords")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Keywords {
+public class Keyword {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,11 +23,17 @@ public class Keywords {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-    private String keyword;
+    private String name;
 
-    public Keywords(Category category, String keyword) {
+    @ManyToMany(mappedBy = "keywords")
+    private Set<Webnovel> webnovels = new HashSet<>();
+
+    @ManyToMany(mappedBy = "keywords")
+    private Set<Webtoon> webtoons = new HashSet<>();
+
+    public Keyword(Category category, String name) {
         this.category = category;
-        this.keyword = keyword;
+        this.name = name;
     }
 
 

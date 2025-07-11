@@ -5,7 +5,7 @@ import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomOauth2UserService;
@@ -76,7 +76,7 @@ class CustomOauth2UserServiceTest {
         OAuthUserInfoResponse oAuthUserInfoResponse = new KakaoSignupRequest(attribute);
 
         //when
-        Users newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
+        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
 
         // then
         assertEquals("test@kakao.com", newUser.getEmail());
@@ -96,7 +96,7 @@ class CustomOauth2UserServiceTest {
         ));
 
         //when
-        Users newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
+        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
 
         // then
         assertEquals("test@naver.com", newUser.getEmail());
@@ -116,7 +116,7 @@ class CustomOauth2UserServiceTest {
         ));
 
         //when
-        Users newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
+        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
 
         // then
         assertEquals("test@gmail.com", newUser.getEmail());
@@ -151,7 +151,7 @@ class CustomOauth2UserServiceTest {
 
         when(delegate.loadUser(any())).thenReturn(oAuth2User);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@kakao.com")
                 .nickname("카카오")
@@ -201,7 +201,7 @@ class CustomOauth2UserServiceTest {
 
         when(delegate.loadUser(request)).thenReturn(oAuth2User);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@naver.com")
                 .nickname("네이버")
@@ -249,7 +249,7 @@ class CustomOauth2UserServiceTest {
 
         when(delegate.loadUser(request)).thenReturn(oAuth2User);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@google.com")
                 .nickname("구글")

@@ -1,12 +1,12 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.CreatorType;
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.dto.request.RegisterCreatorRequest;
-import com.pageon.backend.entity.Creators;
+import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.CreatorRepository;
@@ -35,13 +35,13 @@ public class CreatorService {
             return true;
         }
 
-        throw new
+        throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
     }
 
     @Transactional
     public void registerCreator(PrincipalUser principalUser, RegisterCreatorRequest creatorRequest) {
         String email = principalUser.getUsername();
-        Users user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
+        User user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -51,7 +51,7 @@ public class CreatorService {
 
         if (!creatorRequest.getAgreedToAiPolicy()) throw new CustomException(ErrorCode.AI_POLICY_NOT_AGREED);
 
-        Optional<Creators> optionalCreator = creatorRepository.findByUser(user);
+        Optional<Creator> optionalCreator = creatorRepository.findByUser(user);
         if (optionalCreator.isEmpty()) {
             // userrole에 ROLE_CREATOR 추가
             UserRole userRole = UserRole.builder()
@@ -61,10 +61,10 @@ public class CreatorService {
 
             user.getUserRoles().add(userRole);
 
-            Creators creators = Creators.builder()
+            Creator creators = Creator.builder()
                     .user(user)
                     .penName(creatorRequest.getPenName())
-                    .creatorType(CreatorType.valueOf(creatorRequest.getCreatorType()))
+                    .creatorType(ContentType.valueOf(creatorRequest.getContentType()))
                     .agreedToAiPolicy(creatorRequest.getAgreedToAiPolicy())
                     .aiPolicyAgreedAt(LocalDateTime.now())
                     .build();

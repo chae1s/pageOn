@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class PrincipalUser implements UserDetails, OAuth2User {
-    private final Users users;
+    private final User users;
     private final OAuthUserInfoResponse oAuthUserInfoResponse;
 
-    public PrincipalUser(Users user) {
+    public PrincipalUser(User user) {
         this.users = user;
         this.oAuthUserInfoResponse = null;
     }
 
-    public Users getUsers() {
+    public User getUsers() {
         return users;
     }
     @Override

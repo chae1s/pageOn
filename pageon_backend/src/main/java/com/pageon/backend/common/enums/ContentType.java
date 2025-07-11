@@ -1,5 +1,5 @@
 package com.pageon.backend.common.enums;
 
-public enum CreatorType {
+public enum ContentType {
     WEBTOON, WEBNOVEL
 }

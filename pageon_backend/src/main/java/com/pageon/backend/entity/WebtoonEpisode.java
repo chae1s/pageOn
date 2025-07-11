@@ -13,21 +13,20 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @SuperBuilder
 @DynamicUpdate
+@Table(name = "webtoon_episodes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class WebnovelEpisodes extends BaseTimeEntity {
+public class WebtoonEpisode extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "webnovel_id")
-    private Webnovels webnovel;
+    @JoinColumn(name = "webtoon_id")
+    private Webtoon webtoon;
 
     private Integer episodeNum;
     private String episodeTitle;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    private String imageUrls;
 
 }

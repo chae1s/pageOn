@@ -16,9 +16,10 @@ import java.util.List;
 @Getter
 @SuperBuilder
 @DynamicUpdate
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Users {
+public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -66,23 +67,23 @@ public class Users {
 
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private Creators creators;
+    private Creator creator;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
-    private List<Comments> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
-    private List<Likes> likes = new ArrayList<>();
+    private List<Like> likes = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
-    private List<PointTransactions> pointTransactions = new ArrayList<>();
+    private List<PointTransaction> pointTransactions = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
-    private List<Ratings> ratings = new ArrayList<>();
+    private List<Rating> ratings = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -118,13 +119,12 @@ public class Users {
         this.identityProvider = identityProvider;
     }
 
-    public Users(String email, String password, String nickname, LocalDate birthDate, Integer pointBalance, OAuthProvider provider, boolean isDeleted) {
+    public User(String email, String password, String nickname, Integer pointBalance, OAuthProvider oAuthProvider, boolean isDeleted) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.birthDate = birthDate;
         this.pointBalance = pointBalance;
-        this.oAuthProvider = provider;
+        this.oAuthProvider = oAuthProvider;
         this.isDeleted = isDeleted;
         this.userRoles = new ArrayList<>();
         this.terms_agreed = true;

@@ -7,7 +7,7 @@ import com.pageon.backend.dto.payload.OtpVerificationPayload;
 import com.pageon.backend.dto.request.IdentityVerificationRequest;
 import com.pageon.backend.dto.request.IdentityVerificationResultRequest;
 import com.pageon.backend.dto.response.IdentityVerificationIdResponse;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -35,7 +35,7 @@ public class PortOneService {
 
     //  본인인증 요청 식별 위해 identityVerificationId 발급 후 redis에 저장
     public IdentityVerificationIdResponse createIdentityVerificationId(PrincipalUser principalUser) {
-        Users user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
+        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -54,7 +54,7 @@ public class PortOneService {
 
     public boolean createAndStoreOtp(String identityVerificationId, PrincipalUser principalUser, IdentityVerificationRequest identityVerificationRequest) {
         // 로그인한 유저의 이메일로 db 검색
-        Users user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
+        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -84,7 +84,7 @@ public class PortOneService {
 
     @Transactional
     public boolean verifyOtpAndUpdateUser(String identityVerificationId, PrincipalUser principalUser, IdentityVerificationResultRequest request) {
-        Users user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
+        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -94,6 +94,7 @@ public class PortOneService {
         try {
             otpVerificationPayload = (OtpVerificationPayload) redisTemplate.opsForValue().get(identityVerificationId);
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
 
@@ -114,6 +115,13 @@ public class PortOneService {
                 request.getDi(), true, IdentityProvider.valueOf(request.getIdentityProvider())
         );
 
+        try {
+            redisTemplate.delete(identityVerificationId);
+            redisTemplate.delete(String.format("%s_identityVerificationId", user.getEmail()));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
+
         return true;
     }
 
@@ -126,6 +134,7 @@ public class PortOneService {
                 throw new CustomException(ErrorCode.IDENTITY_VERIFICATION_ID_NOT_MATCH);
 
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
     }

@@ -22,12 +22,10 @@ public class FileUploadController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            String url = fileUploadService.upload(file, "webnovels");
 
-            return ResponseEntity.ok(url);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
-        }
+        String url = fileUploadService.upload(file, "webnovels");
+
+        return ResponseEntity.ok(url);
+
     }
 }

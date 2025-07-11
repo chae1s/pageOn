@@ -10,7 +10,7 @@ import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.exception.CustomException;
@@ -47,7 +47,6 @@ import org.springframework.web.client.RestTemplate;
 import static org.mockito.Mockito.*;
 
 
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -103,10 +102,10 @@ public class UserServiceTest {
         // given
         SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(roleService).assignDefaultRole(any(Users.class));
+        doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
 
-        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
         //when
         userService.signup(signupRequest);
@@ -114,7 +113,7 @@ public class UserServiceTest {
         // then
 
         verify(userRepository).save(userCaptor.capture());
-        Users savedUser = userCaptor.getValue();
+        User savedUser = userCaptor.getValue();
 
         assertEquals("test@mail.com", savedUser.getEmail());
         assertEquals("nickname", savedUser.getNickname());
@@ -131,7 +130,7 @@ public class UserServiceTest {
 
         SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
 
-        doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(Users.class));
+        doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(User.class));
 
         //when + then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -152,14 +151,14 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
         doAnswer(invocation -> {
-            Users user = invocation.getArgument(0);
+            User user = invocation.getArgument(0);
             Role dummyRole = Role.builder().roleType(RoleType.ROLE_USER).build();
             UserRole userRole = UserRole.builder().user(user).role(dummyRole).build();
             user.getUserRoles().add(userRole);
             return null;
-        }).when(roleService).assignDefaultRole(any(Users.class));
+        }).when(roleService).assignDefaultRole(any(User.class));
 
-        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
 
         //when
@@ -167,7 +166,7 @@ public class UserServiceTest {
         
         // then
         verify(userRepository).save(userCaptor.capture());
-        Users savedUser = userCaptor.getValue();
+        User savedUser = userCaptor.getValue();
 
         assertFalse(savedUser.getUserRoles().isEmpty(), "userRole이 저장되지 않았습니다.");
 
@@ -182,16 +181,16 @@ public class UserServiceTest {
         // given
         SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(roleService).assignDefaultRole(any(Users.class));
+        doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
 
-        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         //when
         userService.signup(signupRequest);
         
         // then
         verify(userRepository).save(userCaptor.capture());
-        Users savedUser = userCaptor.getValue();
+        User savedUser = userCaptor.getValue();
 
         assertEquals(savedUser.getOAuthProvider(), OAuthProvider.EMAIL, "Provider가 EMAIL입니다.");
         
@@ -203,16 +202,16 @@ public class UserServiceTest {
     void signup_shouldSetIsDeletedAsFalseByDefault() {
         SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(roleService).assignDefaultRole(any(Users.class));
+        doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
 
-        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         //when
         userService.signup(signupRequest);
 
         // then
         verify(userRepository).save(userCaptor.capture());
-        Users savedUser = userCaptor.getValue();
+        User savedUser = userCaptor.getValue();
 
         assertFalse(savedUser.getIsDeleted(), "회원가입 시 isDeleted는 false여야 합니다.");
 
@@ -284,7 +283,7 @@ public class UserServiceTest {
     @DisplayName("유효한 이메일, 비밀번호로 로그인 시 토큰 발급 및 loginCheck true return")
     void login_withValidEmailAndPassword_shouldReturnAccessAndRefreshToken() {
         // given
-        Users user = Users.builder()
+        User user = User.builder()
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
@@ -322,7 +321,7 @@ public class UserServiceTest {
     @DisplayName("유효한 이메일, 비밀번호로 로그인 시 토큰 중 하나라도 발급 실패")
     void login_withValidEmailAndPasswordButTokenCreationFails_shouldReturnLoginCheckFalse() {
         // given
-        Users user = Users.builder()
+        User user = User.builder()
                 .email("test@mail.com")
                 .password("encodePassword")
                 .nickname("nickname")
@@ -406,7 +405,7 @@ public class UserServiceTest {
     void logout_withValidUser_shouldDeletedCookieAndDeleteToken() {
         // given
         Long userId = 1L;
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password("encodePassword")
@@ -473,7 +472,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password("encodePassword")
@@ -512,7 +511,7 @@ public class UserServiceTest {
         String email = "test@mail.com";
         FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("encodePassword")
@@ -543,7 +542,7 @@ public class UserServiceTest {
         OAuthProvider provider = OAuthProvider.NAVER;
         FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("encodePassword")
@@ -587,7 +586,7 @@ public class UserServiceTest {
     void getMyInfo_withValidPrincipal_shouldReturnUserInfoResponse() {
         // given
         String email = "test@mail.com";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email(email)
                 .password("encodePassword")
@@ -634,7 +633,7 @@ public class UserServiceTest {
     void checkPassword_withCorrectPassword_shouldReturnTrue() {
         // given
         String password = "encodePassword";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password(password)
@@ -678,7 +677,7 @@ public class UserServiceTest {
     void checkPassword_withWrongPassword_shouldReturnFalse() {
         // given
         String password = "encodePassword";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password(password)
@@ -704,7 +703,7 @@ public class UserServiceTest {
     void updateProfile_withValidNicknameOnly_shouldUpdateNickname() {
         // given
         Long userId = 1L;
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password("password")
@@ -733,7 +732,7 @@ public class UserServiceTest {
         // given
         String newPassword = "newPassword";
         Long userId = 1L;
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -763,7 +762,7 @@ public class UserServiceTest {
         Long userId = 1L;
         String newPassword = "newPassword";
         String newNickname = "newNickname";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
@@ -812,7 +811,7 @@ public class UserServiceTest {
     void updateProfile_withInvalidPassword_shouldThrowCustomException() {
         // given
         Long userId = 1L;
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password("password")
@@ -844,7 +843,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password(password)
@@ -884,7 +883,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password(password)
@@ -935,7 +934,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@kakao.com")
                 .password(password)
@@ -982,7 +981,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@naver.com")
                 .password(password)
@@ -1029,7 +1028,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(userId)
                 .email("test@gmail.com")
                 .password(password)

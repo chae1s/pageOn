@@ -2,10 +2,10 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.dto.request.RegisterCreatorRequest;
-import com.pageon.backend.entity.Creators;
+import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Role;
 import com.pageon.backend.entity.UserRole;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.CreatorRepository;
@@ -59,7 +59,7 @@ class CreatorServiceTest {
     void registerCreator_withValidInput_shouldSucceed() {
         // given
         String email = "test@mail.com";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")
@@ -85,14 +85,14 @@ class CreatorServiceTest {
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
 
         RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
-        ArgumentCaptor<Creators> creatorCaptor = ArgumentCaptor.forClass(Creators.class);
+        ArgumentCaptor<Creator> creatorCaptor = ArgumentCaptor.forClass(Creator.class);
         
         //when
         creatorService.registerCreator(mockPrincipalUser, creatorRequest);
         
         // then
         verify(creatorRepository).save(creatorCaptor.capture());
-        Creators savedCreator = creatorCaptor.getValue();
+        Creator savedCreator = creatorCaptor.getValue();
 
         assertEquals(RoleType.ROLE_CREATOR, savedCreator.getUser().getUserRoles().get(1).getRole().getRoleType());
         assertEquals("필명", savedCreator.getPenName());
@@ -125,7 +125,7 @@ class CreatorServiceTest {
     void registerCreator_whenUserAlreadyHasCreatorRole_shouldThrowException() {
         // given
         String email = "test@mail.com";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")
@@ -159,7 +159,7 @@ class CreatorServiceTest {
     void registerCreator_withoutAgreeingToAiPolicy_shouldThrowCustomException() {
         // given
         String email = "test@mail.com";
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")

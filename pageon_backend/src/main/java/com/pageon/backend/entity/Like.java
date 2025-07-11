@@ -1,8 +1,12 @@
 package com.pageon.backend.entity;
 
 import com.pageon.backend.common.base.BaseTimeEntity;
+import com.pageon.backend.common.enums.ContentType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -10,20 +14,20 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @SuperBuilder
 @DynamicUpdate
+@Table(name = "likes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Comments extends BaseTimeEntity {
+public class Like extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users user;
+    private User user;
 
-    private String target_type;     // 댓글달린 작품이 웹툰인지 웹소설인지 표시
-    private Integer target_id;      // 해당 작품의 id
+    private ContentType contentType;     // 좋아요 작품이 웹툰인지 웹소설인지 표시
+    private Integer contentId;      // 해당 작품의 id
 
-    private String content;
 
 }

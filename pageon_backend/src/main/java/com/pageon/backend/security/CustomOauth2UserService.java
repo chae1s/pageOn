@@ -7,7 +7,7 @@ import com.pageon.backend.dto.oauth.GoogleSignupRequest;
 import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.service.RoleService;
 import jakarta.transaction.Transactional;
@@ -45,7 +45,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         OAuthUserInfoResponse userInfoResponse = null;
-        Users users = null;
+        User users = null;
 
         switch (registrationId) {
             case "kakao" -> {
@@ -74,10 +74,10 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         return new PrincipalUser(users, userInfoResponse);
     }
 
-    private Users existingUser(OAuthUserInfoResponse response) {
+    private User existingUser(OAuthUserInfoResponse response) {
         log.info(response.getEmail());
 
-        Optional<Users> user = userRepository.findWithRolesByProviderAndProviderId(response.getOAuthProvider(), response.getProviderId());
+        Optional<User> user = userRepository.findWithRolesByProviderAndProviderId(response.getOAuthProvider(), response.getProviderId());
 
         if (user.isPresent()) {
             return user.get();
@@ -87,9 +87,9 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     @Transactional
-    public Users signupSocial(OAuthUserInfoResponse response) {
+    public User signupSocial(OAuthUserInfoResponse response) {
 
-        Users users = Users.builder()
+        User users = User.builder()
                 .email(response.getEmail())
                 .nickname(generateRandomNickname())
                 .oAuthProvider(response.getOAuthProvider())
@@ -121,7 +121,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         return sb.toString();
     }
 
-    private void setAccessToken(OAuth2AccessToken oAuth2AccessToken, Users users) {
+    private void setAccessToken(OAuth2AccessToken oAuth2AccessToken, User users) {
         String accessToken = oAuth2AccessToken.getTokenValue();
 
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
