@@ -19,7 +19,7 @@ public class CreatorController {
     private final CreatorService creatorService;
 
     @GetMapping("/register")
-    public ResponseEntity<Boolean> checkIdentityVerifiaction(@AuthenticationPrincipal PrincipalUser principalUser){
+    public ResponseEntity<Boolean> checkIdentityVerification(@AuthenticationPrincipal PrincipalUser principalUser){
 
         return ResponseEntity.ok(creatorService.checkIdentityVerification(principalUser));
     }

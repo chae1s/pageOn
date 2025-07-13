@@ -46,6 +46,8 @@ class CreatorServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
     private PrincipalUser mockPrincipalUser;
+    @Mock
+    private CommonService commonService;
     
     @BeforeEach
     void setUp() {
@@ -81,7 +83,7 @@ class CreatorServiceTest {
         user.getUserRoles().add(userRole);
 
         when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
 
         RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
@@ -98,27 +100,7 @@ class CreatorServiceTest {
         assertEquals("필명", savedCreator.getPenName());
         assertTrue(savedCreator.getIsActive());
     }
-    
-    @Test
-    @DisplayName("DB에서 로그인한 유저의 정보를 찾을 수 없을 경우 CustomException 발생")
-    void registerCreator_whenUserNotFound_shouldThrowCustomException() {
-        // given
-        String email = "test@mail.com";
 
-        when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", true);
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            creatorService.registerCreator(mockPrincipalUser, creatorRequest);
-        });
-        
-        // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
-
-    }
 
     @Test
     @DisplayName("로그인한 유저가 이미 creator 권한이 있을 경우 CustomException 발생")
@@ -138,7 +120,7 @@ class CreatorServiceTest {
                 .build();
 
         when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
         when(creatorRepository.findByUser(user)).thenThrow(new CustomException(ErrorCode.ALREADY_HAS_CREATOR_ROLE));
 
@@ -180,7 +162,7 @@ class CreatorServiceTest {
         user.getUserRoles().add(userRole);
 
         when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(roleRepository.findByRoleType(RoleType.ROLE_CREATOR)).thenReturn(Optional.of(creatorRole));
 
         RegisterCreatorRequest creatorRequest = new RegisterCreatorRequest("필명", "WEBNOVEL", false);

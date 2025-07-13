@@ -53,6 +53,7 @@ public class UserService {
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RestTemplate restTemplate;
+    private final CommonService commonService;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -203,9 +204,7 @@ public class UserService {
     }
 
     public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
-        User user = userRepository.findByEmailAndIsDeletedFalse(
-                principalUser.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
         return UserInfoResponse.fromEntity(user);
     }

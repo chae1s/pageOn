@@ -46,6 +46,8 @@ class PortOneServiceTest {
     @Mock
     SmsService smsService;
     private PrincipalUser mockPrincipalUser;
+    @Mock
+    private CommonService commonService;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +66,7 @@ class PortOneServiceTest {
                 .password("password")
                 .isDeleted(false)
                 .build();
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //when
@@ -72,23 +74,6 @@ class PortOneServiceTest {
 
         // then
         assertNotNull(response.getIdentityVerificationId());
-
-    }
-
-    @Test
-    @DisplayName("로그인한 유저의 정보가 DB에 없을 경우 CustomException 발생")
-    void createIdentityVerificationId_whenUserNotFound_shouldThrowCustomException() {
-        // given
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.empty());
-
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            portOneService.createIdentityVerificationId(mockPrincipalUser);
-        });
-
-        // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
@@ -104,7 +89,7 @@ class PortOneServiceTest {
                 .isPhoneVerified(true)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(userRepository.existsByEmailAndIsPhoneVerifiedTrue(mockPrincipalUser.getUsername())).thenReturn(true);
 
         //when
@@ -131,7 +116,7 @@ class PortOneServiceTest {
                 .build();
         // 생성된 id를 redis에서 가져온다.
         String redisKey = String.format("%s_identityVerificationId", user.getEmail());
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(redisKey)).thenReturn(expectedId);
 
@@ -159,26 +144,6 @@ class PortOneServiceTest {
     }
 
     @Test
-    @DisplayName("로그인한 유저의 정보가 DB에 없을 경우 CustomException 발생")
-    void createAndStoreOtp_whenUserNotFound_shouldThrowCustomException() {
-        // given
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.empty());
-
-        String identityVerificationId = "somdId";
-        IdentityVerificationRequest request = new IdentityVerificationRequest();
-
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            portOneService.createAndStoreOtp(identityVerificationId, mockPrincipalUser, request);
-        });
-
-        // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
-
-    }
-
-    @Test
     @DisplayName("입력한 전화번호가 이미 인증이 완료된 상태라면 CustomException 발생")
     void createAndStoreOtp_whenAlreadyVerifiedPhoneNumber_shouldThrowCustomException() {
         // given
@@ -196,7 +161,7 @@ class PortOneServiceTest {
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", phoneNumber, "9604032");
         IdentityVerificationRequest request = new IdentityVerificationRequest(customer, "SMS");
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(userRepository.existsByPhoneNumberAndIsPhoneVerifiedTrue(phoneNumber)).thenReturn(true);
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -223,7 +188,7 @@ class PortOneServiceTest {
                 .isDeleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);;
 
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", "010-1111-1111", "9604032");
         IdentityVerificationRequest request = new IdentityVerificationRequest(customer, "NULL");
@@ -254,7 +219,7 @@ class PortOneServiceTest {
                 .isDeleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         String redisKey = String.format("%s_identityVerificationId", user.getEmail());
 
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", "010-1111-1111", "9604032");
@@ -290,9 +255,10 @@ class PortOneServiceTest {
                 .build();
 
         OtpVerificationPayload payload = new OtpVerificationPayload(redisOtp, new IdentityVerificationCustomer("박누구", "01011111111", "9504022"));
-
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        String redisKey = user.getEmail() + "_identityVerificationId";
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(redisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(identityVerificationId)).thenReturn(payload);
 
         String di = UUID.randomUUID().toString();
@@ -308,25 +274,6 @@ class PortOneServiceTest {
         
     }
 
-    @Test
-    @DisplayName("로그인한 유저의 정보가 DB에 없을 경우 CustomException 발생")
-    void verifyOtpAndUpdateUser_whenUserNotFound_shouldThrowCustomException() {
-        // given
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.empty());
-
-        String identityVerificationId = "somdId";
-        IdentityVerificationResultRequest request = new IdentityVerificationResultRequest();
-
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            portOneService.verifyOtpAndUpdateUser(identityVerificationId, mockPrincipalUser, request);
-        });
-
-        // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
-
-    }
     
     @Test
     @DisplayName("identityVerificationId로 redis에서 꺼낸 데이터가 없을 경우 CustomException 발생")
@@ -343,9 +290,10 @@ class PortOneServiceTest {
                 .isDeleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        String redisKey = user.getEmail() + "_identityVerificationId";
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
+        when(valueOperations.get(redisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(identityVerificationId)).thenReturn(null);
         IdentityVerificationResultRequest request = new IdentityVerificationResultRequest();
         //when
@@ -367,6 +315,7 @@ class PortOneServiceTest {
         String identityVerificationId = "identity-verification-id";
         String redisOtp = "493029";
 
+
         User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
@@ -374,10 +323,12 @@ class PortOneServiceTest {
                 .isDeleted(false)
                 .build();
 
+        String redisKey = user.getEmail() + "_identityVerificationId";
         OtpVerificationPayload payload = new OtpVerificationPayload(redisOtp, new IdentityVerificationCustomer("박누구", "01011111111", "9504022"));
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(redisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(identityVerificationId)).thenReturn(payload);
 
         String di = UUID.randomUUID().toString();

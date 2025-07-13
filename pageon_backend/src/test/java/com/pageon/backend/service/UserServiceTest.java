@@ -86,6 +86,8 @@ public class UserServiceTest {
     private PrincipalUser mockPrincipalUser;
     @Mock
     private ValueOperations<String, Object> valueOperations;
+    @Mock
+    private CommonService commonService;
 
 
     @BeforeEach
@@ -595,10 +597,10 @@ public class UserServiceTest {
                 .providerId(null)
                 .pointBalance(0)
                 .isDeleted(false)
+                .isPhoneVerified(false)
                 .build();
 
-        when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
 
         //when
         UserInfoResponse userInfoResponse = userService.getMyInfo(mockPrincipalUser);
@@ -608,25 +610,7 @@ public class UserServiceTest {
         assertEquals("nickname", userInfoResponse.getNickname());
         
     }
-    
-    @Test
-    @DisplayName("존재하지 않는 사용자의 정보를 조회하면 CustomException 발생")
-    void getMyInfo_withInvalidPrincipal_shouldThrowCustomException() {
-        // given
-        String email = "test@mail.com";
 
-        when(mockPrincipalUser.getUsername()).thenReturn(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.empty());
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            userService.getMyInfo(mockPrincipalUser);
-        });
-        
-        // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
-        
-    }
     
     @Test
     @DisplayName("입력한 비밀번호와 사용자의 정보 속 비밀번호가 일치하면 true 리턴")

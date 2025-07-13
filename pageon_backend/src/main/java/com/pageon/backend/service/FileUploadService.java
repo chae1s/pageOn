@@ -40,7 +40,7 @@ public class FileUploadService {
         try {
             s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CustomException(ErrorCode.S3_UPLOAD_FAILED);
         }
 
         return cloudFrontUrl + "/" + fileName;

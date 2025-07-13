@@ -29,6 +29,7 @@ public class CreatorService {
     private final CreatorRepository creatorRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final CommonService commonService;
 
     public boolean checkIdentityVerification(PrincipalUser principalUser) {
         if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
@@ -41,9 +42,7 @@ public class CreatorService {
     @Transactional
     public void registerCreator(PrincipalUser principalUser, RegisterCreatorRequest creatorRequest) {
         String email = principalUser.getUsername();
-        User user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
         Role role = roleRepository.findByRoleType(RoleType.ROLE_CREATOR).orElseThrow(
                 () -> new CustomException(ErrorCode.ROLE_NOT_FOUND)
@@ -64,7 +63,7 @@ public class CreatorService {
             Creator creators = Creator.builder()
                     .user(user)
                     .penName(creatorRequest.getPenName())
-                    .creatorType(ContentType.valueOf(creatorRequest.getContentType()))
+                    .contentType(ContentType.valueOf(creatorRequest.getContentType()))
                     .agreedToAiPolicy(creatorRequest.getAgreedToAiPolicy())
                     .aiPolicyAgreedAt(LocalDateTime.now())
                     .build();

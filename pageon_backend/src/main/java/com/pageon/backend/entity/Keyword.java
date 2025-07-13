@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -26,10 +27,10 @@ public class Keyword {
     private String name;
 
     @ManyToMany(mappedBy = "keywords")
-    private Set<Webnovel> webnovels = new HashSet<>();
+    private Set<Webnovel> webnovels = new LinkedHashSet<>();
 
     @ManyToMany(mappedBy = "keywords")
-    private Set<Webtoon> webtoons = new HashSet<>();
+    private Set<Webtoon> webtoons = new LinkedHashSet<>();
 
     public Keyword(Category category, String name) {
         this.category = category;

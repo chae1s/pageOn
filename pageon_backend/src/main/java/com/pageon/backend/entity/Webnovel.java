@@ -3,14 +3,12 @@ package com.pageon.backend.entity;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.SeriesStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -41,24 +39,29 @@ public class Webnovel {
             joinColumns = @JoinColumn(name = "webnovel_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
-    private Set<Keyword> keywords = new HashSet<>();
+    private Set<Keyword> keywords = new LinkedHashSet<>();
 
     // 연재 요일
-    private DayOfWeek publishDay;
+    private DayOfWeek serialDay;
     // 연재, 완결, 휴재
-    private SeriesStatus status;
+    @Builder.Default
+    private SeriesStatus status = SeriesStatus.ONGOING;
+    @Builder.Default
+    private Long viewCount = 0L;
 
-    private Long viewCount;
-
-    public Webnovel(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String publishDay, String status, Long viewCount) {
+    public Webnovel(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
         this.title = title;
         this.description = description;
         this.keywords = keywords;
         this.creator = creator;
         this.cover = cover;
-        this.publishDay = DayOfWeek.valueOf(publishDay);
+        this.serialDay = DayOfWeek.valueOf(serialDay);
         this.status = SeriesStatus.valueOf(status);
         this.viewCount = viewCount;
+    }
+
+    public void uploadCover(String s3Url) {
+        this.cover = s3Url;
     }
 
 

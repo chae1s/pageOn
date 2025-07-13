@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -195,7 +196,7 @@ public class InitContentData implements ApplicationRunner {
 
     private Set<Keyword> separateKeywords(String line) {
         String[] words = line.split(",");
-        Set<Keyword> keywords = new HashSet<>();
+        Set<Keyword> keywords = new LinkedHashSet<>();
         Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
         for (int i = 0; i < words.length; i++) {
             Optional<Keyword> optionalKeyword = keywordRepository.findByName(words[i]);

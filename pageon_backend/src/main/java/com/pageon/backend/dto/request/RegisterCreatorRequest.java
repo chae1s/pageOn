@@ -1,6 +1,7 @@
 package com.pageon.backend.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,6 @@ public class RegisterCreatorRequest {
     private String penName;
     @NotBlank(message = "타입을 선택해주세요.")
     private String contentType;
-    @NotBlank(message = "약관에 동의해주세요.")
+    @NotNull(message = "약관에 동의해주세요.")
     private Boolean agreedToAiPolicy;
 }

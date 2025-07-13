@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -35,7 +36,7 @@ public class Webtoon {
             joinColumns = @JoinColumn(name = "webtoon_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
-    private Set<Keyword> keywords = new HashSet<>();
+    private Set<Keyword> keywords = new LinkedHashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
@@ -43,19 +44,19 @@ public class Webtoon {
 
     private String cover;
     // 연재 요일
-    private DayOfWeek publishDay;
+    private DayOfWeek serialDay;
 
     // 연재, 완결, 휴재
     private SeriesStatus status;
     private Long viewCount;
 
-    public Webtoon(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String publishDay, String status, Long viewCount) {
+    public Webtoon(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
         this.title = title;
         this.description = description;
         this.keywords = keywords;
         this.creator = creator;
         this.cover = cover;
-        this.publishDay = DayOfWeek.valueOf(publishDay);
+        this.serialDay = DayOfWeek.valueOf(serialDay);
         this.status = SeriesStatus.valueOf(status);
         this.viewCount = viewCount;
 

@@ -32,12 +32,11 @@ public class PortOneService {
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final SmsService smsService;
+    private final CommonService commonService;
 
     //  본인인증 요청 식별 위해 identityVerificationId 발급 후 redis에 저장
     public IdentityVerificationIdResponse createIdentityVerificationId(PrincipalUser principalUser) {
-        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
         if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername()))
             throw new CustomException(ErrorCode.IDENTITY_ALREADY_VERIFIED);
@@ -54,9 +53,7 @@ public class PortOneService {
 
     public boolean createAndStoreOtp(String identityVerificationId, PrincipalUser principalUser, IdentityVerificationRequest identityVerificationRequest) {
         // 로그인한 유저의 이메일로 db 검색
-        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
         if (!identityVerificationRequest.getMethod().equals("SMS"))
             throw new CustomException(ErrorCode.INVALID_VERIFICATION_METHOD);
@@ -84,9 +81,7 @@ public class PortOneService {
 
     @Transactional
     public boolean verifyOtpAndUpdateUser(String identityVerificationId, PrincipalUser principalUser, IdentityVerificationResultRequest request) {
-        User user = userRepository.findByEmailAndIsDeletedFalse(principalUser.getUsername()).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
         checkIdentityVerificationId(identityVerificationId, user.getEmail());
 
@@ -127,16 +122,16 @@ public class PortOneService {
 
     // redis에 저장된 identityVerificationId와 url로 넘어온 identityVerificationId를 비교하는 메서드
     private void checkIdentityVerificationId(String identityVerificationId, String email) {
+        String storedVerificationId;
         try {
-            String storedVerificationId = (String) redisTemplate.opsForValue().get(String.format("%s_identityVerificationId", email));
-
-            if (!identityVerificationId.equals(storedVerificationId))
-                throw new CustomException(ErrorCode.IDENTITY_VERIFICATION_ID_NOT_MATCH);
-
+             storedVerificationId = (String) redisTemplate.opsForValue().get(String.format("%s_identityVerificationId", email));
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
+
+        if (!identityVerificationId.equals(storedVerificationId))
+            throw new CustomException(ErrorCode.IDENTITY_VERIFICATION_ID_NOT_MATCH);
     }
 
     // 주민번호 앞자리 6 + 뒷자리 1 인 identityNumber를 이용해 생년월일과 성별을 구하는 메소드

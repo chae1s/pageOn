@@ -28,7 +28,7 @@ public class Creator {
     @JoinColumn(name = "user_id")
     private User user;
     // 웹툰, 웹소설 작가 구분
-    private ContentType creatorType;
+    private ContentType contentType;
 
     @Builder.Default
     private Boolean isActive = true;
@@ -44,10 +44,10 @@ public class Creator {
     @OneToMany(mappedBy = "creator")
     private List<Webnovel> webnovels = new ArrayList<>();
 
-    public Creator(String penName, User users, ContentType creatorType, boolean isActive) {
+    public Creator(String penName, User users, ContentType contentType, boolean isActive) {
         this.penName = penName;
         this.user = users;
-        this.creatorType = creatorType;
+        this.contentType = contentType;
         this.isActive = isActive;
     }
 
