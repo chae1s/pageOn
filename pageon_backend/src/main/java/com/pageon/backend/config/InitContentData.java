@@ -101,7 +101,7 @@ public class InitContentData implements ApplicationRunner {
             while ((line = csvReader.readNext()) != null) {
                 Category category = categoryRepository.findById(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("카테고리 없음"));
 
-                Keyword keyWords = new Keyword(category, line[1]);
+                Keyword keyWords = new Keyword(category, line[1].trim());
 
                 keywordRepository.save(keyWords);
 
@@ -195,20 +195,21 @@ public class InitContentData implements ApplicationRunner {
     }
 
     private Set<Keyword> separateKeywords(String line) {
-        String[] words = line.split(",");
+        String[] words = line.replaceAll("\\s", "").split(",");
         Set<Keyword> keywords = new LinkedHashSet<>();
         Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
-        for (int i = 0; i < words.length; i++) {
-            Optional<Keyword> optionalKeyword = keywordRepository.findByName(words[i]);
+        for (String word : words) {
 
-            if (optionalKeyword.isPresent()) {
-                keywords.add(optionalKeyword.get());
-            } else {
-                Keyword keyword = new Keyword(category, words[i]);
+            Keyword keyword = keywordRepository.findByName(word).orElseGet(
+                    () -> {
+                        Keyword newKeyword = new Keyword(category, word);
+                        keywordRepository.save(newKeyword);
 
-                keywordRepository.save(keyword);
-            }
+                        return newKeyword;
+                    }
+            );
 
+            keywords.add(keyword);
 
         }
 

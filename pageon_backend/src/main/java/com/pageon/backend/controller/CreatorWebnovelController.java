@@ -1,8 +1,9 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
-import com.pageon.backend.service.WebnovelService;
+import com.pageon.backend.service.CreatorWebnovelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/creators/webnovels")
 @RequiredArgsConstructor
-public class WebnovelController {
+public class CreatorWebnovelController {
 
-    private final WebnovelService webnovelService;
+    private final CreatorWebnovelService webnovelService;
 
     @PostMapping()
     public ResponseEntity<Void> createWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @ModelAttribute WebnovelCreateRequest webnovelCreateRequest) {
@@ -24,4 +25,12 @@ public class WebnovelController {
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{webnovelId}")
+    public ResponseEntity<CreatorWebnovelResponse> getWebnovelById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
+
+        return ResponseEntity.ok(webnovelService.getWebnovelById(principalUser, webnovelId));
+    }
+
+
 }

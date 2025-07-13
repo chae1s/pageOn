@@ -3,7 +3,9 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -20,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -30,11 +31,11 @@ import static org.mockito.Mockito.*;
 
 @Transactional
 @ActiveProfiles("test")
-@DisplayName("WebnovelService 단위 테스트")
+@DisplayName("CreatorWebnovelService 단위 테스트")
 @ExtendWith(MockitoExtension.class)
-class WebnovelServiceTest {
+class CreatorWebnovelServiceTest {
     @InjectMocks
-    private WebnovelService webnovelService;
+    private CreatorWebnovelService webnovelService;
     @Mock
     private WebnovelRepository webnovelRepository;
     @Mock
@@ -71,11 +72,11 @@ class WebnovelServiceTest {
     @DisplayName("로그인한 유저가 creator이고 content type이 webnovel일 때 제목, 설명, 웹소설, 키워드, 커버, 연재 요일 작성 시 생성 ")
     void createWebnovel_withValidCreatorAndCorrectInput_shouldCreateWebnovel() {
         // given
-        User user = createUser();
+        User user = createUser(1L);
 
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
 
-        Creator creator = createCreator(user, ContentType.WEBNOVEL);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
 
         when(commonService.findCreatorByUser(user)).thenReturn(creator);
 
@@ -110,12 +111,12 @@ class WebnovelServiceTest {
     @DisplayName("웹소설을 작성하려는 Creator의 contentType이 webnovel이 아니면 CustomException 발생")
     void createWebnovel_withNotMatchContentType_shouldThrowCustomException() {
         // given
-        User user = createUser();
+        User user = createUser(1L);
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
 
-        Creator creator = createCreator(user, ContentType.WEBTOON);
-        when(creatorRepository.findByUser(user)).thenReturn(Optional.of(creator));
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
         
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -133,13 +134,13 @@ class WebnovelServiceTest {
     @DisplayName("웹소설 작성 후 cover file이 s3에 업로드가 되지 않았으면 CustomException 발생")
     void createWebnovel_whenCoverUploadFails_shouldThrowCustomException() {
         // given
-        User user = createUser();
+        User user = createUser(1L);
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
 
-        Creator creator = createCreator(user, ContentType.WEBNOVEL);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
 
-        when(creatorRepository.findByUser(user)).thenReturn(Optional.of(creator));
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
 
         MockMultipartFile mockFile =  new MockMultipartFile("file", "file".getBytes());
 
@@ -156,14 +157,115 @@ class WebnovelServiceTest {
         assertEquals("S3 업로드 중 오류가 발생했습니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.S3_UPLOAD_FAILED, ErrorCode.valueOf(exception.getErrorCode()));
     }
-    
-    
+
+
+    // 웹소설 1개 조회
+    @Test
+    @DisplayName("웹소설을 id로 조회했을 때 DB에 존재하고, 로그인한 유저가 작성자일 때 해당 작품을 return")
+    void getWebnovelById_whenUserIsCreator_shouldReturnWebnovel() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(creator)
+                .keywords(new LinkedHashSet<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
+
+        //when
+
+        CreatorWebnovelResponse result = webnovelService.getWebnovelById(mockPrincipalUser, 1L);
+
+
+        // then
+        assertEquals(result.getTitle(), webnovel.getTitle());
+        assertEquals(result.getDescription(), webnovel.getDescription());
+        assertEquals(result.getStatus(), webnovel.getStatus());
+        assertEquals(result.getSerialDay(), webnovel.getSerialDay());
+    }
+
+    @Test
+    @DisplayName("웹소설을 id로 조회했을 때 DB에 존재하지 않으면 CustomException 발생")
+    void getWebnovelById_whenWebnovelNotFound_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Long id = 1L;
+
+        when(webnovelRepository.findById(id)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelService.getWebnovelById(mockPrincipalUser, id);
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹소설입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBNOVEL_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("DB에서 id로 조회한 웹소설의 작성자가 로그인한 유저가 아니면 CustomException 발생")
+    void getWebnovelById_whenInvalidCreator_shouldThrowCustomException() {
+        // given
+        User loggedUser = createUser(1L);
+
+        User createUser = createUser(2L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(loggedUser);
+
+        Creator loggedCreator = createCreator(1L, loggedUser, ContentType.WEBNOVEL);
+        Creator otherCreator = createCreator(2L, createUser, ContentType.WEBNOVEL);
+
+        when(commonService.findCreatorByUser(loggedUser)).thenReturn(loggedCreator);
+
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(otherCreator)
+                .keywords(new LinkedHashSet<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelService.getWebnovelById(mockPrincipalUser, 1L);
+        });
+
+        // then
+        assertEquals("해당 콘텐츠의 작성자가 아닙니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS, ErrorCode.valueOf(exception.getErrorCode()));
+    }
 
     // role에 creator가 포함되어 있는 유저를 return
-    private User createUser() {
+    private User createUser(Long id) {
 
         User user = User.builder()
-                .id(1L)
+                .id(id)
                 .email("test@mail.com")
                 .nickname("테스트")
                 .userRoles(new ArrayList<>())
@@ -195,9 +297,9 @@ class WebnovelServiceTest {
     }
 
     // user가 포함되어 있는 creator를 return
-    private Creator createCreator(User user, ContentType contentType) {
+    private Creator createCreator(Long id, User user, ContentType contentType) {
         Creator creator = Creator.builder()
-                .id(1L)
+                .id(id)
                 .penName("필명")
                 .user(user)
                 .contentType(contentType)

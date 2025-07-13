@@ -34,6 +34,7 @@ public enum ErrorCode {
     CREATER_NOT_FOUND("존재하지 않는 작가입니다.", HttpStatus.NOT_FOUND),
     NOT_CREATOR_OF_WEBTOON("웹툰 업로드 권한이 없습니다.", HttpStatus.FORBIDDEN),
     NOT_CREATOR_OF_WEBNOVEL("웹소설 업로드 권한이 없습니다.",  HttpStatus.FORBIDDEN),
+    CREATOR_UNAUTHORIZED_ACCESS("해당 콘텐츠의 작성자가 아닙니다.", HttpStatus.FORBIDDEN),
 
     // 토큰
     TOKEN_GENERATION_FAILED("Refresh Token 또는 Access Token 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -50,7 +51,10 @@ public enum ErrorCode {
     FILE_PROCESSING_ERROR("파일의 MIME 타입을 읽는 데 실패했습니다.", HttpStatus.BAD_REQUEST),
 
     // request
-    INVALID_INPUT("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST)
+    INVALID_INPUT("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+
+    // 작품
+    WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND)
     ;
 
 

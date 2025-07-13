@@ -3,6 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class WebnovelService {
+public class CreatorWebnovelService {
 
     private final WebnovelRepository webnovelRepository;
     private final FileUploadService fileUploadService;
@@ -46,5 +47,21 @@ public class WebnovelService {
         String s3Url = fileUploadService.upload(webnovelCreateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
 
         webnovel.uploadCover(s3Url);
+    }
+
+    public CreatorWebnovelResponse getWebnovelById(PrincipalUser principalUser, Long id) {
+        // 로그인한 유저에게서 가져온 creator 정보
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        // 웹소설에서 가져온 creator 정보
+        Webnovel webnovel = webnovelRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
+        );
+
+        if (!webnovel.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
+        return CreatorWebnovelResponse.fromEntity(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
     }
 }

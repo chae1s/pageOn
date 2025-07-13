@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.dto.response.CreatorKeywordResponse;
 import com.pageon.backend.entity.Category;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.repository.CategoryRepository;
@@ -7,7 +8,9 @@ import com.pageon.backend.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -37,5 +40,14 @@ public class KeywordService {
         }
 
         return keywords;
+    }
+
+    public List<CreatorKeywordResponse> getKeywords(Set<Keyword> keywords) {
+        List<CreatorKeywordResponse> creatorKeywordResponses = new ArrayList<>();
+        for (Keyword keyword : keywords) {
+            creatorKeywordResponses.add(CreatorKeywordResponse.fromEntity(keyword));
+        }
+
+        return creatorKeywordResponses;
     }
 }
