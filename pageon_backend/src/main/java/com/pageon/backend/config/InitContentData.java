@@ -19,10 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -194,26 +191,28 @@ public class InitContentData implements ApplicationRunner {
 
     }
 
-    private Set<Keyword> separateKeywords(String line) {
+    private List<Keyword> separateKeywords(String line) {
         String[] words = line.replaceAll("\\s", "").split(",");
-        Set<Keyword> keywords = new LinkedHashSet<>();
+        LinkedHashMap<String, Keyword> keywordMap = new LinkedHashMap<>();
+
         Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
         for (String word : words) {
+            if (!keywordMap.containsKey(word)) {
 
-            Keyword keyword = keywordRepository.findByName(word).orElseGet(
-                    () -> {
-                        Keyword newKeyword = new Keyword(category, word);
-                        keywordRepository.save(newKeyword);
+                Keyword keyword = keywordRepository.findByName(word).orElseGet(
+                        () -> {
+                            Keyword newKeyword = new Keyword(category, word);
 
-                        return newKeyword;
-                    }
-            );
+                            return keywordRepository.save(newKeyword);
+                        }
+                );
 
-            keywords.add(keyword);
+                keywordMap.put(word, keyword);
+            }
 
         }
 
-        return keywords;
+        return new ArrayList<>(keywordMap.values());
     }
 
 

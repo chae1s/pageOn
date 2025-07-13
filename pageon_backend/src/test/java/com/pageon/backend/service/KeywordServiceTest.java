@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,7 +65,7 @@ class KeywordServiceTest {
             when(keywordRepository.findByName(word)).thenReturn(Optional.of(realKeyword));
         }
         //when
-        Set<Keyword> resultKeywords = keywordService.separateKeywords(keyword);
+        List<Keyword> resultKeywords = keywordService.separateKeywords(keyword);
         
         // then
         assertEquals(words.length, resultKeywords.size());
@@ -88,7 +89,7 @@ class KeywordServiceTest {
             when(keywordRepository.findByName(word)).thenReturn(Optional.empty());
         }
         //when
-        Set<Keyword> resultKeywords = keywordService.separateKeywords(keyword);
+        List<Keyword> resultKeywords = keywordService.separateKeywords(keyword);
 
         // then
         assertEquals(words.length, resultKeywords.size());

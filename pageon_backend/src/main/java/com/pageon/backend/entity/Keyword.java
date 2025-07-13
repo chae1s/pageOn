@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -27,10 +25,10 @@ public class Keyword {
     private String name;
 
     @ManyToMany(mappedBy = "keywords")
-    private Set<Webnovel> webnovels = new LinkedHashSet<>();
+    private List<Webnovel> webnovels = new ArrayList<>();
 
     @ManyToMany(mappedBy = "keywords")
-    private Set<Webtoon> webtoons = new LinkedHashSet<>();
+    private List<Webtoon> webtoons = new ArrayList<>();
 
     public Keyword(Category category, String name) {
         this.category = category;

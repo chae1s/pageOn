@@ -8,10 +8,7 @@ import com.pageon.backend.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,29 +17,30 @@ public class KeywordService {
     private final KeywordRepository keywordRepository;
     private final CategoryRepository categoryRepository;
 
-    public Set<Keyword> separateKeywords(String line) {
+    public List<Keyword> separateKeywords(String line) {
         String[] words = line.replaceAll("\\s", "").split(",");
-        Set<Keyword> keywords = new LinkedHashSet<>();
+        LinkedHashMap<String, Keyword> keywordMap = new LinkedHashMap<>();
         Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
         for (String word : words) {
+            if (!keywordMap.containsKey(word)) {
+                Keyword keyword = keywordRepository.findByName(word).orElseGet(
+                        () -> {
+                            Keyword newKeyword = new Keyword(category, word);
+                            keywordRepository.save(newKeyword);
 
-            Keyword keyword = keywordRepository.findByName(word).orElseGet(
-                    () -> {
-                        Keyword newKeyword = new Keyword(category, word);
-                        keywordRepository.save(newKeyword);
+                            return newKeyword;
+                        }
+                );
 
-                        return newKeyword;
-                    }
-            );
-
-            keywords.add(keyword);
+                keywordMap.put(word, keyword);
+            }
 
         }
 
-        return keywords;
+        return new ArrayList<>(keywordMap.values());
     }
 
-    public List<CreatorKeywordResponse> getKeywords(Set<Keyword> keywords) {
+    public List<CreatorKeywordResponse> getKeywords(List<Keyword> keywords) {
         List<CreatorKeywordResponse> creatorKeywordResponses = new ArrayList<>();
         for (Keyword keyword : keywords) {
             creatorKeywordResponses.add(CreatorKeywordResponse.fromEntity(keyword));

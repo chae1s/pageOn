@@ -83,7 +83,7 @@ class CreatorWebnovelServiceTest {
         MockMultipartFile mockFile =  new MockMultipartFile("file", "file".getBytes());
 
         WebnovelCreateRequest request = new WebnovelCreateRequest("웹소설 제목", "웹소설 설명", "하나,둘,셋,넷", mockFile, "MONDAY");
-        Set<Keyword> keywords = new LinkedHashSet<>();
+        List<Keyword> keywords = new ArrayList<>();
 
         doReturn(keywords).when(keywordService).separateKeywords("하나,둘,셋,넷");
         
@@ -178,7 +178,7 @@ class CreatorWebnovelServiceTest {
                 .description("테스트")
                 .cover("테스트")
                 .creator(creator)
-                .keywords(new LinkedHashSet<>())
+                .keywords(new ArrayList<>())
                 .serialDay(DayOfWeek.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
@@ -245,7 +245,7 @@ class CreatorWebnovelServiceTest {
                 .description("테스트")
                 .cover("테스트")
                 .creator(otherCreator)
-                .keywords(new LinkedHashSet<>())
+                .keywords(new ArrayList<>())
                 .serialDay(DayOfWeek.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();

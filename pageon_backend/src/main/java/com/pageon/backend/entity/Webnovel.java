@@ -7,9 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -39,7 +37,7 @@ public class Webnovel {
             joinColumns = @JoinColumn(name = "webnovel_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
-    private Set<Keyword> keywords = new LinkedHashSet<>();
+    private List<Keyword> keywords = new ArrayList<>();
 
     // 연재 요일
     private DayOfWeek serialDay;
@@ -49,7 +47,7 @@ public class Webnovel {
     @Builder.Default
     private Long viewCount = 0L;
 
-    public Webnovel(String title, String description, Set<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
+    public Webnovel(String title, String description, List<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
         this.title = title;
         this.description = description;
         this.keywords = keywords;
