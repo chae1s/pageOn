@@ -1,6 +1,7 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.CreatorWebnovelService;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -30,6 +33,12 @@ public class CreatorWebnovelController {
     public ResponseEntity<CreatorWebnovelResponse> getWebnovelById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
 
         return ResponseEntity.ok(webnovelService.getWebnovelById(principalUser, webnovelId));
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<CreatorWebnovelListResponse>> getMyWebnovels(@AuthenticationPrincipal PrincipalUser principalUser) {
+
+        return ResponseEntity.ok(webnovelService.getMyWebnovels(principalUser));
     }
 
 

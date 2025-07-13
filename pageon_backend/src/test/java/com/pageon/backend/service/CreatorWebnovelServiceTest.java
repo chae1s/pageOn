@@ -5,6 +5,7 @@ import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
@@ -259,6 +260,43 @@ class CreatorWebnovelServiceTest {
         // then
         assertEquals("해당 콘텐츠의 작성자가 아닙니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+    
+    // 작성한 웹소설 목록 리턴
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 웹소설의 목록을 조회")
+    void getMyWebnovels_whenValidCreator_shouldReturnWebnovelList() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(creator)
+                .keywords(new ArrayList<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        List<Webnovel> webnovelList = new ArrayList<>();
+        webnovelList.add(webnovel);
+
+        when(webnovelRepository.findByCreator(creator)).thenReturn(webnovelList);
+        //when
+        List<CreatorWebnovelListResponse> result = webnovelService.getMyWebnovels(mockPrincipalUser);
+        
+        // then
+        assertEquals(result.size(), webnovelList.size());
+        assertEquals(result.get(0).getTitle(), webnovel.getTitle());
+        
     }
 
     // role에 creator가 포함되어 있는 유저를 return
