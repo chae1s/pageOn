@@ -3,7 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.DeleteStatus;
-import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.WebnovelDeleteRequest;
 import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
@@ -17,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,25 +33,25 @@ public class CreatorWebnovelService {
 
 
     @Transactional
-    public void createWebnovel(PrincipalUser principalUser, WebnovelCreateRequest webnovelCreateRequest) {
+    public void createWebnovel(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
 
         Creator creator = commonService.findCreatorByUser(user);
 
         if (creator.getContentType() != ContentType.WEBNOVEL)
-            throw new CustomException(ErrorCode.NOT_CREATOR_OF_WEBTOON);
+            throw new CustomException(ErrorCode.NOT_CREATOR_OF_WEBNOVEL);
 
         Webnovel webnovel = Webnovel.builder()
-                .title(webnovelCreateRequest.getTitle())
-                .description(webnovelCreateRequest.getDescription())
+                .title(contentCreateRequest.getTitle())
+                .description(contentCreateRequest.getDescription())
                 .creator(creator)
-                .keywords(keywordService.separateKeywords(webnovelCreateRequest.getKeywords()))
-                .serialDay(DayOfWeek.valueOf(webnovelCreateRequest.getSerialDay()))
+                .keywords(keywordService.separateKeywords(contentCreateRequest.getKeywords()))
+                .serialDay(DayOfWeek.valueOf(contentCreateRequest.getSerialDay()))
                 .build();
 
         webnovelRepository.save(webnovel);
 
-        String s3Url = fileUploadService.upload(webnovelCreateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
+        String s3Url = fileUploadService.upload(contentCreateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
 
         webnovel.updateCover(s3Url);
     }
@@ -122,7 +120,7 @@ public class CreatorWebnovelService {
         return webnovelId;
     }
 
-
+    @Transactional
     public void deleteRequestWebnovel(PrincipalUser principalUser, long webnovelId, WebnovelDeleteRequest webnovelDeleteRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);

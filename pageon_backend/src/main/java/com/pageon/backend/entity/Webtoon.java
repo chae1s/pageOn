@@ -60,5 +60,9 @@ public class Webtoon {
 
     }
 
+    public void updateCover(String s3Url) {
+        this.cover = s3Url;
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.*;
-import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.WebnovelDeleteRequest;
 import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
@@ -80,7 +80,7 @@ class CreatorWebnovelServiceTest {
 
         MockMultipartFile mockFile =  new MockMultipartFile("file", "file".getBytes());
 
-        WebnovelCreateRequest request = new WebnovelCreateRequest("웹소설 제목", "웹소설 설명", "하나,둘,셋,넷", mockFile, "MONDAY");
+        ContentCreateRequest request = new ContentCreateRequest("웹소설 제목", "웹소설 설명", "하나,둘,셋,넷", mockFile, "MONDAY");
         List<Keyword> keywords = new ArrayList<>();
 
         doReturn(keywords).when(keywordService).separateKeywords("하나,둘,셋,넷");
@@ -118,12 +118,12 @@ class CreatorWebnovelServiceTest {
         
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.createWebnovel(mockPrincipalUser, new WebnovelCreateRequest());
+            webnovelService.createWebnovel(mockPrincipalUser, new ContentCreateRequest());
         });
         
         // then
-        assertEquals("웹툰 업로드 권한이 없습니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.NOT_CREATOR_OF_WEBTOON, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("웹소설 업로드 권한이 없습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.NOT_CREATOR_OF_WEBNOVEL, ErrorCode.valueOf(exception.getErrorCode()));
         
     }
 
@@ -142,7 +142,7 @@ class CreatorWebnovelServiceTest {
 
         MockMultipartFile mockFile =  new MockMultipartFile("file", "file".getBytes());
 
-        WebnovelCreateRequest request = new WebnovelCreateRequest("웹소설 제목", "웹소설 설명", "하나,둘,셋,넷", mockFile, "MONDAY");
+        ContentCreateRequest request = new ContentCreateRequest("웹소설 제목", "웹소설 설명", "하나,둘,셋,넷", mockFile, "MONDAY");
 
         doThrow(new CustomException(ErrorCode.S3_UPLOAD_FAILED)).when(fileUploadService).upload(any(MockMultipartFile.class), any(String.class));
         

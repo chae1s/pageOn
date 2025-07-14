@@ -1,7 +1,6 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.dto.request.WebnovelCreateRequest;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;

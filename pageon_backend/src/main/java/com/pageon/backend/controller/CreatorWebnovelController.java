@@ -1,6 +1,6 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.WebnovelDeleteRequest;
 import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
@@ -25,7 +25,7 @@ public class CreatorWebnovelController {
     private final CreatorWebnovelService creatorWebnovelService;
 
     @PostMapping()
-    public ResponseEntity<Void> createWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @ModelAttribute WebnovelCreateRequest webnovelCreateRequest) {
+    public ResponseEntity<Void> createWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @ModelAttribute ContentCreateRequest webnovelCreateRequest) {
         creatorWebnovelService.createWebnovel(principalUser, webnovelCreateRequest);
 
         return ResponseEntity.ok().build();
