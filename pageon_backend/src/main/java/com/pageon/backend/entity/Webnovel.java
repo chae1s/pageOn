@@ -2,6 +2,7 @@ package com.pageon.backend.entity;
 
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.SeriesStatus;
+import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -58,8 +59,25 @@ public class Webnovel {
         this.viewCount = viewCount;
     }
 
-    public void uploadCover(String s3Url) {
+    public void updateCover(String s3Url) {
         this.cover = s3Url;
+    }
+
+    public void updateWebnovelInfo(WebnovelUpdateRequest request) {
+        if (request.getTitle() != null) this.title = request.getTitle();
+        if (request.getDescription() != null)this.description = request.getDescription();
+        if (request.getSerialDay() != null) this.serialDay = DayOfWeek.valueOf(request.getSerialDay());
+    }
+
+    public void updateKeywords(List<Keyword> keywords) {
+        if (keywords != null) {
+            this.keywords.clear();
+            this.keywords.addAll(keywords);
+        }
+    }
+
+    public void updateStatus(String status) {
+        if (status != null) this.status = SeriesStatus.valueOf(status);
     }
 
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
@@ -29,7 +30,7 @@ public class FileUploadService {
 
     public String upload(MultipartFile file, String folder) {
         String originalName = file.getOriginalFilename();
-        String fileName = String.format("/%s/%s_%s", folder, UUID.randomUUID(), originalName);
+        String fileName = String.format("%s/%s_%s", folder, UUID.randomUUID(), originalName);
 
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -76,6 +77,20 @@ public class FileUploadService {
 
 
         return cloudFrontUrl + "/" + fileName;
+
+    }
+
+    public void deleteFile(String s3Url) {
+        String splitStr = cloudFrontUrl + "/";
+
+        String fileName = s3Url.replace(splitStr, "");
+
+        try {
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(fileName).build();
+            s3Client.deleteObject(deleteObjectRequest);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.S3_DELETE_FAILED);
+        }
 
     }
 }

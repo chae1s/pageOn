@@ -5,6 +5,7 @@ import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.*;
@@ -299,6 +300,111 @@ class CreatorWebnovelServiceTest {
         
     }
 
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 웹소설 정보를 수정")
+    void updateWebnovel_whenValidCreatorAndCorrectInput_shouldUpdateWebnovel() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
+        String newTitle = "새 제목";
+        String newDescription = "새 내용";
+        String newSerialDay = "TUESDAY";
+        String newKeywords = "하나,둘,셋";
+        String newStatus = "REST";
+
+        List<Keyword> newKeywordList = createKeywords(newKeywords);
+        doReturn(newKeywordList).when(keywordService).separateKeywords(newKeywords);
+
+        WebnovelUpdateRequest request = new WebnovelUpdateRequest(newTitle, newDescription, newKeywords, null, newSerialDay, newStatus);
+
+        //when
+        webnovelService.updateWebnovel(mockPrincipalUser, 1L, request);
+
+        // then
+        assertEquals(newTitle, webnovel.getTitle());
+        assertEquals(newDescription, webnovel.getDescription());
+        assertEquals(3, webnovel.getKeywords().size());
+        assertEquals(DayOfWeek.valueOf(newSerialDay), webnovel.getSerialDay());
+
+    }
+
+    @Test
+    @DisplayName("커버 이미지 변경 시 기존 s3 이미지 버킷에서 제거 후 새로운 파일 업로드")
+    void updateWebnovel_whenWebnovelCoverUpdate_shouldDeleteOldFileAndUploadNewFile() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .cover("https://gdsdgtehh.cloudfront.net/filename.png")
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        String oldCover = webnovel.getCover();
+
+        MockMultipartFile mockFile =  new MockMultipartFile("newFile.png", "file".getBytes());
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
+
+        WebnovelUpdateRequest request = new WebnovelUpdateRequest(null, null, null, mockFile, null, null);
+
+        doNothing().when(fileUploadService).deleteFile(oldCover);
+        doReturn("newUrl").when(fileUploadService).upload(mockFile, String.format("webnovels/%d", webnovel.getId()));
+        //when
+        webnovelService.updateWebnovel(mockPrincipalUser, 1L, request);
+
+        // then
+        verify(fileUploadService).deleteFile(oldCover);
+        verify(fileUploadService).upload(mockFile, String.format("webnovels/%d", webnovel.getId()));
+        assertEquals("newUrl", webnovel.getCover());
+
+
+    }
+
+    @Test
+    @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
+    void updateWebnovel_withInvalidWebnovelId_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelService.updateWebnovel(mockPrincipalUser, 1L, new WebnovelUpdateRequest());
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹소설입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBNOVEL_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
     // role에 creator가 포함되어 있는 유저를 return
     private User createUser(Long id) {
 
@@ -348,24 +454,26 @@ class CreatorWebnovelServiceTest {
         return creator;
     }
 
-    private Set<Keyword> separateKeywords(String line) {
-        String[] words = line.split(",");
-        Set<Keyword> keywords = new HashSet<>();
-        Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
+    private List<Keyword> createKeywords(String s) {
+        Category category = Category.builder()
+                .id(1L)
+                .name("카테고리")
+                .build();
+
+        List<Keyword> keywords = new ArrayList<>();
+        String[] words = s.replaceAll("\\s", "").split(",");
         for (int i = 0; i < words.length; i++) {
-            Optional<Keyword> optionalKeyword = keywordRepository.findByName(words[i]);
+            Keyword keyword = Keyword.builder()
+                    .id(i + 1L)
+                    .category(category)
+                    .name(words[i])
+                    .build();
 
-            if (optionalKeyword.isPresent()) {
-                keywords.add(optionalKeyword.get());
-            } else {
-                Keyword keyword = new Keyword(category, words[i]);
-
-                keywordRepository.save(keyword);
-            }
-            
+            keywords.add(keyword);
         }
 
         return keywords;
     }
+
 
 }

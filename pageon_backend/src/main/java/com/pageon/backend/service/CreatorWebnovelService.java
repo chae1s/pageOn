@@ -3,9 +3,11 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
@@ -51,7 +53,7 @@ public class CreatorWebnovelService {
 
         String s3Url = fileUploadService.upload(webnovelCreateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
 
-        webnovel.uploadCover(s3Url);
+        webnovel.updateCover(s3Url);
     }
 
     // 내가 작성한 웹소설의 정보를 가져오는 메소드
@@ -83,4 +85,40 @@ public class CreatorWebnovelService {
                 .map(CreatorWebnovelListResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public Long updateWebnovel(PrincipalUser principalUser, Long webnovelId, WebnovelUpdateRequest webnovelUpdateRequest) {
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        Webnovel webnovel = webnovelRepository.findById(webnovelId).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
+        );
+
+        if (webnovelUpdateRequest.getTitle() != null || webnovelUpdateRequest.getDescription() != null || webnovelUpdateRequest.getSerialDay() != null) {
+            webnovel.updateWebnovelInfo(webnovelUpdateRequest);
+        }
+
+        if (webnovelUpdateRequest.getKeywords() != null) {
+            List<Keyword> keywords = keywordService.separateKeywords(webnovelUpdateRequest.getKeywords());
+
+            webnovel.updateKeywords(keywords);
+        }
+
+        if (webnovelUpdateRequest.getCoverFile() != null) {
+            // 기존 파일 삭제
+            fileUploadService.deleteFile(webnovel.getCover());
+            String newS3Url = fileUploadService.upload(webnovelUpdateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
+
+            webnovel.updateCover(newS3Url);
+        }
+
+        if (webnovelUpdateRequest.getStatus() != null) {
+            webnovel.updateStatus(webnovelUpdateRequest.getStatus());
+        }
+
+        return webnovelId;
+    }
+
+
 }

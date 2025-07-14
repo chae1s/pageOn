@@ -1,6 +1,7 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
@@ -39,6 +40,12 @@ public class CreatorWebnovelController {
     public ResponseEntity<List<CreatorWebnovelListResponse>> getMyWebnovels(@AuthenticationPrincipal PrincipalUser principalUser) {
 
         return ResponseEntity.ok(webnovelService.getMyWebnovels(principalUser));
+    }
+
+    @PatchMapping("/{webnovelId}")
+    public ResponseEntity<Long> updateWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId, @Valid @ModelAttribute WebnovelUpdateRequest webnovelUpdateRequest) {
+
+        return ResponseEntity.ok(webnovelService.updateWebnovel(principalUser, webnovelId, webnovelUpdateRequest));
     }
 
 

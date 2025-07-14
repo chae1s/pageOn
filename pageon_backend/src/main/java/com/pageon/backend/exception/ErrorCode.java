@@ -46,6 +46,7 @@ public enum ErrorCode {
     REDIS_CONNECTION_FAILED("Redis 연결에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     MAIL_SEND_FAILED("메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     S3_UPLOAD_FAILED("S3 업로드 중 오류가 발생했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
+    S3_DELETE_FAILED("S3 데이터 삭제 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // file
     FILE_PROCESSING_ERROR("파일의 MIME 타입을 읽는 데 실패했습니다.", HttpStatus.BAD_REQUEST),
