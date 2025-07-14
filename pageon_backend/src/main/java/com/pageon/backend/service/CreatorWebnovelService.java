@@ -2,14 +2,13 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.DeleteStatus;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.WebnovelDeleteRequest;
 import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
-import com.pageon.backend.entity.Creator;
-import com.pageon.backend.entity.Keyword;
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.Webnovel;
+import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
@@ -18,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class CreatorWebnovelService {
     private final FileUploadService fileUploadService;
     private final CommonService commonService;
     private final KeywordService keywordService;
+    private final ContentDeleteRequestRepository contentDeleteRequestRepository;
 
 
     @Transactional
@@ -121,4 +123,28 @@ public class CreatorWebnovelService {
     }
 
 
+    public void deleteRequestWebnovel(PrincipalUser principalUser, long webnovelId, WebnovelDeleteRequest webnovelDeleteRequest) {
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        Webnovel webnovel = webnovelRepository.findById(webnovelId).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
+        );
+
+        if (!webnovel.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
+        ContentDeleteRequest contentDeleteRequest = ContentDeleteRequest.builder()
+                .contentType(ContentType.WEBNOVEL)
+                .contentId(webnovel.getId())
+                .creator(creator)
+                .reason(webnovelDeleteRequest.getReason())
+                .deleteStatus(DeleteStatus.PENDING)
+                .requestedAt(LocalDateTime.now())
+                .build();
+
+        contentDeleteRequestRepository.save(contentDeleteRequest);
+
+
+    }
 }

@@ -1,10 +1,8 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.common.enums.DayOfWeek;
-import com.pageon.backend.common.enums.RoleType;
-import com.pageon.backend.common.enums.SeriesStatus;
+import com.pageon.backend.common.enums.*;
 import com.pageon.backend.dto.request.WebnovelCreateRequest;
+import com.pageon.backend.dto.request.WebnovelDeleteRequest;
 import com.pageon.backend.dto.request.WebnovelUpdateRequest;
 import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
 import com.pageon.backend.dto.response.CreatorWebnovelResponse;
@@ -51,13 +49,11 @@ class CreatorWebnovelServiceTest {
     @Mock
     private FileUploadService fileUploadService;
     @Mock
-    private CategoryRepository categoryRepository;
-    @Mock
-    private KeywordRepository keywordRepository;
-    @Mock
     private CommonService commonService;
     @Mock
     private KeywordService keywordService;
+    @Mock
+    private ContentDeleteRequestRepository contentDeleteRequestRepository;
 
     @BeforeEach
     void setUp() {
@@ -404,6 +400,72 @@ class CreatorWebnovelServiceTest {
         assertEquals("존재하지 않는 웹소설입니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.WEBNOVEL_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
     }
+
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 작품을 삭제 요청")
+    void deleteRequestWebnovel_withValidCreator_shouldRequestDeleteWebnovel() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webnovel webnovel = Webnovel.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
+
+        ContentDeleteRequest contentDeleteRequest = ContentDeleteRequest.builder()
+                .id(1L)
+                .contentId(1L)
+                .creator(creator)
+                .contentType(ContentType.WEBNOVEL)
+                .reason("그냥")
+                .deleteStatus(DeleteStatus.PENDING)
+                .requestedAt(LocalDateTime.now())
+                .build();
+
+        ArgumentCaptor<ContentDeleteRequest> requestCaptor = ArgumentCaptor.forClass(ContentDeleteRequest.class);
+        WebnovelDeleteRequest deleteRequest = new WebnovelDeleteRequest("그냥");
+        //when
+        webnovelService.deleteRequestWebnovel(mockPrincipalUser, 1L, deleteRequest);
+
+        // then
+        verify(contentDeleteRequestRepository).save(requestCaptor.capture());
+        ContentDeleteRequest request = requestCaptor.getValue();
+        assertEquals(webnovel.getId(), request.getContentId());
+        assertEquals(creator.getPenName(), request.getCreator().getPenName());
+
+    }
+
+    @Test
+    @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
+    void deleteRequestWebnovel_withInvalidWebnovelId_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        when(webnovelRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelService.deleteRequestWebnovel(mockPrincipalUser, 1L, new WebnovelDeleteRequest());
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹소설입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBNOVEL_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
 
     // role에 creator가 포함되어 있는 유저를 return
     private User createUser(Long id) {

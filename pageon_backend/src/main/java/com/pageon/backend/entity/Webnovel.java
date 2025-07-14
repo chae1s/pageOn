@@ -47,6 +47,8 @@ public class Webnovel {
     private SeriesStatus status = SeriesStatus.ONGOING;
     @Builder.Default
     private Long viewCount = 0L;
+    @Builder.Default
+    private boolean isDeleted = false;
 
     public Webnovel(String title, String description, List<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
         this.title = title;
@@ -80,6 +82,8 @@ public class Webnovel {
         if (status != null) this.status = SeriesStatus.valueOf(status);
     }
 
-
+    public void updateIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 
 }
