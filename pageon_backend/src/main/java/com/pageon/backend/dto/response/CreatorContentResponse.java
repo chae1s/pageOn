@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatorContentResponse {
+    private Long id;
     private String title;
     private String description;
     private List<CreatorKeywordResponse> keywords;
@@ -23,6 +24,7 @@ public class CreatorContentResponse {
 
     public static CreatorContentResponse fromWebnovel(Webnovel webnovel, List<CreatorKeywordResponse> keywords) {
         CreatorContentResponse creatorContentResponse = new CreatorContentResponse();
+        creatorContentResponse.setId(webnovel.getId());
         creatorContentResponse.setTitle(webnovel.getTitle());
         creatorContentResponse.setDescription(webnovel.getDescription());
         creatorContentResponse.setKeywords(keywords);
@@ -36,6 +38,7 @@ public class CreatorContentResponse {
 
     public static CreatorContentResponse fromWebtoon(Webtoon webtoon, List<CreatorKeywordResponse> keywords) {
         CreatorContentResponse creatorContentResponse = new CreatorContentResponse();
+        creatorContentResponse.setId(webtoon.getId());
         creatorContentResponse.setTitle(webtoon.getTitle());
         creatorContentResponse.setDescription(webtoon.getDescription());
         creatorContentResponse.setKeywords(keywords);

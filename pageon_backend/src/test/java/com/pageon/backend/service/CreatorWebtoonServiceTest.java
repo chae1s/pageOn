@@ -1,15 +1,15 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.common.enums.DayOfWeek;
-import com.pageon.backend.common.enums.RoleType;
-import com.pageon.backend.common.enums.SeriesStatus;
+import com.pageon.backend.common.enums.*;
 import com.pageon.backend.dto.request.ContentCreateRequest;
+import com.pageon.backend.dto.request.ContentDeleteRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
 import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.ContentDeleteRepository;
 import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
@@ -52,6 +52,8 @@ class CreatorWebtoonServiceTest {
     private KeywordService keywordService;
     @Mock
     private FileUploadService fileUploadService;
+    @Mock
+    private ContentDeleteRepository contentDeleteRepository;
 
 
     @BeforeEach
@@ -159,7 +161,7 @@ class CreatorWebtoonServiceTest {
     // 웹툰 1개 조회
     @Test
     @DisplayName("웹툰을 id로 조회했을 때 DB에 존재하고, 로그인한 유저가 작성자일 때 해당 작품을 return")
-    void getContentById_whenUserIsCreator_shouldReturnWebnovel() {
+    void getContentById_whenUserIsCreator_shouldReturnWebtoon() {
         // given
         User user = createUser(1L);
 
@@ -293,6 +295,176 @@ class CreatorWebtoonServiceTest {
         assertEquals(result.size(), webtoonList.size());
         assertEquals(result.get(0).getTitle(), webtoon.getTitle());
 
+    }
+
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 웹툰 정보를 수정")
+    void updateContent_whenValidCreatorAndCorrectInput_shouldUpdateWebtoon() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.of(webtoon));
+        String newTitle = "새 제목";
+        String newDescription = "새 내용";
+        String newSerialDay = "TUESDAY";
+        String newKeywords = "하나,둘,셋";
+        String newStatus = "REST";
+
+        List<Keyword> newKeywordList = createKeywords(newKeywords);
+        doReturn(newKeywordList).when(keywordService).separateKeywords(newKeywords);
+
+        ContentUpdateRequest request = new ContentUpdateRequest(newTitle, newDescription, newKeywords, null, newSerialDay, newStatus);
+
+        //when
+        webtoonService.updateContent(mockPrincipalUser, 1L, request);
+
+        // then
+        assertEquals(newTitle, webtoon.getTitle());
+        assertEquals(newDescription, webtoon.getDescription());
+        assertEquals(3, webtoon.getKeywords().size());
+        assertEquals(DayOfWeek.valueOf(newSerialDay), webtoon.getSerialDay());
+
+    }
+
+    @Test
+    @DisplayName("커버 이미지 변경 시 기존 s3 이미지 버킷에서 제거 후 새로운 파일 업로드")
+    void updateContent_whenWebtoonCoverUpdate_shouldDeleteOldFileAndUploadNewFile() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .cover("https://gdsdgtehh.cloudfront.net/filename.png")
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        String oldCover = webtoon.getCover();
+
+        MockMultipartFile mockFile =  new MockMultipartFile("newFile.png", "file".getBytes());
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.of(webtoon));
+
+        ContentUpdateRequest request = new ContentUpdateRequest(null, null, null, mockFile, null, null);
+
+        doNothing().when(fileUploadService).deleteFile(oldCover);
+        doReturn("newUrl").when(fileUploadService).upload(mockFile, String.format("webtoons/%d", webtoon.getId()));
+        //when
+        webtoonService.updateContent(mockPrincipalUser, 1L, request);
+
+        // then
+        verify(fileUploadService).deleteFile(oldCover);
+        verify(fileUploadService).upload(mockFile, String.format("webtoons/%d", webtoon.getId()));
+        assertEquals("newUrl", webtoon.getCover());
+
+
+    }
+
+    @Test
+    @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
+    void updateContent_withInvalidWebtoonId_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonService.updateContent(mockPrincipalUser, 1L, new ContentUpdateRequest());
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹툰입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBTOON_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 작품을 삭제 요청")
+    void deleteRequestContent_withValidCreator_shouldRequestDeleteWebtoon() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .creator(creator)
+                .keywords(createKeywords("하나,둘,셋,넷"))
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.of(webtoon));
+
+        ContentDelete contentDeleteRequest = ContentDelete.builder()
+                .id(1L)
+                .contentId(1L)
+                .creator(creator)
+                .contentType(ContentType.WEBTOON)
+                .reason("그냥")
+                .deleteStatus(DeleteStatus.PENDING)
+                .requestedAt(LocalDateTime.now())
+                .build();
+
+        ArgumentCaptor<ContentDelete> requestCaptor = ArgumentCaptor.forClass(ContentDelete.class);
+        ContentDeleteRequest deleteRequest = new ContentDeleteRequest("그냥");
+        //when
+        webtoonService.deleteRequestContent(mockPrincipalUser, 1L, deleteRequest);
+
+        // then
+        verify(contentDeleteRepository).save(requestCaptor.capture());
+        ContentDelete request = requestCaptor.getValue();
+        assertEquals(webtoon.getId(), request.getContentId());
+        assertEquals(creator.getPenName(), request.getCreator().getPenName());
+
+    }
+
+    @Test
+    @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
+    void deleteRequestContent_withInvalidWebnovelId_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        Creator creator = createCreator(1L, user, ContentType.WEBNOVEL);
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonService.deleteRequestContent(mockPrincipalUser, 1L, new ContentDeleteRequest());
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹툰입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBTOON_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
     }
 
     // role에 creator가 포함되어 있는 유저를 return

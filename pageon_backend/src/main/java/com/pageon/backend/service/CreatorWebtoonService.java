@@ -2,23 +2,23 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.DeleteStatus;
 import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
 import com.pageon.backend.dto.response.CreatorContentResponse;
-import com.pageon.backend.entity.Creator;
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.Webtoon;
+import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.ContentDeleteRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +30,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     private final KeywordService keywordService;
     private final FileUploadService fileUploadService;
     private final CommonService commonService;
+    private final ContentDeleteRepository  contentDeleteRepository;
 
     @Override
     @Transactional
@@ -84,12 +85,67 @@ public class CreatorWebtoonService implements CreatorContentService{
     }
 
     @Override
+    @Transactional
     public Long updateContent(PrincipalUser principalUser, Long contentId, ContentUpdateRequest contentUpdateRequest) {
-        return 0L;
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
+        );
+
+        if (!webtoon.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
+
+        if (contentUpdateRequest.getTitle() != null || contentUpdateRequest.getDescription() != null || contentUpdateRequest.getSerialDay() != null) {
+            webtoon.updateWebtoonInfo(contentUpdateRequest);
+        }
+
+        if (contentUpdateRequest.getKeywords() != null) {
+            List<Keyword> keywords = keywordService.separateKeywords(contentUpdateRequest.getKeywords());
+
+            webtoon.updateKeywords(keywords);
+        }
+
+        if (contentUpdateRequest.getCoverFile() != null) {
+            // 기존 파일 삭제
+            fileUploadService.deleteFile(webtoon.getCover());
+            String newS3Url = fileUploadService.upload(contentUpdateRequest.getCoverFile(), String.format("webtoons/%d", webtoon.getId()));
+
+            webtoon.updateCover(newS3Url);
+        }
+
+        if (contentUpdateRequest.getStatus() != null) {
+            webtoon.updateStatus(contentUpdateRequest.getStatus());
+        }
+
+        return webtoon.getId();
     }
 
     @Override
+    @Transactional
     public void deleteRequestContent(PrincipalUser principalUser, Long contentId, ContentDeleteRequest contentDeleteRequest) {
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
+        );
+
+        if (!webtoon.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
+        ContentDelete contentDelete = ContentDelete.builder()
+                .contentType(ContentType.WEBTOON)
+                .contentId(webtoon.getId())
+                .creator(creator)
+                .reason(contentDeleteRequest.getReason())
+                .deleteStatus(DeleteStatus.PENDING)
+                .requestedAt(LocalDateTime.now())
+                .build();
+
+        contentDeleteRepository.save(contentDelete);
 
     }
 }

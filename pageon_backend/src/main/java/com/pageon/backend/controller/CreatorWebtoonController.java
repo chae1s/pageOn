@@ -1,6 +1,8 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.request.ContentCreateRequest;
+import com.pageon.backend.dto.request.ContentDeleteRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
 import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.security.PrincipalUser;
@@ -39,5 +41,18 @@ public class CreatorWebtoonController {
     public ResponseEntity<List<CreatorContentListResponse>> getMyContents(@AuthenticationPrincipal PrincipalUser principalUser) {
 
         return ResponseEntity.ok(creatorWebtoonService.getMyContents(principalUser));
+    }
+
+    @PatchMapping("/{webtoonId}")
+    public ResponseEntity<Long> updateContent(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId, @Valid @ModelAttribute ContentUpdateRequest contentUpdateRequest) {
+
+        return ResponseEntity.ok(creatorWebtoonService.updateContent(principalUser, webtoonId, contentUpdateRequest));
+    }
+
+    @PostMapping("/{webtoonId}/delete-request")
+    public ResponseEntity<Void> deleteRequestContent(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId, @RequestBody ContentDeleteRequest contentDeleteRequest) {
+        creatorWebtoonService.deleteRequestContent(principalUser, webtoonId, contentDeleteRequest);
+
+        return ResponseEntity.ok().build();
     }
 }

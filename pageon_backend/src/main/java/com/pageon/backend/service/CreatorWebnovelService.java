@@ -99,6 +99,9 @@ public class CreatorWebnovelService implements CreatorContentService {
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
+        if (!webnovel.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
         if (contentUpdateRequest.getTitle() != null || contentUpdateRequest.getDescription() != null || contentUpdateRequest.getSerialDay() != null) {
             webnovel.updateWebnovelInfo(contentUpdateRequest);
         }
@@ -121,7 +124,7 @@ public class CreatorWebnovelService implements CreatorContentService {
             webnovel.updateStatus(contentUpdateRequest.getStatus());
         }
 
-        return webnovelId;
+        return webnovel.getId();
     }
 
 
