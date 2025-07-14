@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @DynamicUpdate
-@Table(name = "content_delete_requests")
+@Table(name = "content_deletes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ContentDelete {

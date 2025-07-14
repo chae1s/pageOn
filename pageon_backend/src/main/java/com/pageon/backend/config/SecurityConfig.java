@@ -41,7 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
-                                "/api/users/login", "/api/users/find-password"
+                                "/api/users/login", "/api/users/find-password",
+                                "/api/webnovels", "/api/webnovels/*", "/api/webtoons", "/api/webtoons/*"
                         ).permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )

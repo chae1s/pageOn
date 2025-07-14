@@ -7,7 +7,8 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorContentResponse;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
+import com.pageon.backend.dto.response.CreatorWebtoonResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -57,8 +58,7 @@ public class CreatorWebtoonService implements CreatorContentService{
         webtoon.updateCover(s3Url);
     }
 
-    @Override
-    public CreatorContentResponse getContentById(PrincipalUser principalUser, Long contentId) {
+    public CreatorWebtoonResponse getContentById(PrincipalUser principalUser, Long contentId) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -69,7 +69,7 @@ public class CreatorWebtoonService implements CreatorContentService{
         if (!webtoon.getCreator().getId().equals(creator.getId()))
             throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
 
-        return CreatorContentResponse.fromWebtoon(webtoon, keywordService.getKeywords(webtoon.getKeywords()));
+        return CreatorWebtoonResponse.fromEntity(webtoon, keywordService.getKeywords(webtoon.getKeywords()));
     }
 
     @Override

@@ -10,6 +10,9 @@ import java.util.Optional;
 public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     Optional<Webnovel> findById(Long id);
+    Optional<Webnovel> findByIdAndIsDeletedFalse(Long id);
 
     List<Webnovel> findByCreator(Creator creator);
+
+    List<Webnovel> findByIsDeletedFalse();
 }

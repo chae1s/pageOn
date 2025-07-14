@@ -7,7 +7,7 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorContentResponse;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -58,8 +58,7 @@ public class CreatorWebnovelService implements CreatorContentService {
     }
 
     // 내가 작성한 웹소설의 정보를 가져오는 메소드
-    @Override
-    public CreatorContentResponse getContentById(PrincipalUser principalUser, Long webnovelId) {
+    public CreatorWebnovelResponse getContentById(PrincipalUser principalUser, Long webnovelId) {
         // 로그인한 유저에게서 가져온 creator 정보
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
@@ -72,7 +71,7 @@ public class CreatorWebnovelService implements CreatorContentService {
         if (!webnovel.getCreator().getId().equals(creator.getId()))
             throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
 
-        return CreatorContentResponse.fromWebnovel(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
+        return CreatorWebnovelResponse.fromEntity(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
     }
 
     // 내가 작성한 웹소설 리스트를 가져오는 메소드
@@ -127,7 +126,7 @@ public class CreatorWebnovelService implements CreatorContentService {
         return webnovel.getId();
     }
 
-
+    @Override
     @Transactional
     public void deleteRequestContent(PrincipalUser principalUser, Long webnovelId, ContentDeleteRequest contentDeleteRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());

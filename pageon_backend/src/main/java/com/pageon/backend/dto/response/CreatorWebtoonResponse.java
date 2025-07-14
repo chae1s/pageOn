@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatorContentResponse {
+public class CreatorWebtoonResponse {
     private Long id;
     private String title;
     private String description;
@@ -22,22 +22,9 @@ public class CreatorContentResponse {
     private String cover;
     private DayOfWeek serialDay;
 
-    public static CreatorContentResponse fromWebnovel(Webnovel webnovel, List<CreatorKeywordResponse> keywords) {
-        CreatorContentResponse creatorContentResponse = new CreatorContentResponse();
-        creatorContentResponse.setId(webnovel.getId());
-        creatorContentResponse.setTitle(webnovel.getTitle());
-        creatorContentResponse.setDescription(webnovel.getDescription());
-        creatorContentResponse.setKeywords(keywords);
-        creatorContentResponse.setStatus(webnovel.getStatus());
-        creatorContentResponse.setCover(webnovel.getCover());
-        creatorContentResponse.setSerialDay(webnovel.getSerialDay());
 
-        return creatorContentResponse;
-
-    }
-
-    public static CreatorContentResponse fromWebtoon(Webtoon webtoon, List<CreatorKeywordResponse> keywords) {
-        CreatorContentResponse creatorContentResponse = new CreatorContentResponse();
+    public static CreatorWebtoonResponse fromEntity(Webtoon webtoon, List<CreatorKeywordResponse> keywords) {
+        CreatorWebtoonResponse creatorContentResponse = new CreatorWebtoonResponse();
         creatorContentResponse.setId(webtoon.getId());
         creatorContentResponse.setTitle(webtoon.getTitle());
         creatorContentResponse.setDescription(webtoon.getDescription());

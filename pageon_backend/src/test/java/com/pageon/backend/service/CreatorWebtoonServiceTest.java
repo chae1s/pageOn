@@ -5,7 +5,8 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorContentResponse;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
+import com.pageon.backend.dto.response.CreatorWebtoonResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -186,7 +187,7 @@ class CreatorWebtoonServiceTest {
 
         //when
 
-        CreatorContentResponse result = webtoonService.getContentById(mockPrincipalUser, 1L);
+        CreatorWebtoonResponse result = webtoonService.getContentById(mockPrincipalUser, 1L);
 
 
         // then

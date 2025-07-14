@@ -5,7 +5,7 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorContentResponse;
+import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -185,7 +185,7 @@ class CreatorWebnovelServiceTest {
 
         //when
 
-        CreatorContentResponse result = webnovelService.getContentById(mockPrincipalUser, 1L);
+        CreatorWebnovelResponse result = webnovelService.getContentById(mockPrincipalUser, 1L);
 
 
         // then

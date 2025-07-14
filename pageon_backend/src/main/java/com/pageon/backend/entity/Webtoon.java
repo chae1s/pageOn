@@ -59,6 +59,7 @@ public class Webtoon {
         this.serialDay = DayOfWeek.valueOf(serialDay);
         this.status = SeriesStatus.valueOf(status);
         this.viewCount = viewCount;
+        this.isDeleted = false;
 
     }
 
