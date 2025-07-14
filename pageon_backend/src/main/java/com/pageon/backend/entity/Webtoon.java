@@ -3,10 +3,7 @@ package com.pageon.backend.entity;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.SeriesStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -45,8 +42,10 @@ public class Webtoon {
     private DayOfWeek serialDay;
 
     // 연재, 완결, 휴재
-    private SeriesStatus status;
-    private Long viewCount;
+    @Builder.Default
+    private SeriesStatus status = SeriesStatus.ONGOING;
+    @Builder.Default
+    private Long viewCount = 0L;
 
     public Webtoon(String title, String description, List<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
         this.title = title;

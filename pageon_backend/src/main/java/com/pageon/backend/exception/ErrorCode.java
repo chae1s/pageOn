@@ -55,7 +55,8 @@ public enum ErrorCode {
     INVALID_INPUT("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // 작품
-    WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND)
+    WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND),
+    WEBTOON_NOT_FOUND("존재하지 않는 웹툰입니다.", HttpStatus.NOT_FOUND)
     ;
 
 

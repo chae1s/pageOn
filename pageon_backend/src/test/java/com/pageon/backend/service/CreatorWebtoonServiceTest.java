@@ -3,7 +3,10 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.ContentCreateRequest;
+import com.pageon.backend.dto.response.CreatorContentListResponse;
+import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -65,7 +68,7 @@ class CreatorWebtoonServiceTest {
     // 웹툰 저장
     @Test
     @DisplayName("로그인한 유저가 creator이고 content type이 webtoon일 때 제목, 설명, 웹툰, 키워드, 커버, 연재 요일 작성 시 생성 ")
-    void createWebtoon_withValidCreatorAndCorrectInput_shouldCreateWebtoon() {
+    void createContent_withValidCreatorAndCorrectInput_shouldCreateWebtoon() {
         // given
         User user = createUser(1L);
 
@@ -88,7 +91,7 @@ class CreatorWebtoonServiceTest {
         ArgumentCaptor<Webtoon> captor = ArgumentCaptor.forClass(Webtoon.class);
 
         //when
-        webtoonService.createWebtoon(mockPrincipalUser, request);
+        webtoonService.createContent(mockPrincipalUser, request);
 
         // then
         verify(webtoonRepository).save(captor.capture());
@@ -104,7 +107,7 @@ class CreatorWebtoonServiceTest {
 
     @Test
     @DisplayName("웹툰을 작성하려는 Creator의 contentType이 webtoon이 아니면 CustomException 발생")
-    void createWebtoon_withNotMatchContentType_shouldThrowCustomException() {
+    void createContent_withNotMatchContentType_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
 
@@ -115,7 +118,7 @@ class CreatorWebtoonServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webtoonService.createWebtoon(mockPrincipalUser, new ContentCreateRequest());
+            webtoonService.createContent(mockPrincipalUser, new ContentCreateRequest());
         });
 
         // then
@@ -127,7 +130,7 @@ class CreatorWebtoonServiceTest {
 
     @Test
     @DisplayName("웹툰 작성 후 cover file이 s3에 업로드가 되지 않았으면 CustomException 발생")
-    void createWebtoon_whenCoverUploadFails_shouldThrowCustomException() {
+    void createContent_whenCoverUploadFails_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
 
@@ -145,12 +148,151 @@ class CreatorWebtoonServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webtoonService.createWebtoon(mockPrincipalUser, request);
+            webtoonService.createContent(mockPrincipalUser, request);
         });
 
         // then
         assertEquals("S3 업로드 중 오류가 발생했습니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.S3_UPLOAD_FAILED, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
+    // 웹툰 1개 조회
+    @Test
+    @DisplayName("웹툰을 id로 조회했을 때 DB에 존재하고, 로그인한 유저가 작성자일 때 해당 작품을 return")
+    void getContentById_whenUserIsCreator_shouldReturnWebnovel() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(creator)
+                .keywords(new ArrayList<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.of(webtoon));
+
+        //when
+
+        CreatorContentResponse result = webtoonService.getContentById(mockPrincipalUser, 1L);
+
+
+        // then
+        assertEquals(result.getTitle(), webtoon.getTitle());
+        assertEquals(result.getDescription(), webtoon.getDescription());
+        assertEquals(result.getStatus(), webtoon.getStatus());
+        assertEquals(result.getSerialDay(), webtoon.getSerialDay());
+    }
+
+    @Test
+    @DisplayName("웹소설을 id로 조회했을 때 DB에 존재하지 않으면 CustomException 발생")
+    void getContentById_whenWebtoonNotFound_shouldThrowCustomException() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Long id = 1L;
+
+        when(webtoonRepository.findById(id)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonService.getContentById(mockPrincipalUser, id);
+        });
+
+        // then
+        assertEquals("존재하지 않는 웹툰입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.WEBTOON_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("DB에서 id로 조회한 웹소설의 작성자가 로그인한 유저가 아니면 CustomException 발생")
+    void getContentById_whenInvalidCreator_shouldThrowCustomException() {
+        // given
+        User loggedUser = createUser(1L);
+
+        User createUser = createUser(2L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(loggedUser);
+
+        Creator loggedCreator = createCreator(1L, loggedUser, ContentType.WEBTOON);
+        Creator otherCreator = createCreator(2L, createUser, ContentType.WEBTOON);
+
+        when(commonService.findCreatorByUser(loggedUser)).thenReturn(loggedCreator);
+
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(otherCreator)
+                .keywords(new ArrayList<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        when(webtoonRepository.findById(1L)).thenReturn(Optional.of(webtoon));
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonService.getContentById(mockPrincipalUser, 1L);
+        });
+
+        // then
+        assertEquals("해당 콘텐츠의 작성자가 아닙니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
+    // 작성한 웹소설 목록 리턴
+    @Test
+    @DisplayName("로그인한 작가가 자신이 작성한 웹소설의 목록을 조회")
+    void getMyContents_whenValidCreator_shouldReturnWebtoonList() {
+        // given
+        User user = createUser(1L);
+
+        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+
+        Creator creator = createCreator(1L, user, ContentType.WEBTOON);
+
+        when(commonService.findCreatorByUser(user)).thenReturn(creator);
+
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
+                .title("테스트")
+                .description("테스트")
+                .cover("테스트")
+                .creator(creator)
+                .keywords(new ArrayList<>())
+                .serialDay(DayOfWeek.MONDAY)
+                .status(SeriesStatus.ONGOING)
+                .build();
+
+        List<Webtoon> webtoonList = new ArrayList<>();
+        webtoonList.add(webtoon);
+
+        when(webtoonRepository.findByCreator(creator)).thenReturn(webtoonList);
+        //when
+        List<CreatorContentListResponse> result = webtoonService.getMyContents(mockPrincipalUser);
+
+        // then
+        assertEquals(result.size(), webtoonList.size());
+        assertEquals(result.get(0).getTitle(), webtoon.getTitle());
+
     }
 
     // role에 creator가 포함되어 있는 유저를 return

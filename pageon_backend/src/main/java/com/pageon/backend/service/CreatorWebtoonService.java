@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,12 +58,29 @@ public class CreatorWebtoonService implements CreatorContentService{
 
     @Override
     public CreatorContentResponse getContentById(PrincipalUser principalUser, Long contentId) {
-        return null;
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
+        );
+
+        if (!webtoon.getCreator().getId().equals(creator.getId()))
+            throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
+
+        return CreatorContentResponse.fromWebtoon(webtoon, keywordService.getKeywords(webtoon.getKeywords()));
     }
 
     @Override
     public List<CreatorContentListResponse> getMyContents(PrincipalUser principalUser) {
-        return List.of();
+        User user = commonService.findUserByEmail(principalUser.getUsername());
+        Creator creator = commonService.findCreatorByUser(user);
+
+        List<Webtoon> webtoons = webtoonRepository.findByCreator(creator);
+
+        return webtoons.stream()
+                .map(CreatorContentListResponse::fromWebtoon)
+                .collect(Collectors.toList());
     }
 
     @Override
