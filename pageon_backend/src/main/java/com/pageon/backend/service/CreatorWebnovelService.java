@@ -4,10 +4,10 @@ import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.DeleteStatus;
 import com.pageon.backend.dto.request.ContentCreateRequest;
-import com.pageon.backend.dto.request.WebnovelDeleteRequest;
-import com.pageon.backend.dto.request.WebnovelUpdateRequest;
-import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
-import com.pageon.backend.dto.response.CreatorWebnovelResponse;
+import com.pageon.backend.dto.request.ContentDeleteRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
+import com.pageon.backend.dto.response.CreatorContentListResponse;
+import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -23,17 +23,18 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CreatorWebnovelService {
+public class CreatorWebnovelService implements CreatorContentService {
 
     private final WebnovelRepository webnovelRepository;
     private final FileUploadService fileUploadService;
     private final CommonService commonService;
     private final KeywordService keywordService;
-    private final ContentDeleteRequestRepository contentDeleteRequestRepository;
+    private final ContentDeleteRepository contentDeleteRepository;
 
 
+    @Override
     @Transactional
-    public void createWebnovel(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
+    public void createContent(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
 
         Creator creator = commonService.findCreatorByUser(user);
@@ -57,7 +58,8 @@ public class CreatorWebnovelService {
     }
 
     // 내가 작성한 웹소설의 정보를 가져오는 메소드
-    public CreatorWebnovelResponse getWebnovelById(PrincipalUser principalUser, Long webnovelId) {
+    @Override
+    public CreatorContentResponse getContentById(PrincipalUser principalUser, Long webnovelId) {
         // 로그인한 유저에게서 가져온 creator 정보
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
@@ -70,11 +72,12 @@ public class CreatorWebnovelService {
         if (!webnovel.getCreator().getId().equals(creator.getId()))
             throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
 
-        return CreatorWebnovelResponse.fromEntity(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
+        return CreatorContentResponse.fromWebnovel(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
     }
 
     // 내가 작성한 웹소설 리스트를 가져오는 메소드
-    public List<CreatorWebnovelListResponse> getMyWebnovels(PrincipalUser principalUser) {
+    @Override
+    public List<CreatorContentListResponse> getMyContents(PrincipalUser principalUser) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -82,12 +85,13 @@ public class CreatorWebnovelService {
 
 
         return webnovels.stream()
-                .map(CreatorWebnovelListResponse::fromEntity)
+                .map(CreatorContentListResponse::fromWebnovel)
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional
-    public Long updateWebnovel(PrincipalUser principalUser, Long webnovelId, WebnovelUpdateRequest webnovelUpdateRequest) {
+    public Long updateContent(PrincipalUser principalUser, Long webnovelId, ContentUpdateRequest contentUpdateRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -95,33 +99,34 @@ public class CreatorWebnovelService {
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
-        if (webnovelUpdateRequest.getTitle() != null || webnovelUpdateRequest.getDescription() != null || webnovelUpdateRequest.getSerialDay() != null) {
-            webnovel.updateWebnovelInfo(webnovelUpdateRequest);
+        if (contentUpdateRequest.getTitle() != null || contentUpdateRequest.getDescription() != null || contentUpdateRequest.getSerialDay() != null) {
+            webnovel.updateWebnovelInfo(contentUpdateRequest);
         }
 
-        if (webnovelUpdateRequest.getKeywords() != null) {
-            List<Keyword> keywords = keywordService.separateKeywords(webnovelUpdateRequest.getKeywords());
+        if (contentUpdateRequest.getKeywords() != null) {
+            List<Keyword> keywords = keywordService.separateKeywords(contentUpdateRequest.getKeywords());
 
             webnovel.updateKeywords(keywords);
         }
 
-        if (webnovelUpdateRequest.getCoverFile() != null) {
+        if (contentUpdateRequest.getCoverFile() != null) {
             // 기존 파일 삭제
             fileUploadService.deleteFile(webnovel.getCover());
-            String newS3Url = fileUploadService.upload(webnovelUpdateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
+            String newS3Url = fileUploadService.upload(contentUpdateRequest.getCoverFile(), String.format("webnovels/%d", webnovel.getId()));
 
             webnovel.updateCover(newS3Url);
         }
 
-        if (webnovelUpdateRequest.getStatus() != null) {
-            webnovel.updateStatus(webnovelUpdateRequest.getStatus());
+        if (contentUpdateRequest.getStatus() != null) {
+            webnovel.updateStatus(contentUpdateRequest.getStatus());
         }
 
         return webnovelId;
     }
 
+
     @Transactional
-    public void deleteRequestWebnovel(PrincipalUser principalUser, long webnovelId, WebnovelDeleteRequest webnovelDeleteRequest) {
+    public void deleteRequestContent(PrincipalUser principalUser, Long webnovelId, ContentDeleteRequest contentDeleteRequest) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -132,16 +137,16 @@ public class CreatorWebnovelService {
         if (!webnovel.getCreator().getId().equals(creator.getId()))
             throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
 
-        ContentDeleteRequest contentDeleteRequest = ContentDeleteRequest.builder()
+        ContentDelete contentDelete = ContentDelete.builder()
                 .contentType(ContentType.WEBNOVEL)
                 .contentId(webnovel.getId())
                 .creator(creator)
-                .reason(webnovelDeleteRequest.getReason())
+                .reason(contentDeleteRequest.getReason())
                 .deleteStatus(DeleteStatus.PENDING)
                 .requestedAt(LocalDateTime.now())
                 .build();
 
-        contentDeleteRequestRepository.save(contentDeleteRequest);
+        contentDeleteRepository.save(contentDelete);
 
 
     }

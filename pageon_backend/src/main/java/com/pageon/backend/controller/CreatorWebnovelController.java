@@ -1,10 +1,10 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.dto.request.ContentCreateRequest;
-import com.pageon.backend.dto.request.WebnovelDeleteRequest;
-import com.pageon.backend.dto.request.WebnovelUpdateRequest;
-import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
-import com.pageon.backend.dto.response.CreatorWebnovelResponse;
+import com.pageon.backend.dto.request.ContentDeleteRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
+import com.pageon.backend.dto.response.CreatorContentListResponse;
+import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.CreatorWebnovelService;
 import jakarta.validation.Valid;
@@ -25,33 +25,33 @@ public class CreatorWebnovelController {
     private final CreatorWebnovelService creatorWebnovelService;
 
     @PostMapping()
-    public ResponseEntity<Void> createWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @ModelAttribute ContentCreateRequest webnovelCreateRequest) {
-        creatorWebnovelService.createWebnovel(principalUser, webnovelCreateRequest);
+    public ResponseEntity<Void> createContent(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @ModelAttribute ContentCreateRequest contentCreateRequest) {
+        creatorWebnovelService.createContent(principalUser, contentCreateRequest);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{webnovelId}")
-    public ResponseEntity<CreatorWebnovelResponse> getWebnovelById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
+    public ResponseEntity<CreatorContentResponse> getContentById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
 
-        return ResponseEntity.ok(creatorWebnovelService.getWebnovelById(principalUser, webnovelId));
+        return ResponseEntity.ok(creatorWebnovelService.getContentById(principalUser, webnovelId));
     }
 
     @GetMapping()
-    public ResponseEntity<List<CreatorWebnovelListResponse>> getMyWebnovels(@AuthenticationPrincipal PrincipalUser principalUser) {
+    public ResponseEntity<List<CreatorContentListResponse>> getMyContents(@AuthenticationPrincipal PrincipalUser principalUser) {
 
-        return ResponseEntity.ok(creatorWebnovelService.getMyWebnovels(principalUser));
+        return ResponseEntity.ok(creatorWebnovelService.getMyContents(principalUser));
     }
 
     @PatchMapping("/{webnovelId}")
-    public ResponseEntity<Long> updateWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId, @Valid @ModelAttribute WebnovelUpdateRequest webnovelUpdateRequest) {
+    public ResponseEntity<Long> updateContent(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId, @Valid @ModelAttribute ContentUpdateRequest contentUpdateRequest) {
 
-        return ResponseEntity.ok(creatorWebnovelService.updateWebnovel(principalUser, webnovelId, webnovelUpdateRequest));
+        return ResponseEntity.ok(creatorWebnovelService.updateContent(principalUser, webnovelId, contentUpdateRequest));
     }
 
     @PostMapping("/{webnovelId}/delete-request")
-    public ResponseEntity<Void> deleteRequestWebnovel(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId, @RequestBody WebnovelDeleteRequest webnovelDeleteRequest) {
-        creatorWebnovelService.deleteRequestWebnovel(principalUser, webnovelId, webnovelDeleteRequest);
+    public ResponseEntity<Void> deleteRequestContent(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId, @RequestBody ContentDeleteRequest contentDeleteRequest) {
+        creatorWebnovelService.deleteRequestContent(principalUser, webnovelId, contentDeleteRequest);
 
         return ResponseEntity.ok().build();
     }

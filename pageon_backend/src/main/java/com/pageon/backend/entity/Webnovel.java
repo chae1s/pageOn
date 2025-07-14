@@ -2,7 +2,7 @@ package com.pageon.backend.entity;
 
 import com.pageon.backend.common.enums.DayOfWeek;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.dto.request.WebnovelUpdateRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -65,7 +65,7 @@ public class Webnovel {
         this.cover = s3Url;
     }
 
-    public void updateWebnovelInfo(WebnovelUpdateRequest request) {
+    public void updateWebnovelInfo(ContentUpdateRequest request) {
         if (request.getTitle() != null) this.title = request.getTitle();
         if (request.getDescription() != null)this.description = request.getDescription();
         if (request.getSerialDay() != null) this.serialDay = DayOfWeek.valueOf(request.getSerialDay());

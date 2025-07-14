@@ -2,10 +2,10 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.*;
 import com.pageon.backend.dto.request.ContentCreateRequest;
-import com.pageon.backend.dto.request.WebnovelDeleteRequest;
-import com.pageon.backend.dto.request.WebnovelUpdateRequest;
-import com.pageon.backend.dto.response.CreatorWebnovelListResponse;
-import com.pageon.backend.dto.response.CreatorWebnovelResponse;
+import com.pageon.backend.dto.request.ContentDeleteRequest;
+import com.pageon.backend.dto.request.ContentUpdateRequest;
+import com.pageon.backend.dto.response.CreatorContentListResponse;
+import com.pageon.backend.dto.response.CreatorContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -53,7 +53,7 @@ class CreatorWebnovelServiceTest {
     @Mock
     private KeywordService keywordService;
     @Mock
-    private ContentDeleteRequestRepository contentDeleteRequestRepository;
+    private ContentDeleteRepository contentDeleteRequestRepository;
 
     @BeforeEach
     void setUp() {
@@ -68,7 +68,7 @@ class CreatorWebnovelServiceTest {
     // 웹소설 저장
     @Test
     @DisplayName("로그인한 유저가 creator이고 content type이 webnovel일 때 제목, 설명, 웹소설, 키워드, 커버, 연재 요일 작성 시 생성 ")
-    void createWebnovel_withValidCreatorAndCorrectInput_shouldCreateWebnovel() {
+    void createContent_withValidCreatorAndCorrectInput_shouldCreateWebnovel() {
         // given
         User user = createUser(1L);
 
@@ -91,7 +91,7 @@ class CreatorWebnovelServiceTest {
         ArgumentCaptor<Webnovel> captor = ArgumentCaptor.forClass(Webnovel.class);
         
         //when
-        webnovelService.createWebnovel(mockPrincipalUser, request);
+        webnovelService.createContent(mockPrincipalUser, request);
         
         // then
         verify(webnovelRepository).save(captor.capture());
@@ -107,7 +107,7 @@ class CreatorWebnovelServiceTest {
     
     @Test
     @DisplayName("웹소설을 작성하려는 Creator의 contentType이 webnovel이 아니면 CustomException 발생")
-    void createWebnovel_withNotMatchContentType_shouldThrowCustomException() {
+    void createContent_withNotMatchContentType_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
 
@@ -118,7 +118,7 @@ class CreatorWebnovelServiceTest {
         
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.createWebnovel(mockPrincipalUser, new ContentCreateRequest());
+            webnovelService.createContent(mockPrincipalUser, new ContentCreateRequest());
         });
         
         // then
@@ -130,7 +130,7 @@ class CreatorWebnovelServiceTest {
     
     @Test
     @DisplayName("웹소설 작성 후 cover file이 s3에 업로드가 되지 않았으면 CustomException 발생")
-    void createWebnovel_whenCoverUploadFails_shouldThrowCustomException() {
+    void createContent_whenCoverUploadFails_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
 
@@ -148,7 +148,7 @@ class CreatorWebnovelServiceTest {
         
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.createWebnovel(mockPrincipalUser, request);
+            webnovelService.createContent(mockPrincipalUser, request);
         });
         
         // then
@@ -160,7 +160,7 @@ class CreatorWebnovelServiceTest {
     // 웹소설 1개 조회
     @Test
     @DisplayName("웹소설을 id로 조회했을 때 DB에 존재하고, 로그인한 유저가 작성자일 때 해당 작품을 return")
-    void getWebnovelById_whenUserIsCreator_shouldReturnWebnovel() {
+    void getContentById_whenUserIsCreator_shouldReturnWebnovel() {
         // given
         User user = createUser(1L);
 
@@ -185,7 +185,7 @@ class CreatorWebnovelServiceTest {
 
         //when
 
-        CreatorWebnovelResponse result = webnovelService.getWebnovelById(mockPrincipalUser, 1L);
+        CreatorContentResponse result = webnovelService.getContentById(mockPrincipalUser, 1L);
 
 
         // then
@@ -197,7 +197,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("웹소설을 id로 조회했을 때 DB에 존재하지 않으면 CustomException 발생")
-    void getWebnovelById_whenWebnovelNotFound_shouldThrowCustomException() {
+    void getContentById_whenWebnovelNotFound_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
 
@@ -213,7 +213,7 @@ class CreatorWebnovelServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.getWebnovelById(mockPrincipalUser, id);
+            webnovelService.getContentById(mockPrincipalUser, id);
         });
 
         // then
@@ -224,7 +224,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("DB에서 id로 조회한 웹소설의 작성자가 로그인한 유저가 아니면 CustomException 발생")
-    void getWebnovelById_whenInvalidCreator_shouldThrowCustomException() {
+    void getContentById_whenInvalidCreator_shouldThrowCustomException() {
         // given
         User loggedUser = createUser(1L);
 
@@ -251,7 +251,7 @@ class CreatorWebnovelServiceTest {
         when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.getWebnovelById(mockPrincipalUser, 1L);
+            webnovelService.getContentById(mockPrincipalUser, 1L);
         });
 
         // then
@@ -262,7 +262,7 @@ class CreatorWebnovelServiceTest {
     // 작성한 웹소설 목록 리턴
     @Test
     @DisplayName("로그인한 작가가 자신이 작성한 웹소설의 목록을 조회")
-    void getMyWebnovels_whenValidCreator_shouldReturnWebnovelList() {
+    void getMyContents_whenValidCreator_shouldReturnWebnovelList() {
         // given
         User user = createUser(1L);
 
@@ -288,7 +288,7 @@ class CreatorWebnovelServiceTest {
 
         when(webnovelRepository.findByCreator(creator)).thenReturn(webnovelList);
         //when
-        List<CreatorWebnovelListResponse> result = webnovelService.getMyWebnovels(mockPrincipalUser);
+        List<CreatorContentListResponse> result = webnovelService.getMyContents(mockPrincipalUser);
         
         // then
         assertEquals(result.size(), webnovelList.size());
@@ -298,7 +298,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("로그인한 작가가 자신이 작성한 웹소설 정보를 수정")
-    void updateWebnovel_whenValidCreatorAndCorrectInput_shouldUpdateWebnovel() {
+    void updateContent_whenValidCreatorAndCorrectInput_shouldUpdateWebnovel() {
         // given
         User user = createUser(1L);
 
@@ -327,10 +327,10 @@ class CreatorWebnovelServiceTest {
         List<Keyword> newKeywordList = createKeywords(newKeywords);
         doReturn(newKeywordList).when(keywordService).separateKeywords(newKeywords);
 
-        WebnovelUpdateRequest request = new WebnovelUpdateRequest(newTitle, newDescription, newKeywords, null, newSerialDay, newStatus);
+        ContentUpdateRequest request = new ContentUpdateRequest(newTitle, newDescription, newKeywords, null, newSerialDay, newStatus);
 
         //when
-        webnovelService.updateWebnovel(mockPrincipalUser, 1L, request);
+        webnovelService.updateContent(mockPrincipalUser, 1L, request);
 
         // then
         assertEquals(newTitle, webnovel.getTitle());
@@ -342,7 +342,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("커버 이미지 변경 시 기존 s3 이미지 버킷에서 제거 후 새로운 파일 업로드")
-    void updateWebnovel_whenWebnovelCoverUpdate_shouldDeleteOldFileAndUploadNewFile() {
+    void updateContent_whenWebnovelCoverUpdate_shouldDeleteOldFileAndUploadNewFile() {
         // given
         User user = createUser(1L);
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
@@ -365,12 +365,12 @@ class CreatorWebnovelServiceTest {
         MockMultipartFile mockFile =  new MockMultipartFile("newFile.png", "file".getBytes());
         when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
 
-        WebnovelUpdateRequest request = new WebnovelUpdateRequest(null, null, null, mockFile, null, null);
+        ContentUpdateRequest request = new ContentUpdateRequest(null, null, null, mockFile, null, null);
 
         doNothing().when(fileUploadService).deleteFile(oldCover);
         doReturn("newUrl").when(fileUploadService).upload(mockFile, String.format("webnovels/%d", webnovel.getId()));
         //when
-        webnovelService.updateWebnovel(mockPrincipalUser, 1L, request);
+        webnovelService.updateContent(mockPrincipalUser, 1L, request);
 
         // then
         verify(fileUploadService).deleteFile(oldCover);
@@ -382,7 +382,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
-    void updateWebnovel_withInvalidWebnovelId_shouldThrowCustomException() {
+    void updateContent_withInvalidWebnovelId_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
@@ -393,7 +393,7 @@ class CreatorWebnovelServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.updateWebnovel(mockPrincipalUser, 1L, new WebnovelUpdateRequest());
+            webnovelService.updateContent(mockPrincipalUser, 1L, new ContentUpdateRequest());
         });
 
         // then
@@ -403,7 +403,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("로그인한 작가가 자신이 작성한 작품을 삭제 요청")
-    void deleteRequestWebnovel_withValidCreator_shouldRequestDeleteWebnovel() {
+    void deleteRequestContent_withValidCreator_shouldRequestDeleteWebnovel() {
         // given
         User user = createUser(1L);
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
@@ -422,7 +422,7 @@ class CreatorWebnovelServiceTest {
 
         when(webnovelRepository.findById(1L)).thenReturn(Optional.of(webnovel));
 
-        ContentDeleteRequest contentDeleteRequest = ContentDeleteRequest.builder()
+        ContentDelete contentDeleteRequest = ContentDelete.builder()
                 .id(1L)
                 .contentId(1L)
                 .creator(creator)
@@ -432,14 +432,14 @@ class CreatorWebnovelServiceTest {
                 .requestedAt(LocalDateTime.now())
                 .build();
 
-        ArgumentCaptor<ContentDeleteRequest> requestCaptor = ArgumentCaptor.forClass(ContentDeleteRequest.class);
-        WebnovelDeleteRequest deleteRequest = new WebnovelDeleteRequest("그냥");
+        ArgumentCaptor<ContentDelete> requestCaptor = ArgumentCaptor.forClass(ContentDelete.class);
+        ContentDeleteRequest deleteRequest = new ContentDeleteRequest("그냥");
         //when
-        webnovelService.deleteRequestWebnovel(mockPrincipalUser, 1L, deleteRequest);
+        webnovelService.deleteRequestContent(mockPrincipalUser, 1L, deleteRequest);
 
         // then
         verify(contentDeleteRequestRepository).save(requestCaptor.capture());
-        ContentDeleteRequest request = requestCaptor.getValue();
+        ContentDelete request = requestCaptor.getValue();
         assertEquals(webnovel.getId(), request.getContentId());
         assertEquals(creator.getPenName(), request.getCreator().getPenName());
 
@@ -447,7 +447,7 @@ class CreatorWebnovelServiceTest {
 
     @Test
     @DisplayName("DB에 수정하려는 작품이 없을 때 CustomException 발생")
-    void deleteRequestWebnovel_withInvalidWebnovelId_shouldThrowCustomException() {
+    void deleteRequestContent_withInvalidWebnovelId_shouldThrowCustomException() {
         // given
         User user = createUser(1L);
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
@@ -458,7 +458,7 @@ class CreatorWebnovelServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelService.deleteRequestWebnovel(mockPrincipalUser, 1L, new WebnovelDeleteRequest());
+            webnovelService.deleteRequestContent(mockPrincipalUser, 1L, new ContentDeleteRequest());
         });
 
         // then

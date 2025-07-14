@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "content_delete_requests")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ContentDeleteRequest {
+public class ContentDelete {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

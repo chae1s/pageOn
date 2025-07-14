@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WebnovelUpdateRequest {
+public class ContentUpdateRequest {
 
     @NotBlank(message = "웹소설 제목을 입력해주세요.")
     private String title;
