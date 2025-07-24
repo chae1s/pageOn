@@ -1,5 +1,6 @@
 package com.pageon.backend.security;
 
+import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,12 +54,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("소셜로그인 토큰 발행");
 
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : roleTypes) {
+            userRoles.add(roleType.toString());
+        }
+
         jwtProvider.sendTokens(response, accessToken, refreshToken);
         setRefreshToken(user, refreshToken);
         String redirectUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/oauth/callback")
                 .queryParam("accessToken", accessToken)
                 .queryParam("provider", provider)
+                .queryParam("userRoles", userRoles)
                 .build()
                 .toUriString();
 

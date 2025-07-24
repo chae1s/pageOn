@@ -25,6 +25,8 @@ public class SignupRequest {
 
     @NotBlank(message = "닉네임을 입력해주세요.")
     private String nickname;
+    private String birthDate;
+    private String gender;
 
     private Boolean termsAgreed;
 }

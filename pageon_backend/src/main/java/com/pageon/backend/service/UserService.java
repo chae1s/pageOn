@@ -1,15 +1,16 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.request.FindPasswordRequest;
-import com.pageon.backend.dto.request.LoginRequest;
-import com.pageon.backend.dto.request.SignupRequest;
-import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.common.enums.Gender;
+import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
+import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
+import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -34,11 +35,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.DateFormat;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -74,14 +75,18 @@ public class UserService {
 
 
     private User createUser(SignupRequest request) {
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        log.info((request.getBirthDate()));
+        LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
         return User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .birthDate(birthDate)
+                .gender(Gender.valueOf(request.getGender()))
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .isDeleted(false)
-                .terms_agreed(request.getTermsAgreed())
+                .termsAgreed(request.getTermsAgreed())
                 .build();
 
     }
@@ -120,8 +125,12 @@ public class UserService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : principalUser.getRoleType()) {
+            userRoles.add(roleType.toString());
+        }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider());
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider(), userRoles);
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
@@ -241,14 +250,14 @@ public class UserService {
     }
 
     @Transactional
-    public Map<String, Object> deleteAccount(Long id, String password, HttpServletRequest request) {
+    public Map<String, Object> deleteAccount(Long id, UserDeleteRequest userDeleteRequest, HttpServletRequest request) {
         User user = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
         if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
 
-            return deleteEmailAccount(user, password, request);
+            return deleteEmailAccount(user, userDeleteRequest.getPassword(), request);
         } else {
 
             return deleteSocialAccount(user, request);
@@ -355,5 +364,13 @@ public class UserService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new CustomException(ErrorCode.OAUTH_UNLINK_FAILED);
         }
+    }
+
+    public boolean checkIdentityVerification(PrincipalUser principalUser) {
+        if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
+            return true;
+        }
+
+        throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
     }
 }

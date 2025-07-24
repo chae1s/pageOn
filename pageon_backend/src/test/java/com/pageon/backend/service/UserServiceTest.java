@@ -1,9 +1,6 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.request.FindPasswordRequest;
-import com.pageon.backend.dto.request.LoginRequest;
-import com.pageon.backend.dto.request.SignupRequest;
-import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
 import com.pageon.backend.dto.token.AccessToken;
@@ -102,7 +99,7 @@ public class UserServiceTest {
     @DisplayName("모든 정보가 유효할 때 회원가입 성공")
     void signup_withValidInfo_shouldSucceed() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -130,7 +127,7 @@ public class UserServiceTest {
         // given
         roleRepository.deleteAll();
 
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
 
         doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(User.class));
 
@@ -149,7 +146,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 기본 권한 UserRole 함께 저장")
     void signup_shouldCreateUserRoleWithDefaultRole() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
         doAnswer(invocation -> {
@@ -181,7 +178,7 @@ public class UserServiceTest {
     @DisplayName("회원가입 시 provider는 EMAIL, providerId는 null로 저장")
     void signup_shouldSetProviderAsEmailAndProviderIdAsNull() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -202,7 +199,7 @@ public class UserServiceTest {
     @Test
     @DisplayName("회원가입 시 IsDeleted는 false로 저장")
     void signup_shouldSetIsDeletedAsFalseByDefault() {
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", true);
+        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -827,6 +824,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
+        UserDeleteRequest userDeleteRequest = new UserDeleteRequest(password, 1, "", "");
         User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
@@ -853,7 +851,7 @@ public class UserServiceTest {
         when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
 
         //when
-        Map<String, Object> result = userService.deleteAccount(userId, password, request);
+        Map<String, Object> result = userService.deleteAccount(userId, userDeleteRequest, request);
 
         // then
         assertTrue((boolean) result.get("isDeleted"));
@@ -867,6 +865,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
+        UserDeleteRequest userDeleteRequest = new UserDeleteRequest(password, 1, "", "");
         User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
@@ -883,7 +882,7 @@ public class UserServiceTest {
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
 
         //when
-        Map<String, Object> result = userService.deleteAccount(userId, password, request);
+        Map<String, Object> result = userService.deleteAccount(userId, userDeleteRequest, request);
 
         // then
         assertFalse((boolean) result.get("isDeleted"));
@@ -892,7 +891,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용장일 경우 CustomException 발생")
+    @DisplayName("존재하지 않는 사용자일 경우 CustomException 발생")
     void deleteAccount_withInvalidUser_shouldThrowCustomException() {
         // given
         Long userId = 1L;
@@ -903,7 +902,7 @@ public class UserServiceTest {
 
         //when
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
-            userService.deleteAccount(userId, password, request);
+            userService.deleteAccount(userId, new UserDeleteRequest(), request);
         });
 
 

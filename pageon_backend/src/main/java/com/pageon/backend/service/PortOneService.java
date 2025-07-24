@@ -37,7 +37,7 @@ public class PortOneService {
     //  본인인증 요청 식별 위해 identityVerificationId 발급 후 redis에 저장
     public IdentityVerificationIdResponse createIdentityVerificationId(PrincipalUser principalUser) {
         User user = commonService.findUserByEmail(principalUser.getUsername());
-
+        log.info("identityVerificationId 발급");
         if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername()))
             throw new CustomException(ErrorCode.IDENTITY_ALREADY_VERIFIED);
 
@@ -70,6 +70,7 @@ public class PortOneService {
 
         try {
             redisTemplate.opsForValue().set(identityVerificationId, otpVerificationPayload, Duration.ofMinutes(3));
+            log.info("본인인증 번호 redis 저장");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }

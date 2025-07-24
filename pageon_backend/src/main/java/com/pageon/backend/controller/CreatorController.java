@@ -18,12 +18,6 @@ public class CreatorController {
 
     private final CreatorService creatorService;
 
-    @GetMapping("/register")
-    public ResponseEntity<Boolean> checkIdentityVerification(@AuthenticationPrincipal PrincipalUser principalUser){
-
-        return ResponseEntity.ok(creatorService.checkIdentityVerification(principalUser));
-    }
-
     @PostMapping("/register")
     public ResponseEntity<Void> registerCreator(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @RequestBody RegisterCreatorRequest request) {
         creatorService.registerCreator(principalUser, request);

@@ -2,12 +2,12 @@ package com.pageon.backend.entity;
 
 import com.pageon.backend.common.base.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,11 +27,19 @@ public class WebtoonEpisode extends BaseTimeEntity {
 
     private Integer episodeNum;
     private String episodeTitle;
-    private String imageUrls;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "webtoonEpisode", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WebtoonImage> images = new ArrayList<>();
 
     // 대여 금액
     private Integer rentalPrice;
     // 구매 금액
     private Integer purchasePrice;
+
+    public void addImage(WebtoonImage image) {
+        this.images.add(image);
+        image.addEpisode(this);
+    }
 
 }

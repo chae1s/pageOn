@@ -1,6 +1,8 @@
 package com.pageon.backend.config;
 
 import com.opencsv.CSVReader;
+import com.pageon.backend.common.enums.Gender;
+import com.pageon.backend.common.enums.IdentityProvider;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.exception.CustomException;
@@ -15,11 +17,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 @Component
@@ -35,6 +39,9 @@ public class InitContentData implements ApplicationRunner {
     private final WebnovelRepository webnovelRepository;
     private final FileUploadService fileUploadService;
     private final WebtoonRepository webtoonRepository;
+    private final WebnovelEpisodeRepository webnovelEpisodeRepository;
+    private final WebtoonImageRepository webtoonImageRepository;
+    private final WebtoonEpisodeRepository webtoonEpisodeRepository;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -43,6 +50,8 @@ public class InitContentData implements ApplicationRunner {
         initKeywords();
         initWebnovels();
         initWebtoons();
+        initWebnovelEpisode();
+        initWebtoonEpisode();
 
     }
 
@@ -59,9 +68,13 @@ public class InitContentData implements ApplicationRunner {
 
             String [] line;
             while ((line = csvReader.readNext()) != null) {
-                User users = userRepository.findByIdAndIsDeletedFalse(Long.valueOf(line[1])).orElseThrow(() -> new RuntimeException("user 없음"));
+                User user = userRepository.findByIdAndIsDeletedFalse(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("user 없음"));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                LocalDate birthDate = LocalDate.parse(line[5], formatter);
+                user.updateIdentityVerification(line[3], line[4], birthDate, Gender.valueOf(line[6]), line[7], true, IdentityProvider.DANAL);
 
-                Creator creators = new Creator(line[0], users, ContentType.valueOf(line[2]), Boolean.valueOf(line[3]));
+
+                Creator creators = new Creator(line[1], user, ContentType.valueOf(line[2]));
 
                 creatorRepository.save(creators);
 
@@ -78,7 +91,7 @@ public class InitContentData implements ApplicationRunner {
             categoryRepository.save(new Category("소재"));
             categoryRepository.save(new Category("배경"));
             categoryRepository.save(new Category("분위기"));
-            categoryRepository.save(new Category("형식"));
+            categoryRepository.save(new Category("형식/기타"));
             categoryRepository.save(new Category("카테고리 미배정"));
         }
     }
@@ -129,13 +142,13 @@ public class InitContentData implements ApplicationRunner {
 
                 Webnovel webnovel = new Webnovel(
                         line[0],
-                        line[2],
-                        separateKeywords(line[1]),
+                        line[1],
+                        separateKeywords(line[2]),
                         creator,
                         s3Url,
-                        line[5],
+                        line[6],
                         line[7],
-                        Long.parseLong(line[8])
+                        Long.parseLong(line[5])
                 );
 
                 webnovelRepository.save(webnovel);
@@ -213,6 +226,139 @@ public class InitContentData implements ApplicationRunner {
         }
 
         return new ArrayList<>(keywordMap.values());
+    }
+
+    public void initWebnovelEpisode() {
+        if (webnovelEpisodeRepository.count() > 0) {
+            return;
+        }
+        InputStream inputStream = getClass().getResourceAsStream("/data/webnovelEpisode.csv");
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+        CSVReader csvReader = new CSVReader(inputStreamReader);
+
+        String[] line;
+        int i = 1;
+        try {
+            while ((line = csvReader.readNext()) != null) {
+                Webnovel webnovel = webnovelRepository.findById(Long.parseLong(line[0])).orElseThrow(
+                        () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
+                );
+
+                String filePath = String.format("C:/Users/user/Desktop/project/pageon_txt/%s", line[4]);
+                String content = readTextFile(filePath);
+
+                WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder()
+                        .episodeNum(Integer.parseInt(line[2]))
+                        .episodeTitle(line[3])
+                        .webnovel(webnovel)
+                        .content(content)
+                        .purchasePrice(100)
+                        .build();
+
+                webnovelEpisodeRepository.save(webnovelEpisode);
+
+            }
+        } catch (Exception e) {
+            log.error("에러 발생: {}", e.getMessage());
+            throw new RuntimeException();
+        }
+    }
+
+    private String readTextFile(String path) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            StringBuffer sb = new StringBuffer();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void initWebtoonEpisode() {
+        if (webtoonEpisodeRepository.count() > 0) {
+            return;
+        }
+        InputStream inputStream = getClass().getResourceAsStream("/data/webtoonEpisode.csv");
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+        CSVReader csvReader = new CSVReader(inputStreamReader);
+        boolean check = true;
+        String[] line;
+        try {
+            while ((line = csvReader.readNext()) != null) {
+                Webtoon webtoon = webtoonRepository.findById(Long.parseLong(line[0])).orElseThrow(
+                        () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
+                );
+
+                List<String> webtoonImages = new ArrayList<>();
+                if (check) {
+                    webtoonImages = webtoonImageUpload();
+                    check = false;
+                } else {
+                    webtoonImages = webtoonImageUrl();
+                }
+
+                WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder()
+                        .episodeNum(Integer.parseInt(line[1]))
+                        .episodeTitle(line[2])
+                        .webtoon(webtoon)
+                        .rentalPrice(300)
+                        .purchasePrice(500)
+                        .build();
+
+                int index = 1;
+                for (String imageUrl : webtoonImages) {
+                    WebtoonImage webtoonImage = WebtoonImage.builder()
+                            .sequence(index++)
+                            .imageUrl(imageUrl)
+                            .build();
+
+                    webtoonEpisode.addImage(webtoonImage);
+                }
+
+                webtoonEpisodeRepository.save(webtoonEpisode);
+
+            }
+        } catch (Exception e) {
+            log.error("에러 발생: {}", e.getMessage());
+            throw new RuntimeException();
+        }
+    }
+
+    // 이미지 업로드 필요할 때 사용
+    private List<String> webtoonImageUpload() {
+        List<String> images = new ArrayList<>();
+        // 에피소드 한 편당 52개의 이미지 업로드
+        for (int i = 0; i < 52; i++) {
+            File file = new File(String.format("/Users/user/Desktop/project/pageon_images/webtoons/episode/episodeCut%d.png", i + 1));
+
+            String imageUrl = fileUploadService.localFileUpload(file, "webtoons/common/episode/common");
+
+            // s3 url을 list에 저장
+            images.add(imageUrl);
+        }
+
+        return images;
+    }
+
+    private List<String> webtoonImageUrl() {
+        List<String> images = new ArrayList<>();
+
+        for (int i = 0; i < 52; i++) {
+            String imageUrl = String.format("https://d2ge55k9wic00e.cloudfront.net/webtoons/common/episode/common/episodeCut%d.png",i + 1);
+
+            // s3 url을 list에 저장
+            images.add(imageUrl);
+        }
+
+        return images;
     }
 
 

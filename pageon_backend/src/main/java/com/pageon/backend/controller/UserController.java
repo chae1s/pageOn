@@ -1,9 +1,6 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.request.FindPasswordRequest;
-import com.pageon.backend.dto.request.LoginRequest;
-import com.pageon.backend.dto.request.SignupRequest;
-import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
 import com.pageon.backend.security.CustomOauth2UserService;
@@ -95,14 +92,16 @@ public class UserController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> deleteAccount(
-            @AuthenticationPrincipal PrincipalUser principalUser, @RequestBody Map<String, String> body, HttpServletRequest request
+            @AuthenticationPrincipal PrincipalUser principalUser, @RequestBody UserDeleteRequest userDeleteRequest, HttpServletRequest request
     ) {
 
-        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), body.get("password"), request));
-
+        log.info("탈퇴");
+        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), userDeleteRequest, request));
     }
 
-    public void deleteSocialAccount(@AuthenticationPrincipal PrincipalUser principalUser) {
+    @GetMapping("/check-identity")
+    public ResponseEntity<Boolean> checkIdentityVerification(@AuthenticationPrincipal PrincipalUser principalUser){
 
+        return ResponseEntity.ok(userService.checkIdentityVerification(principalUser));
     }
 }

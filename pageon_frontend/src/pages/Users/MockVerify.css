@@ -1,0 +1,183 @@
+.verify-form {
+  margin: 0 auto;
+  background: #fff;
+  padding: 18px 20px 20px 20px;
+}
+
+.verify-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.verify-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 7px;
+}
+
+.verify-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fafafa;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.verify-birth-gender-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.birth-input {
+  flex: 0 0 40%;
+}
+
+.birth-input::placeholder {
+    font-size: 10px;
+    line-height: 46px;
+}
+
+.gender-input {
+  width: 37px;
+  text-align: center;
+}
+
+.gender-input::placeholder {
+    font-size: 10px;
+    line-height: 46px;
+}
+
+.verify-birth-dash {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+.verify-captcha-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.verify-captcha-img {
+  width: 90px;
+  height: 32px;
+  border: 1px solid #ccc;
+  background: #fff;
+  object-fit: cover;
+}
+.captcha-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.verify-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.verify-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  border-radius: 3px;
+}
+.verify-checkbox-label {
+  font-size: 0.97rem;
+  color: #222;
+  cursor: pointer;
+}
+
+.verify-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.verify-btn {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 20px;
+}
+.verify-btn.cancel {
+  background: #f5f5f5;
+  color: #888;
+  border: 1px solid #ddd;
+}
+.verify-btn.confirm {
+  background: #444;
+  color: #fff;
+}
+
+.verify-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verify-carrier-select {
+  height: 46px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
+  font-size: 1rem;
+  color: #444;
+}
+
+.verify-code-form {
+  margin: 0 auto;
+  background: #fff;
+  padding: 18px 20px 20px 20px;
+}
+
+.code-input {
+  border: 1px solid #ccc;
+  background: #fafdff;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+
+.code-input:focus {
+  border-color: var(--accent-color);
+}
+
+.verify-code-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 18px 0;
+}
+.verify-timer-label {
+  font-size: 0.97rem;
+  color: #444;
+  margin-right: 4px;
+}
+.verify-timer {
+  color: #fc5858;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-right: 12px;
+}
+.verify-timer-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.97rem;
+  cursor: pointer;
+  margin-right: 6px;
+  padding: 0 2px;
+}
+.verify-timer-btn:last-child {
+  margin-right: 0;
+}

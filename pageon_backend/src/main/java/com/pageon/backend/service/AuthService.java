@@ -1,6 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.RoleType;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -57,7 +59,12 @@ public class AuthService {
 
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        return new JwtTokenResponse(true, accessToken, user.getOAuthProvider());
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : roleTypes) {
+            userRoles.add(roleType.toString());
+        }
+
+        return new JwtTokenResponse(true, accessToken, user.getOAuthProvider(), userRoles);
 
     }
 

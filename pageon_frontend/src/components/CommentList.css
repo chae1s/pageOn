@@ -1,0 +1,136 @@
+.comments-list {
+    width: 100%;
+    margin: 0 0 80px;
+}
+
+.sort-btn-list {
+    display: flex;
+    padding: 16px 0;
+}
+
+.sort-btn-list button.active {
+    color: #69a3ff;
+    font-weight: 500;
+}
+
+.sort-btn-list button:not(.active) {
+    color: #b4b4b4;
+}
+
+.comments-list ul {
+    display: grid;
+}
+
+.comments-list ul p {
+    margin: 0 auto;
+}
+
+.comments-list ul li {
+    display: grid;
+    gap: 7px;
+    margin: 0;
+    padding: 16px 0;
+}
+
+.comments-list ul li:not(:first-of-type) {
+    border-top: 1px solid #e6e6e6;
+}
+
+.comment-episode {
+    display: flex;
+    font-size: 15px;
+    color: #a5a5a5;
+    line-height: 18px;
+}
+
+.comment-title {
+    margin-right: 10px;
+}
+
+.comment-content {
+    position: relative;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.comment-content p {
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: calc(24px * 4);
+    line-height: 24px;
+    white-space: pre-line;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+.comment-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comment-info-left {
+    display: grid;
+    gap: 6px;
+    color: #a5a5a5;
+    line-height: 17px;
+}
+
+.comment-user-info {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    width: fit-content;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 17px;
+}
+
+.comment-date-btn {
+    display: flex;
+    align-items: center;
+    margin: 8.5px 0;
+    color: #a5a5a5;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 17px;
+}
+
+.comment-space {
+    background: #f0f0f0;
+    border-radius: 999px;
+    width: 1px;
+    height: 10px;
+    margin: 0 7px;
+}
+
+.comment-btn {
+    font-weight: 500;
+    background: none;
+    box-shadow: none;
+    color: #a5a5a5;
+}
+
+.comment-btn-divider {
+    width: 2px;
+    height: 2px;
+    margin: 0 5px;
+    border-radius: 999px;
+    background: #e6e6e6;
+}
+
+.comment-like-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 7px;
+    color: #787878;
+    font-weight: 500;  
+    line-height: 16px;
+    margin-left: 6px;
+    min-width: 64px;
+    font-size: 14px;
+    gap: 10px;
+}

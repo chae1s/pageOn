@@ -44,11 +44,13 @@ public class Creator {
     @OneToMany(mappedBy = "creator")
     private List<Webnovel> webnovels = new ArrayList<>();
 
-    public Creator(String penName, User users, ContentType contentType, boolean isActive) {
+    public Creator(String penName, User users, ContentType contentType) {
         this.penName = penName;
         this.user = users;
         this.contentType = contentType;
-        this.isActive = isActive;
+        this.isActive = true;
+        this.aiPolicyAgreedAt = LocalDateTime.now();
+        this.agreedToAiPolicy = true;
     }
 
 }

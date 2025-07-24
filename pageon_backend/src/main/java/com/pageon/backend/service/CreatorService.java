@@ -27,17 +27,8 @@ import java.util.Optional;
 public class CreatorService {
 
     private final CreatorRepository creatorRepository;
-    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CommonService commonService;
-
-    public boolean checkIdentityVerification(PrincipalUser principalUser) {
-        if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
-            return true;
-        }
-
-        throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
-    }
 
     @Transactional
     public void registerCreator(PrincipalUser principalUser, RegisterCreatorRequest creatorRequest) {

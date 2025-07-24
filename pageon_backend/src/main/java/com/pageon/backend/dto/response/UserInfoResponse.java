@@ -8,23 +8,21 @@ import java.time.LocalDate;
 
 @Data
 public class UserInfoResponse {
+    private Long id;
     private String email;
     private String nickname;
     private LocalDate birthDate;
     private Integer pointBalance;
-    private OAuthProvider provider;
-    private String name;
-    private boolean isPhoneVerified;
+    private OAuthProvider oAuthProvider;
 
     public static UserInfoResponse fromEntity(User user) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
+        userInfoResponse.setId(user.getId());
         userInfoResponse.setEmail(user.getEmail());
         userInfoResponse.setNickname(user.getNickname());
         userInfoResponse.setBirthDate(user.getBirthDate());
         userInfoResponse.setPointBalance(user.getPointBalance());
-        userInfoResponse.setProvider(user.getOAuthProvider());
-        userInfoResponse.setName(user.getName());
-        userInfoResponse.setPhoneVerified(user.getIsPhoneVerified());
+        userInfoResponse.setOAuthProvider(user.getOAuthProvider());
         return userInfoResponse;
     }
 }

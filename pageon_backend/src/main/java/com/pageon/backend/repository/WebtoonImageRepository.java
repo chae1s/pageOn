@@ -1,4 +1,7 @@
 package com.pageon.backend.repository;
 
-public interface WebtoonImageRepository {
+import com.pageon.backend.entity.WebtoonImage;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface WebtoonImageRepository extends JpaRepository<WebtoonImage, Long> {
 }

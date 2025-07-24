@@ -1,0 +1,6 @@
+{
+    "emmet.preferences": {
+        "format.forceIndentationForNewLine": true,  
+        "format.lineBreak": true
+    }
+}

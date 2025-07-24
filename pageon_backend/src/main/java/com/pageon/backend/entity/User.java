@@ -51,10 +51,11 @@ public class User {
 
     // Soft Delete
     @Column(nullable = false)
-    private Boolean isDeleted;
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     @Column(nullable = false)
-    private Boolean terms_agreed;
+    private Boolean termsAgreed;
 
     // 본인인증 추가 정보
     private String name;
@@ -62,7 +63,8 @@ public class User {
     private String phoneNumber;
     private Gender gender;
     private String di;
-    private Boolean isPhoneVerified;
+    @Builder.Default
+    private Boolean isPhoneVerified = false;
     private IdentityProvider identityProvider;
 
 
@@ -119,15 +121,18 @@ public class User {
         this.identityProvider = identityProvider;
     }
 
-    public User(String email, String password, String nickname, Integer pointBalance, OAuthProvider oAuthProvider, boolean isDeleted) {
+    public User(String email, String password, String nickname, LocalDate birthDate, Integer pointBalance, OAuthProvider oAuthProvider, Gender gender) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.birthDate = birthDate;
         this.pointBalance = pointBalance;
         this.oAuthProvider = oAuthProvider;
-        this.isDeleted = isDeleted;
+        this.isDeleted = false;
         this.userRoles = new ArrayList<>();
-        this.terms_agreed = true;
+        this.termsAgreed = true;
+        this.isPhoneVerified = false;
+        this.gender = gender;
     }
 
 
