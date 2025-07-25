@@ -1,10 +1,8 @@
 package com.pageon.backend.config;
 
 import com.opencsv.CSVReader;
-import com.pageon.backend.common.enums.Gender;
-import com.pageon.backend.common.enums.IdentityProvider;
+import com.pageon.backend.common.enums.*;
 import com.pageon.backend.entity.*;
-import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
@@ -40,7 +38,6 @@ public class InitContentData implements ApplicationRunner {
     private final FileUploadService fileUploadService;
     private final WebtoonRepository webtoonRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
-    private final WebtoonImageRepository webtoonImageRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
 
     @Override
@@ -106,16 +103,18 @@ public class InitContentData implements ApplicationRunner {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
             CSVReader csvReader = new CSVReader(inputStreamReader);
-
+            List<Keyword> keywords = new ArrayList<>();
             String [] line;
             while ((line = csvReader.readNext()) != null) {
                 Category category = categoryRepository.findById(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("카테고리 없음"));
 
-                Keyword keyWords = new Keyword(category, line[1].trim());
+                Keyword keyWord = new Keyword(category, line[1].trim());
 
-                keywordRepository.save(keyWords);
+                keywords.add(keyWord);
 
             }
+
+            keywordRepository.saveAll(keywords);
 
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
@@ -130,7 +129,7 @@ public class InitContentData implements ApplicationRunner {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
         CSVReader csvReader = new CSVReader(inputStreamReader);
-
+        List<Webnovel> webnovels = new ArrayList<>();
         String[] line;
         int i = 1;
         try {
@@ -140,21 +139,22 @@ public class InitContentData implements ApplicationRunner {
                 File file = new File(String.format("/Users/user/Desktop/project/pageon_images/webnovels/%s", line[4]));
                 String s3Url = fileUploadService.localFileUpload(file, String.format("webnovels/%d", i++));
 
-                Webnovel webnovel = new Webnovel(
-                        line[0],
-                        line[1],
-                        separateKeywords(line[2]),
-                        creator,
-                        s3Url,
-                        line[6],
-                        line[7],
-                        Long.parseLong(line[5])
-                );
+                Webnovel webnovel = Webnovel.builder()
+                        .title(line[0])
+                        .description(line[1])
+                        .keywords(separateKeywords(line[2]))
+                        .creator(creator)
+                        .cover(s3Url)
+                        .serialDay(DayOfWeek.valueOf(line[6]))
+                        .status(SeriesStatus.valueOf(line[7]))
+                        .viewCount(Long.parseLong(line[5]))
+                        .isDeleted(false)
+                        .build();
 
-                webnovelRepository.save(webnovel);
-
-
+                webnovels.add(webnovel);
             }
+
+            webnovelRepository.saveAll(webnovels);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();
@@ -171,7 +171,7 @@ public class InitContentData implements ApplicationRunner {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
         CSVReader csvReader = new CSVReader(inputStreamReader);
-
+        List<Webtoon> webtoons = new ArrayList<>();
         String[] line;
         int i = 1;
         try {
@@ -181,21 +181,23 @@ public class InitContentData implements ApplicationRunner {
                 File file = new File(String.format("/Users/user/Desktop/project/pageon_images/webtoons/%s", line[4]));
                 String s3Url = fileUploadService.localFileUpload(file, String.format("webtoons/%d", i++));
 
-                Webtoon webtoon = new Webtoon(
-                        line[0],
-                        line[2],
-                        separateKeywords(line[1]),
-                        creator,
-                        s3Url,
-                        line[7],
-                        line[5],
-                        Long.parseLong(line[6])
-                );
+                Webtoon webtoon = Webtoon.builder()
+                        .title(line[0])
+                        .description(line[1])
+                        .keywords(separateKeywords(line[2]))
+                        .creator(creator)
+                        .cover(s3Url)
+                        .serialDay(DayOfWeek.valueOf(line[5]))
+                        .status(SeriesStatus.valueOf(line[6]))
+                        .viewCount(Long.parseLong(line[7]))
+                        .isDeleted(false)
+                        .build();
 
-                webtoonRepository.save(webtoon);
-
+                webtoons.add(webtoon);
 
             }
+
+            webtoonRepository.saveAll(webtoons);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();
@@ -236,7 +238,7 @@ public class InitContentData implements ApplicationRunner {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
         CSVReader csvReader = new CSVReader(inputStreamReader);
-
+        List<WebnovelEpisode> webnovelEpisodes = new ArrayList<>();
         String[] line;
         int i = 1;
         try {
@@ -256,9 +258,11 @@ public class InitContentData implements ApplicationRunner {
                         .purchasePrice(100)
                         .build();
 
-                webnovelEpisodeRepository.save(webnovelEpisode);
+                webnovelEpisodes.add(webnovelEpisode);
 
             }
+
+            webnovelEpisodeRepository.saveAll(webnovelEpisodes);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();
@@ -291,6 +295,7 @@ public class InitContentData implements ApplicationRunner {
         CSVReader csvReader = new CSVReader(inputStreamReader);
         boolean check = true;
         String[] line;
+        List<WebtoonEpisode> webtoonEpisodes = new ArrayList<>();
         try {
             while ((line = csvReader.readNext()) != null) {
                 Webtoon webtoon = webtoonRepository.findById(Long.parseLong(line[0])).orElseThrow(
@@ -306,8 +311,8 @@ public class InitContentData implements ApplicationRunner {
                 }
 
                 WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder()
-                        .episodeNum(Integer.parseInt(line[1]))
-                        .episodeTitle(line[2])
+                        .episodeNum(Integer.parseInt(line[2]))
+                        .episodeTitle(line[3])
                         .webtoon(webtoon)
                         .rentalPrice(300)
                         .purchasePrice(500)
@@ -323,9 +328,10 @@ public class InitContentData implements ApplicationRunner {
                     webtoonEpisode.addImage(webtoonImage);
                 }
 
-                webtoonEpisodeRepository.save(webtoonEpisode);
+                webtoonEpisodes.add(webtoonEpisode);
 
             }
+            webtoonEpisodeRepository.saveAll(webtoonEpisodes);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();

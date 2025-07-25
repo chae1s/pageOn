@@ -21,13 +21,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: drop
+      ddl-auto: update
     show-sql: true
     defer-datasource-initialization: true
     properties:
       hibernate:
         jdbc:
-          batch_size: 500
+          batch_size: 1000
           batch_versioned_data: true
         order_insert: true
         order_updates: true

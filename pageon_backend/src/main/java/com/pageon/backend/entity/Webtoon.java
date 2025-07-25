@@ -50,18 +50,6 @@ public class Webtoon {
     @Builder.Default
     private Boolean isDeleted = false;
 
-    public Webtoon(String title, String description, List<Keyword> keywords, Creator creator, String cover, String serialDay, String status, Long viewCount) {
-        this.title = title;
-        this.description = description;
-        this.keywords = keywords;
-        this.creator = creator;
-        this.cover = cover;
-        this.serialDay = DayOfWeek.valueOf(serialDay);
-        this.status = SeriesStatus.valueOf(status);
-        this.viewCount = viewCount;
-        this.isDeleted = false;
-
-    }
 
     public void updateCover(String s3Url) {
         this.cover = s3Url;
