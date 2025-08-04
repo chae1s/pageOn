@@ -5,7 +5,6 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.dto.response.CreatorWebtoonResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
@@ -103,7 +102,7 @@ class CreatorWebtoonServiceTest {
         assertEquals("웹툰 제목", webtoon.getTitle());
         assertEquals("웹툰 설명", webtoon.getDescription());
         assertEquals("/webtoons/cover.png", webtoon.getCover());
-        assertEquals(DayOfWeek.MONDAY, webtoon.getSerialDay());
+        assertEquals(SerialDay.MONDAY, webtoon.getSerialDay());
     }
 
 
@@ -179,7 +178,7 @@ class CreatorWebtoonServiceTest {
                 .cover("테스트")
                 .creator(creator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -246,7 +245,7 @@ class CreatorWebtoonServiceTest {
                 .cover("테스트")
                 .creator(otherCreator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -281,7 +280,7 @@ class CreatorWebtoonServiceTest {
                 .cover("테스트")
                 .creator(creator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -315,7 +314,7 @@ class CreatorWebtoonServiceTest {
                 .description("테스트")
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -338,7 +337,7 @@ class CreatorWebtoonServiceTest {
         assertEquals(newTitle, webtoon.getTitle());
         assertEquals(newDescription, webtoon.getDescription());
         assertEquals(3, webtoon.getKeywords().size());
-        assertEquals(DayOfWeek.valueOf(newSerialDay), webtoon.getSerialDay());
+        assertEquals(SerialDay.valueOf(newSerialDay), webtoon.getSerialDay());
 
     }
 
@@ -358,7 +357,7 @@ class CreatorWebtoonServiceTest {
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
                 .cover("https://gdsdgtehh.cloudfront.net/filename.png")
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -418,7 +417,7 @@ class CreatorWebtoonServiceTest {
                 .description("테스트")
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -476,7 +475,7 @@ class CreatorWebtoonServiceTest {
                 .email("test@mail.com")
                 .nickname("테스트")
                 .userRoles(new ArrayList<>())
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(true)
                 .build();
 

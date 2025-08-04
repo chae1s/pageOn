@@ -38,11 +38,14 @@ public class User {
     )
     private String nickname;
     private LocalDate birthDate;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Builder.Default
     private Integer pointBalance = 0;
 
     // email, kakao, naver, google
+    @Enumerated(EnumType.STRING)
     private OAuthProvider oAuthProvider;
 
     // 소셜 로그인 시 제공받는 id
@@ -52,7 +55,7 @@ public class User {
     // Soft Delete
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private Boolean deleted = false;
 
     @Column(nullable = false)
     private Boolean termsAgreed;
@@ -61,10 +64,10 @@ public class User {
     private String name;
     @Column(unique = true)
     private String phoneNumber;
-    private Gender gender;
     private String di;
     @Builder.Default
     private Boolean isPhoneVerified = false;
+    @Enumerated(EnumType.STRING)
     private IdentityProvider identityProvider;
 
 
@@ -100,7 +103,7 @@ public class User {
     }
 
     public void delete() {
-        this.isDeleted = true;
+        this.deleted = true;
     }
 
     public void deleteEmail(String deleteEmail) {
@@ -128,7 +131,7 @@ public class User {
         this.birthDate = birthDate;
         this.pointBalance = pointBalance;
         this.oAuthProvider = oAuthProvider;
-        this.isDeleted = false;
+        this.deleted = false;
         this.userRoles = new ArrayList<>();
         this.termsAgreed = true;
         this.isPhoneVerified = false;

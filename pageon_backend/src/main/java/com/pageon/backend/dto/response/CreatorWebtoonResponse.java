@@ -1,8 +1,7 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +19,7 @@ public class CreatorWebtoonResponse {
     private List<CreatorKeywordResponse> keywords;
     private SeriesStatus status;
     private String cover;
-    private DayOfWeek serialDay;
+    private SerialDay serialDay;
 
 
     public static CreatorWebtoonResponse fromEntity(Webtoon webtoon, List<CreatorKeywordResponse> keywords) {

@@ -1,12 +1,140 @@
 import React, {useState, useEffect, useCallback} from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
-import "./Users.css"
+import styled from "styled-components";
+import * as U from "./Users.styles"
+import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import { SignupRequest } from "../../types/User";
-import { useNavigate, Link} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const SignupNessesary = styled.div`
+    margin-left: 5px;
+    margin-bottom: 5px;
+    font-size: 13px;
+`
 
+const NessesaryCheck = styled.span`
+    color: #fc5858;
+    margin-right: 3px;
+`
+
+const UsersFormBirthDate = styled.div`
+    flex: 0 0 65%;
+`
+
+const UsersFormGenderCheckbox = styled.div`
+    width: 100%;
+`
+
+const UsersFromGroupGenderLabel = styled.div`
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+`
+
+const UsersFormGroupGender = styled.div`
+    flex: 0 0 35%;
+    display: flex;
+`
+
+const UsersFormGenderLabelLeft = styled.label<{selected: boolean}>`
+    width: 50%;
+    height: 47px;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background-color: ${({ selected }) => (selected ? "#A0C4FF !important" : "#fff")};
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border: 1px solid ${({ selected }) => (selected ? "#A0C4FF" : "#ccc")};
+    color: ${({ selected }) => (selected ? "#FFF" : "#444")};
+    border-right: none;
+
+`
+
+const UsersFormGenderLabelRight = styled.label<{selected: boolean}>`
+    width: 50%;
+    height: 47px;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background-color: ${({ selected }) => (selected ? "#A0C4FF !important" : "#fff")};
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border: 1px solid ${({ selected }) => (selected ? "#A0C4FF" : "#ccc")};
+    color: ${({ selected }) => (selected ? "#FFF" : "#444")};
+`
+
+const UsersTerms = styled.div`
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 16px 14px 10px 14px;
+    margin-top: 10px;
+    margin-bottom: 18px;
+    font-size: 0.97rem;
+    color: #444;
+`
+
+const GenderInput = styled.input`
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0px;
+    overflow: hidden;
+    border: 0;
+`
+
+const TermsContent = styled.div`
+    margin-bottom: 8px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 3px;
+    border: 1px solid #eee;
+    font-size: 0.92rem;
+    color: #666;
+    max-height: 170px;
+    overflow-y: auto;
+    line-height: 1.5;
+`
+
+const TermsLabel = styled.label`
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 8px;
+    justify-content: center;
+`
+
+const TermsInput = styled.input`
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin-top: 5px;
+    margin-right: 15px;
+    accent-color: var(--accent-color);
+`
 
 function SignupEmail() {
     const [formData, setFormData] = useState<SignupRequest>({
@@ -31,7 +159,7 @@ function SignupEmail() {
     const validate = useCallback((data: SignupRequest, checkRequired = false) => {
         const newErrors: ErrorMap = {};
 
-        const {email, password, confirmPassword, nickname, birthDate, gender, termsAgreed} = data;
+        const {email, password, confirmPassword, nickname, birthDate} = data;
 
         // 이메일 유효성 검사
         if (checkRequired && !email) {
@@ -286,120 +414,118 @@ function SignupEmail() {
 
 
     return (
-        <div className="main-container">
-            <main className="no-sidebar-main">
-                <div className="users-form-wrapper">
-                    <h1 className="users-title">회원가입</h1>
-                    <form className="users-form" onSubmit={handleSubmit}>
-                        <div className="users-form-group">
-                            <label htmlFor="email">이메일 <span className="nessesary-check">*</span></label>
-                            <input 
+        <MainContainer>
+            <NoSidebarMain>
+                <U.UsersFormWrapper>
+                    <U.UsersTitle>회원가입</U.UsersTitle>
+                    <U.UsersForm onSubmit={handleSubmit}>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="email">이메일 <NessesaryCheck>*</NessesaryCheck></U.UsersFormLabel>
+                            <U.UsersFormInput
+                                validation={getInputclassName("email")}
                                 type="email"
                                 id="email"
                                 name="email"
-                                className={`form-input ${getInputclassName("email")}`}
                                 value={formData.email}
                                 placeholder="이메일을 입력해주세요."
                                 onChange={handleChange}
                                 onBlur={handleEmailBlur}
                             />
                             {errors.email && (
-                                <p className="error-message">{errors.email}</p>
+                                <U.ErrorMessage>{errors.email}</U.ErrorMessage>
                             )}
-                        </div>
-                        <div className="users-form-group">
-                            <label htmlFor="password">비밀번호 <span className="nessesary-check">*</span></label>
-                            <input 
+                        </U.UsersFormGroup>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="password">비밀번호 <NessesaryCheck>*</NessesaryCheck></U.UsersFormLabel>
+                            <U.UsersFormInput
+                                validation={getInputclassName("password")}
                                 type="password"
                                 id="password"
                                 name="password"
                                 value={formData.password}
-                                className={`form-input ${getInputclassName("password")}`}
                                 onChange={handleChange}
                                 placeholder="비밀번호를 입력해주세요."
                             />
                             {errors.password && (
-                                <p className="error-message">{errors.password}</p>
+                                <U.ErrorMessage>{errors.password}</U.ErrorMessage>
                             )}
-                        </div>
-                        <div className="users-form-group">
-                            <label htmlFor="confirmPassword">비밀번호 확인 <span className="nessesary-check">*</span></label>
-                            <input 
+                        </U.UsersFormGroup>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="confirmPassword">비밀번호 확인 <NessesaryCheck>*</NessesaryCheck></U.UsersFormLabel>
+                            <U.UsersFormInput
+                                validation={getInputclassName("confirmPassword")}
                                 type="password"
                                 id="confirmPassword"
                                 name="confirmPassword"
-                                className={`form-input ${getInputclassName("confirmPassword")}`}
                                 onChange={handleChange}
                                 value={formData.confirmPassword}
                                 placeholder="비밀번호를 다시 입력해주세요."
                                 required
                             />
                             {errors.confirmPassword && (
-                                <p className="error-message">{errors.confirmPassword}</p>
+                                <U.ErrorMessage>{errors.confirmPassword}</U.ErrorMessage>
                             )}
-                        </div>
-                        <div className="users-form-group">
-                            <label htmlFor="nickname">닉네임 <span className="nessesary-check">*</span></label>
-                            <input 
+                        </U.UsersFormGroup>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="nickname">닉네임 <NessesaryCheck>*</NessesaryCheck></U.UsersFormLabel>
+                            <U.UsersFormInput
+                                validation={getInputclassName("nickname")} 
                                 type="nickname"
                                 id="nickname"
                                 name="nickname"
-                                className={`form-input ${getInputclassName("nickname")}`}
                                 onChange={handleChange}
                                 onBlur={handleNicknameBlur}
                                 value={formData.nickname}
                                 placeholder="닉네임을 입력해주세요."
                             />
                             {errors.nickname && (
-                                <p className="error-message">{errors.nickname}</p>
+                                <U.ErrorMessage>{errors.nickname}</U.ErrorMessage>
                             )}
-                        </div>
-                        <div className="users-form-group users-birthDate-gender">
-                            <div className="users-form-birth-date">
-                                <label htmlFor="birthDate">생년월일</label>
-                                <input 
+                        </U.UsersFormGroup>
+                        <U.UsersFormGroup className="users-birthDate-gender">
+                            <UsersFormBirthDate>
+                                <U.UsersFormLabel htmlFor="birthDate">생년월일</U.UsersFormLabel>
+                                <U.UsersFormInput
+                                    validation={getInputclassName("birthDate")}
                                     type="text"
                                     id="birthDate"
                                     name="birthDate"
-                                    className={`form-input ${getInputclassName("birthDate")}`}
                                     onChange={handleChange}
                                     value={formData.birthDate}
                                     placeholder="생년월일을 입력해주세요."
                                 />
                                 {errors.birthDate && (
-                                    <p className="error-message">{errors.birthDate}</p>
+                                    <U.ErrorMessage>{errors.birthDate}</U.ErrorMessage>
                                 )}
-                            </div>
-                            <div className="users-form-gender-checkbox">
-                                <div className="users-form-group-gender-label">성별</div>
-                                <div className="users-form-group-gender">
-                                    <label className={`users-form-left ${formData.gender === "MALE" ? "selected" : ""}`}>
-                                        <input 
+                            </UsersFormBirthDate>
+                            <UsersFormGenderCheckbox>
+                                <UsersFromGroupGenderLabel>성별</UsersFromGroupGenderLabel>
+                                <UsersFormGroupGender>
+                                    <UsersFormGenderLabelLeft selected={formData.gender === "MALE"}>
+                                        <GenderInput
                                             type="checkbox"
                                             id="gender"
                                             name="gender"
-                                            className="form-input"
                                             onChange={() => handleGenderChange("MALE")}
                                             checked={formData.gender === "MALE"}
                                         />
                                         <span>남</span>
-                                    </label>
-                                    <label className={`users-form-right ${formData.gender === "FEMALE" ? "selected" : ""}`}>
-                                        <input 
+                                    </UsersFormGenderLabelLeft>
+                                    <UsersFormGenderLabelRight selected={formData.gender === "FEMALE"}>
+                                        <GenderInput
                                             type="checkbox"
                                             name="gender"
-                                            className="form-input"
                                             onChange={() => handleGenderChange("FEMALE")}
                                             checked={formData.gender === "FEMALE"}
                                         />
                                         <span>여</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="signup-nessesary"><span className="nessesary-check">*</span>는 필수 입력 사항입니다.</div>
-                        <div className="users-terms">
-                            <div className="terms-content">
+                                    </UsersFormGenderLabelRight>
+                                </UsersFormGroupGender>
+                            </UsersFormGenderCheckbox>
+                        </U.UsersFormGroup>
+                        <SignupNessesary><NessesaryCheck>*</NessesaryCheck>는 필수 입력 사항입니다.</SignupNessesary>
+                        <UsersTerms>
+                            <TermsContent>
                                 제 1 조 (목적)<br /><br />
                                 이 약관은 pageOn (이하 "회사")가 제공하는 웹소설 및 웹툰 플랫폼(이하 "서비스") 이용과 관련하여 
                                 회사와 회원 간의 권리, 의무 및 기타 필요한 사항을 규정함을 목적으로 합니다.
@@ -497,9 +623,9 @@ function SignupEmail() {
                                 <br />
                                 부칙<br />
                                 본 약관은 2025년 7월 7일부터 시행됩니다.
-                            </div>
-                            <label htmlFor="termsAgreed" className="terms-label">
-                                <input 
+                            </TermsContent>
+                            <TermsLabel htmlFor="termsAgreed">
+                                <TermsInput
                                     type="checkbox" 
                                     id="termsAgreed"
                                     name="termsAgreed"
@@ -507,22 +633,22 @@ function SignupEmail() {
                                     required
                                     onChange={handleChange}
                                 />
-                                <span className="term-message">본 이용약관 및 AI 콘텐츠 관련 고지사항을 <br />모두 확인하였으며, 이에 동의합니다.</span>
-                            </label>
-                        </div>
-                        <button className="submit-btn" type="submit" disabled={!isFormValid}>
+                                <div className="term-message">본 이용약관 및 AI 콘텐츠 관련 고지사항을 <br />모두 확인하였으며, 이에 동의합니다.</div>
+                            </TermsLabel>
+                        </UsersTerms>
+                        <U.SubmitBtn type="submit" disabled={!isFormValid}>
                             회원가입
-                        </button>
-                    </form>
-                    <div className="users-link">
+                        </U.SubmitBtn>
+                    </U.UsersForm>
+                    <U.UsersLinkWrap>
                         <span>이미 계정이 있으신가요?</span>
-                        <Link to={"/users/login"}>로그인</Link>
+                        <U.UsersLink to={"/users/login"}>로그인</U.UsersLink>
 
-                    </div>
-                </div>
-            </main>
+                    </U.UsersLinkWrap>
+                </U.UsersFormWrapper>
+            </NoSidebarMain>
 
-        </div>
+        </MainContainer>
     )
 }
 

@@ -1,10 +1,127 @@
 import React, {useState, useEffect} from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
+import { styled } from "styled-components";
+import { MainContainer, SidebarMain } from "../../styles/Layout.styles";
+import * as M from "./MyPage.styles"
 import { UserProfile, DeleteRequest } from "../../types/User";
 import axios from "axios";
-import Sidebar from "../../components/MyPageSidebar";
-import "./MyPage.css"
+import Sidebar from "../../components/Sidebars/MyPageSidebar";
+
+const WithdrawWarning = styled.div`
+    padding: 20px;
+    margin-bottom: 10px;
+`
+
+const WithdrawEmail = styled.span`
+    color: #528efa !important;
+    font-size: 20px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+    margin-top: 0;
+    display: inline-block;
+`
+
+const WithdrawEmailUnit = styled.span`
+    margin-left: 5px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+    margin-top: 0;
+    display: inline-block;
+`
+
+const WithdrawCheckMsg = styled.p`
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 12px;
+    margin-top: 0;
+`
+
+const WithdrawCheckUl = styled.ul`
+    margin: 0;
+    padding-left: 20px;
+`
+
+const WithdrawCheckLi = styled.li`
+    color: #444;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+`
+
+const WithdrawMyPointInfo = styled.div`
+    margin-top: 5px;
+    margin-left: 20px;
+    font-size: 0.9rem;
+    color: #444;
+`
+
+const WithDrawMyPointText = styled.span`
+    color: #FC5858;
+    font-weight: 600;
+`
+
+const WithdrawMyPointValue = styled.span`
+    color: #FC5858;
+    font-weight: 600;
+    font-size: 16px;
+`
+
+const WithdrawReasonSection = styled.div`
+    padding: 20px;
+`
+
+const WithdrawReasonTitle = styled.p`
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 12px;
+  margin-top: 0;
+`
+
+const WithdrawReasonOptions = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 20px;
+`
+
+const WithdrawReasonLabel = styled.label`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 0;
+`
+
+const WithdrawReasonInput = styled.input`
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+`
+
+const WithdrawReasonText = styled.span`
+    font-size: 0.95rem;
+    color: #444;
+    cursor: pointer;
+    line-height: 1.4;
+`
+
+const WithdrawOtherReason = styled.input`
+    width: 300px;
+    padding: 4px 0;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
+    margin-left: 8px;
+    background: none;
+`
+
+const WithdrawPasswordCheck = styled.div`
+    max-width: 400px;
+    margin: 30px auto 0;
+    padding: 32px;
+`
+
 
 function Withdraw() {
     type WithdrawUserInfo = Pick<UserProfile, "id" | "email" | "pointBalance" | "oauthProvider">;
@@ -141,74 +258,72 @@ function Withdraw() {
 
 
     return (
-        <div className="main-container">
-            <main className="sidebar-main">
+        <MainContainer>
+            <SidebarMain>
                 <Sidebar />
-                <div className="sidebar-right-wrap withdraw">
-                    <h2 className="mypage-title">회원탈퇴</h2>
-                    <div className="withdraw-warning">
-                        <span className="withdraw-email">{userInfo?.email}</span><span className="unit">님</span>
-                        <p>회원탈퇴 시 다음 사항을 확인해주세요. : </p>
-                        <ul>
-                            <li>• 모든 개인정보와 서비스 이용 기록이 삭제됩니다.</li>
-                            <li>• 보유한 포인트와 쿠폰이 모두 소멸됩니다.
-                                <div className="withdraw-point-info">
-                                    <span>현재 내 잔여 포인트: </span>
-                                    <span className="withdraw-point-value">{userInfo?.pointBalance} P</span>
-                                </div>
-                            </li>
-                            <li>• 탈퇴 후에는 복구할 수 없습니다.</li>
-                            <li>• 탈퇴를 원하시면 비밀번호를 입력해주세요.</li>
-                        </ul>
-                    </div>
+                <M.SidebarRightWrap>
+                    <M.MypageTitle>회원탈퇴</M.MypageTitle>
+                    <WithdrawWarning>
+                        <WithdrawEmail>{userInfo?.email}</WithdrawEmail><WithdrawEmailUnit>님</WithdrawEmailUnit>
+                        <WithdrawCheckMsg>회원탈퇴 시 다음 사항을 확인해주세요. : </WithdrawCheckMsg>
+                        <WithdrawCheckUl>
+                            <WithdrawCheckLi>• 모든 개인정보와 서비스 이용 기록이 삭제됩니다.</WithdrawCheckLi>
+                            <WithdrawCheckLi>• 보유한 포인트와 쿠폰이 모두 소멸됩니다.
+                                <WithdrawMyPointInfo>
+                                    <WithDrawMyPointText>현재 내 잔여 포인트: </WithDrawMyPointText>
+                                    <WithdrawMyPointValue>{userInfo?.pointBalance} P</WithdrawMyPointValue>
+                                </WithdrawMyPointInfo>
+                            </WithdrawCheckLi>
+                            <WithdrawCheckLi>• 탈퇴 후에는 복구할 수 없습니다.</WithdrawCheckLi>
+                            <WithdrawCheckLi>• 탈퇴를 원하시면 비밀번호를 입력해주세요.</WithdrawCheckLi>
+                        </WithdrawCheckUl>
+                    </WithdrawWarning>
                     <form onSubmit={handleSumbit}>
-                        <div className="withdraw-reason-section">
-                            <p className="withdraw-reason-title">탈퇴하는 이유를 말해주세요 :</p>
-                            <div className="withdraw-reason-options">
+                        <WithdrawReasonSection>
+                            <WithdrawReasonTitle>탈퇴하는 이유를 말해주세요 :</WithdrawReasonTitle>
+                            <WithdrawReasonOptions>
                                 {withdrawReasons.map((reason, index) => (
-                                    <label key={index} className="withdraw-reason-option">
-                                        <input 
+                                    <WithdrawReasonLabel key={index}>
+                                        <WithdrawReasonInput 
                                             type="radio"
                                             name="withdrawReason"
                                             value={index}
                                             onChange={handleReasonChange}
                                         />
-                                        <span className="withdraw-reason-text">{reason}</span>
+                                        <WithdrawReasonText>{reason}</WithdrawReasonText>
                                         {reason === "기타" && (
-                                            <input 
+                                            <WithdrawOtherReason 
                                                 type="text" 
-                                                className="withdraw-other-reason" 
                                                 value={deleteData.otherReason}
                                                 placeholder="기타 이유를 입력해주세요."
                                                 onChange={handleOtherReasonChange}
                                             />
                                         )}
-                                    </label>
+                                    </WithdrawReasonLabel>
                                 ))}
-                            </div>
-                        </div>
-                        <div className="password-check-form">
+                            </WithdrawReasonOptions>
+                        </WithdrawReasonSection>
+                        <WithdrawPasswordCheck>
                             {userInfo?.oauthProvider === "EMAIL" && (
-                                <div className="password-check-form-group">
-                                    <label htmlFor="">비밀번호</label>
-                                    <input 
+                                <div>
+                                    <M.PasswordCheckLabel htmlFor="">비밀번호</M.PasswordCheckLabel>
+                                    <M.PasswordCheckInput 
                                         type="password" 
                                         id="password"
                                         value={deleteData.password}
-                                        className="password-check-input"
                                         onChange={handlePasswordChange}
                                     />
                                     {error && 
-                                        <div className="error-message">{error}</div>
+                                        <M.ErrorMessage>{error}</M.ErrorMessage>
                                     }
                                 </div>
                             )}
-                            <button type="submit" className="submit-btn">탈퇴하기</button>
-                        </div>
+                            <M.SubmitBtn type="submit">탈퇴하기</M.SubmitBtn>
+                        </WithdrawPasswordCheck>
                     </form>
-                </div>
-            </main>
-        </div>
+                </M.SidebarRightWrap>
+            </SidebarMain>
+        </MainContainer>
     )
 
 }

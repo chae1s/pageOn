@@ -1,5 +1,7 @@
 package com.pageon.backend.controller;
 
+import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebnovelResponse;
 import com.pageon.backend.service.UserWebnovelService;
@@ -30,5 +32,11 @@ public class UserWebnovelController {
     public ResponseEntity<List<UserContentListResponse>> getWebnovels() {
 
         return ResponseEntity.ok(userWebnovelService.getWebnovels());
+    }
+
+    @GetMapping("/daily/{day}")
+    public ResponseEntity<List<ContentSimpleResponse>> getWebnovelsByDay(@PathVariable String day) {
+
+        return ResponseEntity.ok(userWebnovelService.getWebnovelsByDay(day));
     }
 }

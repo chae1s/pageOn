@@ -100,7 +100,7 @@ class CreatorWebnovelServiceTest {
         assertEquals("웹소설 제목", webnovel.getTitle());
         assertEquals("웹소설 설명", webnovel.getDescription());
         assertEquals("/webnovels/cover.png", webnovel.getCover());
-        assertEquals(DayOfWeek.MONDAY, webnovel.getSerialDay());
+        assertEquals(SerialDay.MONDAY, webnovel.getSerialDay());
     }
 
 
@@ -177,7 +177,7 @@ class CreatorWebnovelServiceTest {
                 .cover("테스트")
                 .creator(creator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -244,7 +244,7 @@ class CreatorWebnovelServiceTest {
                 .cover("테스트")
                 .creator(otherCreator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -279,7 +279,7 @@ class CreatorWebnovelServiceTest {
                 .cover("테스트")
                 .creator(creator)
                 .keywords(new ArrayList<>())
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -313,7 +313,7 @@ class CreatorWebnovelServiceTest {
                 .description("테스트")
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -336,7 +336,7 @@ class CreatorWebnovelServiceTest {
         assertEquals(newTitle, webnovel.getTitle());
         assertEquals(newDescription, webnovel.getDescription());
         assertEquals(3, webnovel.getKeywords().size());
-        assertEquals(DayOfWeek.valueOf(newSerialDay), webnovel.getSerialDay());
+        assertEquals(SerialDay.valueOf(newSerialDay), webnovel.getSerialDay());
 
     }
 
@@ -356,7 +356,7 @@ class CreatorWebnovelServiceTest {
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
                 .cover("https://gdsdgtehh.cloudfront.net/filename.png")
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -416,7 +416,7 @@ class CreatorWebnovelServiceTest {
                 .description("테스트")
                 .creator(creator)
                 .keywords(createKeywords("하나,둘,셋,넷"))
-                .serialDay(DayOfWeek.MONDAY)
+                .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
@@ -475,7 +475,7 @@ class CreatorWebnovelServiceTest {
                 .email("test@mail.com")
                 .nickname("테스트")
                 .userRoles(new ArrayList<>())
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(true)
                 .build();
 

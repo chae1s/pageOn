@@ -1,7 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.DeleteStatus;
 import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
@@ -47,7 +47,7 @@ public class CreatorWebnovelService implements CreatorContentService {
                 .description(contentCreateRequest.getDescription())
                 .creator(creator)
                 .keywords(keywordService.separateKeywords(contentCreateRequest.getKeywords()))
-                .serialDay(DayOfWeek.valueOf(contentCreateRequest.getSerialDay()))
+                .serialDay(SerialDay.valueOf(contentCreateRequest.getSerialDay()))
                 .build();
 
         webnovelRepository.save(webnovel);

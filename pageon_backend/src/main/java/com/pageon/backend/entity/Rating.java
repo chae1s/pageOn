@@ -23,6 +23,7 @@ public class Rating {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;     // 댓글달린 작품이 웹툰인지 웹소설인지 표시
     private Integer contentId;
 

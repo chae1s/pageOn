@@ -26,6 +26,7 @@ public class Like extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;     // 좋아요 작품이 웹툰인지 웹소설인지 표시
     private Integer contentId;      // 해당 작품의 id
 

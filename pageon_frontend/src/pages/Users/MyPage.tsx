@@ -1,15 +1,168 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
+import styled from "styled-components";
+import { MainContainer, SidebarMain } from "../../styles/Layout.styles";
+import * as M from "./MyPage.styles"
 import { UserSimpleProfile } from "../../types/User";
 import { useNavigate, Link} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { SimpleBook } from "../../types/Book";
-import BookList from "../../components/BookList";
-import Sidebar from "../../components/MyPageSidebar";
-import "./MyPage.css"
+import { SimpleContent } from "../../types/Content";
+import Sidebar from "../../components/Sidebars/MyPageSidebar";
+import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 
+
+const MypageSummaryContainer = styled.div`
+    display: flex;
+    border: 1.5px solid #e0e4ea;
+    border-radius: 6px;
+    background: #fff;
+    margin-bottom: 32px;
+    overflow: hidden;
+    height: 180px;
+`
+
+const MypageSummaryLeft = styled.div`
+    background: #f6faff;
+    padding: 20px 15px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+`
+
+const MypageNickname = styled.div`
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 22px 10px 24px;
+    color: #444;
+`
+
+const MypageLogoutLink = styled(Link)`
+    background: #f8fafc;
+    color: #666;
+    font-weight: 500;
+    border-radius: 4px;
+    padding: 9px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+`
+
+const MypageSummaryRight = styled.div`
+    flex: 1;
+    padding: 24px 32px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+`
+
+const MypageSummaryRow = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0;
+`
+
+const MypageSummaryItem = styled.div`
+    flex: 1;
+    text-align: center;
+`
+
+const MypageSummaryIcon = styled.div`
+    height: 35px;
+    width: 35px;
+    margin: 3px auto;
+`
+
+const MypageSummaryLabel = styled.div`
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-bottom: 12px;
+`
+
+const MypageSummaryValueWrap = styled.div`
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const MypageSummaryValue = styled.div`
+    font-size: 23px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 2px;
+    display: inline-block;
+`
+
+const MypageSummaryValueUnit = styled.span`
+    font-size: 16px;
+    font-weight: 400;
+    color: #888;
+    margin-left: 2px;
+    vertical-align: baseline;
+    position: static;
+`
+
+const MypageChargeLinkWrap = styled.div`
+    font-size: 0.95rem;
+    color: #888;
+    margin-top: 10px;
+`
+
+const MypageChargeLink = styled(Link)`
+    color: #b0b8c1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.92em;
+`
+
+const BookSectionList = styled.section`
+    margin-bottom: 36px;
+`
+
+const BookSectionTitle = styled.div`
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+`
+
+const BookSectionTitleText = styled.span`
+    flex: 0 0 auto;
+    z-index: 1;  
+`
+
+const BookSectionTitleLine = styled.span`
+    flex: 1 1 auto;
+    height: 1px;
+    background: #e0e4ea;
+    margin: 0 16px;
+    display: block;
+`
+
+const BookSectionViewAllLink = styled(Link)`
+    color: #b0b8c1;
+    background: none;
+    border: none;
+    font-size: 0.98rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 4px 0px 4px 12px;
+    border-radius: 4px;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 0;
+`
 
 function MyPage() {
     const [userInfo, setUserInfo] = useState<UserSimpleProfile>({
@@ -63,8 +216,10 @@ function MyPage() {
             })
 
             if (response.status === 200) {
-                logout();
                 navigate("/", {replace: true});
+                setTimeout(() => {
+                    logout();
+                }, 0);
             } else {
                 alert("로그아웃에 실패했습니다.");
             }
@@ -74,66 +229,76 @@ function MyPage() {
     };
 
 
-    const dummyBooks: SimpleBook[] = [
+    const dummyBooks: SimpleContent[] = [
         {
             id: 1,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
             title: '임시 작품 제목 1',
-            author: '작가A'
+            author: '작가A',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 2,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
             title: '임시 작품 제목 2',
-            author: '작가B'
+            author: '작가B',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 3,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
             title: '임시 작품 제목 3',
-            author: '작가C'
+            author: '작가C',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 4,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
             title: '임시 작품 제목 4',
-            author: '작가D'
+            author: '작가D',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 5,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
             title: '임시 작품 제목 5',
-            author: '작가E'
+            author: '작가E',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 6,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
             title: '임시 작품 제목 6',
-            author: '작가E'
+            author: '작가E',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 7,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
             title: '임시 작품 제목 7',
-            author: '작가A'
+            author: '작가A',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 8,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
             title: '임시 작품 제목 8',
-            author: '작가B'
+            author: '작가B',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 9,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
             title: '임시 작품 제목 9',
-            author: '작가C'
+            author: '작가C',
+            contentType: 'WEBNOVEL'
         },
         {
             id: 10,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/10/webnovel10.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/10/webnovel10.png',
             title: '임시 작품 제목 10',
-            author: '작가D'
+            author: '작가D',
+            contentType: 'WEBNOVEL'
         }
     ]
 
@@ -175,65 +340,65 @@ function MyPage() {
     )
 
     return (
-        <div className="main-container">
-            <main className="sidebar-main">
+        <MainContainer>
+            <SidebarMain>
                 <Sidebar />
-                <div className="sidebar-right-wrap">
-                    <div className="mypage-summary-container">
-                        <div className="mypage-summary-left">
-                            <div className="mypage-nickname">{userInfo?.nickname}</div>
-                            <Link to={"#logout"} className="mypage-logout-link" onClick={handleLogoutClick}>로그아웃</Link>
-                        </div>
-                        <div className="mypage-summary-right">
-                            <div className="mypage-summary-row">
-                                <div className="mypage-summary-item">
-                                    <div className="icon">
+                <M.SidebarRightWrap>
+                    <MypageSummaryContainer>
+                        <MypageSummaryLeft>
+                            <MypageNickname>{userInfo?.nickname}</MypageNickname>
+                            <MypageLogoutLink to={"#logout"} onClick={handleLogoutClick}>로그아웃</MypageLogoutLink>
+                        </MypageSummaryLeft>
+                        <MypageSummaryRight>
+                            <MypageSummaryRow>
+                                <MypageSummaryItem>
+                                    <MypageSummaryIcon>
                                         <PointIcon />
-                                    </div>
-                                    <div className="label">내 포인트</div>
-                                    <div className="value-wrap">
-                                        <div className="value">{userInfo?.pointBalance}</div>
-                                        <span className="mypage-value-unit">P</span>
-                                    </div>
-                                    <div className="desc">
-                                        <Link to={"#charge"}>충전하기</Link>
-                                    </div>
-                                </div>
-                                <div className="mypage-summary-item">
-                                    <div className="icon coupon">
+                                    </MypageSummaryIcon>
+                                    <MypageSummaryLabel>내 포인트</MypageSummaryLabel>
+                                    <MypageSummaryValueWrap>
+                                        <MypageSummaryValue>{userInfo?.pointBalance}</MypageSummaryValue>
+                                        <MypageSummaryValueUnit>P</MypageSummaryValueUnit>
+                                    </MypageSummaryValueWrap>
+                                    <MypageChargeLinkWrap>
+                                        <MypageChargeLink to={"#charge"}>충전하기</MypageChargeLink>
+                                    </MypageChargeLinkWrap>
+                                </MypageSummaryItem>
+                                <MypageSummaryItem>
+                                    <MypageSummaryIcon>
                                         <CouponIcon />
-                                    </div>
-                                    <div className="label">쿠폰</div>
-                                    <div className="value-wrap">
-                                        <div className="value">0</div>
-                                        <span className="mypage-value-unit">개</span>
-                                    </div>
-                                </div>
-                                <div className="mypage-summary-item">
-                                    <div className="icon">
+                                    </MypageSummaryIcon>
+                                    <MypageSummaryLabel>쿠폰</MypageSummaryLabel>
+                                    <MypageSummaryValueWrap>
+                                        <MypageSummaryValue>0</MypageSummaryValue>
+                                        <MypageSummaryValueUnit>개</MypageSummaryValueUnit>
+                                    </MypageSummaryValueWrap>
+                                </MypageSummaryItem>
+                                <MypageSummaryItem>
+                                    <MypageSummaryIcon>
                                         <BookIcon />
-                                    </div>
-                                    <div className="label">내가 읽은 작품</div>
-                                    <div className="value-wrap">
-                                        <div className="value">0</div>
-                                        <span className="mypage-value-unit">개</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <section className="book-section-list">
-                        <div className="book-section-title">
-                            <span className="book-section-title-text">오늘 업데이트된 작품</span>
-                            <span className="book-section-title-line"></span>
-                            <Link to={"#favorite-book"} className="book-section-viewall-link">전체보기</Link>
-                        </div>
-                        <BookList simpleBooks={dummyBooks} home={false}></BookList>
-                    </section>
-                </div>
-            </main>
+                                    </MypageSummaryIcon>
+                                    <MypageSummaryLabel>내가 읽은 작품</MypageSummaryLabel>
+                                    <MypageSummaryValueWrap>
+                                        <MypageSummaryValue>0</MypageSummaryValue>
+                                        <MypageSummaryValueUnit>개</MypageSummaryValueUnit>
+                                    </MypageSummaryValueWrap>
+                                </MypageSummaryItem>
+                            </MypageSummaryRow>
+                        </MypageSummaryRight>
+                    </MypageSummaryContainer>
+                    <BookSectionList>
+                        <BookSectionTitle>
+                            <BookSectionTitleText>오늘 업데이트된 작품</BookSectionTitleText>
+                            <BookSectionTitleLine></BookSectionTitleLine>
+                            <BookSectionViewAllLink to={"#favorite-book"}>더보기</BookSectionViewAllLink>
+                        </BookSectionTitle>
+                        <ThumbnailContentList layout="grid" contents={dummyBooks}/>
+                    </BookSectionList>
+                </M.SidebarRightWrap>
+            </SidebarMain>
 
-        </div>
+        </MainContainer>
     ) 
 }
 

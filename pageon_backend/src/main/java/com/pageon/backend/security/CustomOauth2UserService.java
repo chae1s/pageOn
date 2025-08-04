@@ -94,7 +94,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .nickname(generateRandomNickname())
                 .oAuthProvider(response.getOAuthProvider())
                 .providerId(response.getProviderId())
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         roleService.assignDefaultRole(users);

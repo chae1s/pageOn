@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -21,14 +22,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {
             "userRoles", "userRoles.role"
     })
-    Optional<User> findByEmailAndIsDeletedFalse(String email);
+    Optional<User> findByEmailAndDeleted(String email, boolean deleted);
 
-    Optional<User> findByIdAndIsDeletedFalse(Long id);
+    Optional<User> findByIdAndDeleted(Long id, boolean deleted);
 
     Boolean existsByPhoneNumberAndIsPhoneVerifiedTrue(String phoneNumber);
 
     Boolean existsByEmailAndIsPhoneVerifiedTrue(String email);
-
-
 
 }

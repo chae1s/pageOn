@@ -1,8 +1,7 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,7 @@ public class UserContentListResponse {
     private String coverUrl;
     private String penName;
     private List<UserKeywordResponse> keywords;
-    private DayOfWeek serialDay;
+    private SerialDay serialDay;
     private SeriesStatus status;
     private Integer episodeCount;
     private Integer averageRating;

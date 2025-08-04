@@ -1,7 +1,7 @@
 import React from "react";
 import "../../styles/reset.css"
 import "../../styles/global.css"
-import CreatorSidebar from "../../components/CreatorSidebar";
+import CreatorSidebar from "../../components/Sidebars/CreatorSidebar";
 import "./Creators.css"
 function CreatorDashbord() {
 

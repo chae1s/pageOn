@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
+import styled from "styled-components";
+import * as U from "./Users.styles"
+import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import "./Users.css"
 import { useNavigate, Link} from "react-router-dom";
 import axios from "axios";
+
+const SuccessMessage = styled.p`
+    margin-top: 8px;
+    color: #528efa;
+`
 
 function PasswordFind() {
     const [email, setEmail] = useState<string>("");
@@ -46,14 +52,14 @@ function PasswordFind() {
     }
 
     return(
-        <div className="main-container">
-            <main className="no-sidebar-main">
-                <div className="users-form-wrapper">
-                    <h1 className="users-title">비밀번호 찾기</h1>
-                    <form className="users-form">
-                        <div className="users-form-group">
-                            <label htmlFor="email">이메일</label>
-                            <input 
+        <MainContainer>
+            <NoSidebarMain>
+                <U.UsersFormWrapper>
+                    <U.UsersTitle>비밀번호 찾기</U.UsersTitle>
+                    <U.UsersForm onSubmit={handleSubmit}>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="email">이메일</U.UsersFormLabel>
+                            <U.UsersFormInput 
                                 type="email"
                                 id="email"
                                 name="email"
@@ -62,30 +68,30 @@ function PasswordFind() {
                                 onChange={handleChange}
                                 required
                             />
-                        </div>
+                        </U.UsersFormGroup>
                         <div>
                             {error && (
-                                <p className="error-message" style={{ marginTop: "8px" }}>
+                                <U.ErrorMessage style={{ marginTop: "8px" }}>
                                     {error}
-                                </p>
+                                </U.ErrorMessage>
                             )}
                             {successMsg && (
-                                <p className="success-message" style={{ marginTop: "8px", color: "#528efa" }}>
+                                <SuccessMessage>
                                     {successMsg}
-                                </p>
+                                </SuccessMessage>
                             )}
                         </div>
-                        <button type="submit" className="submit-btn" style={{marginTop: "16px"}}>
+                        <U.SubmitBtn type="submit"  style={{marginTop: "16px"}}>
                             비밀번호 찾기
-                        </button>
-                    </form>
-                    <div className="users-link" style={{marginTop: "24px"}}>
-                        <Link to={"/users/login"}>로그인으로 돌아가기</Link>
-                    </div>
-                </div>
-            </main>
+                        </U.SubmitBtn>
+                    </U.UsersForm>
+                    <U.UsersLinkWrap style={{marginTop: "24px"}}>
+                        <U.UsersLink to={"/users/login"}>로그인으로 돌아가기</U.UsersLink>
+                    </U.UsersLinkWrap>
+                </U.UsersFormWrapper>
+            </NoSidebarMain>
 
-        </div>
+        </MainContainer>
     ) 
 }
 

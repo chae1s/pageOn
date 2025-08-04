@@ -1,6 +1,6 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import jakarta.persistence.*;
@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.DayOfWeek;
 import java.util.*;
 
 @Entity
@@ -41,14 +42,24 @@ public class Webnovel {
     private List<Keyword> keywords = new ArrayList<>();
 
     // 연재 요일
-    private DayOfWeek serialDay;
+    @Enumerated(EnumType.STRING)
+    private SerialDay serialDay;
     // 연재, 완결, 휴재
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private SeriesStatus status = SeriesStatus.ONGOING;
     @Builder.Default
     private Long viewCount = 0L;
     @Builder.Default
-    private boolean isDeleted = false;
+    private boolean deleted = false;
+
+    public Webnovel(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
+        this.id = id;
+        this.title = title;
+        this.creator = creator;
+        this.serialDay = serialDay;
+        this.viewCount = viewCount;
+    }
 
     public void updateCover(String s3Url) {
         this.cover = s3Url;
@@ -57,7 +68,7 @@ public class Webnovel {
     public void updateWebnovelInfo(ContentUpdateRequest request) {
         if (request.getTitle() != null) this.title = request.getTitle();
         if (request.getDescription() != null)this.description = request.getDescription();
-        if (request.getSerialDay() != null) this.serialDay = DayOfWeek.valueOf(request.getSerialDay());
+        if (request.getSerialDay() != null) this.serialDay = SerialDay.valueOf(request.getSerialDay());
     }
 
     public void updateKeywords(List<Keyword> keywords) {
@@ -71,8 +82,8 @@ public class Webnovel {
         if (status != null) this.status = SeriesStatus.valueOf(status);
     }
 
-    public void updateIsDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

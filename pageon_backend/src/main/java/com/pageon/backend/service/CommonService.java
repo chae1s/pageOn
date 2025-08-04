@@ -18,7 +18,7 @@ public class CommonService {
     private final CreatorRepository creatorRepository;
 
     public User findUserByEmail(String email) {
-        User user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
+        User user = userRepository.findByEmailAndDeleted(email, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

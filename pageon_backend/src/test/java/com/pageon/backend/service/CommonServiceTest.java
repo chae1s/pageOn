@@ -50,11 +50,11 @@ class CommonServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("test")
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted(mockPrincipalUser.getUsername(), false)).thenReturn(Optional.of(user));
 
         //when
         User savedUser = commonService.findUserByEmail(mockPrincipalUser.getUsername());
@@ -70,7 +70,7 @@ class CommonServiceTest {
     void findUserByEmail_whenUserNotFound_shouldThrowCustomException() {
         // given
 
-        when(userRepository.findByEmailAndIsDeletedFalse(mockPrincipalUser.getUsername())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeleted(mockPrincipalUser.getUsername(), false)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -90,7 +90,7 @@ class CommonServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("test")
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(false)
                 .build();
 
@@ -122,7 +122,7 @@ class CommonServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("test")
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(false)
                 .build();
 

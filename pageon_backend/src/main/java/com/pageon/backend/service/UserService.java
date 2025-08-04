@@ -85,7 +85,7 @@ public class UserService {
                 .birthDate(birthDate)
                 .gender(Gender.valueOf(request.getGender()))
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .isDeleted(false)
+                .deleted(false)
                 .termsAgreed(request.getTermsAgreed())
                 .build();
 
@@ -140,7 +140,7 @@ public class UserService {
     }
 
     public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
-        User user = userRepository.findByIdAndIsDeletedFalse(principalUser.getId()).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(principalUser.getId(), false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -176,7 +176,7 @@ public class UserService {
     @Transactional
     public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
         Map<String, String> result = new HashMap<>();
-        Optional<User> optionalUsers = userRepository.findByEmailAndIsDeletedFalse(passwordDto.getEmail());
+        Optional<User> optionalUsers = userRepository.findByEmailAndDeleted(passwordDto.getEmail(), false);
         if (optionalUsers.isPresent()) {
             User user = optionalUsers.get();
             if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
@@ -219,7 +219,7 @@ public class UserService {
     }
 
     public boolean checkPassword(Long id, String password) {
-        User user = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -228,7 +228,7 @@ public class UserService {
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        User user = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
         log.info(request.getNickname());
@@ -251,7 +251,7 @@ public class UserService {
 
     @Transactional
     public Map<String, Object> deleteAccount(Long id, UserDeleteRequest userDeleteRequest, HttpServletRequest request) {
-        User user = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

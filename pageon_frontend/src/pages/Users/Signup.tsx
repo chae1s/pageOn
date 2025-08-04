@@ -1,12 +1,89 @@
 import React, { useState } from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
-import "./Users.css"
+import {styled, css} from "styled-components";
+import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
+import * as U from "./Users.styles"
 import { useNavigate, Link} from "react-router-dom";
-import axios from "axios";
 
+const SubTitleP = styled.p`
+    margin-bottom: 19px;
+`
+
+const SocialSignupBtnGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+`
+
+const SocialSignupBtnItem = styled.button<{platform: "kakao" | "naver" | "google"}>`
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    ${({platform}) => 
+        platform === "kakao" && 
+        css`
+            background-color: #FEE500;
+            color: #000;
+            border-color: #FEE500;
+        `
+    }
+
+    ${({platform}) => 
+        platform === "naver" && 
+        css`
+            background-color: #03C75A;
+            color: white;
+            border-color: #03C75A;
+        `
+    }
+
+    ${({platform}) => 
+        platform === "google" && 
+        css`
+            background-color: white;
+            color: #333;
+            border-color: #ddd;
+        `
+    }
+`
+
+const DividerWrapper = styled.div`
+  margin: 20px 0 20px;
+  display: flex;
+  gap: 20px;
+`
+
+const Divider = styled.div`
+  width: 130px;
+  height: 8px;
+  border-bottom: 1px solid #e5e5e5;
+`
+
+const EmailSignUpBtnItem = styled.button`
+    width: 100%;
+    padding: 14px;
+    background-color: #528efa;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 24px;
+`
 
 function Signup() {
+    
     const navigate = useNavigate();
 
     const handleEmailSignupClick = () => {
@@ -58,41 +135,41 @@ function Signup() {
     );
 
     return (
-        <div className="main-container">
-            <div className="no-sidebar-main">
-                <div className="users-form-wrapper">
-                    <h1 className="users-title">회원가입</h1>
-                    <p>SNS 계정으로 간편하게 시작하세요.</p>
+        <MainContainer>
+            <NoSidebarMain>
+                <U.UsersFormWrapper>
+                    <U.UsersTitle>회원가입</U.UsersTitle>
+                    <SubTitleP>SNS 계정으로 간편하게 시작하세요.</SubTitleP>
 
-                    <div className="social-signup-btn-group" onClick={handleKakaoSignupClick}>
-                        <button className="social-signup-btn-item kakao">
+                    <SocialSignupBtnGroup >
+                        <SocialSignupBtnItem platform="kakao" onClick={handleKakaoSignupClick}>
                             <KakaoIcon />
                             카카오 계정으로 가입하기
-                        </button>
-                        <button className="social-signup-btn-item naver" onClick={handleNaverSignupClick}>
+                        </SocialSignupBtnItem>
+                        <SocialSignupBtnItem platform="naver" onClick={handleNaverSignupClick}>
                             <NaverIcon />
                             네이버 계정으로 가입하기
-                        </button>
-                        <button className="social-signup-btn-item google" onClick={handleGoogleSignupClick}>
+                        </SocialSignupBtnItem>
+                        <SocialSignupBtnItem platform="google" onClick={handleGoogleSignupClick}>
                             <GoogleIcon />
                             구글 계정으로 가입하기
-                        </button>
-                    </div>
-                    <div className="divider-wrap">
-                        <div className="divider"></div>
+                        </SocialSignupBtnItem>
+                    </SocialSignupBtnGroup>
+                    <DividerWrapper>
+                        <Divider></Divider>
                         <span>또는</span>
-                        <div className="divider"></div>
-                    </div>
-                    <button className="email-signup-btn-item" onClick={handleEmailSignupClick}>
+                        <Divider></Divider>
+                    </DividerWrapper>
+                    <EmailSignUpBtnItem onClick={handleEmailSignupClick}>
                         이메일로 가입하기
-                    </button>
-                    <div className="users-link">
+                    </EmailSignUpBtnItem>
+                    <U.UsersLinkWrap>
                         <span>이미 계정이 있으신가요?</span>
-                        <Link to={"/users/login"}>로그인</Link>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        <U.UsersLink to={"/users/login"}>로그인</U.UsersLink>
+                    </U.UsersLinkWrap>
+                </U.UsersFormWrapper>
+            </NoSidebarMain>
+        </MainContainer>
     )
 }
 

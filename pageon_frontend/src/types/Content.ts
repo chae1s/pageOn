@@ -1,0 +1,37 @@
+import { UserKeywordResponse } from "./Keyword";
+
+export type ContentType = 'WEBNOVEL' | 'WEBTOON';
+export type ContentStatus = 'COMPLETED' | 'ONGOING' | 'REST';
+
+export interface SimpleContent {
+    id: number;
+    title: string;
+    author: string;
+    cover: string;
+    contentType: string;
+}
+
+export interface RankingBook {
+    id: number;
+    title: string;
+    author: string;
+    cover: string;
+    rating: number;
+    ratingCount: number;
+    contentType: string;
+}
+
+export interface ContentDetail {
+    id: number;
+    title: string;
+    description: string;
+    cover: string;
+    author: string;
+    keywords: UserKeywordResponse[];
+    serialDay: string;
+    rating: number;
+    ratingCount: number;
+    status: ContentStatus;
+    viewCount: number;
+    contentType: string;
+}

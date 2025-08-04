@@ -13,9 +13,13 @@ const Authcontext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({children} : {children: ReactNode}) => {
     const [accessToken, setAccessToken] = useState<string | null>(localStorage.getItem("accessToken"));
 
-    const [roles, setRoles] = useState<string[]>(
-        JSON.parse(localStorage.getItem("roles") || "[]")
-    );
+    const [roles, setRoles] = useState<string[]>(() => {
+        try {
+            return JSON.parse(localStorage.getItem("roles") || "[]");
+        } catch {
+            return [];
+        }
+    });
 
     const isAuthenticated = !!accessToken;
 

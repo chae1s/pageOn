@@ -1,5 +1,6 @@
 package com.pageon.backend.controller;
 
+import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebtoonResponse;
 import com.pageon.backend.service.UserWebtoonService;
@@ -32,4 +33,12 @@ public class UserWebtoonController {
 
         return ResponseEntity.ok(userWebtoonService.getWebtoons());
     }
+
+    @GetMapping("/daily/{day}")
+    public ResponseEntity<List<ContentSimpleResponse>> getWebtoonsByDay(@PathVariable String day) {
+
+        return ResponseEntity.ok(userWebtoonService.getWebtoonsByDay(day));
+    }
+
+
 }

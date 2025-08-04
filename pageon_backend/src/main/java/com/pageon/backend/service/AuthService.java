@@ -45,7 +45,7 @@ public class AuthService {
         // refreshToken에서 가져온 email
         String email = jwtProvider.getUsernameRefreshToken(refreshToken);
 
-        User user = userRepository.findByEmailAndIsDeletedFalse(email).orElseThrow(
+        User user = userRepository.findByEmailAndDeleted(email, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
         if (!user.getId().equals(tokenInfo.getUserId())) {

@@ -64,7 +64,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email(email)
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -85,7 +85,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(true)
                 .build();
 
@@ -112,7 +112,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email(email)
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
         // 생성된 id를 redis에서 가져온다.
         String redisKey = String.format("%s_identityVerificationId", user.getEmail());
@@ -153,7 +153,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .phoneNumber(phoneNumber)
                 .isPhoneVerified(true)
                 .build();
@@ -185,7 +185,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email(email)
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);;
@@ -216,7 +216,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email(email)
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
@@ -251,7 +251,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         OtpVerificationPayload payload = new OtpVerificationPayload(redisOtp, new IdentityVerificationCustomer("박누구", "01011111111", "9504022"));
@@ -287,7 +287,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         String redisKey = user.getEmail() + "_identityVerificationId";
@@ -320,7 +320,7 @@ class PortOneServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .password("password")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         String redisKey = user.getEmail() + "_identityVerificationId";

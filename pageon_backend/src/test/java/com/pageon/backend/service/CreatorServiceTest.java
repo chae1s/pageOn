@@ -65,7 +65,7 @@ class CreatorServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")
-                .isDeleted(false)
+                .deleted(false)
                 .userRoles(new ArrayList<>())
                 .build();
 
@@ -111,7 +111,7 @@ class CreatorServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         Role creatorRole = Role.builder()
@@ -145,7 +145,7 @@ class CreatorServiceTest {
                 .id(1L)
                 .email("test@mail.com")
                 .nickname("nickname")
-                .isDeleted(false)
+                .deleted(false)
                 .userRoles(new ArrayList<>())
                 .build();
 

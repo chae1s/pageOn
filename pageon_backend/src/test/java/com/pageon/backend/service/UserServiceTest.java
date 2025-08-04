@@ -117,7 +117,7 @@ public class UserServiceTest {
         assertEquals("test@mail.com", savedUser.getEmail());
         assertEquals("nickname", savedUser.getNickname());
         assertEquals("encodePassword", savedUser.getPassword());
-        assertFalse(savedUser.getIsDeleted());
+        assertFalse(savedUser.getDeleted());
         
     }
 
@@ -212,7 +212,7 @@ public class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertFalse(savedUser.getIsDeleted(), "회원가입 시 isDeleted는 false여야 합니다.");
+        assertFalse(savedUser.getDeleted(), "회원가입 시 isDeleted는 false여야 합니다.");
 
     }
     
@@ -289,7 +289,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
@@ -327,7 +327,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
@@ -412,11 +412,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
 
@@ -435,7 +435,7 @@ public class UserServiceTest {
         userService.logout(mockPrincipalUser, request, response);
         
         // then
-        verify(userRepository).findByIdAndIsDeletedFalse(1L);
+        verify(userRepository).findByIdAndDeleted(userId, false);
         verify(valueOperations).get("sample-refresh-token");
         verify(redisTemplate).delete("sample-refresh-token");
 
@@ -452,7 +452,7 @@ public class UserServiceTest {
         Long userId = 1L;
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -479,11 +479,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
 
@@ -518,10 +518,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.of(user));
 
         //when
         Map<String, String> result = userService.passwordFind(findPasswordRequest);
@@ -549,10 +549,10 @@ public class UserServiceTest {
                 .oAuthProvider(provider)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.of(user));
         //when
         Map<String, String> result = userService.passwordFind(findPasswordRequest);
 
@@ -569,7 +569,7 @@ public class UserServiceTest {
         String email = "test@mail.com";
 
         FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
-        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.empty());
 
         //when
         Map<String, String> result = userService.passwordFind(findPasswordRequest);
@@ -593,7 +593,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .isPhoneVerified(false)
                 .build();
 
@@ -622,10 +622,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(user.getId(), false)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(password, "encodePassword")).thenReturn(true);
         //when
         boolean result = userService.checkPassword(1L, password);
@@ -641,7 +641,7 @@ public class UserServiceTest {
         // given
         String password = "encodePassword";
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.checkPassword(1L, password);
@@ -666,10 +666,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
         //when
         boolean result = userService.checkPassword(1L, password);
@@ -692,11 +692,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         String newNickname = "newNick";
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(null, newNickname);
 
         //when
@@ -721,10 +721,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn(newPassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", null);
@@ -751,10 +751,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn(newPassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", newNickname);
@@ -773,7 +773,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.empty());
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         //when
@@ -800,10 +800,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
 
         String invalidPassword = "abc1234";
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(invalidPassword, null);
@@ -833,10 +833,10 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(true);
         request = mock(HttpServletRequest.class);
 
@@ -874,11 +874,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
 
         //when
@@ -898,7 +898,7 @@ public class UserServiceTest {
         String password = "password";
         request = mock(HttpServletRequest.class);
 
-        when(userRepository.findByIdAndIsDeletedFalse(1L)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByIdAndDeleted(1L, false)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
 
         //when
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
@@ -925,11 +925,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
 
         String socialAccessToken = "social-access-token";
         String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
@@ -972,11 +972,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.NAVER)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
 
         String socialAccessToken = "social-access-token";
         String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
@@ -1019,11 +1019,11 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId("sampleProviderId")
                 .pointBalance(0)
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndIsDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
 
         String socialAccessToken = "social-access-token";
         String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());

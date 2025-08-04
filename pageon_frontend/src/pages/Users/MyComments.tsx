@@ -1,10 +1,8 @@
 import React, {useState, useEffect} from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
 import axios from "axios";
-import Sidebar from "../../components/MyPageSidebar";
+import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import "./MyPage.css"
-import CommentList from "../../components/CommentList";
+import CommentList from "../../components/Comments/CommentList";
 
 function MyComments() {
 

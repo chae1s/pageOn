@@ -70,10 +70,10 @@ class AuthServiceTest {
         User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
-                .isDeleted(false)
+                .deleted(false)
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
-        when(userRepository.findByEmailAndIsDeletedFalse("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted("test@mail.com", false)).thenReturn(Optional.of(user));
 
         when(jwtProvider.generateAccessToken(eq("test@mail.com"), any())).thenReturn("reissue-access-token");
 
@@ -143,7 +143,7 @@ class AuthServiceTest {
 
         String cookieEmail = "cookie_test@mail.com";
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn(cookieEmail);
-        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByEmailAndDeleted(cookieEmail, false)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -175,10 +175,10 @@ class AuthServiceTest {
         User user = User.builder()
                 .id(2L)
                 .email(cookieEmail)
-                .isDeleted(false)
+                .deleted(false)
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
-        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted(cookieEmail, false)).thenReturn(Optional.of(user));
 
 
         //when

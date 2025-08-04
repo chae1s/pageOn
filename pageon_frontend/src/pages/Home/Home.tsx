@@ -1,77 +1,179 @@
 import React, {useEffect, useState} from "react";
-import "../../styles/reset.css";
-import "../../styles/global.css";
-import "./Home.css"
-import { SimpleBook } from "../../types/Book";
-import BookList from "../../components/BookList";
+import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
+import * as H from "./Home.styles"
+import { SimpleContent, RankingBook } from "../../types/Content";
+import RankingContentList from "../../components/Contents/RankingContentList";
+import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 
 function Home() {
-    const dummyBooks: SimpleBook[] = [
+    const dummyBooks: RankingBook[] = [
         {
             id: 1,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
             title: '임시 작품 제목 1',
-            author: '작가A'
+            author: '작가A',
+            rating: 4.9124,
+            ratingCount: 13974,
+            contentType: 'webnovels'
         },
         {
             id: 2,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
             title: '임시 작품 제목 2',
-            author: '작가B'
+            author: '작가B',
+            rating: 4.9124,
+            ratingCount: 10266,
+            contentType: 'webnovels'
         },
         {
             id: 3,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
             title: '임시 작품 제목 3',
-            author: '작가C'
+            author: '작가C',
+            rating: 4.9124,
+            ratingCount: 758,
+            contentType: 'webnovels'
         },
         {
             id: 4,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
             title: '임시 작품 제목 4',
-            author: '작가D'
+            author: '작가D',
+            rating: 4.9124,
+            ratingCount: 108,
+            contentType: 'webnovels'
         },
         {
             id: 5,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
             title: '임시 작품 제목 5',
-            author: '작가E'
+            author: '작가E',
+            rating: 4.8124,
+            ratingCount: 4751,
+            contentType: 'webnovels'
         },
         {
             id: 6,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
             title: '임시 작품 제목 6',
-            author: '작가E'
+            author: '작가E',
+            rating: 4.8124,
+            ratingCount: 7793,
+            contentType: 'webnovels'
         },
         {
             id: 7,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
             title: '임시 작품 제목 7',
-            author: '작가A'
+            author: '작가A',
+            rating: 4.7124,
+            ratingCount: 4582,
+            contentType: 'webnovels'
         },
         {
             id: 8,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
             title: '임시 작품 제목 8',
-            author: '작가B'
+            author: '작가B',
+            rating: 4.7124,
+            ratingCount: 591,
+            contentType: 'webnovels'
         },
         {
             id: 9,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
             title: '임시 작품 제목 9',
-            author: '작가C'
+            author: '작가C',
+            rating: 4.8124,
+            ratingCount: 6574,
+            contentType: 'webnovels'
         },
         {
             id: 10,
-            coverUrl: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/10/webnovel10.png',
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/10/webnovel10.png',
             title: '임시 작품 제목 10',
-            author: '작가D'
+            author: '작가A',
+            rating: 4.9124,
+            ratingCount: 13974,
+            contentType: 'webnovels'
+        },
+        {
+            id: 11,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/11/webnovel11.png',
+            title: '임시 작품 제목 11',
+            author: '작가B',
+            rating: 4.9124,
+            ratingCount: 10266,
+            contentType: 'webnovels'
+        },
+        {
+            id: 12,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/12/webnovel12.png',
+            title: '임시 작품 제목 12',
+            author: '작가C',
+            rating: 4.9124,
+            ratingCount: 758,
+            contentType: 'webnovels'
+        },
+        {
+            id: 13,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/13/webnovel13.png',
+            title: '임시 작품 제목 13',
+            author: '작가D',
+            rating: 4.9124,
+            ratingCount: 108,
+            contentType: 'webnovels'
+        },
+        {
+            id: 14,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/14/webnovel14.png',
+            title: '임시 작품 제목 14',
+            author: '작가E',
+            rating: 4.8124,
+            ratingCount: 4751,
+            contentType: 'webnovels'
+        },
+        {
+            id: 15,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/15/webnovel15.png',
+            title: '임시 작품 제목 15',
+            author: '작가E',
+            rating: 4.8124,
+            ratingCount: 7793,
+            contentType: 'webnovels'
+        },
+        {
+            id: 16,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/16/webnovel16.png',
+            title: '임시 작품 제목 16',
+            author: '작가A',
+            rating: 4.7124,
+            ratingCount: 4582,
+            contentType: 'webnovels'
+        },
+        {
+            id: 17,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/17/webnovel17.png',
+            title: '임시 작품 제목 17',
+            author: '작가B',
+            rating: 4.7124,
+            ratingCount: 591,
+            contentType: 'webnovels'
+        },
+        {
+            id: 18,
+            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/18/webnovel18.png',
+            title: '임시 작품 제목 18',
+            author: '작가C',
+            rating: 4.8124,
+            ratingCount: 6574,
+            contentType: 'webnovels'
         }
     ]
     return(
-        <div className="main-container">
-            <main className="no-sidebar-main">
-                <section className="home-banner">
+        <MainContainer>
+            <NoSidebarMain>
+                <H.HomeBanner>
                     <div className="banner-text">
                         <h1>
                             인기 웹툰과 웹소설을<br />한 곳에서 즐기세요
@@ -91,17 +193,34 @@ function Home() {
                         alt="메인 배너"
                         />
                     </div>
-                </section>
-                <section className="section-popular">
-                    <h2>인기 웹툰</h2>
-                    <BookList simpleBooks={ dummyBooks } home={ true } ></BookList>    
-                </section>
-                <section className="section-popular">
-                    <h2>인기 웹소설</h2>
-                    <BookList simpleBooks={ dummyBooks } home={ true } ></BookList>    
-                </section>
-            </main>
-        </div>
+                </H.HomeBanner>
+                <H.SectionBookList>
+                    <H.SectionBookListTitle>실시간 랭킹</H.SectionBookListTitle>
+                    <RankingContentList contents={ dummyBooks } layout="slider" />
+                </H.SectionBookList>
+                <H.SectionBookList>
+                    <H.SectionBookTitleWrapper>
+                        <H.SectionBookListTitle>이번 주 화제의 작품</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                    </H.SectionBookTitleWrapper>
+                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>
+                </H.SectionBookList>
+                <H.SectionBookList>
+                     <H.SectionBookTitleWrapper>
+                        <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                    </H.SectionBookTitleWrapper>
+                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>
+                </H.SectionBookList>
+                <H.SectionBookList>
+                     <H.SectionBookTitleWrapper>
+                        <H.SectionBookListTitle>정주행 랭킹</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                    </H.SectionBookTitleWrapper>
+                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>  
+                </H.SectionBookList>
+            </NoSidebarMain>
+        </MainContainer>
         
     )
 }

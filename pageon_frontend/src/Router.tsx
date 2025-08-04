@@ -1,10 +1,11 @@
 import { Route, Routes, useLocation } from "react-router-dom";
-import PrivateRoute from "./components/PrivateRoute";
-import RoleRoute from "./components/RoleRoute";
-import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import PrivateRoute from "./components/Routes/PrivateRoute";
+import RoleRoute from "./components/Routes/RoleRoute";
+import PublicOnlyRoute from "./components/Routes/PublicOnlyRoute";
+import GlobalStyle from "./styles/Global.styles";
 import Home from "./pages/Home/Home"
-import Header from "./components/Header";
-import CreatorHeader from "./components/CreatorHeader";
+import Header from "./components/Headers/Header";
+import CreatorHeader from "./components/Headers/CreatorHeader";
 import Footer from "./components/Footer";
 import Login from "./pages/Users/Login";
 import Signup from "./pages/Users/Signup";
@@ -20,6 +21,10 @@ import MyComments from "./pages/Users/MyComments";
 import CreatorRegister from "./pages/Creators/CreatorRegister";
 import MockVerify from "./pages/Users/MockVerify";
 import CreatorDashbord from "./pages/Creators/CreatorDashbord";
+import WebnovelHome from "./pages/Home/WebnovelHome";
+import WebtoonHome from "./pages/Home/WebtoonHome";
+import WebnovelDetailPage from "./pages/Contents/WebnovelDetailPage";
+import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage ";
 
 function Router() {
     const location = useLocation();
@@ -29,10 +34,15 @@ function Router() {
 
     return (
         <>
+        <GlobalStyle/>
         {!hideHeaderFooter && !creatorHeader && <Header></Header>}
         {!hideHeaderFooter && creatorHeader && <CreatorHeader/>}
         <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/webnovels" element={<WebnovelHome />} />
+            <Route path="/webtoons" element={<WebtoonHome />} />
+            <Route path="/webnovels/:id" element={<WebnovelDetailPage />} />
+            <Route path="/webtoons/:id" element={<WebtoonDetailPage />} />
             <Route element={<PublicOnlyRoute/>} >
                 <Route path="/users/login" element={<Login />} />
                 <Route path="/users/signup" element={<Signup />} />

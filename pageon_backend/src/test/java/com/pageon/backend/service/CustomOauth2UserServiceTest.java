@@ -80,7 +80,7 @@ class CustomOauth2UserServiceTest {
 
         // then
         assertEquals("test@kakao.com", newUser.getEmail());
-        assertFalse(newUser.getIsDeleted());
+        assertFalse(newUser.getDeleted());
         assertEquals(OAuthProvider.KAKAO, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
@@ -100,7 +100,7 @@ class CustomOauth2UserServiceTest {
 
         // then
         assertEquals("test@naver.com", newUser.getEmail());
-        assertFalse(newUser.getIsDeleted());
+        assertFalse(newUser.getDeleted());
         assertEquals(OAuthProvider.NAVER, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
@@ -120,7 +120,7 @@ class CustomOauth2UserServiceTest {
 
         // then
         assertEquals("test@gmail.com", newUser.getEmail());
-        assertFalse(newUser.getIsDeleted());
+        assertFalse(newUser.getDeleted());
         assertEquals(OAuthProvider.GOOGLE, newUser.getOAuthProvider());
         verify(roleService).assignDefaultRole(newUser);
         verify(userRepository).save(newUser);
@@ -157,7 +157,7 @@ class CustomOauth2UserServiceTest {
                 .nickname("카카오")
                 .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("123456")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -207,7 +207,7 @@ class CustomOauth2UserServiceTest {
                 .nickname("네이버")
                 .oAuthProvider(OAuthProvider.NAVER)
                 .providerId("123456")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -255,7 +255,7 @@ class CustomOauth2UserServiceTest {
                 .nickname("구글")
                 .oAuthProvider(OAuthProvider.GOOGLE)
                 .providerId("123456")
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);

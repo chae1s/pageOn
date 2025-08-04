@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.common.enums.DayOfWeek;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
@@ -16,7 +16,7 @@ public class CreatorContentListResponse {
     private String title;
     private SeriesStatus status;
     private String cover;
-    private DayOfWeek serialDay;
+    private SerialDay serialDay;
 
     public static CreatorContentListResponse fromWebnovel(Webnovel webnovel) {
         CreatorContentListResponse creatorContentListResponse = new CreatorContentListResponse();

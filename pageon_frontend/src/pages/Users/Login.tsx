@@ -1,15 +1,62 @@
 import React, { useState } from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
-import "./Users.css"
+import styled from "styled-components";
+import * as U from "./Users.styles"
+import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import { LoginRequest } from "../../types/User";
 import { useNavigate, Link} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
 
+// styled 코드
+const FindPasswordLink = styled(Link)`
+margin: 16px 0 0 0;
+background: none;
+border: none;
+cursor: pointer;
+font-size: 15px;
+display: block;
+padding: 0;
+align-self: flex-end;
+color: #666;
+`
+
+const DividerWrapper = styled.div`
+  margin: 20px 0 20px;
+  display: flex;
+  gap: 20px;
+`
+
+const Divider = styled.div`
+  width: 130px;
+  height: 8px;
+  border-bottom: 1px solid #e5e5e5;
+`
+
+const SocialBtnGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0 24px 0;
+  gap: 8px;
+`
+
+const SocialBtnItem = styled.button`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  margin: 0 8px;
+  cursor: pointer;
+  background-color: #fff;
+  padding: 0;
+`
 
 function Login() {
+
     const {login} = useAuth();
     const [formData, setFormData] = useState<LoginRequest> ({
         email: "",
@@ -104,14 +151,14 @@ function Login() {
     );
 
     return (
-        <div className="main-container">
-            <main className="no-sidebar-main">
-                <div className="users-form-wrapper">
-                    <h1 className="users-title">로그인</h1>
-                    <form className="users-form" onSubmit={handleSubmit}>
-                        <div className="users-form-group">
-                            <label htmlFor="email">이메일</label>
-                            <input 
+        <MainContainer>
+            <NoSidebarMain>
+                <U.UsersFormWrapper>
+                    <U.UsersTitle>로그인</U.UsersTitle>
+                    <U.UsersForm onSubmit={handleSubmit}>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="email">이메일</U.UsersFormLabel>
+                            <U.UsersFormInput 
                                 type="email"
                                 id="email"
                                 name="email"
@@ -119,10 +166,10 @@ function Login() {
                                 placeholder="이메일을 입력해주세요."
                                 onChange={handleChange}
                             />
-                        </div>
-                        <div className="users-form-group">
-                            <label htmlFor="password">비밀번호</label>
-                            <input 
+                        </U.UsersFormGroup>
+                        <U.UsersFormGroup>
+                            <U.UsersFormLabel htmlFor="password">비밀번호</U.UsersFormLabel>
+                            <U.UsersFormInput 
                                 type="password"
                                 id="password"
                                 name="password"
@@ -130,56 +177,53 @@ function Login() {
                                 placeholder="비밀번호를 입력해주세요."
                                 onChange={handleChange}
                             />
-                        </div>
+                        </U.UsersFormGroup>
                         <div>
-                            <p className="error-message" style={{marginTop: "8px"}}>
+                            <U.ErrorMessage style={{marginTop: "8px"}}>
                                 {error && (error)}
-                            </p>
+                            </U.ErrorMessage>
                         </div>
-                        <button className="submit-btn" type="submit">
+                        <U.SubmitBtn type="submit">
                             로그인
-                        </button>
-                        <Link to={"/users/find-password"} className="find-password-link">비밀번호 찾기</Link>
-                    </form>
-                    <div className="divider-wrap">
-                        <div className="divider"></div>
+                        </U.SubmitBtn>
+                        <FindPasswordLink to={"/users/find-password"}>비밀번호 찾기</FindPasswordLink>
+                    </U.UsersForm>
+                    <DividerWrapper>
+                        <Divider></Divider>
                         <span>또는</span>
-                        <div className="divider"></div>
-                    </div>
-                    <div className="social-btn-group">
-                        <button 
+                        <Divider></Divider>
+                    </DividerWrapper>
+                    <SocialBtnGroup>
+                        <SocialBtnItem 
                             type="button" 
-                            className="social-btn-item" 
                             onClick={handleKakaoLogin}
                             style={{background: "#FEE500"}}
                         >
                             <KakaoIcon />
-                        </button>
-                        <button 
+                        </SocialBtnItem>
+                        <SocialBtnItem 
                             type="button" 
-                            className="social-btn-item" 
                             onClick={handleNaverLogin}
                             style={{background: "#03C75A"}}
                         >
                             <NaverIcon />
-                        </button>
-                        <button 
+                        </SocialBtnItem>
+                        <SocialBtnItem
                             type="button" 
-                            className="social-btn-item" 
                             onClick={handleGoogleLogin}
                             style={{border: "1px solid #eee"}}
                         >
                             <GoogleIcon />
-                        </button>
-                    </div>
-                    <div className="users-link">
+                        </SocialBtnItem>
+                    </SocialBtnGroup>
+                    <U.UsersLinkWrap>
                         <span>아직 계정이 없으신가요?</span>
-                        <Link to={"/users/signup"}>회원가입</Link>
-                    </div>
-                </div>
-            </main>
+                        <U.UsersLink to={"/users/signup"}>회원가입</U.UsersLink>
+                    </U.UsersLinkWrap>
+                </U.UsersFormWrapper>
+            </NoSidebarMain>
 
-        </div>
+        </MainContainer>
     )
 }
 

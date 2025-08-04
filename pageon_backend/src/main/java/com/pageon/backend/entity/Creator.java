@@ -28,6 +28,7 @@ public class Creator {
     @JoinColumn(name = "user_id")
     private User user;
     // 웹툰, 웹소설 작가 구분
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;
 
     @Builder.Default

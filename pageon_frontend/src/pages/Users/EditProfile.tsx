@@ -1,11 +1,110 @@
 import React, {useState, useEffect} from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
+import { styled, css } from "styled-components";
+import { MainContainer, SidebarMain } from "../../styles/Layout.styles";
+import * as M from "./MyPage.styles"
 import { UserProfile, UpdateRequest } from "../../types/User";
-import { useNavigate, Link} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Sidebar from "../../components/MyPageSidebar";
-import "./MyPage.css"
+import Sidebar from "../../components/Sidebars/MyPageSidebar";
+
+const EditProfileForm = styled.form`
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    gap: 18px;
+    margin: 0 auto;
+    padding: 0 24px;
+    align-items: flex-start;
+`
+
+const EditProfileFormGroup = styled.div`
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 16px;
+    min-height: 60px;
+    width: 100%;
+`
+
+const EditProfileLabel = styled.label`
+    flex: 0 0 120px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 12px;
+`
+
+const EditProfileValue = styled.span`
+    flex: 1;
+    color: #666;
+    margin-top: 12px;
+    cursor: default;
+`
+
+const EditProfileInput = styled.input<{validation? : "" | "input-success" | "input-error"}>`
+    width: 500px;
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    height: 48px;
+    box-sizing: border-box;
+
+    ${({validation}) => 
+        validation === "input-success" && 
+        css`
+            border: 1px solid #A0C4FF;
+        `
+    }
+
+    ${({validation}) => 
+        validation === "input-error" && 
+        css`
+            border: 1px solid #FC5858;
+        `
+    }
+
+`
+
+const EditProfileMsg = styled.p<{validation? : "success" | "error"}>`
+    font-size: 0.85rem;
+    margin-top: 8px;
+    position: relative;
+    left: 0;
+
+    ${({validation}) => 
+        validation === "success" && 
+        css`
+            color: #2563eb;
+        `
+    }
+    ${({validation}) => 
+        validation === "error" && 
+        css`
+            color: var(--error-color);
+        `
+    }
+`
+
+const EditProfileSubmitBtn = styled.button`
+    width: 33.33%;
+    background: #528efa;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 0;
+    font-weight: 600;
+    font-size: 1.08rem;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.15s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    &:disabled {
+        background-color: var(--accent-color);
+    }
+`
 
 function EditProfile() {
     type ErrorMap = Record<string, string>;
@@ -279,72 +378,72 @@ function EditProfile() {
     };
 
     return (
-        <div className="main-container">
-            <main className="sidebar-main">
+        <MainContainer>
+            <SidebarMain>
                 <Sidebar />
-                <div className="sidebar-right-wrap">
-                    <h2 className="mypage-title">내 정보 수정</h2>
-                    <form onSubmit={handleSumbit} className="edit-profile-form">
-                        <div className="edit-profile-form-group">
-                            <label htmlFor="" className="edit-profile-label">이메일</label>
-                            <span className="edit-profile-value">{userInfo.email}</span>
-                        </div>
-                        <div className="edit-profile-form-group">
-                            <label htmlFor="" className="edit-profile-label">비밀번호</label>
-                            <div className="edit-profile-input-wrap">
-                                <input 
+                <M.SidebarRightWrap>
+                    <M.MypageTitle>내 정보 수정</M.MypageTitle>
+                    <EditProfileForm onSubmit={handleSumbit} >
+                        <EditProfileFormGroup>
+                            <EditProfileLabel>이메일</EditProfileLabel>
+                            <EditProfileValue>{userInfo.email}</EditProfileValue>
+                        </EditProfileFormGroup>
+                        <EditProfileFormGroup>
+                            <EditProfileLabel htmlFor="" >비밀번호</EditProfileLabel>
+                            <div>
+                                <EditProfileInput 
                                     type="password" 
-                                    className={`edit-profile-input ${getInputClassName("password")}`}  
+                                    validation = {getInputClassName("password")} 
                                     onChange={handlePasswordChange}
                                     value={updateData.password}
                                 />
                                 {errors.password && (
-                                    <p className="edit-profile-msg error">{errors.password}</p>
+                                    <EditProfileMsg validation="error">{errors.password}</EditProfileMsg>
                                 )}
                             </div>
-                        </div>
-                        <div className="edit-profile-form-group">
-                            <label htmlFor="" className="edit-profile-label">비밀번호 확인</label>
+                        </EditProfileFormGroup>
+                        <EditProfileFormGroup>
+                            <EditProfileLabel htmlFor="">비밀번호 확인</EditProfileLabel>
                             <div>
-                                <input 
+                                <EditProfileInput 
                                     type="password" 
-                                    className={`edit-profile-input ${getInputClassName("confirmPassword")}`}  
+                                    validation = {getInputClassName("confirmPassword")} 
                                     onChange={handleConfirmPasswordChange}
                                     value={updateData.confirmPassword}
                                 />
                                 {errors.confirmPassword && (
-                                    <p className="edit-profile-msg error">{errors.confirmPassword}</p>
+                                    <EditProfileMsg validation="error">{errors.confirmPassword}</EditProfileMsg>
                                 )}
                             </div>
-                        </div>
-                        <div className="edit-profile-form-group">
-                            <label htmlFor="" className="edit-profile-label">닉네임</label>
+                        </EditProfileFormGroup>
+                        <EditProfileFormGroup>
+                            <EditProfileLabel htmlFor="" >닉네임</EditProfileLabel>
                             <div>
-                                <input 
+                                <EditProfileInput 
                                     type="text" 
-                                    className={`edit-profile-input ${getInputClassName("nickname")}`} 
+                                    validation = {getInputClassName("nickname")} 
                                     value={updateData.nickname}
                                     onChange={handleNicknameChange}
                                     onBlur={handleNicknameBlur}
                                 />
                                 {errors.nickname && (
-                                    <p className="edit-profile-msg error">{errors.nickname}</p>
+                                    <EditProfileMsg validation="error">{errors.nickname}</EditProfileMsg>
                                 )}
                                 {successMessage && (
-                                    <p className="edit-profile-msg success">{successMessage}</p>
+                                    <EditProfileMsg validation="success">{successMessage}</EditProfileMsg>
                                 )}
                             </div>
-                        </div>
-                        <div className="edit-profile-form-group">
-                            <label htmlFor="" className="edit-profile-label">생년월일</label>
-                            <span className="edit-profile-value">{userInfo?.birthDate || "-"}</span>
-                        </div>
-                        <button type="submit" disabled={!isFormValid} className="edit-profile-submit-btn">수정하기</button>
-                    </form>
-                </div>
-            </main>
+                        </EditProfileFormGroup>
+                        <EditProfileFormGroup>
+                            <EditProfileLabel htmlFor="" >생년월일</EditProfileLabel>
+                            <EditProfileValue>{userInfo?.birthDate || "-"}</EditProfileValue>
+                        </EditProfileFormGroup>
+                        <EditProfileSubmitBtn type="submit" disabled={!isFormValid}>수정하기</EditProfileSubmitBtn>
+                    </EditProfileForm>
+                </M.SidebarRightWrap>
+            </SidebarMain>
 
-        </div>
+        </MainContainer>
     )
 
 }

@@ -20,8 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Slf4j
 @Component
@@ -49,7 +47,6 @@ public class InitContentData implements ApplicationRunner {
         initWebtoons();
         initWebnovelEpisode();
         initWebtoonEpisode();
-
     }
 
     private void initCreators() {
@@ -65,14 +62,13 @@ public class InitContentData implements ApplicationRunner {
 
             String [] line;
             while ((line = csvReader.readNext()) != null) {
-                User user = userRepository.findByIdAndIsDeletedFalse(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("user 없음"));
+                User user = userRepository.findByIdAndDeleted(Long.valueOf(line[0]), false).orElseThrow(() -> new RuntimeException("user 없음"));
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                 LocalDate birthDate = LocalDate.parse(line[5], formatter);
                 user.updateIdentityVerification(line[3], line[4], birthDate, Gender.valueOf(line[6]), line[7], true, IdentityProvider.DANAL);
-
+                userRepository.save(user);
 
                 Creator creators = new Creator(line[1], user, ContentType.valueOf(line[2]));
-
                 creatorRepository.save(creators);
 
             }
@@ -145,10 +141,10 @@ public class InitContentData implements ApplicationRunner {
                         .keywords(separateKeywords(line[2]))
                         .creator(creator)
                         .cover(s3Url)
-                        .serialDay(DayOfWeek.valueOf(line[6]))
+                        .serialDay(SerialDay.valueOf(line[6]))
                         .status(SeriesStatus.valueOf(line[7]))
                         .viewCount(Long.parseLong(line[5]))
-                        .isDeleted(false)
+                        .deleted(false)
                         .build();
 
                 webnovels.add(webnovel);
@@ -187,10 +183,10 @@ public class InitContentData implements ApplicationRunner {
                         .keywords(separateKeywords(line[2]))
                         .creator(creator)
                         .cover(s3Url)
-                        .serialDay(DayOfWeek.valueOf(line[5]))
+                        .serialDay(SerialDay.valueOf(line[5]))
                         .status(SeriesStatus.valueOf(line[6]))
                         .viewCount(Long.parseLong(line[7]))
-                        .isDeleted(false)
+                        .deleted(false)
                         .build();
 
                 webtoons.add(webtoon);

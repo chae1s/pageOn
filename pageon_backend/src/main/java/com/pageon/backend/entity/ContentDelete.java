@@ -21,6 +21,7 @@ public class ContentDelete {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;
     private Long contentId;
 
@@ -28,6 +29,7 @@ public class ContentDelete {
     @JoinColumn(name = "creator_id", nullable = false)
     private Creator creator;
     private String reason;
+    @Enumerated(EnumType.STRING)
     private DeleteStatus deleteStatus;
     private LocalDateTime requestedAt;
     private LocalDateTime processedAt;

@@ -1,10 +1,12 @@
 import React, {useState} from "react";
-import "../../styles/reset.css"
-import "../../styles/global.css"
-import { useNavigate, Link} from "react-router-dom";
+import styled from "styled-components";
+import { MainContainer, SidebarMain } from "../../styles/Layout.styles";
+import * as M from "./MyPage.styles"
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Sidebar from "../../components/MyPageSidebar";
+import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import "./MyPage.css"
+
 
 function PasswordCheck() {
     const [password, setPassword] = useState<string>("");
@@ -47,32 +49,30 @@ function PasswordCheck() {
 
 
     return (
-        <div className="main-container">
-            <main className="sidebar-main">
+        <MainContainer>
+            <SidebarMain>
                 <Sidebar />
-                <div className="sidebar-right-wrap">
-                    <h2 className="mypage-title">비밀번호 재확인</h2>
-                    <form className="password-check-form" onSubmit={handleSubmit}>
-                        <div className="password-check-form-group">
-                            <label htmlFor="password">비밀번호</label>
-                            <input 
+                <M.SidebarRightWrap>
+                    <M.MypageTitle>비밀번호 재확인</M.MypageTitle>
+                    <M.PasswordCheckForm onSubmit={handleSubmit}>
+                        <div>
+                            <M.PasswordCheckLabel htmlFor="password">비밀번호</M.PasswordCheckLabel>
+                            <M.PasswordCheckInput 
                                 id="password"
                                 type="password"
                                 value={password}
-                                className="password-check-input"
                                 onChange={handleChange}
                                 autoFocus
                             />
                             {error && 
-                                <div className="error-message">{error}</div>
+                                <M.ErrorMessage>{error}</M.ErrorMessage>
                             }
-                            <button type="submit" className="submit-btn">확인</button>
+                            <M.SubmitBtn type="submit" >확인</M.SubmitBtn>
                         </div>
-                    </form>
-                </div>
-            </main>
-
-        </div>
+                    </M.PasswordCheckForm>
+                </M.SidebarRightWrap>
+            </SidebarMain>
+        </MainContainer>
     )
 }
 

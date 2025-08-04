@@ -26,6 +26,7 @@ public class PointTransaction extends BaseTimeEntity {
     private String type;    // 충전인지 사용인지 구분
     private Integer amount;
     private String description;
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;
 
     private Integer contentId;
