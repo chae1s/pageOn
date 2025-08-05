@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import { ContentDetail } from "../../types/Content";
-import ContentDetailLayout from "../../components/ContentDetailLayout";
+import ContentDetailLayout from "../../components/Contents/ContentDetailLayout";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import ContentEpisodeListLayout from "../../components/Contents/ContentEpisodeListLayout";
 
 function WebnovelDetailPage(){
     const [webnovel, setWebnovel] = useState<ContentDetail | null>(null);
@@ -11,7 +12,8 @@ function WebnovelDetailPage(){
 
     useEffect(() => {
         async function fetchData() {
-            const response = await axios.get(`/api/webnovels/${id}`); // 실제 ID로 교체
+            const response = await axios.get(`/api/webnovels/${id}`); 
+            console.log(response.data)
             setWebnovel(response.data);
         }
         fetchData();
@@ -30,7 +32,8 @@ function WebnovelDetailPage(){
     return(
         <MainContainer>
             <NoSidebarMain>
-                <ContentDetailLayout type="WEBNOVEL" content={webnovel}></ContentDetailLayout>
+                <ContentDetailLayout content={webnovel} />
+                <ContentEpisodeListLayout type="webnovels" episodes={webnovel.episodes} />
             </NoSidebarMain>
         </MainContainer>
     )

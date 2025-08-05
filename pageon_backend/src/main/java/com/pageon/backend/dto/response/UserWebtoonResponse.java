@@ -24,11 +24,12 @@ public class UserWebtoonResponse {
     private Double rating;
     private Integer ratingCount;
     private Long viewCount;
+    private String contentType;
 
     // 에피소드 담기
+    private List<EpisodeListResponse> episodes;
 
-
-    public static UserWebtoonResponse fromEntity(Webtoon webtoon, List<UserKeywordResponse> keywords) {
+    public static UserWebtoonResponse fromEntity(Webtoon webtoon, List<UserKeywordResponse> keywords, List<EpisodeListResponse> episodes) {
         UserWebtoonResponse userWebtoonResponse = new UserWebtoonResponse();
         userWebtoonResponse.setId(webtoon.getId());
         userWebtoonResponse.setTitle(webtoon.getTitle());
@@ -41,6 +42,8 @@ public class UserWebtoonResponse {
         userWebtoonResponse.setRating(4.9231);
         userWebtoonResponse.setRatingCount(125039);
         userWebtoonResponse.setViewCount(webtoon.getViewCount());
+        userWebtoonResponse.setContentType("webtoons");
+        userWebtoonResponse.setEpisodes(episodes);
 
         return userWebtoonResponse;
 

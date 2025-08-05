@@ -1,10 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.SerialDay;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserKeywordResponse;
-import com.pageon.backend.dto.response.UserWebtoonResponse;
+import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
@@ -27,6 +24,7 @@ public class UserWebtoonService {
 
     private final WebtoonRepository webtoonRepository;
     private final KeywordService keywordService;
+    private final WebtoonEpisodeService webtoonEpisodeService;
 
     @Transactional(readOnly = true)
     public UserWebtoonResponse getWebtoonById(Long webtoonId) {
@@ -34,8 +32,9 @@ public class UserWebtoonService {
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
+        List<EpisodeListResponse> episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
 
-        return UserWebtoonResponse.fromEntity(webtoon, keywords);
+        return UserWebtoonResponse.fromEntity(webtoon, keywords, episodes);
     }
 
     @Transactional(readOnly = true)

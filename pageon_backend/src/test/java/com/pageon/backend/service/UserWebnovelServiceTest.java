@@ -86,7 +86,7 @@ class UserWebnovelServiceTest {
         // then
         assertEquals(webnovel.getId(), response.getId());
         assertEquals(webnovel.getTitle(), response.getTitle());
-        assertEquals(webnovel.getCreator().getPenName(), response.getPenName());
+        assertEquals(webnovel.getCreator().getPenName(), response.getAuthor());
 
     }
 

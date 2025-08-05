@@ -1,3 +1,4 @@
+import { EpisodeSummary } from "./Episodes";
 import { UserKeywordResponse } from "./Keyword";
 
 export type ContentType = 'WEBNOVEL' | 'WEBTOON';
@@ -28,6 +29,7 @@ export interface ContentDetail {
     cover: string;
     author: string;
     keywords: UserKeywordResponse[];
+    episodes: EpisodeSummary[];
     serialDay: string;
     rating: number;
     ratingCount: number;

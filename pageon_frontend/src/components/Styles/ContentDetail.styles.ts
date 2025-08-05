@@ -47,7 +47,7 @@ export const ContentTitle = styled.h1`
     line-height: 32px;
 `
 
-export const ContentStatus = styled.div<{status: 'COMPLETED' | 'ONGOING' | 'REST'}>`
+export const ContentStatus = styled.div<{$status: 'COMPLETED' | 'ONGOING' | 'REST'}>`
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -61,8 +61,8 @@ export const ContentStatus = styled.div<{status: 'COMPLETED' | 'ONGOING' | 'REST
     cursor: default;
     
 
-    ${({status}) => {
-        switch (status) {
+    ${({$status}) => {
+        switch ($status) {
             case 'COMPLETED':
               return css`
                 background-color: #444; // 완결 - 짙은 회색
@@ -175,4 +175,149 @@ export const ContentInterestBtn = styled.button`
 
 `
 
+export const EpisodeSection = styled.section`
+    padding-bottom: 80px;
+    border-top: 2px solid #222;
+`
+
+export const EpisodeListOption = styled.div`
+    display: flex;
+    width: 100%;
+    padding: 10px 0;
+    height: 50px;
+    align-items: center;
+    justify-content: space-between;
+`
+
+export const OptionLeft = styled.div`
+    padding-left: 10px;
+    display: flex;
+`
+
+export const OptionItem = styled.li`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+export const OptionCheckbox = styled.input`
+    width: 18px;
+    height: 18px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    border-radius: 4px;
+`
+
+export const OptionCheckboxLabel = styled.label`
+    vertical-align: top;
+    line-height: 18px;
+    margin: 0 15px 0 8px;
+`
+
+export const FilterBtnDivider = styled.div`
+    width: 1px;
+    height: 14px;
+    margin: 0 7px;
+    border-radius: 999px;
+    background: #e6e6e6;
+`
+
+export const EpisodeSellBtnWrapper = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+`
+
+export const RentalBtn = styled.button`
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1;
+    border: 1px solid #528efa;
+    color: #528efa;
+`
+
+export const PurchaseBtn = styled.button`
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1;
+    background-color: #528efa;
+    color: #FFF;
+`
+
+export const OptionRight = styled.div`
+    padding-right: 10px;
+`
+
+export const EpisodeFilterWrapper = styled.div`
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+`
+
+export const EpisodeFilterBtn = styled.button<{active: boolean}>`
+    color: ${({active}) => (active? "#69a3ff" : "#b4b4b4" )};
+    font-weight: ${({active}) => (active? "500" : "")};
+    font-size: 14px;
+`
+
+export const EpisodeListWrapper = styled.div`
+    position: relative;
+`
+
+export const EpisodeItem = styled.div`
+    display: flex;
+    padding: 0 10px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border-top: 1px dotted #bbb;
+    align-items: center;
+    justify-content: space-between;
+    height: 59px;
+`
+
+export const EpisodeItemLeft = styled.div`
+    display: flex;
+    align-items: center;
+`
+
+export const EpisodeThumbnailContainer = styled.div`
+    margin-left: 8px;
+`
+
+export const EpisodeThumbnailImage = styled.img`
+
+`
+
+export const EpisodeInfoContainer = styled.div`
+    margin-left: 8px;
+    font-size: 14.5px;
+`
+
+export const EpisodeTitleAndNum = styled.div`
+    font-weight: 500;
+`
+
+export const EpisodeTitle = styled.span`
+    margin-left: 5px;
+`
+
+export const EpisodeCreateDate = styled.div`
+    font-size: 14px;
+    color: #A5A5A5;
+    margin-top: 4px;
+`
+
+export const EpisodeItemRight = styled.div`
+`
 

@@ -24,11 +24,12 @@ public class UserWebnovelResponse {
     private Double rating;
     private Integer ratingCount;
     private Long viewCount;
+    private String contentType;
 
     // 에피소드 담기
+    private List<EpisodeListResponse> episodes;
 
-
-    public static UserWebnovelResponse fromEntity(Webnovel webnovel, List<UserKeywordResponse> keywords) {
+    public static UserWebnovelResponse fromEntity(Webnovel webnovel, List<UserKeywordResponse> keywords, List<EpisodeListResponse> episodes) {
         UserWebnovelResponse userWebnovelResponse = new UserWebnovelResponse();
         userWebnovelResponse.setId(webnovel.getId());
         userWebnovelResponse.setTitle(webnovel.getTitle());
@@ -41,6 +42,8 @@ public class UserWebnovelResponse {
         userWebnovelResponse.setRating(4.9231);
         userWebnovelResponse.setRatingCount(125039);
         userWebnovelResponse.setViewCount(webnovel.getViewCount());
+        userWebnovelResponse.setContentType("webnovels");
+        userWebnovelResponse.setEpisodes(episodes);
 
         return userWebnovelResponse;
 

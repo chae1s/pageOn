@@ -1,13 +1,12 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.SerialDay;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserKeywordResponse;
-import com.pageon.backend.dto.response.UserWebnovelResponse;
+import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.Webnovel;
+import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.WebnovelEpisodeRepository;
 import com.pageon.backend.repository.WebnovelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ public class UserWebnovelService {
 
     private final WebnovelRepository webnovelRepository;
     private final KeywordService keywordService;
+    private final WebnovelEpisodeService  webnovelEpisodeService;
 
     @Transactional(readOnly = true)
     public UserWebnovelResponse getWebnovelById(Long webnovelId) {
@@ -34,8 +34,9 @@ public class UserWebnovelService {
         );
 
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webnovel.getKeywords());
+        List<EpisodeListResponse> episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
 
-        return UserWebnovelResponse.fromEntity(webnovel, keywords);
+        return UserWebnovelResponse.fromEntity(webnovel, keywords, episodes);
     }
 
     @Transactional(readOnly = true)
@@ -66,4 +67,6 @@ public class UserWebnovelService {
                         "webnovels"))
                 .toList();
     }
+
+
 }

@@ -84,7 +84,7 @@ class UserWebtoonServiceTest {
         // then
         assertEquals(webtoon.getId(), response.getId());
         assertEquals(webtoon.getTitle(), response.getTitle());
-        assertEquals(webtoon.getCreator().getPenName(), response.getPenName());
+        assertEquals(webtoon.getCreator().getPenName(), response.getAuthor());
 
     }
 
