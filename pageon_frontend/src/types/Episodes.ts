@@ -6,3 +6,13 @@ export interface EpisodeSummary {
     purchasePrice: number;
     rentalPrice: number;
 }
+
+export interface WebnovelEpisodeDetail {
+    id: number;
+    title: string;
+    episodeNum: number;
+    episodeTitle: string;
+    content: string;
+    prevEpisodeId: number | null;
+    nextEpisodeId: number | null;
+}

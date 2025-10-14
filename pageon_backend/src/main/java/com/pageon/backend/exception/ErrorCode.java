@@ -56,7 +56,8 @@ public enum ErrorCode {
 
     // 작품
     WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND),
-    WEBTOON_NOT_FOUND("존재하지 않는 웹툰입니다.", HttpStatus.NOT_FOUND)
+    WEBTOON_NOT_FOUND("존재하지 않는 웹툰입니다.", HttpStatus.NOT_FOUND),
+    EPISODE_NOT_FOUND("해당 에피소드를 찾을 수 없습니다.", HttpStatus.NOT_FOUND)
     ;
 
 

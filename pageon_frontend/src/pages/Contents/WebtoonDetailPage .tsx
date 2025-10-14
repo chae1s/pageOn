@@ -8,16 +8,16 @@ import ContentEpisodeListLayout from "../../components/Contents/ContentEpisodeLi
 
 function WebtoonDetailPage(){
     const [webtoon, setWebnovel] = useState<ContentDetail | null>(null);
-    const { id } = useParams();
+    const { contentId } = useParams();
 
     useEffect(() => {
         async function fetchData() {
-            const response = await axios.get(`/api/webtoons/${id}`); 
+            const response = await axios.get(`/api/webtoons/${contentId}`); 
             console.log(response.data)
             setWebnovel(response.data);
         }
         fetchData();
-    }, [id]);
+    }, [contentId]);
 
     if (!webtoon) {
         return (
@@ -33,7 +33,7 @@ function WebtoonDetailPage(){
         <MainContainer>
             <NoSidebarMain>
                 <ContentDetailLayout content={webtoon}></ContentDetailLayout>
-                <ContentEpisodeListLayout type="webtoons" episodes={webtoon.episodes} />
+                <ContentEpisodeListLayout type="webtoons" contentId={webtoon.id} episodes={webtoon.episodes} />
             </NoSidebarMain>
         </MainContainer>
     )

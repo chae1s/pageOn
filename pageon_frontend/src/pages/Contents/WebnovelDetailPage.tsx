@@ -8,16 +8,15 @@ import ContentEpisodeListLayout from "../../components/Contents/ContentEpisodeLi
 
 function WebnovelDetailPage(){
     const [webnovel, setWebnovel] = useState<ContentDetail | null>(null);
-    const { id } = useParams();
+    const { contentId } = useParams();
 
     useEffect(() => {
         async function fetchData() {
-            const response = await axios.get(`/api/webnovels/${id}`); 
-            console.log(response.data)
+            const response = await axios.get(`/api/webnovels/${contentId}`); 
             setWebnovel(response.data);
         }
         fetchData();
-    }, [id]);
+    }, [contentId]);
 
     if (!webnovel) {
         return (
@@ -33,7 +32,7 @@ function WebnovelDetailPage(){
         <MainContainer>
             <NoSidebarMain>
                 <ContentDetailLayout content={webnovel} />
-                <ContentEpisodeListLayout type="webnovels" episodes={webnovel.episodes} />
+                <ContentEpisodeListLayout type="webnovels" contentId={webnovel.id} episodes={webnovel.episodes} />
             </NoSidebarMain>
         </MainContainer>
     )

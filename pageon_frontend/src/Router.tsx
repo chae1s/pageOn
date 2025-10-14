@@ -25,10 +25,15 @@ import WebnovelHome from "./pages/Home/WebnovelHome";
 import WebtoonHome from "./pages/Home/WebtoonHome";
 import WebnovelDetailPage from "./pages/Contents/WebnovelDetailPage";
 import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage ";
+import WebnovelViewer from "./pages/Contents/WebnovelViewer";
 
 function Router() {
     const location = useLocation();
-    const hideHeaderFooter = location.pathname === "/mock-verify";
+    const hideHeaderFooter =
+        location.pathname === "/mock-verify" ||
+        /^\/webnovels\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
+        /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname);
+
     const creatorHeader = location.pathname.startsWith("/creators");
     const isAuthenticated = !!localStorage.getItem("accessToken");
 
@@ -41,8 +46,8 @@ function Router() {
             <Route path="/" element={<Home />} />
             <Route path="/webnovels" element={<WebnovelHome />} />
             <Route path="/webtoons" element={<WebtoonHome />} />
-            <Route path="/webnovels/:id" element={<WebnovelDetailPage />} />
-            <Route path="/webtoons/:id" element={<WebtoonDetailPage />} />
+            <Route path="/webnovels/:contentId" element={<WebnovelDetailPage />} />
+            <Route path="/webtoons/:contentId" element={<WebtoonDetailPage />} />
             <Route element={<PublicOnlyRoute/>} >
                 <Route path="/users/login" element={<Login />} />
                 <Route path="/users/signup" element={<Signup />} />
@@ -60,6 +65,7 @@ function Router() {
                 <Route path="/library/my-comments" element={<MyComments />}  />
                 <Route path="/creators/register" element={<CreatorRegister/>}  />
                 <Route path="/mock-verify" element={<MockVerify/>}  />
+                <Route path="/webnovels/:contentId/viewer/:episodeId" element={<WebnovelViewer />} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={["ROLE_CREATOR"]}/>}>

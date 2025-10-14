@@ -5,9 +5,19 @@ export const CommentList = styled.div`
     margin: 0 0 80px;
 `
 
+export const CommentHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
+export const CommentCount = styled.div`
+    font-weight: 600;
+`
+
 export const SortBtnList = styled.div`
     display: flex;
     padding: 16px 0;
+    gap: 10px;
 `
 
 export const CommentListUl = styled.ul`

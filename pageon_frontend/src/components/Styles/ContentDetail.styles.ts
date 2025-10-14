@@ -1,5 +1,5 @@
 import {styled, css} from "styled-components";
-
+import { Link } from "react-router-dom";
 
 export const ContentDetailHeader = styled.div`
     display: grid;
@@ -201,8 +201,8 @@ export const OptionItem = styled.li`
 `
 
 export const OptionCheckbox = styled.input`
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     border: 1px solid #eee;
     cursor: pointer;
     border-radius: 4px;
@@ -264,9 +264,9 @@ export const EpisodeFilterWrapper = styled.div`
     display: flex;
 `
 
-export const EpisodeFilterBtn = styled.button<{active: boolean}>`
-    color: ${({active}) => (active? "#69a3ff" : "#b4b4b4" )};
-    font-weight: ${({active}) => (active? "500" : "")};
+export const EpisodeFilterBtn = styled.button<{$active: boolean}>`
+    color: ${({$active}) => ($active? "#69a3ff" : "#b4b4b4" )};
+    font-weight: ${({$active}) => ($active? "500" : "")};
     font-size: 14px;
 `
 
@@ -308,7 +308,7 @@ export const EpisodeTitleAndNum = styled.div`
     font-weight: 500;
 `
 
-export const EpisodeTitle = styled.span`
+export const EpisodeTitle = styled(Link)`
     margin-left: 5px;
 `
 
@@ -319,5 +319,22 @@ export const EpisodeCreateDate = styled.div`
 `
 
 export const EpisodeItemRight = styled.div`
+`
+
+export const ShowAllBtnContainer = styled.div`
+    position: relative;
+`
+
+export const ShowAllBtn = styled.button`
+    padding: 16px 0 14px 0;
+    width: 100%;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-top: 0;
 `
 

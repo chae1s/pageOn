@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
                                 "/api/users/login", "/api/users/find-password",
-                                "/api/webnovels", "/api/webnovels/**", "/api/webtoons", "/api/webtoons/**"
+                                "/api/webnovels", "/api/webnovels/**", "/api/webtoons", "/api/webtoons/**", "/api/episodes/**"
                         ).permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
