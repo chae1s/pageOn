@@ -35,7 +35,7 @@ public class WebnovelEpisodeService {
     }
 
     @Transactional(readOnly = true)
-    public WebnovelEpisodeDetailResponse getWebnovelEpisodeById(long id) {
+    public WebnovelEpisodeDetailResponse getWebnovelEpisodeById(Long id) {
         WebnovelEpisode episode = webnovelEpisodeRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );

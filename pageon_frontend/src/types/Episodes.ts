@@ -1,3 +1,5 @@
+import { WebtoonImagesResponse } from "./WebtoonImage";
+
 export interface EpisodeSummary {
     id: number;
     episodeNum: number;
@@ -13,6 +15,15 @@ export interface WebnovelEpisodeDetail {
     episodeNum: number;
     episodeTitle: string;
     content: string;
+    prevEpisodeId: number | null;
+    nextEpisodeId: number | null;
+}
+
+export interface WebtoonEpisodeDetail {
+    id: number;
+    title: string;
+    episodeNum: number;
+    images: WebtoonImagesResponse[];
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
 }

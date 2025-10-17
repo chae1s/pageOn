@@ -172,6 +172,7 @@ $RECYCLE.BIN/
 
 application-dev.yml
 **/resources/data/*.csv
+**/resources/keys/*.pem
 
 
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij+all,gradle.env

@@ -53,7 +53,7 @@ export const EpisodeLink = styled(Link)<{ $disabled?: boolean }>`
     line-height: 19px;
     min-width: 0px;
     white-space: nowrap;
-    color: ${props => props.$disabled ? '#a5a5a5' : '#888'};
+    color: ${props => props.$disabled ? '#a5a5a5' : '#444'};
     pointer-events: ${props => props.$disabled ? 'none' : 'auto'};
     cursor: ${props => props.$disabled ? 'default' : 'pointer'};
     text-decoration: none;
@@ -101,6 +101,12 @@ export const EpisodeContent = styled.article`
     font-size: 18px;
     line-height: 33px;
     white-space: pre-line;
+`
+
+export const EpisodeThumbnailImage = styled.img`
+    display: block;
+    width: 100%;
+    height: auto;
 `
 
 export const EpisodeContentFooter = styled.div`

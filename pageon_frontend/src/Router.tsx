@@ -26,6 +26,7 @@ import WebtoonHome from "./pages/Home/WebtoonHome";
 import WebnovelDetailPage from "./pages/Contents/WebnovelDetailPage";
 import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage ";
 import WebnovelViewer from "./pages/Contents/WebnovelViewer";
+import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 
 function Router() {
     const location = useLocation();
@@ -66,6 +67,7 @@ function Router() {
                 <Route path="/creators/register" element={<CreatorRegister/>}  />
                 <Route path="/mock-verify" element={<MockVerify/>}  />
                 <Route path="/webnovels/:contentId/viewer/:episodeId" element={<WebnovelViewer />} />
+                <Route path="/webtoons/:contentId/viewer/:episodeId" element={<WebtoonViewer />} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={["ROLE_CREATOR"]}/>}>

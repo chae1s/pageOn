@@ -7,14 +7,14 @@ import { useParams } from "react-router-dom";
 import ContentEpisodeListLayout from "../../components/Contents/ContentEpisodeListLayout";
 
 function WebtoonDetailPage(){
-    const [webtoon, setWebnovel] = useState<ContentDetail | null>(null);
+    const [webtoon, setWebtoon] = useState<ContentDetail | null>(null);
     const { contentId } = useParams();
 
     useEffect(() => {
         async function fetchData() {
             const response = await axios.get(`/api/webtoons/${contentId}`); 
             console.log(response.data)
-            setWebnovel(response.data);
+            setWebtoon(response.data);
         }
         fetchData();
     }, [contentId]);

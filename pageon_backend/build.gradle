@@ -51,6 +51,8 @@ dependencies {
 	implementation 'software.amazon.awssdk:auth:2.25.20'
 	implementation 'software.amazon.awssdk:regions:2.25.20'
 	implementation 'net.nurigo:sdk:4.3.2'
+	implementation 'software.amazon.awssdk:cloudfront:2.20.0'
+	implementation 'org.bouncycastle:bcpkix-jdk15on:1.70' // PEM 파일 파싱용
 
 }
 
