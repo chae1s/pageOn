@@ -55,7 +55,7 @@ export const ContentStatus = styled.div<{$status: 'COMPLETED' | 'ONGOING' | 'RES
     line-height: 1;
     border-radius: 12px;
     font-weight: 600px;
-    height: 20px;
+    height: 25px;
     font-size: 15px;
     color: #FFF;
     cursor: default;
@@ -69,11 +69,11 @@ export const ContentStatus = styled.div<{$status: 'COMPLETED' | 'ONGOING' | 'RES
               `;
             case 'ONGOING':
               return css`
-                background-color: #e74c3c; // 연재중 - 빨강
+                background-color: #3498db; // 연재중 - 빨강
               `;
             case 'REST':
               return css`
-                background-color: #3498db; // 휴재 - 파랑
+                background-color: #e74c3c; // 휴재 - 파랑
               `;
             default:
               return css`
@@ -82,6 +82,7 @@ export const ContentStatus = styled.div<{$status: 'COMPLETED' | 'ONGOING' | 'RES
           }
     }}
 `
+
 
 export const ContentInfoText = styled.div`
     display: flex;
@@ -167,14 +168,27 @@ export const ContentKeywordItem = styled.button`
 
 `
 
-export const ContentInterestBtnContainer = styled.div`
+export const ContentLikeBtnContainer = styled.div`
+
 
 `
 
-export const ContentInterestBtn = styled.button`
-
+export const ContentLikeBtn = styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    line-height: 1;
+    border-radius: 12px;
+    font-weight: 600px;
+    height: 25px;
+    font-size: 15px;
+    color: #fff;
+    background-color: var(--accent-color);
 `
-
+export const ContentLikeBtnText = styled.p`
+    margin-left: 5px;
+`
 export const EpisodeSection = styled.section`
     padding-bottom: 80px;
     border-top: 2px solid #222;
@@ -336,5 +350,22 @@ export const ShowAllBtn = styled.button`
     border-radius: 6px;
     border: 1px solid #ccc;
     margin-top: 0;
+`
+
+export const NotificationContainer = styled.div<{$show: boolean}>`
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: ${({$show}) => ($show ? 1 : 0)};
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
 `
 

@@ -95,7 +95,7 @@ class WebtoonEpisodeServiceTest {
 
 
         // then
-        assertEquals(webtoonEpisode.getEpisodeTitle(), result.getEpisodeTitle());
+        assertEquals(webtoonEpisode.getEpisodeTitle(), result.getTitle());
         assertEquals(webtoonImages.size(), result.getImages().size());
 
     }
@@ -150,12 +150,11 @@ class WebtoonEpisodeServiceTest {
 
         List<WebtoonImagesResponse> images = new ArrayList<>();
 
+        String signUrl = "https://cdn.test.example.com";
+
         for (int i = 1; i <= 10; i++) {
-            images.add(
-                    WebtoonImagesResponse.fromEntity(
-                            new WebtoonImage((long) i, i, "url" + i, webtoonEpisode)
-                    )
-            );
+            WebtoonImage image = new WebtoonImage((long)i, i, "url" + i, webtoonEpisode);
+            images.add(WebtoonImagesResponse.fromEntity(image, signUrl));
         }
 
         return images;

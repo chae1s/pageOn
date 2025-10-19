@@ -42,8 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
                                 "/api/users/login", "/api/users/find-password",
-                                "/api/webnovels", "/api/webnovels/**", "/api/webtoons", "/api/webtoons/**", "/api/episodes/**"
+                                "/api/webnovels", "/api/webnovels/*", "/api/webtoons", "/api/webtoons/*", "/api/episodes/**", "/api/webnovels/daily/*", "/api/webtoons/daily/*"
                         ).permitAll()
+                        .requestMatchers("/api/webnovels/*/likes", "/api/webtoons/*/likes").authenticated()
                         .requestMatchers("/api/**").authenticated()
                 )
                 .formLogin(FormLoginConfigurer::disable)
