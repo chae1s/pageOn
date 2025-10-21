@@ -25,11 +25,12 @@ public class UserWebnovelResponse {
     private Integer ratingCount;
     private Long viewCount;
     private String contentType;
+    private Boolean isInterested;
 
     // 에피소드 담기
     private List<EpisodeListResponse> episodes;
 
-    public static UserWebnovelResponse fromEntity(Webnovel webnovel, List<UserKeywordResponse> keywords, List<EpisodeListResponse> episodes) {
+    public static UserWebnovelResponse fromEntity(Webnovel webnovel, List<UserKeywordResponse> keywords, List<EpisodeListResponse> episodes, Boolean isInterested) {
         UserWebnovelResponse userWebnovelResponse = new UserWebnovelResponse();
         userWebnovelResponse.setId(webnovel.getId());
         userWebnovelResponse.setTitle(webnovel.getTitle());
@@ -44,6 +45,7 @@ public class UserWebnovelResponse {
         userWebnovelResponse.setViewCount(webnovel.getViewCount());
         userWebnovelResponse.setContentType("webnovels");
         userWebnovelResponse.setEpisodes(episodes);
+        userWebnovelResponse.setIsInterested(isInterested);
 
         return userWebnovelResponse;
 

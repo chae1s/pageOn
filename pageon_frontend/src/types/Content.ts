@@ -36,4 +36,5 @@ export interface ContentDetail {
     status: ContentStatus;
     viewCount: number;
     contentType: string;
+    isInterested: boolean;
 }

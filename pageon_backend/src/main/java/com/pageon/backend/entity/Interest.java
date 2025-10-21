@@ -14,10 +14,10 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @SuperBuilder
 @DynamicUpdate
-@Table(name = "likes")
+@Table(name = "interests")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Like extends BaseTimeEntity {
+public class Interest extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

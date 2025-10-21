@@ -80,7 +80,7 @@ public class User {
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
-    private List<Like> likes = new ArrayList<>();
+    private List<Interest> interests = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "user")

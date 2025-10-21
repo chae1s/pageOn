@@ -4,13 +4,13 @@ import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.entity.Like;
+import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.LikeRepository;
+import com.pageon.backend.repository.InterestRepository;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.repository.WebnovelRepository;
 import com.pageon.backend.repository.WebtoonRepository;
@@ -32,13 +32,13 @@ import static org.mockito.Mockito.*;
 
 @Transactional
 @ActiveProfiles("test")
-@DisplayName("LikeService 단위 테스트")
+@DisplayName("Interest 단위 테스트")
 @ExtendWith(MockitoExtension.class)
-class LikeServiceTest {
+class InterestServiceTest {
     @InjectMocks
-    private LikeService likeService;
+    private InterestService interestService;
     @Mock
-    private LikeRepository likeRepository;
+    private InterestRepository likeRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -83,14 +83,14 @@ class LikeServiceTest {
         when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(webnovelRepository.findById(webnovelId)).thenReturn(Optional.of(webnovel));
 
-        ArgumentCaptor<Like> likeCaptor = ArgumentCaptor.forClass(Like.class);
+        ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        likeService.registerLike(userId, webnovelId, contentType);
+        interestService.registerInterest(userId, webnovelId, contentType);
         
         // then
         verify(likeRepository).save(likeCaptor.capture());
-        Like like = likeCaptor.getValue();
+        Interest like = likeCaptor.getValue();
 
         assertEquals(ContentType.WEBNOVEL, like.getContentType());
         assertEquals(webnovelId, like.getContentId());
@@ -129,14 +129,14 @@ class LikeServiceTest {
         when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
         when(webtoonRepository.findById(webtoonId)).thenReturn(Optional.of(webtoon));
 
-        ArgumentCaptor<Like> likeCaptor = ArgumentCaptor.forClass(Like.class);
+        ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        likeService.registerLike(userId, webtoonId, contentType);
+        interestService.registerInterest(userId, webtoonId, contentType);
 
         // then
         verify(likeRepository).save(likeCaptor.capture());
-        Like like = likeCaptor.getValue();
+        Interest like = likeCaptor.getValue();
 
         assertEquals(ContentType.WEBTOON, like.getContentType());
         assertEquals(webtoonId, like.getContentId());
@@ -169,7 +169,7 @@ class LikeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            likeService.registerLike(userId, webnovelId, contentType);
+            interestService.registerInterest(userId, webnovelId, contentType);
         });
         
         // then
@@ -203,7 +203,7 @@ class LikeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            likeService.registerLike(userId, webtoonId, contentType);
+            interestService.registerInterest(userId, webtoonId, contentType);
         });
 
         // then
@@ -236,7 +236,7 @@ class LikeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            likeService.registerLike(userId, contentId, contentType);
+            interestService.registerInterest(userId, contentId, contentType);
         });
 
         // then

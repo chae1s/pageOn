@@ -5,7 +5,7 @@ import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebtoonResponse;
 import com.pageon.backend.security.PrincipalUser;
-import com.pageon.backend.service.LikeService;
+import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebtoonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +22,12 @@ import java.util.List;
 public class UserWebtoonController {
 
     private final UserWebtoonService userWebtoonService;
-    private final LikeService likeService;
+    private final InterestService interestService;
 
     @GetMapping("/{webtoonId}")
-    public ResponseEntity<UserWebtoonResponse> getWebnovelById(@PathVariable Long webtoonId) {
+    public ResponseEntity<UserWebtoonResponse> getWebnovelById(@PathVariable Long webtoonId, @AuthenticationPrincipal PrincipalUser principalUser) {
 
-        return ResponseEntity.ok(userWebtoonService.getWebtoonById(webtoonId));
+        return ResponseEntity.ok(userWebtoonService.getWebtoonById(webtoonId, principalUser));
     }
 
     @GetMapping()
@@ -42,12 +42,12 @@ public class UserWebtoonController {
         return ResponseEntity.ok(userWebtoonService.getWebtoonsByDay(day));
     }
 
-    @PostMapping("/{webtoonId}/likes")
+    @PostMapping("/{webtoonId}/interests")
     public ResponseEntity<Void> likeWebnovel(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId
     ) {
         log.info("WEBTOON {} 관심 등록",  webtoonId);
-        likeService.registerLike(principalUser.getId(), webtoonId, ContentType.WEBTOON);
+        interestService.registerInterest(principalUser.getId(), webtoonId, ContentType.WEBTOON);
 
         return ResponseEntity.ok().build();
     }

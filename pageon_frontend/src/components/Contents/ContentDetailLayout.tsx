@@ -25,7 +25,7 @@ function ContentDetailLayout({content}: Props) {
         REST: "휴재"
     }
 
-    const [liked, setLiked] = useState(false);
+    const [isInterested, setIsInterested] = useState(content.isInterested);
     const [showNotification, setShowNotification] = useState(false);
 
     const RatingFullIcon = () => (
@@ -35,7 +35,7 @@ function ContentDetailLayout({content}: Props) {
     )
 
     const PlusIcon = () => (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="#69a3ff" xmlns="http://www.w3.org/2000/svg">
             <rect x="7" y="3" width="2" height="10" rx="1" />
             <rect x="3" y="7" width="10" height="2" rx="1" />
         </svg>
@@ -52,20 +52,22 @@ function ContentDetailLayout({content}: Props) {
         try {
 
             if (content.contentType === "webnovels") {
-                await axios.post(`/api/webnovels/${content.id}/likes`, {}, {
+                const response = await axios.post(`/api/webnovels/${content.id}/interests`, {}, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("accessToken")}`
                     }
                 })
+
+                console.log(response.data)
             } else if (content.contentType === "webtoons") {
-                await axios.post(`/api/webtoons/${content.id}/likes`, {}, {
+                await axios.post(`/api/webtoons/${content.id}/interests`, {}, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("accessToken")}`
                     }
                 })
             }
-
-            setLiked(true);
+            
+            setIsInterested(true);
             setShowNotification(true);
             
             // 3초 후 알림 메시지 숨기기
@@ -89,16 +91,16 @@ function ContentDetailLayout({content}: Props) {
                         <S.ContentTitle className="detail-title">{content.title}</S.ContentTitle>
                         <S.ContentStatus $status={content.status}>{statusMap[content.status]}</S.ContentStatus>
                         <S.ContentLikeBtnContainer>
-                            {liked ? (
-                                <S.ContentLikeBtn>
+                            {isInterested ? (
+                                <S.ContentInterestBtn>
                                     <CheckIcon />
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
-                                </S.ContentLikeBtn>
+                                </S.ContentInterestBtn>
                             ):(
-                                <S.ContentLikeBtn type="button" onClick={RegisterLike}>
+                                <S.ContentInterestRegisterBtn type="button" onClick={RegisterLike}>
                                     <PlusIcon /> 
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
-                                </S.ContentLikeBtn>
+                                </S.ContentInterestRegisterBtn>
                             )}
                             
                         </S.ContentLikeBtnContainer>

@@ -1,13 +1,14 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.WebnovelEpisodeRepository;
+import com.pageon.backend.repository.InterestRepository;
 import com.pageon.backend.repository.WebnovelRepository;
+import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -26,9 +27,11 @@ public class UserWebnovelService {
     private final WebnovelRepository webnovelRepository;
     private final KeywordService keywordService;
     private final WebnovelEpisodeService  webnovelEpisodeService;
+    private final InterestRepository interestRepository;
 
     @Transactional(readOnly = true)
-    public UserWebnovelResponse getWebnovelById(Long webnovelId) {
+    public UserWebnovelResponse getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
+
         Webnovel webnovel = webnovelRepository.findByIdAndDeleted(webnovelId, false).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
@@ -36,7 +39,17 @@ public class UserWebnovelService {
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webnovel.getKeywords());
         List<EpisodeListResponse> episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
 
-        return UserWebnovelResponse.fromEntity(webnovel, keywords, episodes);
+        Boolean isInterested = false;
+
+        if (principalUser != null) {
+            Long userId = principalUser.getId();
+            log.info("UserWebnovelService.getWebnovelById: userId = " + userId);
+            isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBNOVEL, webnovelId);
+        }
+
+        log.info("IsInterested: {}", isInterested);
+
+        return UserWebnovelResponse.fromEntity(webnovel, keywords, episodes, isInterested);
     }
 
     @Transactional(readOnly = true)

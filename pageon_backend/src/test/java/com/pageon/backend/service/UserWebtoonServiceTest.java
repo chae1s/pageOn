@@ -11,6 +11,7 @@ import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.WebtoonRepository;
+import com.pageon.backend.security.PrincipalUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,9 +45,12 @@ class UserWebtoonServiceTest {
     @Mock
     private KeywordService keywordService;
 
+    private PrincipalUser mockPrincipalUser;
+
     @BeforeEach
     void setUp() {
         webtoonRepository.deleteAll();
+        mockPrincipalUser = mock(PrincipalUser.class);
     }
 
     @Test
@@ -79,7 +83,7 @@ class UserWebtoonServiceTest {
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
         when(webtoonRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(webtoon));
         //when
-        UserWebtoonResponse response = userWebtoonService.getWebtoonById(1L);
+        UserWebtoonResponse response = userWebtoonService.getWebtoonById(1L, mockPrincipalUser);
 
         // then
         assertEquals(webtoon.getId(), response.getId());
@@ -96,7 +100,7 @@ class UserWebtoonServiceTest {
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
-            userWebtoonService.getWebtoonById(1L);
+            userWebtoonService.getWebtoonById(1L, mockPrincipalUser);
         });
 
         // then

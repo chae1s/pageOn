@@ -14,6 +14,7 @@ import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.WebnovelRepository;
+import com.pageon.backend.security.PrincipalUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,10 +48,12 @@ class UserWebnovelServiceTest {
     private WebnovelRepository webnovelRepository;
     @Mock
     private KeywordService keywordService;
+    private PrincipalUser mockPrincipalUser;
 
     @BeforeEach
     void setUp() {
         webnovelRepository.deleteAll();
+        mockPrincipalUser = mock(PrincipalUser.class);
     }
 
     @Test
@@ -81,7 +85,7 @@ class UserWebnovelServiceTest {
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
         when(webnovelRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(webnovel));
         //when
-        UserWebnovelResponse response = userWebnovelService.getWebnovelById(1L);
+        UserWebnovelResponse response = userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
 
         // then
         assertEquals(webnovel.getId(), response.getId());
@@ -98,7 +102,7 @@ class UserWebnovelServiceTest {
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
-            userWebnovelService.getWebnovelById(1L);
+            userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
         });
 
         // then

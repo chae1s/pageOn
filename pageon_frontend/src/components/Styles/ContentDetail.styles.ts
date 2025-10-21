@@ -173,7 +173,7 @@ export const ContentLikeBtnContainer = styled.div`
 
 `
 
-export const ContentLikeBtn = styled.button`
+export const ContentInterestBtn = styled.button`
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -186,6 +186,21 @@ export const ContentLikeBtn = styled.button`
     color: #fff;
     background-color: var(--accent-color);
 `
+
+export const ContentInterestRegisterBtn = styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    line-height: 1;
+    border-radius: 12px;
+    font-weight: 600px;
+    height: 25px;
+    font-size: 15px;
+    color: #69a3ff;
+    border: 1px solid #69a3ff;
+`
+
 export const ContentLikeBtnText = styled.p`
     margin-left: 5px;
 `

@@ -1,12 +1,11 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
-import com.pageon.backend.service.LikeService;
+import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebnovelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserWebnovelController {
     private final UserWebnovelService userWebnovelService;
-    private final LikeService likeService;
+    private final InterestService interestService;
 
     @GetMapping("/{webnovelId}")
-    public ResponseEntity<UserWebnovelResponse> getWebnovelById(@PathVariable Long webnovelId) {
+    public ResponseEntity<UserWebnovelResponse> getWebnovelById(@PathVariable Long webnovelId, @AuthenticationPrincipal PrincipalUser principalUser) {
 
-        return ResponseEntity.ok(userWebnovelService.getWebnovelById(webnovelId));
+        return ResponseEntity.ok(userWebnovelService.getWebnovelById(webnovelId, principalUser));
     }
 
     @GetMapping()
@@ -42,13 +41,13 @@ public class UserWebnovelController {
         return ResponseEntity.ok(userWebnovelService.getWebnovelsByDay(day));
     }
 
-    @PostMapping("/{webnovelId}/likes")
+    @PostMapping("/{webnovelId}/interests")
     public ResponseEntity<Void> likeWebnovel(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId
     ) {
 
         log.info("webnovel : {}", webnovelId);
-        likeService.registerLike(principalUser.getId(), webnovelId, ContentType.WEBNOVEL);
+        interestService.registerInterest(principalUser.getId(), webnovelId, ContentType.WEBNOVEL);
 
         return ResponseEntity.ok().build();
     }
