@@ -38,7 +38,7 @@ class InterestServiceTest {
     @InjectMocks
     private InterestService interestService;
     @Mock
-    private InterestRepository likeRepository;
+    private InterestRepository interestRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -48,7 +48,7 @@ class InterestServiceTest {
     
     @BeforeEach
     void setUp() {
-        likeRepository.deleteAll();
+        interestRepository.deleteAll();
     }
     
     @Test
@@ -86,10 +86,10 @@ class InterestServiceTest {
         ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        interestService.registerInterest(userId, webnovelId, contentType);
+        interestService.registerInterest(userId, contentType, webnovelId);
         
         // then
-        verify(likeRepository).save(likeCaptor.capture());
+        verify(interestRepository).save(likeCaptor.capture());
         Interest like = likeCaptor.getValue();
 
         assertEquals(ContentType.WEBNOVEL, like.getContentType());
@@ -132,10 +132,10 @@ class InterestServiceTest {
         ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        interestService.registerInterest(userId, webtoonId, contentType);
+        interestService.registerInterest(userId, contentType, webtoonId);
 
         // then
-        verify(likeRepository).save(likeCaptor.capture());
+        verify(interestRepository).save(likeCaptor.capture());
         Interest like = likeCaptor.getValue();
 
         assertEquals(ContentType.WEBTOON, like.getContentType());
@@ -169,7 +169,7 @@ class InterestServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, webnovelId, contentType);
+            interestService.registerInterest(userId, contentType, webnovelId);
         });
         
         // then
@@ -203,7 +203,7 @@ class InterestServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, webtoonId, contentType);
+            interestService.registerInterest(userId, contentType, webtoonId);
         });
 
         // then
@@ -236,12 +236,69 @@ class InterestServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, contentId, contentType);
+            interestService.registerInterest(userId, contentType, contentId);
         });
 
         // then
         assertEquals("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.INVALID_CONTENT_TYPE, ErrorCode.valueOf(exception.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("콘텐츠의 관심 삭제 버튼 클릭 시 DB에 존재하면 삭제한다.")
+    void shouldDeleteInterest_whenUserIdContentIdAndContentTypeExist() {
+        // given
+        Long userId = 1L;
+        ContentType contentType = ContentType.WEBNOVEL;
+        Long contentId = 1L;
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .providerId(null)
+                .pointBalance(0)
+                .deleted(false)
+                .build();
+
+        Interest interest = Interest.builder()
+                .id(1L)
+                .contentId(contentId)
+                .contentType(contentType)
+                .user(user)
+                .build();
+
+        when(interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId)).thenReturn(Optional.of(interest));
+
+        //when
+        interestService.deleteInterest(userId, contentType, contentId);
+
+        // then
+        verify(interestRepository, times(1)).delete(interest);
+
+    }
+    
+    @Test
+    @DisplayName("콘텐츠의 관심 삭제 버튼 클릭 시 DB에 존재하지 않으면 Exception 발생")
+    void shouldThrowException_whenInterestDoesNotExist() {
+        // given
+        Long userId = 1L;
+        ContentType contentType = ContentType.WEBNOVEL;
+        Long contentId = 1L;
+
+        when(interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId)).thenReturn(Optional.empty());
+        
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            interestService.deleteInterest(userId, contentType, contentId);
+        });
+        
+        // then
+        assertEquals("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.INTEREST_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+        
     }
 
 }

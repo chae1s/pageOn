@@ -21,7 +21,7 @@ public class InterestService {
     private final WebnovelRepository webnovelRepository;
     private final WebtoonRepository webtoonRepository;
 
-    public void registerInterest(Long userId, Long contentId, ContentType contentType) {
+    public void registerInterest(Long userId, ContentType contentType, Long contentId) {
         User user = userRepository.findByIdAndDeleted(userId, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
@@ -45,6 +45,20 @@ public class InterestService {
 
         interestRepository.save(interest);
 
+
+    }
+
+    public void deleteInterest(Long userId, ContentType contentType, Long contentId) {
+
+        userRepository.findByIdAndDeleted(userId, false).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        Interest interest = interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.INTEREST_NOT_FOUND)
+        );
+
+        interestRepository.delete(interest);
 
     }
 }

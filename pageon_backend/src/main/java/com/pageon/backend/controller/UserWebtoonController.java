@@ -43,11 +43,20 @@ public class UserWebtoonController {
     }
 
     @PostMapping("/{webtoonId}/interests")
-    public ResponseEntity<Void> likeWebnovel(
+    public ResponseEntity<Void> registerInterest(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId
     ) {
         log.info("WEBTOON {} 관심 등록",  webtoonId);
-        interestService.registerInterest(principalUser.getId(), webtoonId, ContentType.WEBTOON);
+        interestService.registerInterest(principalUser.getId(), ContentType.WEBTOON, webtoonId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{webtoonId}/interests")
+    public ResponseEntity<Void> deleteInterest(
+            @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId
+    ) {
+        interestService.deleteInterest(principalUser.getId(), ContentType.WEBTOON, webtoonId);
 
         return ResponseEntity.ok().build();
     }

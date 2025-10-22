@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { ContentType, ContentStatus, ContentDetail } from '../../types/Content';
 import axios from "axios";
 import * as S from "../Styles/ContentDetail.styles"
+import api from '../../api/axiosInstance';
 
 interface Props {
     content: ContentDetail;
@@ -27,6 +28,7 @@ function ContentDetailLayout({content}: Props) {
 
     const [isInterested, setIsInterested] = useState(content.isInterested);
     const [showNotification, setShowNotification] = useState(false);
+    const [noficiationMessage, setNotificationMessage] = useState("관심 작품에 등록되었습니다.")
 
     const RatingFullIcon = () => (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="#FFD600" xmlns="http://www.w3.org/2000/svg">
@@ -47,27 +49,19 @@ function ContentDetailLayout({content}: Props) {
         </svg>
     )
 
-    const RegisterLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const RegisterInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
         try {
 
             if (content.contentType === "webnovels") {
-                const response = await axios.post(`/api/webnovels/${content.id}/interests`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                    }
-                })
+                await api.post(`/webnovels/${content.id}/interests`, {})
 
-                console.log(response.data)
             } else if (content.contentType === "webtoons") {
-                await axios.post(`/api/webtoons/${content.id}/interests`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                    }
-                })
+                await api.post(`/webtoons/${content.id}/interests`, {})
             }
             
             setIsInterested(true);
+            setNotificationMessage("관심 작품에 등록되었습니다.");
             setShowNotification(true);
             
             // 3초 후 알림 메시지 숨기기
@@ -79,6 +73,30 @@ function ContentDetailLayout({content}: Props) {
             console.error(error);
         }
     }
+
+    const DeleteInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        try {
+            if (content.contentType === "webnovels") {
+                await api.delete(`/webnovels/${content.id}/interests`, {})
+            } else if (content.contentType === "webtoons") {
+                await api.delete(`/webtoons/${content.id}/interests`, {})
+            }
+
+            setIsInterested(false);
+            setNotificationMessage("관심 작품에서 삭제되었습니다.");
+            setShowNotification(true);
+
+            // 3초 후 알림 메시지 숨기기
+            setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
 
     return (
         <>
@@ -92,12 +110,12 @@ function ContentDetailLayout({content}: Props) {
                         <S.ContentStatus $status={content.status}>{statusMap[content.status]}</S.ContentStatus>
                         <S.ContentLikeBtnContainer>
                             {isInterested ? (
-                                <S.ContentInterestBtn>
+                                <S.ContentInterestBtn type='button' onClick={DeleteInterest}>
                                     <CheckIcon />
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
                                 </S.ContentInterestBtn>
                             ):(
-                                <S.ContentInterestRegisterBtn type="button" onClick={RegisterLike}>
+                                <S.ContentInterestRegisterBtn type="button" onClick={RegisterInterest}>
                                     <PlusIcon /> 
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
                                 </S.ContentInterestRegisterBtn>
@@ -137,7 +155,7 @@ function ContentDetailLayout({content}: Props) {
                 </div>
             </S.ContentDetailHeader>
             <S.NotificationContainer $show={showNotification}>
-                관심 작품에 등록되었습니다.
+                {noficiationMessage}
             </S.NotificationContainer>
         </>
     );

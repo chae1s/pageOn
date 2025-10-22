@@ -42,12 +42,21 @@ public class UserWebnovelController {
     }
 
     @PostMapping("/{webnovelId}/interests")
-    public ResponseEntity<Void> likeWebnovel(
+    public ResponseEntity<Void> RegisterInterest(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId
     ) {
 
         log.info("webnovel : {}", webnovelId);
-        interestService.registerInterest(principalUser.getId(), webnovelId, ContentType.WEBNOVEL);
+        interestService.registerInterest(principalUser.getId(), ContentType.WEBNOVEL, webnovelId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{webnovelId}/interests")
+    public ResponseEntity<Void> DeleteInterest(
+            @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId
+    ) {
+        interestService.deleteInterest(principalUser.getId(), ContentType.WEBNOVEL, webnovelId);
 
         return ResponseEntity.ok().build();
     }
