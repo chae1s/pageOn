@@ -1,0 +1,487 @@
+/* 마이페이지 css 코드 */
+.sidebar-right-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-top: 1em;
+    padding-top: 10px;
+}
+
+.mypage-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.mypage-summary-container {
+    display: flex;
+    border: 1.5px solid #e0e4ea;
+    border-radius: 6px;
+    background: #fff;
+    margin-bottom: 32px;
+    overflow: hidden;
+    height: 180px;
+}
+
+.mypage-summary-left {
+    background: #f6faff;
+    padding: 20px 15px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.mypage-nickname {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 22px 10px 24px;
+    color: #444;
+}
+
+.mypage-logout-link {
+    background: #f8fafc;
+    color: #666;
+    font-weight: 500;
+    border-radius: 4px;
+    padding: 9px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.mypage-summary-right {
+    flex: 1;
+    padding: 24px 32px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mypage-summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0;
+}
+
+.mypage-summary-item {
+    flex: 1;
+    text-align: center;
+}
+
+.mypage-summary-item .icon {
+    height: 35px;
+    width: 35px;
+    margin: 3px auto;
+}
+
+
+
+.mypage-summary-item .label {
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 5px;
+    margin-bottom: 12px;
+}
+
+.mypage-summary-item .value-wrap {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mypage-summary-item .value {
+    font-size: 23px;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 2px;
+    display: inline-block;
+}
+
+
+.mypage-value-unit {
+    font-size: 16px;
+    font-weight: 400;
+    color: #888;
+    margin-left: 2px;
+    vertical-align: baseline;
+    position: static;
+}
+
+.mypage-summary-item .desc {
+    font-size: 0.95rem;
+    color: #888;
+    margin-top: 10px;
+}
+
+.mypage-charge-link {
+    color: #b0b8c1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.92em;
+}
+
+.book-section-list {
+    margin-bottom: 36px;
+}
+
+.book-section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.book-section-title-text {
+    flex: 0 0 auto;
+    z-index: 1;   
+}
+
+.book-section-title-line {
+    flex: 1 1 auto;
+    height: 1px;
+    background: #e0e4ea;
+    margin: 0 16px;
+    display: block;
+}
+
+.book-section-viewall-link {
+    color: #b0b8c1;
+    background: none;
+    border: none;
+    font-size: 0.98rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 4px 0px 4px 12px;
+    border-radius: 4px;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 0;
+}
+
+/* Sidebar 내 정보 css 코드 */
+
+.password-check-form {
+    max-width: 400px;
+    margin: 30px auto 0;
+    padding: 32px;
+}
+
+.password-check-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.password-check-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+}
+
+/* 내 정보 수정 css 코드 */
+
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 700px;
+    gap: 18px;
+    margin: 0 auto;
+    padding: 0 24px;
+    align-items: flex-start;
+}
+
+.edit-profile-form-group {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 16px;
+    min-height: 60px;
+    width: 100%;
+}
+
+.edit-profile-label {
+    flex: 0 0 120px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 12px;
+}
+
+.edit-profile-value {
+    flex: 1;
+    color: #666;
+    margin-top: 12px;
+    cursor: default;
+}
+
+
+.edit-profile-identity-link.check {
+    color: #528efa;
+    cursor: default;
+}
+
+.edit-profile-input {
+    width: 500px;
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    height: 48px;
+    box-sizing: border-box;
+}
+
+.edit-profile-input.input-error {
+    border: 1px solid #FC5858;
+}
+
+.edit-profile-input.input-sucess {
+    border: 1px solid #A0C4FF;
+}
+
+.edit-profile-msg {
+    font-size: 0.85rem;
+    margin-top: 8px;
+    position: relative;
+    left: 0;
+}
+
+.edit-profile-msg.error {
+    color: var(--error-color);
+}
+
+.edit-profile-msg.success {
+    color: #2563eb;
+}
+
+.edit-profile-submit-btn {
+    width: 33.33%;
+    background: #528efa;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 0;
+    font-weight: 600;
+    font-size: 1.08rem;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.15s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.edit-profile-submit-btn:disabled {
+    background-color: var(--accent-color);
+}
+
+/* 회원탈퇴 css 코드 */
+
+.sidebar-right-wrap.withdraw {
+    max-width: 700px;
+    margin: 1em auto;
+}
+
+.withdraw-warning {
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.withdraw-email {
+    color: #528efa !important;
+    font-size: 20px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+    margin-top: 0;
+    display: inline-block;
+}
+
+.unit {
+    margin-left: 5px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+    margin-top: 0;
+    display: inline-block;
+}
+
+.withdraw-warning p {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 12px;
+    margin-top: 0;
+}
+
+.withdraw-warning ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.withdraw-warning li {
+    color: #444;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.withdraw-point-info {
+    margin-top: 5px;
+    margin-left: 20px;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.withdraw-point-value {
+    color: #FC5858;
+    font-weight: 600;
+}
+
+.withdraw-reason-section {
+    padding: 20px;
+}
+
+.withdraw-reason-title {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.withdraw-reason-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+.withdraw-reason-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.withdraw-reason-option input[type="radio"] {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
+
+.withdraw-reason-text {
+  font-size: 0.95rem;
+  color: #444;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.withdraw-other-reason-container {
+  margin-left: 24px;
+  margin-top: 4px;
+}
+
+.withdraw-other-reason {
+  width: 300px;
+  padding: 4px 0;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.9rem;
+  margin-left: 8px;
+  background: none;
+}
+
+/* sidebar 책 css 코드 */
+.mypage-books-sort-btn-wrapper {
+    display: block;
+}
+
+.mypage-books-sort-btn-list {
+    display: block;
+    padding-left: 8px;
+    margin-bottom: 16px;
+}
+
+.mypage-books-select-type {
+    display: flex;
+    gap: 14px;
+    color: #444;
+    font-size: 0.98rem;
+    padding: 10px 0 10px 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, .1)
+}
+
+.mypage-books-search-select-sort {
+    display: flex;
+    justify-content: space-between;
+} 
+
+.mypage-books-search-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 250px;
+    margin: 12px 0 0 0;
+}
+
+.mypage-books-search-input {
+    flex: 1;
+    padding: 8px 8px 6px 8px;
+    border: none;
+    border-radius: 0;
+    font-size: 1rem;
+    background: none;
+    color: #222;
+}
+
+.mypage-books-search-btn {
+    background: none;
+    border: none;
+    padding: 0 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 32px;
+}
+
+.mypage-books-sort-group {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85em;
+    padding: 10px 8px;
+}
+
+.mypage-books-select-type button.active {
+    color: #69a3ff;
+    font-weight: 500;
+}
+
+.mypage-books-select-type button:not(.active) {
+    color: #b4b4b4;
+}
+
+.mypage-books-sort-group button.active {
+    color: #69a3ff;
+    font-weight: 500;
+}
+
+.mypage-books-sort-group button:not(.active) {
+    color: #b4b4b4;
+}
+
+.mypage-books-section {
+    margin-top: 13px;
+    margin-bottom: 36px;
+}

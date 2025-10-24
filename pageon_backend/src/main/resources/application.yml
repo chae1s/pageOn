@@ -10,7 +10,10 @@ spring:
       matching-strategy: ant_path_matcher
   web:
     resources:
-      static-locations: file:media, classpath:/static
+      static-locations:
+        - file:media
+        - classpath:/static
+        -
   servlet:
     multipart:
       enabled: true
@@ -22,11 +25,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
     defer-datasource-initialization: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 1000
+          batch_versioned_data: true
+        order_insert: true
+        order_updates: true
+    open-in-view: false
 
 
 
@@ -38,19 +46,16 @@ spring:
             provider: kakao
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8080/login/oauth2/code/kakao
-            scope:
-              - account_email
+            scope: [account_email]
             client-name: Kakao
             client-authentication-method: client_secret_post
           naver:
             client-name: Naver
             redirect-uri: http://localhost:8080/login/oauth2/code/naver
-            scope:
-              - email
+            scope: [email]
             authorization-grant-type: authorization_code
           google:
-            scope:
-              - email
+            scope: [email]
             redirect-uri: http://localhost:8080/login/oauth2/code/google
             client-name: google
             authorization-grant-type: authorization_code
@@ -85,8 +90,33 @@ spring:
   profiles:
     active: dev
   config:
+
     import: optional:classpath:application-${spring.profiles.active}.yml
 
   sql:
     init:
       mode: always
+
+cdn:
+  cloudfront:
+    domain: d2ge55k9wic00e.cloudfront.net
+    keypair-id: K102WOMGEU2ILO
+    private-key-path: classpath:keys/private_key.pem
+    url-expire-minutes: 10
+
+app:
+  image-delivery:
+    mode: direct
+    allowed-host: [d2ge55k9wic00e.cloudfront.net]
+
+error:
+  printStackTrace: true
+
+portone:
+  api-secret:
+
+coolsms:
+  api-key:
+  api-secret:
+  domain: https://api.solapi.com
+  set-from:

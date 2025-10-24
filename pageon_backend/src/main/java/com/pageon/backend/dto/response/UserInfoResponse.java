@@ -1,27 +1,28 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
 public class UserInfoResponse {
+    private Long id;
     private String email;
     private String nickname;
     private LocalDate birthDate;
     private Integer pointBalance;
-    private Provider provider;
+    private OAuthProvider oAuthProvider;
 
-    public static UserInfoResponse fromEntity(Users users) {
+    public static UserInfoResponse fromEntity(User user) {
         UserInfoResponse userInfoResponse = new UserInfoResponse();
-        userInfoResponse.setEmail(users.getEmail());
-        userInfoResponse.setNickname(users.getNickname());
-        userInfoResponse.setBirthDate(users.getBirthDate());
-        userInfoResponse.setPointBalance(users.getPointBalance());
-        userInfoResponse.setProvider(users.getProvider());
-
+        userInfoResponse.setId(user.getId());
+        userInfoResponse.setEmail(user.getEmail());
+        userInfoResponse.setNickname(user.getNickname());
+        userInfoResponse.setBirthDate(user.getBirthDate());
+        userInfoResponse.setPointBalance(user.getPointBalance());
+        userInfoResponse.setOAuthProvider(user.getOAuthProvider());
         return userInfoResponse;
     }
 }

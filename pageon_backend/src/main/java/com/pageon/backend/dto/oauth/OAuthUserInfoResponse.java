@@ -1,9 +1,9 @@
 package com.pageon.backend.dto.oauth;
 
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 
 public interface OAuthUserInfoResponse {
-    Provider getProvider();
+    OAuthProvider getOAuthProvider();
 
     String getProviderId();
 

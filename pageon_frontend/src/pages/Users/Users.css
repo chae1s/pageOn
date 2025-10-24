@@ -1,0 +1,325 @@
+.users-form-wrapper {
+    background: #fff;
+    padding: 0 40px;
+    width: 100%;
+    max-width: 410px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.users-title {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: #444;
+}
+
+.users-form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.users-form-group {
+    margin-bottom: 17px;
+    display: flex;
+    flex-direction: column;
+}
+
+.users-form-group label .nessesary-check {
+    color: #FC5858;
+}
+
+.signup-nessesary {
+    margin-left: 5px;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.signup-nessesary span {
+    color: #fc5858;
+    margin-right: 3px;
+}
+.social-signup-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.social-signup-btn-item {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.social-signup-btn-item.kakao {
+    background-color: #FEE500;
+    color: #000;
+    border-color: #FEE500;
+}
+
+.social-signup-btn-item.naver {
+    background-color: #03C75A;
+    color: white;
+    border-color: #03C75A;
+}
+
+.social-signup-btn-item.google {
+    background-color: white;
+    color: #333;
+    border-color: #ddd;
+}
+
+.email-signup-btn-item {
+    width: 100%;
+    padding: 14px;
+    background-color: #528efa;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 24px;
+}
+
+.users-form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+.users-form-group-gender-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+.users-form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.users-birthDate-gender {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+
+.users-form-birth-date {
+    flex: 0 0 65%;
+}
+
+.users-form-group-gender {
+    flex: 0 0 35%;
+    display: flex;
+}
+
+.users-form-gender-checkbox label.selected {
+    background-color: #A0C4FF;
+    font-weight: 500;
+    color: #fff;
+}
+
+.users-form-gender-checkbox {
+    width: 100%;
+}
+
+.users-form-gender-checkbox label {
+    width: 50%;
+    height: 47px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background-color: #fff;
+}
+
+.users-form-left {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border: 1px solid #ccc;
+    border-right: none;
+}
+
+.users-form-right {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+.users-form-group-gender input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0px;
+    overflow: hidden;
+    border: 0;
+}
+
+.creator-form-group input::placeholder {
+    color: #aaa;
+}
+
+.input-error {
+    border-color: #FC5858 !important;
+}
+
+.input-success {
+    border-color: #A0C4FF !important;
+}
+
+.error-message {
+    color: var(--error-color);
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #528efa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.submit-btn:disabled {
+    background-color: var(--accent-color);
+}
+
+.users-link {
+    margin-top: 24px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.users-link span {
+    margin-right: 8px;
+}
+
+.users-link a {
+    color: #528efa;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.users-link a:hover {
+    text-decoration: underline;
+}
+
+.users-terms {
+    background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 16px 14px 10px 14px;
+    margin-top: 10px;
+    margin-bottom: 18px;
+    font-size: 0.97rem;
+    color: #444;
+}
+
+.terms-label {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.terms-label input[type="checkbox"] {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-sizing: border-box;
+    width: 15px;
+    height: 15px;
+    margin-top: 5px;
+    margin-right: 15px;
+    accent-color: var(--accent-color);
+}
+
+.terms-content {
+    margin-bottom: 8px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 3px;
+    border: 1px solid #eee;
+    font-size: 0.92rem;
+    color: #666;
+    max-height: 170px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+.find-password-link {
+  margin: 16px 0 0 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  display: block;
+  padding: 0;
+  align-self: flex-end;
+  color: #666;
+}
+
+.divider-wrap {
+    margin: 20px 0 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.divider {
+    width: 130px;
+    height: 8px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.social-btn-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 0 24px 0;
+    gap: 8px;
+}
+
+.social-btn-item {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    margin: 0 8px;
+    cursor: pointer;
+    background-color: #fff;
+    padding: 0;
+}

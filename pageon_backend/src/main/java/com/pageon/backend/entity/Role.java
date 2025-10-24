@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @SuperBuilder
 @DynamicUpdate
+@Table(name = "roles")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Role {

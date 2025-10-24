@@ -2,7 +2,7 @@ package com.pageon.backend.dto.oauth;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
@@ -13,8 +13,8 @@ public class KakaoSignupRequest implements OAuthUserInfoResponse {
     private final Map<String, Object> attribute;
 
     @Override
-    public Provider getProvider() {
-        return Provider.KAKAO;
+    public OAuthProvider getOAuthProvider() {
+        return OAuthProvider.KAKAO;
     }
 
     @Override

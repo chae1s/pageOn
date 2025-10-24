@@ -1,19 +1,24 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.request.FindPasswordRequest;
-import com.pageon.backend.dto.request.LoginRequest;
-import com.pageon.backend.dto.request.SignupRequest;
-import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.common.enums.ContentType;
+import com.pageon.backend.dto.request.*;
+import com.pageon.backend.dto.response.ContentPageResponse;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
+import com.pageon.backend.entity.Interest;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;
+import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +32,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final CustomOauth2UserService customOauth2UserService;
+    private final InterestService interestService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest signupDto) {
@@ -95,14 +100,27 @@ public class UserController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> deleteAccount(
-            @AuthenticationPrincipal PrincipalUser principalUser, @RequestBody Map<String, String> body, HttpServletRequest request
+            @AuthenticationPrincipal PrincipalUser principalUser, @RequestBody UserDeleteRequest userDeleteRequest, HttpServletRequest request
     ) {
 
-        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), body.get("password"), request));
-
+        log.info("탈퇴");
+        return ResponseEntity.ok(userService.deleteAccount(principalUser.getId(), userDeleteRequest, request));
     }
 
-    public void deleteSocialAccount(@AuthenticationPrincipal PrincipalUser principalUser) {
+    @GetMapping("/check-identity")
+    public ResponseEntity<Boolean> checkIdentityVerification(@AuthenticationPrincipal PrincipalUser principalUser){
 
+        return ResponseEntity.ok(userService.checkIdentityVerification(principalUser));
+    }
+
+    @GetMapping("/interests")
+    public ResponseEntity<ContentPageResponse<ContentSimpleResponse>> getInterests(
+            @AuthenticationPrincipal PrincipalUser principalUser, @PageableDefault Pageable pageable, @RequestParam(value = "type", required = false) ContentType contentType
+    ){
+
+        log.info("contentType={}", contentType);
+        Page<ContentSimpleResponse> contentSimpleResponses = interestService.getInterestedContents(principalUser.getId(), contentType, pageable);
+
+        return ResponseEntity.ok(new ContentPageResponse<>(contentSimpleResponses));
     }
 }

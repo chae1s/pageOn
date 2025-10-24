@@ -1,15 +1,16 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.request.FindPasswordRequest;
-import com.pageon.backend.dto.request.LoginRequest;
-import com.pageon.backend.dto.request.SignupRequest;
-import com.pageon.backend.dto.request.UserUpdateRequest;
+import com.pageon.backend.common.enums.Gender;
+import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
+import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.common.enums.OAuthProvider;
+import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -23,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -35,13 +35,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -56,6 +54,7 @@ public class UserService {
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RestTemplate restTemplate;
+    private final CommonService commonService;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -65,27 +64,29 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequest request) {
-        Users users = createUser(request);
+        User user = createUser(request);
 
-        roleService.assignDefaultRole(users);
+        roleService.assignDefaultRole(user);
 
-        userRepository.save(users);
+        userRepository.save(user);
 
-        log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getProvider());
+        log.info("이메일 회원가입 성공 email: {}, 닉네임: {}, provider: {}", user.getEmail(), user.getNickname(), user.getOAuthProvider());
     }
 
 
-    private Users createUser(SignupRequest request) {
+    private User createUser(SignupRequest request) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        log.info((request.getBirthDate()));
         LocalDate birthDate = LocalDate.parse(request.getBirthDate(), formatter);
-
-        return Users.builder()
+        return User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .birthDate(birthDate)
-                .provider(Provider.EMAIL)
-                .isDeleted(false)
+                .gender(Gender.valueOf(request.getGender()))
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .deleted(false)
+                .termsAgreed(request.getTermsAgreed())
                 .build();
 
     }
@@ -124,8 +125,12 @@ public class UserService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : principalUser.getRoleType()) {
+            userRoles.add(roleType.toString());
+        }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getProvider());
+        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider(), userRoles);
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
@@ -135,11 +140,11 @@ public class UserService {
     }
 
     public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(principalUser.getId()).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(principalUser.getId(), false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        deleteToken(getRefreshToken(request), users);
+        deleteToken(getRefreshToken(request), user);
 
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setMaxAge(0);
@@ -159,11 +164,11 @@ public class UserService {
         throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
     }
 
-    private void deleteToken(String refreshToken, Users users) {
+    private void deleteToken(String refreshToken, User user) {
 
         TokenInfo tokenInfo = (TokenInfo) redisTemplate.opsForValue().get(refreshToken);
 
-        if (tokenInfo.getUserId().equals(users.getId())) {
+        if (tokenInfo.getUserId().equals(user.getId())) {
             redisTemplate.delete(refreshToken);
         }
     }
@@ -171,10 +176,10 @@ public class UserService {
     @Transactional
     public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
         Map<String, String> result = new HashMap<>();
-        Optional<Users> optionalUsers = userRepository.findByEmailAndIsDeletedFalse(passwordDto.getEmail());
+        Optional<User> optionalUsers = userRepository.findByEmailAndDeleted(passwordDto.getEmail(), false);
         if (optionalUsers.isPresent()) {
-            Users user = optionalUsers.get();
-            if (user.getProvider() == Provider.EMAIL) {
+            User user = optionalUsers.get();
+            if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
                 // provider가 email일 때, 임시 비밀번호 생성 후 db에 저장
                 String tempPassword = generateRandomPassword();
                 user.updatePassword(passwordEncoder.encode(tempPassword));
@@ -184,7 +189,7 @@ public class UserService {
                 result.put("message", "임시 비밀번호가 메일로 발송되었습니다.");
             } else {
                 result.put("type", "social");
-                result.put("message", String.format("%s로 회원가입된 이메일입니다.", user.getProvider()));
+                result.put("message", String.format("%s로 회원가입된 이메일입니다.", user.getOAuthProvider()));
             }
         } else {
             result.put("type", "noUser");
@@ -208,33 +213,31 @@ public class UserService {
     }
 
     public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
-        Users users = userRepository.findByEmailAndIsDeletedFalse(
-                principalUser.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
+        User user = commonService.findUserByEmail(principalUser.getUsername());
 
-        return UserInfoResponse.fromEntity(users);
+        return UserInfoResponse.fromEntity(user);
     }
 
     public boolean checkPassword(Long id, String password) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        return passwordEncoder.matches(password, users.getPassword());
+        return passwordEncoder.matches(password, user.getPassword());
     }
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
         log.info(request.getNickname());
         if (request.getNickname() != null && !request.getNickname().isBlank()) {
-            users.updateNickname(request.getNickname());
+            user.updateNickname(request.getNickname());
         }
 
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            users.updatePassword(validatePassword(request));
+            user.updatePassword(validatePassword(request));
         }
     }
 
@@ -247,29 +250,27 @@ public class UserService {
     }
 
     @Transactional
-    public Map<String, Object> deleteAccount(Long id, String password, HttpServletRequest request) {
-        Users users = userRepository.findByIdAndIsDeletedFalse(id).orElseThrow(
+    public Map<String, Object> deleteAccount(Long id, UserDeleteRequest userDeleteRequest, HttpServletRequest request) {
+        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        Map<String, Object> result = new HashMap<>();
-        if (users.getProvider() == Provider.EMAIL) {
+        if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
 
-            return deleteEmailAccount(users, password, request);
+            return deleteEmailAccount(user, userDeleteRequest.getPassword(), request);
         } else {
 
-            return deleteSocialAccount(users, request);
+            return deleteSocialAccount(user, request);
         }
 
     }
 
     // provider가 email일 때 계정 삭제 메소드
-    private Map<String, Object> deleteEmailAccount(Users users, String password, HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
+    private Map<String, Object> deleteEmailAccount(User user, String password, HttpServletRequest request) {
         log.info("이메일 계정 삭제");
-        if (passwordEncoder.matches(password, users.getPassword())) {
+        if (passwordEncoder.matches(password, user.getPassword())) {
             // 회원 탈퇴
-            return softDeleteAccount(users, "계정이 삭제되었습니다.", null, request);
+            return softDeleteAccount(user, "계정이 삭제되었습니다.", null, request);
         } else {
             // 에러 메세지 전송
             return Map.of(
@@ -280,41 +281,44 @@ public class UserService {
     }
 
     // provider가 email이 아닐때 즉, 소셜로그인일 때 계정 삭제 메소드
-    private Map<String, Object> deleteSocialAccount(Users users, HttpServletRequest request) {
+    private Map<String, Object> deleteSocialAccount(User user, HttpServletRequest request) {
         log.info("소셜 계정 삭제");
-        String redisKey = String.format("%d_%s_accessToken", users.getId(), users.getProviderId());
+        String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
         AccessToken accessToken = (AccessToken) redisTemplate.opsForValue().get(redisKey);
-        switch (users.getProvider()) {
+        switch (user.getOAuthProvider()) {
             case KAKAO -> {
                 unlinkKakao(accessToken.getAccessToken());
-                return softDeleteAccount(users, "카카오 계정이 삭제되었습니다.", redisKey, request);
+                return softDeleteAccount(user, "카카오 계정이 삭제되었습니다.", redisKey, request);
             }
             case NAVER -> {
                 unlinkNaver(accessToken.getAccessToken());
-                return softDeleteAccount(users, "네이버 계정이 삭제되었습니다.", redisKey, request);
+                return softDeleteAccount(user, "네이버 계정이 삭제되었습니다.", redisKey, request);
             }
             case GOOGLE -> {
                 unlinkGoogle(accessToken.getAccessToken());
-                return softDeleteAccount(users, "구글 계정이 삭제되었습니다.", redisKey, request);
+                return softDeleteAccount(user, "구글 계정이 삭제되었습니다.", redisKey, request);
             }
             default -> throw new CustomException(ErrorCode.OAUTH_PROVIDER_MISMATCH);
         }
     }
 
     // 삭제 계정 DB 변경
-    private Map<String, Object> softDeleteAccount(Users users, String message, String redisKey, HttpServletRequest request) {
+    private Map<String, Object> softDeleteAccount(User user, String message, String redisKey, HttpServletRequest request) {
         // 회원 탈퇴
-        users.deleteEmail(String.format("delete_%s_%d", users.getEmail(), users.getId()));
-        users.updateNickname(String.format("delete_%s_%d", users.getNickname(), users.getId()));
-        if (users.getProvider() != Provider.EMAIL) {
-            users.deleteProviderId(String.format("delete_%s_%d", users.getProviderId(), users.getId()));
+        user.deleteEmail(String.format("delete_%s_%d", user.getEmail(), user.getId()));
+        user.updateNickname(String.format("delete_%s_%d", user.getNickname(), user.getId()));
+
+        // 본인인증 데이터 제거
+        user.updateIdentityVerification(null, null, null, null, null, false, null);
+        if (user.getOAuthProvider() != OAuthProvider.EMAIL) {
+            user.deleteProviderId(String.format("delete_%s_%d", user.getProviderId(), user.getId()));
             // 소셜로그인의 access token 삭제
             redisTemplate.delete(redisKey);
         }
-        users.delete();
+        user.delete();
 
         // 로그인 시 받은 refresh token 삭제
-        deleteToken(getRefreshToken(request), users);
+        deleteToken(getRefreshToken(request), user);
         return Map.of(
                 "isDeleted", true,
                 "message", message
@@ -360,5 +364,13 @@ public class UserService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new CustomException(ErrorCode.OAUTH_UNLINK_FAILED);
         }
+    }
+
+    public boolean checkIdentityVerification(PrincipalUser principalUser) {
+        if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
+            return true;
+        }
+
+        throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
     }
 }

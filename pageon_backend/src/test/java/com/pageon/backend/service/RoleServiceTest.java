@@ -1,7 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.entity.Role;
-import com.pageon.backend.entity.Users;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.RoleRepository;
 import jakarta.transaction.Transactional;
@@ -46,7 +46,7 @@ class RoleServiceTest {
                 .roleType(RoleType.ROLE_USER)
                 .build();
 
-        Users user = Users.builder()
+        User user = User.builder()
                 .email("test@mail.com")
                 .userRoles(new ArrayList<>())
                 .build();

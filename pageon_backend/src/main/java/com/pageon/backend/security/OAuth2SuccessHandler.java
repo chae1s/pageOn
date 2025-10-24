@@ -1,8 +1,9 @@
 package com.pageon.backend.security;
 
+import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.repository.UserRepository;
 import jakarta.servlet.ServletException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +39,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 
         /* 소셜 로그인 사용자 정보 조회 */
-        Provider provider = principalUser.getProvider();
+        OAuthProvider provider = principalUser.getProvider();
         String providerId = principalUser.getProviderId();
 
 
         log.info("{} 로그인 성공", provider);
 
-        Users user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
         log.info(principalUser.getName());
@@ -52,12 +54,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         log.info("소셜로그인 토큰 발행");
 
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : roleTypes) {
+            userRoles.add(roleType.toString());
+        }
+
         jwtProvider.sendTokens(response, accessToken, refreshToken);
         setRefreshToken(user, refreshToken);
         String redirectUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/oauth/callback")
                 .queryParam("accessToken", accessToken)
                 .queryParam("provider", provider)
+                .queryParam("userRoles", userRoles)
                 .build()
                 .toUriString();
 
@@ -65,7 +73,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     }
 
-    private void setRefreshToken(Users users, String refreshToken) {
+    private void setRefreshToken(User users, String refreshToken) {
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
 
         // refresh token 저장

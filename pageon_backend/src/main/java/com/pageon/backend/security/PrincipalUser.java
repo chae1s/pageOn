@@ -1,8 +1,8 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class PrincipalUser implements UserDetails, OAuth2User {
-    private final Users users;
+    private final User users;
     private final OAuthUserInfoResponse oAuthUserInfoResponse;
 
-    public PrincipalUser(Users user) {
+    public PrincipalUser(User user) {
         this.users = user;
         this.oAuthUserInfoResponse = null;
     }
 
-    public Users getUsers() {
+    public User getUsers() {
         return users;
     }
     @Override
@@ -35,7 +35,7 @@ public class PrincipalUser implements UserDetails, OAuth2User {
         }
         return Map.of(
                 "email", oAuthUserInfoResponse.getEmail(),
-                "provider", oAuthUserInfoResponse.getProvider(),
+                "provider", oAuthUserInfoResponse.getOAuthProvider(),
                 "providerID", oAuthUserInfoResponse.getProviderId()
         );
     }
@@ -45,8 +45,8 @@ public class PrincipalUser implements UserDetails, OAuth2User {
         return this.users.getEmail();
     }
 
-    public Provider getProvider() {
-        return oAuthUserInfoResponse.getProvider();
+    public OAuthProvider getProvider() {
+        return oAuthUserInfoResponse.getOAuthProvider();
     }
 
     public String getProviderId() {

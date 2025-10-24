@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Builder
 @DynamicUpdate
+@Table(name = "categories")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Category {
@@ -18,13 +19,13 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String category;   // 키워드 상위 분류
+    private String name;   // 키워드 상위 분류
 
     @Builder.Default
     @OneToMany(mappedBy = "category")
-    private List<Keywords> keywords = new ArrayList<>();
+    private List<Keyword> keywords = new ArrayList<>();
 
-    public Category(String category) {
-        this.category = category;
+    public Category(String name) {
+        this.name = name;
     }
 }

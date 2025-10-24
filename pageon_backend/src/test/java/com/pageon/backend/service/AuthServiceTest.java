@@ -2,8 +2,8 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Users;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,13 +67,13 @@ class AuthServiceTest {
         when(valueOperations.get(refreshToken)).thenReturn(tokenInfo);
 
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn("test@mail.com");
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(1L)
                 .email("test@mail.com")
-                .isDeleted(false)
-                .provider(Provider.EMAIL)
+                .deleted(false)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
-        when(userRepository.findByEmailAndIsDeletedFalse("test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted("test@mail.com", false)).thenReturn(Optional.of(user));
 
         when(jwtProvider.generateAccessToken(eq("test@mail.com"), any())).thenReturn("reissue-access-token");
 
@@ -83,7 +82,7 @@ class AuthServiceTest {
         
         // then
         assertEquals("reissue-access-token", result.getAccessToken());
-        assertEquals(Provider.EMAIL, result.getProvider());
+        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider());
         assertTrue(result.getIsLogin());
         
     }
@@ -144,7 +143,7 @@ class AuthServiceTest {
 
         String cookieEmail = "cookie_test@mail.com";
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn(cookieEmail);
-        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
+        when(userRepository.findByEmailAndDeleted(cookieEmail, false)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -173,13 +172,13 @@ class AuthServiceTest {
 
         String cookieEmail = "cookie_test@mail.com";
         when(jwtProvider.getUsernameRefreshToken(refreshToken)).thenReturn(cookieEmail);
-        Users user = Users.builder()
+        User user = User.builder()
                 .id(2L)
                 .email(cookieEmail)
-                .isDeleted(false)
-                .provider(Provider.EMAIL)
+                .deleted(false)
+                .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
-        when(userRepository.findByEmailAndIsDeletedFalse(cookieEmail)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeleted(cookieEmail, false)).thenReturn(Optional.of(user));
 
 
         //when

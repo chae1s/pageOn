@@ -1,7 +1,7 @@
 package com.pageon.backend.security;
 
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -31,8 +31,8 @@ public class CustomOAuth2User implements OAuth2User {
         return oAuth2User.getName();
     }
 
-    public Provider getProvider() {
-        return oAuth2Response.getProvider();
+    public OAuthProvider getProvider() {
+        return oAuth2Response.getOAuthProvider();
     }
 
     public String getProviderId() {

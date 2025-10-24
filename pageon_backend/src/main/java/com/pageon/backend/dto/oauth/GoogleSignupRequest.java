@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.oauth;
 
-import com.pageon.backend.common.enums.Provider;
+import com.pageon.backend.common.enums.OAuthProvider;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
@@ -11,8 +11,8 @@ public class GoogleSignupRequest implements OAuthUserInfoResponse {
     private final Map<String, Object> attribute;
 
     @Override
-    public Provider getProvider() {
-        return Provider.GOOGLE;
+    public OAuthProvider getOAuthProvider() {
+        return OAuthProvider.GOOGLE;
     }
 
     @Override
