@@ -12,6 +12,7 @@ import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.ContentDeleteRepository;
+import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CreatorWebtoonService implements CreatorContentService{
 
+    private final UserRepository userRepository;
     private final WebtoonRepository webtoonRepository;
     private final KeywordService keywordService;
     private final FileUploadService fileUploadService;
@@ -35,7 +37,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     @Override
     @Transactional
     public void createContent(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
 
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -58,7 +60,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     }
 
     public CreatorWebtoonResponse getContentById(PrincipalUser principalUser, Long contentId) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
@@ -73,7 +75,7 @@ public class CreatorWebtoonService implements CreatorContentService{
 
     @Override
     public List<CreatorContentListResponse> getMyContents(PrincipalUser principalUser) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         List<Webtoon> webtoons = webtoonRepository.findByCreator(creator);
@@ -86,7 +88,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     @Override
     @Transactional
     public Long updateContent(PrincipalUser principalUser, Long contentId, ContentUpdateRequest contentUpdateRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
@@ -125,7 +127,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     @Override
     @Transactional
     public void deleteRequestContent(PrincipalUser principalUser, Long contentId, ContentDeleteRequest contentDeleteRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         Webtoon webtoon = webtoonRepository.findById(contentId).orElseThrow(
