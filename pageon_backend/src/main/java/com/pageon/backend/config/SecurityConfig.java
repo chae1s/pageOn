@@ -1,6 +1,7 @@
 package com.pageon.backend.config;
 
 import com.pageon.backend.security.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -34,14 +35,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        log.info("handler 작동 확인 : {}", oAuth2SuccessHandler != null);
         http
                 .cors(cors -> cors.configurationSource(configurationSource))
                 .csrf(csrfConfig -> csrfConfig.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
-                                "/api/users/login", "/api/users/find-password",
+                                "/api/users/login", "/api/users/find-password", "/api/auth/refresh",
                                 "/api/webnovels", "/api/webnovels/*", "/api/webtoons", "/api/webtoons/*", "/api/episodes/**", "/api/webnovels/daily/*", "/api/webtoons/daily/*"
                         ).permitAll()
                         .requestMatchers("/api/webnovels/*/likes", "/api/webtoons/*/likes").authenticated()
@@ -60,6 +60,12 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            log.warn("API Authentication failed: {}", authException.getMessage());
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        })
+                )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService), UsernamePasswordAuthenticationFilter.class)
 
         ;

@@ -9,7 +9,7 @@ import axios from "axios";
 import { SimpleContent } from "../../types/Content";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
-
+import api from "../../api/axiosInstance";
 
 const MypageSummaryContainer = styled.div`
     display: flex;
@@ -178,12 +178,7 @@ function MyPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get<any>("/api/users/me", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                    },
-                    withCredentials: true
-                });
+                const response = await api.get<any>("/users/me");
 
                 const simpleProfile: UserSimpleProfile = {
                     id: response.data.id,
@@ -208,12 +203,7 @@ function MyPage() {
         if (!window.confirm("로그아웃 하시겠습니까?")) return;
 
         try {
-            const response = await axios.get("/api/users/logout", {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                },
-                withCredentials: true
-            })
+            const response = await api.get("/users/logout")
 
             if (response.status === 200) {
                 navigate("/", {replace: true});
