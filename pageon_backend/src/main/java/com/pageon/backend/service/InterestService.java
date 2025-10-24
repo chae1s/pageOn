@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class InterestService {
     private final WebnovelRepository webnovelRepository;
     private final WebtoonRepository webtoonRepository;
 
+    @Transactional
     public void registerInterest(Long userId, ContentType contentType, Long contentId) {
         User user = userRepository.getReferenceById(userId);
 
@@ -60,11 +62,8 @@ public class InterestService {
 
     }
 
+    @Transactional
     public void deleteInterest(Long userId, ContentType contentType, Long contentId) {
-
-        userRepository.findByIdAndDeleted(userId, false).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
 
         Interest interest = interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId).orElseThrow(
                 () -> new CustomException(ErrorCode.INTEREST_NOT_FOUND)
@@ -74,6 +73,7 @@ public class InterestService {
 
     }
 
+    @Transactional
     public Page<ContentSimpleResponse> getInterestedContents(Long userId, ContentType contentType, Pageable pageable) {
         Page<Interest> interests;
 

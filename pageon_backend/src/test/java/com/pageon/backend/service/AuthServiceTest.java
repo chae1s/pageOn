@@ -1,6 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.response.ReissuedTokenResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
@@ -78,12 +79,11 @@ class AuthServiceTest {
         when(jwtProvider.generateAccessToken(eq("test@mail.com"), any())).thenReturn("reissue-access-token");
 
         //when
-        JwtTokenResponse result = authService.reissueToken(request, response);
+        ReissuedTokenResponse result = authService.reissueToken(request, response);
         
         // then
         assertEquals("reissue-access-token", result.getAccessToken());
-        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider());
-        assertTrue(result.getIsLogin());
+        assertTrue(result.getIsRefreshed());
         
     }
     

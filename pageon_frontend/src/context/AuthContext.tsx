@@ -23,10 +23,10 @@ export const AuthProvider = ({children} : {children: ReactNode}) => {
 
     const isAuthenticated = !!accessToken;
 
-    const login = (token:string, roles: string[], proivder:string) => {
+    const login = (token:string, roles: string[], provider:string) => {
         localStorage.setItem("accessToken", token);
         localStorage.setItem("roles", JSON.stringify(roles));
-        localStorage.setItem("provider", proivder)
+        localStorage.setItem("provider", provider)
         setAccessToken(token);
         setRoles(roles);
     }

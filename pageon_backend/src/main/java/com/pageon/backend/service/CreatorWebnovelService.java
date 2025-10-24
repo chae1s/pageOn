@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CreatorWebnovelService implements CreatorContentService {
 
+    private final UserRepository userRepository;
     private final WebnovelRepository webnovelRepository;
     private final FileUploadService fileUploadService;
     private final CommonService commonService;
@@ -35,7 +36,7 @@ public class CreatorWebnovelService implements CreatorContentService {
     @Override
     @Transactional
     public void createContent(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
 
         Creator creator = commonService.findCreatorByUser(user);
 
@@ -58,9 +59,10 @@ public class CreatorWebnovelService implements CreatorContentService {
     }
 
     // 내가 작성한 웹소설의 정보를 가져오는 메소드
+    @Transactional
     public CreatorWebnovelResponse getContentById(PrincipalUser principalUser, Long webnovelId) {
         // 로그인한 유저에게서 가져온 creator 정보
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         // 웹소설에서 가져온 creator 정보
@@ -76,8 +78,9 @@ public class CreatorWebnovelService implements CreatorContentService {
 
     // 내가 작성한 웹소설 리스트를 가져오는 메소드
     @Override
+    @Transactional
     public List<CreatorContentListResponse> getMyContents(PrincipalUser principalUser) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         List<Webnovel> webnovels = webnovelRepository.findByCreator(creator);
@@ -91,7 +94,7 @@ public class CreatorWebnovelService implements CreatorContentService {
     @Override
     @Transactional
     public Long updateContent(PrincipalUser principalUser, Long webnovelId, ContentUpdateRequest contentUpdateRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         Webnovel webnovel = webnovelRepository.findById(webnovelId).orElseThrow(
@@ -129,7 +132,7 @@ public class CreatorWebnovelService implements CreatorContentService {
     @Override
     @Transactional
     public void deleteRequestContent(PrincipalUser principalUser, Long webnovelId, ContentDeleteRequest contentDeleteRequest) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+        User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
 
         Webnovel webnovel = webnovelRepository.findById(webnovelId).orElseThrow(

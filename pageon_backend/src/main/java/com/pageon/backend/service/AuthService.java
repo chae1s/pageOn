@@ -1,6 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.response.ReissuedTokenResponse;
 import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,8 @@ public class AuthService {
     private final UserRepository userRepository;
 
 
-    public JwtTokenResponse reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    @Transactional(readOnly = true)
+    public ReissuedTokenResponse reissueToken(HttpServletRequest request, HttpServletResponse response) {
         log.info("access token 만료, refresh token으로 새로운 access token 발급");
         String refreshToken = extractRefreshToken(request);
 
@@ -42,29 +45,20 @@ public class AuthService {
         if (tokenInfo == null) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        // refreshToken에서 가져온 email
-        String email = jwtProvider.getUsernameRefreshToken(refreshToken);
 
-        User user = userRepository.findByEmailAndDeleted(email, false).orElseThrow(
+        User user = userRepository.findByIdAndDeleted(tokenInfo.getUserId(), false).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
-        if (!user.getId().equals(tokenInfo.getUserId())) {
-            throw new CustomException(ErrorCode.TOKEN_USER_MISMATCH);
-        }
 
         List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).toList();
 
         // 새로운 accessToken 발급
-        String accessToken = jwtProvider.generateAccessToken(email, roleTypes);
+        String accessToken = jwtProvider.generateAccessToken(tokenInfo.getEmail(), roleTypes);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        List<String> userRoles = new ArrayList<>();
-        for (RoleType roleType : roleTypes) {
-            userRoles.add(roleType.toString());
-        }
 
-        return new JwtTokenResponse(true, accessToken, user.getOAuthProvider(), userRoles);
+        return new ReissuedTokenResponse(accessToken, true);
 
     }
 
