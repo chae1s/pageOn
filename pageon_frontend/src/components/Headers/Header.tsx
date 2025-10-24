@@ -35,7 +35,7 @@ function Header() {
                             {isAuthenticated ? (
                                 <>
                                     <H.AuthLinkItem $last = {false}>
-                                        <H.AuthLink to={"/users/my-library"}>내서재</H.AuthLink>
+                                        <H.AuthLink to={"/library/interests"}>내서재</H.AuthLink>
                                     </H.AuthLinkItem>
                                     <H.AuthLinkItem $last = {true}>
                                         <H.AuthLink to={"/users/my-page"}>마이페이지</H.AuthLink> 

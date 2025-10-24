@@ -93,9 +93,9 @@ function RecentViewedWorks() {
                     <M.MypageBooksSortBtnWrapper>
                         <M.mypageBooksSortBtnList>
                              <M.MypageBooksSelectType>
-                                <SortBtn active={type === "all"} onClick={()=>setType('all')}>전체</SortBtn>
-                                <SortBtn active={type === "webtoons"} onClick={()=>setType('webtoons')}>웹툰</SortBtn>
-                                <SortBtn active={type === "webnovels"} onClick={()=>setType('webnovels')}>웹소설</SortBtn>
+                                <SortBtn $active={type === "all"} onClick={()=>setType('all')}>전체</SortBtn>
+                                <SortBtn $active={type === "webtoons"} onClick={()=>setType('webtoons')}>웹툰</SortBtn>
+                                <SortBtn $active={type === "webnovels"} onClick={()=>setType('webnovels')}>웹소설</SortBtn>
                             </M.MypageBooksSelectType>
                             <M.MypageBooksSearchSelectSort>
                                 <M.MypageBooksSearchGroup>
@@ -111,8 +111,8 @@ function RecentViewedWorks() {
                                     </M.MypageBooksSearchBtn>
                                 </M.MypageBooksSearchGroup>
                                 <M.MypageBooksSortGroup>
-                                    <SortBtn active={sort === "updated"} onClick={()=>setSort('updated')}>업데이트순</SortBtn>
-                                    <SortBtn active={sort === "recent"} onClick={()=>setSort('recent')}>최근순</SortBtn>
+                                    <SortBtn $active={sort === "updated"} onClick={()=>setSort('updated')}>업데이트순</SortBtn>
+                                    <SortBtn $active={sort === "recent"} onClick={()=>setSort('recent')}>최근순</SortBtn>
                                 </M.MypageBooksSortGroup>
                             </M.MypageBooksSearchSelectSort>
                         </M.mypageBooksSortBtnList>

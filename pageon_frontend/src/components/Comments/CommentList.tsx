@@ -42,8 +42,8 @@ function CommentList({comments, mypage} : Props) {
                         댓글 {comments.length}개
                     </C.CommentCount>
                     <C.SortBtnList>
-                        <SortBtn active={sort === "recent"} type="button" onClick={()=>setSort('recent')}>최신순</SortBtn>
-                        <SortBtn active={sort === "liked"} type="button" onClick={()=>setSort('liked')}>공감순</SortBtn>
+                        <SortBtn $active={sort === "recent"} type="button" onClick={()=>setSort('recent')}>최신순</SortBtn>
+                        <SortBtn $active={sort === "liked"} type="button" onClick={()=>setSort('liked')}>공감순</SortBtn>
                     </C.SortBtnList>
                 </C.CommentHeader>
             

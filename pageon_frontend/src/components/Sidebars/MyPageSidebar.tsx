@@ -29,7 +29,6 @@ function Sidebar() {
         }
     }
     const {roles} = useAuth();
-    console.log(roles)
 
     return (
         <S.SidebarContainser>
@@ -41,7 +40,7 @@ function Sidebar() {
                             <S.SidebarNavTitle>책</S.SidebarNavTitle>
                             <S.SidebarNavItemUl>
                                 <S.SidebarNavItemLi>
-                                    <S.SidebarNavLink to={"/library/favorites"} className="sidebar-nav-link">관심 작품</S.SidebarNavLink>
+                                    <S.SidebarNavLink to={"/library/interests"} className="sidebar-nav-link">관심 작품</S.SidebarNavLink>
                                 </S.SidebarNavItemLi>
                                 <S.SidebarNavItemLi>
                                     <S.SidebarNavLink to={"/library/recent-view"} className="sidebar-nav-link">최근 조회 작품</S.SidebarNavLink>

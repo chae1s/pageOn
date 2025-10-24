@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ContentType, ContentStatus, ContentDetail } from '../../types/Content';
 import * as S from "../Styles/ContentDetail.styles";
 import { EpisodeSummary } from '../../types/Episodes';
@@ -22,6 +22,18 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
     const [sort, setSort] = useState<string>("recent") // first | recent
     const [showAll, setShowAll] = useState<boolean>(false);
     const navigate = useNavigate();
+
+    const [contentType, setContentType] = useState<string>("");
+
+    useEffect(() => {
+        if (type === "WEBTOON") {
+            setContentType("webtoons");
+        } else if (type === "WEBNOVEL") {
+            setContentType("webnovels");
+        }
+        
+    }, [])
+    
     // 정렬된 에피소드 배열 생성
     const sortedEpisodes = React.useMemo(() => {
         if (sort === "first") {
@@ -95,7 +107,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                             </S.OptionItem>
                             <S.OptionItem>
                                 <S.EpisodeSellBtnWrapper>
-                                    {type === 'webtoons' && (
+                                    {type === 'WEBTOON' && (
                                         <S.RentalBtn type="button" onClick={handleRequireLogin}>
                                             선택 대여
                                         </S.RentalBtn>
@@ -131,7 +143,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                 checked={selectedIds.includes(episodeIdStr)}
                                                 onChange={handleEpisodeCheck(episodeIdStr)}
                                             />
-                                            {type === 'webtoons' && 
+                                            {type === 'WEBTOON' && 
                                                 <S.EpisodeThumbnailContainer>
                                                     <S.EpisodeThumbnailImage src=''/>
                                                 </S.EpisodeThumbnailContainer>
@@ -139,7 +151,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                             <S.EpisodeInfoContainer>
                                                 <S.EpisodeTitleAndNum>
                                                     <span>{episode.episodeNum}화</span>
-                                                    <S.EpisodeTitle to={`/${type}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
+                                                    <S.EpisodeTitle to={`/${contentType}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
                                                 </S.EpisodeTitleAndNum>
                                                 <S.EpisodeCreateDate>
                                                     {createDate}
@@ -148,7 +160,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                         </S.EpisodeItemLeft>
                                         <S.EpisodeItemRight>
                                             <S.EpisodeSellBtnWrapper>
-                                                {type === 'webtoons' && (
+                                                {type === 'WEBTOON' && (
                                                     <S.RentalBtn type="button" onClick={handleRequireLogin}>
                                                         대여
                                                     </S.RentalBtn>

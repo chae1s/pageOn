@@ -4,6 +4,7 @@ import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
@@ -22,9 +23,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,9 +81,9 @@ class InterestServiceTest {
                 .status(SeriesStatus.ONGOING)
                 .deleted(false)
                 .build();
-        
-        
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelRepository.findById(webnovelId)).thenReturn(Optional.of(webnovel));
 
         ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
@@ -126,7 +129,7 @@ class InterestServiceTest {
                 .build();
 
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonRepository.findById(webtoonId)).thenReturn(Optional.of(webtoon));
 
         ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
@@ -164,7 +167,7 @@ class InterestServiceTest {
                 .build();
 
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelRepository.findById(webnovelId)).thenReturn(Optional.empty());
 
         //when
@@ -198,7 +201,7 @@ class InterestServiceTest {
                 .build();
 
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonRepository.findById(webtoonId)).thenReturn(Optional.empty());
 
         //when
@@ -232,7 +235,7 @@ class InterestServiceTest {
                 .build();
 
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -299,6 +302,119 @@ class InterestServiceTest {
         assertEquals("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.INTEREST_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
+    }
+    
+    @Test
+    @DisplayName("로그인한 사용자의 관심 목록을 페이징으로 조회한다.")
+    void shouldReturnInterestedContents_forLoggedInUser() {
+        // given
+        Long userId = 1L;
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .providerId(null)
+                .pointBalance(0)
+                .deleted(false)
+                .build();
+
+        Interest interestWebnovel = Interest.builder()
+                .user(user)
+                .contentType(ContentType.WEBNOVEL)
+                .contentId(1L)
+                .build();
+
+        Interest interestWebtoon = Interest.builder()
+                .user(user)
+                .contentType(ContentType.WEBTOON)
+                .contentId(3L)
+                .build();
+
+        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(interestRepository.findAllByUser_Id(eq(userId), eq(pageable))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
+
+        //when
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, pageable);
+
+        // then
+        assertEquals(2, result.getContent().size());
+        assertEquals(interestWebnovel.getId(), result.getContent().get(0).getId());
+
+
+    }
+
+    @Test
+    @DisplayName("contentType이 주어지면 해당 타입만 필터링하여 반환한다.")
+    void shouldFilterByContentType_whenTypeProvided() {
+        // given
+        Long userId = 1L;
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .providerId(null)
+                .pointBalance(0)
+                .deleted(false)
+                .build();
+
+        Interest interestWebnovel = Interest.builder()
+                .user(user)
+                .contentType(ContentType.WEBNOVEL)
+                .contentId(1L)
+                .build();
+
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+
+        when(interestRepository.findAllByUser_IdAndContentType(userId, ContentType.WEBNOVEL, pageable)).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
+
+        //when
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, ContentType.WEBNOVEL, pageable);
+
+        // then
+        assertEquals(1, result.getContent().size());
+        assertEquals(ContentType.WEBNOVEL, result.getContent().get(0).getContentType());
+
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자의 관심 목록이 없으면 null 반환")
+    void shouldReturnNull_whenNoInterestsExist() {
+        // given
+        Long userId = 1L;
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .providerId(null)
+                .pointBalance(0)
+                .deleted(false)
+                .build();
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(Page.empty(pageable));
+
+        //when
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, pageable);
+
+        // then
+        assertNull(result);
+
     }
 
 }

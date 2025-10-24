@@ -76,7 +76,7 @@ function ContentDetailLayout({content}: Props) {
 
     const DeleteInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
         try {
-            if (content.contentType === "webnovels") {
+            if (content.contentType === "webtnovels") {
                 await api.delete(`/webnovels/${content.id}/interests`, {})
             } else if (content.contentType === "webtoons") {
                 await api.delete(`/webtoons/${content.id}/interests`, {})

@@ -22,4 +22,7 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deleted = false ORDER BY w.viewCount DESC")
     List<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
+
+    @Query("SELECT w FROM Webnovel w JOIN FETCH w.creator WHERE w.id IN :ids")
+    List<Webnovel> findAllByIdIn(@Param("ids") List<Long> ids);
 }

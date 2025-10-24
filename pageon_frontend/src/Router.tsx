@@ -15,7 +15,7 @@ import MyPage from "./pages/Users/MyPage";
 import PasswordCheck from "./pages/Users/PasswordCheck";
 import EditProfile from "./pages/Users/EditProfile";
 import Withdraw from "./pages/Users/Withdraw";
-import FavoriteWorks from "./pages/Users/FavoriteWorks";
+import InterestContents from "./pages/Users/InterestContents";
 import RecentViewedWorks from "./pages/Users/RecentViewedWorks";
 import MyComments from "./pages/Users/MyComments";
 import CreatorRegister from "./pages/Creators/CreatorRegister";
@@ -61,7 +61,7 @@ function Router() {
                 <Route path="/users/check-password" element={<PasswordCheck />} />
                 <Route path="/users/edit" element={<EditProfile />} />
                 <Route path="/users/withdraw" element={<Withdraw />} />
-                <Route path="/library/favorites" element={<FavoriteWorks />} />
+                <Route path="/library/interests" element={<InterestContents />} />
                 <Route path="/library/recent-view" element={<RecentViewedWorks />} />
                 <Route path="/library/my-comments" element={<MyComments />}  />
                 <Route path="/creators/register" element={<CreatorRegister/>}  />
