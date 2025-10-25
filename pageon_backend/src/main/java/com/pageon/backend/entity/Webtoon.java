@@ -1,3 +1,4 @@
+
 package com.pageon.backend.entity;
 
 import com.pageon.backend.common.enums.SerialDay;

@@ -4,7 +4,6 @@ import com.pageon.backend.dto.request.ContentCreateRequest;
 import com.pageon.backend.dto.request.ContentDeleteRequest;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
 import com.pageon.backend.dto.response.CreatorContentListResponse;
-import com.pageon.backend.dto.response.CreatorWebnovelResponse;
 import com.pageon.backend.dto.response.CreatorWebtoonResponse;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.CreatorWebtoonService;

@@ -3,6 +3,9 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.UserContentListResponse;
+import com.pageon.backend.dto.response.UserWebnovelResponse;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -11,6 +14,7 @@ import com.pageon.backend.repository.WebnovelRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -79,6 +83,13 @@ public class UserWebnovelService {
                         w.getCover(),
                         "webnovels"))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentSearchResponse> getWebnovelsByKeyword(String keywordName, Pageable pageable) {
+        Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, pageable);
+
+        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
     }
 
 

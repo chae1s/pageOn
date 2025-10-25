@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 export const MainContainer = styled.div`
   min-height: 100vh;
+  flex: 1;
   background: var(--main-bg);
   color: var(--main-color);
   display: flex;
@@ -19,6 +20,7 @@ export const NoSidebarMain = styled.main`
   box-shadow: none;
   gap: 40px;
   min-height: 600px;
+  flex: 1;
 `;
 
 export const SidebarMain = styled.main`

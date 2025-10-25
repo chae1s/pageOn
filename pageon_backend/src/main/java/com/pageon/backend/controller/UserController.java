@@ -6,8 +6,6 @@ import com.pageon.backend.dto.response.ContentPageResponse;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
-import com.pageon.backend.entity.Interest;
-import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserService;

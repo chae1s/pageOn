@@ -3,6 +3,9 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.UserContentListResponse;
+import com.pageon.backend.dto.response.UserWebtoonResponse;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -11,6 +14,7 @@ import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,5 +78,12 @@ public class UserWebtoonService {
                         w.getCover(),
                         "webtoons"))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentSearchResponse> getWebtoonsByKeyword(String keywordName, Pageable pageable) {
+        Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, pageable);
+
+        return webtoonPage.map(ContentSearchResponse::fromWebtoon);
     }
 }

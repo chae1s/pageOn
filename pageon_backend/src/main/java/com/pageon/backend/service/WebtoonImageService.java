@@ -1,7 +1,6 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.WebtoonImagesResponse;
-import com.pageon.backend.entity.WebtoonEpisode;
 import com.pageon.backend.entity.WebtoonImage;
 import com.pageon.backend.repository.WebtoonImageRepository;
 import lombok.RequiredArgsConstructor;

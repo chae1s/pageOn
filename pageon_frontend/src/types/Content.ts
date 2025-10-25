@@ -38,3 +38,16 @@ export interface ContentDetail {
     contentType: string;
     isInterested: boolean;
 }
+
+export interface SearchContent {
+    id: number;
+    title: string;
+    description: string;
+    cover: string;
+    author: string;
+    keywords: UserKeywordResponse[];
+    episodeCount: number;
+    rating: number;
+    ratingCount: number;
+    contentType: string;
+}
