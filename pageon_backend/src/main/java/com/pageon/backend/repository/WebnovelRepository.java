@@ -29,4 +29,9 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT DISTINCT w FROM Webnovel w JOIN w.keywords k WHERE k.name = :keywordName")
     Page<Webnovel> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
+
+    @Query("SELECT w FROM Webnovel w WHERE"
+            + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
+            + "AND w.deleted = false")
+    Page<Webnovel> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 }

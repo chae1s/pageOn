@@ -3,10 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserKeywordResponse;
-import com.pageon.backend.dto.response.UserWebtoonResponse;
+import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -19,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
@@ -194,6 +193,92 @@ class UserWebtoonServiceTest {
 
         // then
         assertEquals(0, result.size());
+
+    }
+
+    @Test
+    @DisplayName("검색어를 입력하면 해당 검색어가 포함된 콘텐츠 리스트를 반환한다.")
+    void shouldReturnWebtoons_whenKeywordProvided() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+
+        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
+        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").deleted(false).build();
+        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").deleted(false).build();
+
+        when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1, webtoon2), pageable, 2));
+
+        //when
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+
+
+        // then
+        assertEquals(2, results.getContent().size());
+        assertTrue(results.getContent().stream()
+                .allMatch(w -> w.getTitle().equals("고양")));
+
+    }
+
+    @Test
+    @DisplayName("검색 결과가 없으면 빈 리스트를 반환한다.")
+    void shouldReturnEmptyList_whenNoSearchResultsExist() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
+
+        //when
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+
+        // then
+        assertEquals(0, results.getContent().size());
+
+    }
+
+    @Test
+    @DisplayName("검색어를 입력하지 않으면 빈 리스트를 반환한다.")
+    void shouldReturnEmptyList_whenKeywordIsBlank() {
+        // given
+        String query = "";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
+
+        //when
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+
+        // then
+        assertEquals(0, results.getContent().size());
+
+
+    }
+
+    @Test
+    @DisplayName("삭제된 콘텐츠는 검색 결과에 포함되지 않는다.")
+    void shouldExcludeDeletedContents_whenSearchingKeyword() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+
+        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이는 귀여워").deleted(false).build();
+        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").deleted(true).build();
+        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").deleted(false).build();
+
+        when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1), pageable, 1));
+
+        //when
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+
+        // then
+        assertEquals(1, results.getContent().size());
 
     }
 

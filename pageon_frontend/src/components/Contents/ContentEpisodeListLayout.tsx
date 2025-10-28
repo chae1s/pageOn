@@ -23,16 +23,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
     const [showAll, setShowAll] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    const [contentType, setContentType] = useState<string>("");
-
-    useEffect(() => {
-        if (type === "WEBTOON") {
-            setContentType("webtoons");
-        } else if (type === "WEBNOVEL") {
-            setContentType("webnovels");
-        }
-        
-    }, [])
+    
     
     // 정렬된 에피소드 배열 생성
     const sortedEpisodes = React.useMemo(() => {
@@ -151,7 +142,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                             <S.EpisodeInfoContainer>
                                                 <S.EpisodeTitleAndNum>
                                                     <span>{episode.episodeNum}화</span>
-                                                    <S.EpisodeTitle to={`/${contentType}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
+                                                    <S.EpisodeTitle to={`/${type}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
                                                 </S.EpisodeTitleAndNum>
                                                 <S.EpisodeCreateDate>
                                                     {createDate}

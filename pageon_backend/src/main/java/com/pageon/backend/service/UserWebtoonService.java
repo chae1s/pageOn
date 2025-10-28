@@ -6,6 +6,7 @@ import com.pageon.backend.dto.response.*;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebtoonResponse;
+import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -86,4 +87,19 @@ public class UserWebtoonService {
 
         return webtoonPage.map(ContentSearchResponse::fromWebtoon);
     }
+
+    @Transactional(readOnly = true)
+    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, Pageable pageable) {
+
+        log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, pageable);
+        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrPenNameContaining(query, pageable);
+        log.debug("Repository found {} webtoons on this page.", webtoonPage.getNumberOfElements());
+
+        log.info("Webtoon search by title/creator successful. Query: [{}]. Found {} total results.",
+                query,
+                webtoonPage.getTotalElements());
+
+        return webtoonPage.map(ContentSearchResponse::fromWebtoon);
+    }
+
 }

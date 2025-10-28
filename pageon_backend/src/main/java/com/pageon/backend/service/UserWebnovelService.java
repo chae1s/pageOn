@@ -92,5 +92,18 @@ public class UserWebnovelService {
         return webnovelPage.map(ContentSearchResponse::fromWebnovel);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, Pageable pageable) {
+
+        log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, pageable);
+        Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, pageable);
+        log.debug("Repository found {} webnovels on this page.", webnovelPage.getNumberOfElements());
+
+        log.info("Webnovel search by title/creator successful. Query: [{}]. Found {} total results.",
+                query,
+                webnovelPage.getTotalElements());
+
+        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
+    }
 
 }

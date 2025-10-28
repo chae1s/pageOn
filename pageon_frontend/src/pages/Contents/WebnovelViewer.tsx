@@ -130,7 +130,7 @@ function WebnovelViewer() {
 
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>
-                    <S.ViewerNextEpisodeBtn to={`/webnovels/${contentId}/viewer`}>다음화 보기</S.ViewerNextEpisodeBtn>
+                    <S.ViewerNextEpisodeBtn to={`/webnovels/${contentId}/viewer/${episodeData.nextEpisodeId}`} $disabled={episodeData.nextEpisodeId === null} aria-disabled={episodeData.nextEpisodeId === null}>다음화 보기</S.ViewerNextEpisodeBtn>
                 </S.ViewerNextEpisodeBtnContainer>
             </S.ViewerNextEpisodeBtnSection>
         </S.Viewer>

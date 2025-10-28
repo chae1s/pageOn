@@ -145,7 +145,7 @@ export const ViewerNextEpisodeBtnContainer = styled.div`
     text-align: center;
 `
 
-export const ViewerNextEpisodeBtn = styled(Link)`
+export const ViewerNextEpisodeBtn = styled(Link)<{ $disabled?: boolean }>`
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -157,7 +157,9 @@ export const ViewerNextEpisodeBtn = styled(Link)`
     font-size: 16px;
     font-weight: 600;
     line-height: 19px;
-    background: #528efa;
+    background: ${props => props.$disabled ? 'var(--accent-color)' : '#528efa'};
     color: #fff;
+    pointer-events: ${props => props.$disabled ? 'none' : 'auto'};
+    cursor: ${props => props.$disabled ? 'default' : 'pointer'};
 `
 

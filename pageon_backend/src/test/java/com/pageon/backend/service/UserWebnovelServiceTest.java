@@ -3,10 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserKeywordResponse;
-import com.pageon.backend.dto.response.UserWebnovelResponse;
+import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.Category;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Keyword;
@@ -22,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
@@ -197,6 +196,93 @@ class UserWebnovelServiceTest {
         assertEquals(0, result.size());
 
     }
+    
+    @Test
+    @DisplayName("검색어를 입력하면 해당 검색어가 포함된 콘텐츠 리스트를 반환한다.")
+    void shouldReturnWebtoons_whenKeywordProvided() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deleted(false).build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").deleted(false).build();
+
+        when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1, webnovel2), pageable, 2));
+        
+        //when
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+
+        
+        // then
+        assertEquals(2, results.getContent().size());
+        assertTrue(results.getContent().stream()
+                .allMatch(w -> w.getTitle().equals("고양")));
+        
+    }
+    
+    @Test
+    @DisplayName("검색 결과가 없으면 빈 리스트를 반환한다.")
+    void shouldReturnEmptyList_whenNoSearchResultsExist() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
+        
+        //when
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        
+        // then
+        assertEquals(0, results.getContent().size());
+        
+    }
+    
+    @Test
+    @DisplayName("검색어를 입력하지 않으면 빈 리스트를 반환한다.")
+    void shouldReturnEmptyList_whenKeywordIsBlank() {
+        // given
+        String query = "";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
+
+        //when
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+
+        // then
+        assertEquals(0, results.getContent().size());
+        
+        
+    }
+    
+    @Test
+    @DisplayName("삭제된 콘텐츠는 검색 결과에 포함되지 않는다.")
+    void shouldExcludeDeletedContents_whenSearchingKeyword() {
+        // given
+        String query = "고양이";
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deleted(true).build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").deleted(false).build();
+        
+        when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1), pageable, 1));
+        
+        //when
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        
+        // then
+        assertEquals(1, results.getContent().size());
+        
+    }
+
 
     private List<Keyword> createKeywords(String s) {
         Category category = Category.builder()
