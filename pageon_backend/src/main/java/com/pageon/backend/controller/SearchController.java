@@ -25,7 +25,7 @@ public class SearchController {
     private final UserWebtoonService userWebtoonService;
 
     @GetMapping("/keywords")
-    public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getWebnovelsByKeyword(
+    public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getContentsByKeyword(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @PageableDefault(size = 20) Pageable pageable) {
 
         if (contentType.equals("webnovels")) {

@@ -171,3 +171,14 @@ export const ContentKeywordItem = styled.button`
     white-space: nowrap;
     line-height: 1;
 `
+
+export const NoResultsWrapper = styled.div`
+    adding: 50px 20px;
+    text-align: center;
+    color: #888;
+    padding: 80px;
+`
+
+export const NoResultsText = styled.p`
+
+`

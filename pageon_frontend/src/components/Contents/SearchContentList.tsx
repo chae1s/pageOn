@@ -9,7 +9,7 @@ interface Props {
     totalElements?: number;
 }
 
-function SearchContentList({contents, totalElements}: Props) {
+function SearchContentList({contents, totalElements = 0}: Props) {
 
     const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ function SearchContentList({contents, totalElements}: Props) {
         params.append("type", contentType)
         params.append("q", name);
 
-
+        
         navigate(`/search/keyword?${params}`)
     }
 
@@ -33,39 +33,50 @@ function SearchContentList({contents, totalElements}: Props) {
         <S.ContentSection>
             <S.ContentTotalCount>{totalElements}개의 작품</S.ContentTotalCount>
             <S.ContentSearchList>
-               {contents?.map((content) => (
-                    <S.ContentSearchListItem>
-                        <S.ContentSearchWrapper>
-                            <S.ContentSearchItemCoverSection>
-                                <S.ContentCoverWrapper>
-                                    <S.ContentCoverImage src={content.cover} alt={content.title}/>
-                                </S.ContentCoverWrapper>
-                            </S.ContentSearchItemCoverSection>
-                            <S.ContentSearchItemInfoSection>
-                                <S.ContentInfoWrapper>
-                                    <S.ContentTitleWrapper>
-                                        <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
-                                    </S.ContentTitleWrapper>
-                                    <S.ContentAuthor>{content.author}</S.ContentAuthor>
-                                    <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
-                                    <S.ContentRatingContainer>
-                                        <RatingFullIcon />
-                                        <S.ContentRatingScore>4.33</S.ContentRatingScore>
-                                        <S.ContentRatingCount>(356214)</S.ContentRatingCount>
-                                    </S.ContentRatingContainer>
-                                    <S.ContentDescriptionLink to={`/${content.contentType}/${content.id}`}>
-                                    <S.ContentDescription>{content.description}</S.ContentDescription>
-                                    </S.ContentDescriptionLink>
-                                    <S.ContentKeywordContainer>
-                                        {content.keywords.map((keyword, index) => (
-                                            <S.ContentKeywordItem key={index} onClick={()=>handleKeywordClick(`${content.contentType}`, `${keyword.name}`)}>#{keyword.name}</S.ContentKeywordItem>
-                                        ))}
-                                    </S.ContentKeywordContainer>
-                                </S.ContentInfoWrapper>
-                            </S.ContentSearchItemInfoSection>
-                        </S.ContentSearchWrapper>
-                    </S.ContentSearchListItem>
-               ))} 
+               {totalElements > 0 ? (
+                    contents?.map((content) => (
+                        <S.ContentSearchListItem>
+                            <S.ContentSearchWrapper>
+                                <S.ContentSearchItemCoverSection>
+                                    <S.ContentCoverWrapper>
+                                        <S.ContentCoverImage src={content.cover} alt={content.title}/>
+                                    </S.ContentCoverWrapper>
+                                </S.ContentSearchItemCoverSection>
+                                <S.ContentSearchItemInfoSection>
+                                    <S.ContentInfoWrapper>
+                                        <S.ContentTitleWrapper>
+                                            <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
+                                        </S.ContentTitleWrapper>
+                                        <S.ContentAuthor>{content.author}</S.ContentAuthor>
+                                        <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
+                                        <S.ContentRatingContainer>
+                                            <RatingFullIcon />
+                                            <S.ContentRatingScore>4.33</S.ContentRatingScore>
+                                            <S.ContentRatingCount>(356214)</S.ContentRatingCount>
+                                        </S.ContentRatingContainer>
+                                        <S.ContentDescriptionLink to={`/${content.contentType}/${content.id}`}>
+                                        <S.ContentDescription>{content.description}</S.ContentDescription>
+                                        </S.ContentDescriptionLink>
+                                        <S.ContentKeywordContainer>
+                                            {content.keywords.map((keyword, index) => (
+                                                <S.ContentKeywordItem key={index} onClick={()=>handleKeywordClick(`${content.contentType}`, `${keyword.name}`)}>#{keyword.name}</S.ContentKeywordItem>
+                                            ))}
+                                        </S.ContentKeywordContainer>
+                                    </S.ContentInfoWrapper>
+                                </S.ContentSearchItemInfoSection>
+                            </S.ContentSearchWrapper>
+                        </S.ContentSearchListItem>
+                    ))
+                    ) : (
+                        <S.NoResultsWrapper>
+                            <S.NoResultsText>
+                                해당 키워드를 가진 작품이 없습니다.
+                            </S.NoResultsText>
+                        </S.NoResultsWrapper>
+
+                    )
+
+                } 
             </S.ContentSearchList>
         </S.ContentSection>
     )
