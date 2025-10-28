@@ -3,6 +3,7 @@ package com.pageon.backend.repository;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Webnovel;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,7 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT w FROM Webnovel w JOIN FETCH w.creator WHERE w.id IN :ids")
     List<Webnovel> findAllByIdIn(@Param("ids") List<Long> ids);
+
+    @Query("SELECT DISTINCT w FROM Webnovel w JOIN w.keywords k WHERE k.name = :keywordName")
+    Page<Webnovel> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
 }

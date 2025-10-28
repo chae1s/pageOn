@@ -1,8 +1,5 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.Webtoon;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

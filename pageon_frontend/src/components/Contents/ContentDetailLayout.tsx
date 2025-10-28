@@ -3,6 +3,7 @@ import { ContentType, ContentStatus, ContentDetail } from '../../types/Content';
 import axios from "axios";
 import * as S from "../Styles/ContentDetail.styles"
 import api from '../../api/axiosInstance';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface Props {
     content: ContentDetail;
@@ -25,6 +26,8 @@ function ContentDetailLayout({content}: Props) {
         ONGOING: "연재",
         REST: "휴재"
     }
+
+    const navigate = useNavigate();
 
     const [isInterested, setIsInterested] = useState(content.isInterested);
     const [showNotification, setShowNotification] = useState(false);
@@ -96,6 +99,15 @@ function ContentDetailLayout({content}: Props) {
         }
     }
 
+    const handleKeywordClick = (contentType: string, name: string) => {
+        const params = new URLSearchParams();
+        
+        params.append("type", contentType)
+        params.append("q", name);
+
+
+        navigate(`/search/keyword?${params}`)
+    }
 
 
     return (
@@ -145,7 +157,7 @@ function ContentDetailLayout({content}: Props) {
                     </S.ContentDescription>
                     <S.ContentKeywordContainer>
                         {content.keywords.map((keyword, index) => (
-                            <S.ContentKeywordItem key={index}>#{keyword.name}</S.ContentKeywordItem>
+                            <S.ContentKeywordItem key={index} onClick={()=>handleKeywordClick(`${content.contentType}`, `${keyword.name}`)}>#{keyword.name}</S.ContentKeywordItem>
                         ))}
                     </S.ContentKeywordContainer>
                     
