@@ -24,6 +24,7 @@ function TitleCreatorSearch() {
                     params: {
                         type: type,
                         q: q,
+                        sort: sort,
                         page: page,
                     }
                 });

@@ -25,7 +25,7 @@ function KeywordSearch() {
 
     const type = searchParams.get("type") || "webtoons";
     const q = searchParams.get("q") || "SF";
-    const sort = searchParams.get("sort") || "latest"
+    const sort = searchParams.get("sort") || "popular"
     const page = parseInt(searchParams.get("page") || "0", 10);
 
     const NextIcon = () => (
@@ -64,6 +64,7 @@ function KeywordSearch() {
                     params: {
                         type: type,
                         q: q,
+                        sort: sort,
                         page: page,
                     }
                 });

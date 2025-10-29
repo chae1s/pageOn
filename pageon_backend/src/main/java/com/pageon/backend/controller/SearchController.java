@@ -33,13 +33,13 @@ public class SearchController {
 
     @GetMapping("/keywords")
     public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getContentsByKeyword(
-            @RequestParam("type") String contentType, @RequestParam("q") String query, @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable) {
 
         if (contentType.equals("webnovels")) {
-            Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByKeyword(query, pageable);
+            Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByKeyword(query, sort, pageable);
             return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
         } else if (contentType.equals("webtoons")) {
-            Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByKeyword(query, pageable);
+            Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByKeyword(query, sort, pageable);
 
             return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
         }
@@ -49,11 +49,11 @@ public class SearchController {
 
     @GetMapping
     public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getContentsByTitleOrCreator(
-            @RequestParam("type") String contentType, @RequestParam("q") String query, @PageableDefault(size = 20) Pageable pageable
+            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable
     ) {
 
-        log.info("Search request received. Type: [{}], Query[{}], Page: {}, size: {}",
-                contentType, query, pageable.getPageNumber(), pageable.getPageSize());
+        log.info("Search request received. Type: [{}], Query[{}], Sort: [{}], Page: {}, size: {}",
+                contentType, query, sort, pageable.getPageNumber(), pageable.getPageSize());
 
         List<String> contentTypes = List.of("webnovels", "webtoons", "all");
         if (!contentTypes.contains(contentType)) {
@@ -63,19 +63,19 @@ public class SearchController {
         switch (contentType) {
             case "webnovels" -> {
                 log.debug("Routing to 'webnovel' service");
-                Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+                Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
 
                 return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
             }
             case "webtoons" -> {
                 log.debug("Routing to 'webtoon' service");
-                Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+                Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
 
                 return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
             }
             case "all" -> {
                 log.debug("Routing to 'all' service");
-                Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(query, pageable);
+                Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(query, sort, pageable);
 
                 return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
             }

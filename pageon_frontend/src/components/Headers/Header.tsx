@@ -21,6 +21,7 @@ function Header() {
         const params = new URLSearchParams();
         params.append("type", "all");
         params.append("q", query);
+        params.append("sort", "popular");
         params.append("page", "0");
 
         navigate(`/search?${params.toString()}`)

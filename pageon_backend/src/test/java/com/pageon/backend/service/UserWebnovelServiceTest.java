@@ -203,6 +203,7 @@ class UserWebnovelServiceTest {
         // given
         String query = "고양이";
 
+        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
 
@@ -213,7 +214,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1, webnovel2), pageable, 2));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
 
         
         // then
@@ -229,12 +230,13 @@ class UserWebnovelServiceTest {
         // given
         String query = "고양이";
 
+        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
         
         // then
         assertEquals(0, results.getContent().size());
@@ -247,12 +249,13 @@ class UserWebnovelServiceTest {
         // given
         String query = "";
 
+        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -266,6 +269,7 @@ class UserWebnovelServiceTest {
         // given
         String query = "고양이";
 
+        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
 
@@ -276,7 +280,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1), pageable, 1));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
         
         // then
         assertEquals(1, results.getContent().size());

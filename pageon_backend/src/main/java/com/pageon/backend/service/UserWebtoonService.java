@@ -2,6 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,17 +84,24 @@ public class UserWebtoonService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebtoonsByKeyword(String keywordName, Pageable pageable) {
-        Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, pageable);
+    public Page<ContentSearchResponse> getWebtoonsByKeyword(String keywordName, String sort, Pageable pageable) {
+
+        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+
+        Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, sortedPageable);
+
 
         return webtoonPage.map(ContentSearchResponse::fromWebtoon);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, Pageable pageable) {
+    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, String sort, Pageable pageable) {
 
-        log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, pageable);
-        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrPenNameContaining(query, pageable);
+        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+
+        log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
+        Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrPenNameContaining(query, sortedPageable);
+
         log.debug("Repository found {} webtoons on this page.", webtoonPage.getNumberOfElements());
 
         log.info("Webtoon search by title/creator successful. Query: [{}]. Found {} total results.",

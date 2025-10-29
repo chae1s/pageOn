@@ -309,7 +309,7 @@ class InterestServiceTest {
     void shouldReturnInterestedContents_forLoggedInUser() {
         // given
         Long userId = 1L;
-
+        String sort = "update";
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         User user = User.builder()
@@ -339,7 +339,7 @@ class InterestServiceTest {
         when(interestRepository.findAllByUser_Id(eq(userId), eq(pageable))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, pageable);
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, sort, pageable);
 
         // then
         assertEquals(2, result.getContent().size());
@@ -354,6 +354,7 @@ class InterestServiceTest {
         // given
         Long userId = 1L;
 
+        String sort = "update";
         Pageable pageable = PageRequest.of(0, 10);
 
         User user = User.builder()
@@ -379,7 +380,7 @@ class InterestServiceTest {
         when(interestRepository.findAllByUser_IdAndContentType(userId, ContentType.WEBNOVEL, pageable)).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, ContentType.WEBNOVEL, pageable);
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, ContentType.WEBNOVEL, sort, pageable);
 
         // then
         assertEquals(1, result.getContent().size());
@@ -392,6 +393,7 @@ class InterestServiceTest {
     void shouldReturnNull_whenNoInterestsExist() {
         // given
         Long userId = 1L;
+        String sort = "update";
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -410,7 +412,7 @@ class InterestServiceTest {
         when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(Page.empty(pageable));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, pageable);
+        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, sort, pageable);
 
         // then
         assertNull(result);

@@ -20,13 +20,14 @@ public class SearchService {
     private final UserWebnovelService userWebnovelService;
     private final UserWebtoonService userWebtoonService;
 
-    public Page<ContentSearchResponse> getContentsByTitleOrCreator(String query, Pageable pageable) {
 
-        log.debug("Entering 'searchIntegrated'. Query: [{}], Sort: [], Page: {}",
-                query, pageable.getPageNumber());
-        Page<ContentSearchResponse> webnovelPage = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+    public Page<ContentSearchResponse> getContentsByTitleOrCreator(String query, String sort, Pageable pageable) {
 
-        Page<ContentSearchResponse> webtoonPage = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+        log.debug("Entering 'searchIntegrated'. Query: [{}], Sort: [{}], Page: {}",
+                query, sort, pageable.getPageNumber());
+        Page<ContentSearchResponse> webnovelPage = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
+
+        Page<ContentSearchResponse> webtoonPage = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
 
         log.debug("Fetched {} webtoons (Total: {}) and {} webnovels (Total: {}).",
                 webtoonPage.getNumberOfElements(), webtoonPage.getTotalElements(),
@@ -42,8 +43,8 @@ public class SearchService {
 
         long totalElements = webnovelPage.getTotalElements() + webtoonPage.getTotalElements();
 
-        log.info("[IntegratedSearch] 통합 검색 성공. Query: [{}], Sort: []. Found {} total results.",
-                query, totalElements);
+        log.info("[IntegratedSearch] 통합 검색 성공. Query: [{}], Sort: [{}]. Found {} total results.",
+                query, sort, totalElements);
         return new PageImpl<>(finalList, pageable, totalElements);
     }
 }

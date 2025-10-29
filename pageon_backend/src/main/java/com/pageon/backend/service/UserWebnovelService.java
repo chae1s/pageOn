@@ -2,6 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,17 +88,22 @@ public class UserWebnovelService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebnovelsByKeyword(String keywordName, Pageable pageable) {
-        Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, pageable);
+    public Page<ContentSearchResponse> getWebnovelsByKeyword(String keywordName, String sort, Pageable pageable) {
+        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+
+        Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, sortedPageable);
 
         return webnovelPage.map(ContentSearchResponse::fromWebnovel);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, Pageable pageable) {
+    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, String sort, Pageable pageable) {
 
-        log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, pageable);
-        Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, pageable);
+        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+
+        log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
+        Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, sortedPageable);
+
         log.debug("Repository found {} webnovels on this page.", webnovelPage.getNumberOfElements());
 
         log.info("Webnovel search by title/creator successful. Query: [{}]. Found {} total results.",
