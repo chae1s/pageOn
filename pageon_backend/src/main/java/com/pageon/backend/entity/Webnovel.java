@@ -53,6 +53,10 @@ public class Webnovel {
     @Builder.Default
     private boolean deleted = false;
 
+    @Builder.Default
+    private Double totalAverageRating = 0.0;
+    @Builder.Default
+    private Long totalRatingCount = 0L;
     public Webnovel(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
         this.id = id;
         this.title = title;

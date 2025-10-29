@@ -9,10 +9,10 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Builder
 @DynamicUpdate
-@Table(name = "ratings")
+@Table(name = "webtoon_episode_ratings")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Rating {
+public class WebtoonEpisodeRating {
     // 평점 테이블
 
     @Id
@@ -23,9 +23,10 @@ public class Rating {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private ContentType contentType;     // 댓글달린 작품이 웹툰인지 웹소설인지 표시
-    private Integer contentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "webtoonEpisode_id")
+    private WebtoonEpisode webtoonEpisode;
 
+    @Column(nullable = false)
     private Integer score;
 }
