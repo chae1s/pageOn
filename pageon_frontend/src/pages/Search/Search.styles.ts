@@ -24,6 +24,34 @@ export const ContentTypeBtn = styled.button<{$active: boolean}>`
     border-bottom: 1px solid ${({$active}) => ($active? "rgba(0, 0, 0, .8)":"rgba(0, 0, 0, .1)")}
 `
 
+export const ContentTypeListInSearch = styled.ul`
+    font-size: 15px;
+    font-weight: 500px;
+    display: flex;
+    flex: 1 0 auto;
+    position: relative;
+    height: 48px;
+`
+
+export const ContentTypeItemInSearch = styled.li`
+    width: 53px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+`
+
+export const ContentTypeBtnInSearch = styled.button<{$active: boolean}>`
+    color: ${({$active}) => ($active? "rgba(0, 0, 0, .8)":"rgba(0, 0, 0, .3)")};
+    font-weight: ${({$active}) => ($active? "700" : "500")};
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid ${({$active}) => ($active? "rgba(0, 0, 0, .8)":"none")}
+`
+
 export const KeywordTable = styled.ul`
 
 `

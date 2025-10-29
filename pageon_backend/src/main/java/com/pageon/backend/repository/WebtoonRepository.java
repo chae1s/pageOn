@@ -2,6 +2,7 @@ package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +30,9 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     @Query("SELECT w FROM Webtoon w JOIN w.keywords k WHERE k.name = :keywordName")
     Page<Webtoon> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
+
+    @Query("SELECT w FROM Webtoon w WHERE"
+            + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
+            + "AND w.deleted = false")
+    Page<Webtoon> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 }

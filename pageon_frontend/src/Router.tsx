@@ -28,6 +28,7 @@ import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage ";
 import WebnovelViewer from "./pages/Contents/WebnovelViewer";
 import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 import KeywordSearch from "./pages/Search/KeywordSearch";
+import TitleCreatorSearch from "./pages/Search/TitleCreatorSearch";
 
 function Router() {
     const location = useLocation();
@@ -51,6 +52,7 @@ function Router() {
             <Route path="/webnovels/:contentId" element={<WebnovelDetailPage />} />
             <Route path="/webtoons/:contentId" element={<WebtoonDetailPage />} />
             <Route path="/search/keyword" element={<KeywordSearch/>} />
+            <Route path="/search" element={<TitleCreatorSearch />} />
             <Route element={<PublicOnlyRoute/>} >
                 <Route path="/users/login" element={<Login />} />
                 <Route path="/users/signup" element={<Signup />} />

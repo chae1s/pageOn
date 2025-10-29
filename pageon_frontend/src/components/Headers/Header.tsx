@@ -1,13 +1,31 @@
 import React, {useState, useEffect} from "react";
-import { Link, NavLink} from "react-router-dom";
+import { Link, NavLink, useNavigate} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import * as H from "../Styles/Header.styles";
 import logo from '../../assets/icon.png'
+import api from "../../api/axiosInstance";
 
 
 function Header() {
     const {isAuthenticated} = useAuth();
+    const [query, setQuery] = useState("");
+    const navigate = useNavigate();
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value);
+    }
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const params = new URLSearchParams();
+        params.append("type", "all");
+        params.append("q", query);
+        params.append("sort", "popular");
+        params.append("page", "0");
+
+        navigate(`/search?${params.toString()}`)
+    }
     
     return (
         <H.HeaderContainer>
@@ -16,7 +34,7 @@ function Header() {
                     <H.HeaderLogo to={"/"}>
                         <img src={ logo }/>
                     </H.HeaderLogo>
-                    <H.BookSearchForm>
+                    <H.BookSearchForm onSubmit={handleSubmit}>
                         <H.BookSearchInputWrap>
                             <H.BookSearchInputItem>
                                 <H.BookSearchLabel>
@@ -25,7 +43,7 @@ function Header() {
                                         <line x1="14.2" y1="14.2" x2="20" y2="20" stroke="#888" strokeWidth="2" strokeLinecap="round"/>
                                     </H.BookSearchIcon>
                                     <H.BookSearchText>인스턴트 검색</H.BookSearchText>
-                                    <H.BookSearchInput type="text" maxLength={64} placeholder="제목, 작가를 입력하세요."/>
+                                    <H.BookSearchInput type="text" maxLength={64} placeholder="제목, 작가를 입력하세요." onChange={handleChange}/>
                                 </H.BookSearchLabel>
                             </H.BookSearchInputItem>
                         </H.BookSearchInputWrap>

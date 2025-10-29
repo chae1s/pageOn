@@ -13,6 +13,7 @@ function InterestContents() {
     const [searchParams, setSearchParams] = useSearchParams();
     const sort = searchParams.get("sort") || "update";
     const type = searchParams.get("type") || "all";
+    const page = parseInt(searchParams.get("page") || "0", 10);
 
     const [interestContents, setInterestContents] = useState<SimpleContent[]>([]);
 
@@ -20,7 +21,8 @@ function InterestContents() {
         async function fetchData() {
 
             const params: any = {
-                
+                sort: sort,
+                page: page,
             };
     
             // 2. type 파라미터를 추가
@@ -44,19 +46,11 @@ function InterestContents() {
         fetchData();
     }, [type, sort]);
 
-    const handleTypeClick = (newType: string) => {
+    const handleParamClick = (newKey: string, newValue: string) => {
         const newParams = new URLSearchParams(searchParams);
 
-        newParams.set("type", newType);
-
-        setSearchParams(newParams);
-    }
-
-    const handleSortClick = (newSort: string) => {
-        const newParams = new URLSearchParams(searchParams);
-
-        newParams.set("sort", newSort);
-
+        newParams.set(newKey, newValue);
+        newParams.set("page", "0");
         setSearchParams(newParams);
     }
 
@@ -69,9 +63,9 @@ function InterestContents() {
                     <M.MypageBooksSortBtnWrapper>
                         <M.mypageBooksSortBtnList>
                              <M.MypageBooksSelectType>
-                                <SortBtn $active={type === "all"} onClick={()=>handleTypeClick('all')}>전체</SortBtn>
-                                <SortBtn $active={type === "webtoons"} onClick={()=>handleTypeClick('webtoons')}>웹툰</SortBtn>
-                                <SortBtn $active={type === "webnovels"} onClick={()=>handleTypeClick('webnovels')}>웹소설</SortBtn>
+                                <SortBtn $active={type === "all"} onClick={() => handleParamClick("type", "all")}>전체</SortBtn>
+                                <SortBtn $active={type === "webtoons"} onClick={() => handleParamClick("type", "webtoons")}>웹툰</SortBtn>
+                                <SortBtn $active={type === "webnovels"} onClick={() => handleParamClick("type", "webnovels")}>웹소설</SortBtn>
                             </M.MypageBooksSelectType>
                             <M.MypageBooksSearchSelectSort>
                                 <M.MypageBooksSearchGroup>
@@ -87,8 +81,8 @@ function InterestContents() {
                                     </M.MypageBooksSearchBtn>
                                 </M.MypageBooksSearchGroup>
                                 <M.MypageBooksSortGroup>
-                                    <SortBtn $active={sort === "updated"} onClick={()=>handleSortClick('updated')}>업데이트순</SortBtn>
-                                    <SortBtn $active={sort === "recent"} onClick={()=>handleSortClick('recent')}>최근순</SortBtn>
+                                <SortBtn $active={sort === "update"} onClick={() => handleParamClick("sort", "update")}>업데이트순</SortBtn>
+                                <SortBtn $active={sort === "last_read"} onClick={() => handleParamClick("sort", "last_read")}>최근순</SortBtn>
                                 </M.MypageBooksSortGroup>
                             </M.MypageBooksSearchSelectSort>
                         </M.mypageBooksSortBtnList>

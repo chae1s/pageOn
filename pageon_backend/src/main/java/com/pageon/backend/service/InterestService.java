@@ -1,6 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.User;
@@ -73,14 +74,16 @@ public class InterestService {
 
     }
 
-    @Transactional
-    public Page<ContentSimpleResponse> getInterestedContents(Long userId, ContentType contentType, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<ContentSimpleResponse> getInterestedContents(Long userId, ContentType contentType, String sort, Pageable pageable) {
         Page<Interest> interests;
 
+        Pageable sortedPageable = PageableUtil.createMyPagePageable(pageable, sort);
+
         if (contentType != null) {
-            interests = interestRepository.findAllByUser_IdAndContentType(userId, contentType, pageable);
+            interests = interestRepository.findAllByUser_IdAndContentType(userId, contentType, sortedPageable);
         } else {
-            interests = interestRepository.findAllByUser_Id(userId, pageable);
+            interests = interestRepository.findAllByUser_Id(userId, sortedPageable);
         }
 
         List<Interest> interestsOnThisPage = interests.getContent();

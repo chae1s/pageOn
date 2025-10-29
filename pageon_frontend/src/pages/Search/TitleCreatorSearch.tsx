@@ -2,32 +2,43 @@ import React, {useEffect, useState} from "react";
 import { MainContainer, NoSidebarMain, SortBtn } from "../../styles/Layout.styles";
 import { useSearchParams } from "react-router-dom";
 import api from "../../api/axiosInstance";
-import { Category } from "../../types/Keyword";
 import * as S from "./Search.styles"
 import { SearchContent } from "../../types/Content";
 import SearchContentList from "../../components/Contents/SearchContentList";
 import { Pagination } from "../../types/Page";
 
-function KeywordSearch() {
-
-    const [searchParams, setSearchParams] = useSearchParams();
-    const categoryMap: Record<string, string> = {
-        genre: "장르",
-        theme: "소재", 
-        setting: "배경",
-        mood: "분위기", 
-        others: "형식/기타",
-    }
-
-    const [categories, setCategories] = useState<Category[]>([]);
+function TitleCreatorSearch() {
 
     const [pageData, setPageData] = useState<Pagination<SearchContent> | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    const type = searchParams.get("type") || "webtoons";
-    const q = searchParams.get("q") || "SF";
-    const sort = searchParams.get("sort") || "popular"
-    const page = parseInt(searchParams.get("page") || "0", 10);
+    const type = searchParams.get("type") || "all";
+    const q = searchParams.get("q") || "";
+    const sort = searchParams.get("sort") || "popular";
+    const page = parseInt(searchParams.get("page") || "0", 10) ;
 
+    useEffect(() => {
+        async function fetchSearchResults() {
+            try {
+                const response = await api.get("/search", {
+                    params: {
+                        type: type,
+                        q: q,
+                        sort: sort,
+                        page: page,
+                    }
+                });
+
+                console.log(response.data);
+                setPageData(response.data);
+
+            } catch (error) {
+                console.log("제목 및 작가 검색 결과 조회 실패: ", error);
+            }
+        }
+
+        fetchSearchResults();
+    }, [type, q, sort, page])
     const NextIcon = () => (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M8 5l4 5-4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -39,49 +50,6 @@ function KeywordSearch() {
             <path d="M12 5l-4 5 4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
     )
-
-    useEffect(() => {
-        async function fetchCategoryKeywords() {
-            try {
-
-                const response = await api.get("/keywords");
-                
-                setCategories(response.data);
-                console.log(categories);
-            } catch (error) {
-                console.error("카테고리 별 키워드 조회 실패: ", error);
-            }
-        }
-
-        fetchCategoryKeywords();
-        
-    }, []);
-
-    useEffect(() => {
-        async function fetchSearchResults() {
-            try {
-                const response = await api.get("/search/keywords", {
-                    params: {
-                        type: type,
-                        q: q,
-                        sort: sort,
-                        page: page,
-                    }
-                });
-                
-                console.log(response.data)
-                setPageData(response.data)
-
-            } catch (error) {
-                console.error("키워드 검색 결과 조회 실패: ", error);
-            }
-        }
-
-        if (q) {
-            fetchSearchResults();
-        }
-        
-    }, [type, q, sort, page]); 
 
     const handleParamClick = (newKey: string, newValue: string) => {
         const newParams = new URLSearchParams(searchParams);
@@ -127,36 +95,23 @@ function KeywordSearch() {
     return (
         <MainContainer>
             <NoSidebarMain>
-                <S.ContentTypeList>
-                    <S.ContentTypeItem>
-                        <S.ContentTypeBtn $active={type === "webtoons"} onClick={() => handleParamClick("type", "webtoons")}>
+                <S.ContentTypeListInSearch>
+                    <S.ContentTypeItemInSearch>
+                        <S.ContentTypeBtnInSearch $active={type === "all"} onClick={() => handleParamClick("type", "all")}>
+                            전체
+                        </S.ContentTypeBtnInSearch>
+                    </S.ContentTypeItemInSearch>
+                    <S.ContentTypeItemInSearch>
+                        <S.ContentTypeBtnInSearch $active={type === "webtoons"} onClick={() => handleParamClick("type", "webtoons")}>
                             웹툰
-                        </S.ContentTypeBtn>
-                    </S.ContentTypeItem>
-                    <S.ContentTypeItem>
-                        <S.ContentTypeBtn $active={type === "webnovels"} onClick={() => handleParamClick("type", "webnovels")}>
+                        </S.ContentTypeBtnInSearch>
+                    </S.ContentTypeItemInSearch>
+                    <S.ContentTypeItemInSearch>
+                        <S.ContentTypeBtnInSearch $active={type === "webnovels"} onClick={() => handleParamClick("type", "webnovels")}>
                             웹소설
-                        </S.ContentTypeBtn>
-                    </S.ContentTypeItem>
-                </S.ContentTypeList>
-                <S.KeywordTable>
-                    {categories.map((category) => (
-                        <S.CategoryWithKeywords key={category.id}>
-                            <S.CategoryName>{categoryMap[category.name]}</S.CategoryName>
-                            <S.KeywordList>
-                                <S.KeywordItemWrap>
-                                    {category.keywords.map((keyword) => (
-                                        <S.KeywordItem key={keyword.id}>
-                                            <S.KeywordBtn $active={q === `${keyword.name}`} onClick={() => handleParamClick("q", `${keyword.name}`)}>
-                                                {keyword.name}
-                                            </S.KeywordBtn>
-                                        </S.KeywordItem>
-                                    ))}
-                                </S.KeywordItemWrap>
-                            </S.KeywordList>
-                        </S.CategoryWithKeywords>
-                    ))}
-                </S.KeywordTable>
+                        </S.ContentTypeBtnInSearch>
+                    </S.ContentTypeItemInSearch>
+                </S.ContentTypeListInSearch>
                 <S.SelectSortSection>
                     <S.SelectSortBtnGroup>
                         <SortBtn $active={sort === "latest"} onClick={() => handleParamClick("sort", "latest")}>최신순</SortBtn>
@@ -204,11 +159,9 @@ function KeywordSearch() {
                         </S.PaginationIconWrapper>
                     </S.PaginationContainer>
                 )}
-                
-                
             </NoSidebarMain>
         </MainContainer>
     )
 }
 
-export default KeywordSearch;
+export default TitleCreatorSearch;
