@@ -15,6 +15,8 @@ function WebtoonViewer() {
         id: 0,
         title: "",
         episodeNum: 0,
+        averageRating: 0.0,
+        ratingCount: 0,
         images: [],
         prevEpisodeId: null,
         nextEpisodeId: null
@@ -24,22 +26,28 @@ function WebtoonViewer() {
     const lastScrollY = useRef(0);
 
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData(preserveScroll: boolean = false) {
             if (!episodeId) return;
 
+            const savedY = window.scrollY;
             try {
-                const response = await axios.get(`/api/episodes/webtoon/${episodeId}`);
+                const response = await api.get(`/episodes/webtoon/${episodeId}`);
                 setEpisodeData(response.data);
 
-                console.log(response.data);
-                window.scrollTo(0, 0);
+                if (preserveScroll) {
+                    window.scrollTo(0, savedY);
+                } else {
+                    window.scrollTo(0, 0);
+                }
             } catch (err) {
                 alert("에피소드 정보를 불러오지 못했습니다.");
                 return;
             }
         }
 
-        fetchData();
+        // 에피소드 이동 시 선택 점수 초기화
+        setSelectedScore(0);
+        fetchData(false);
     }, [episodeId]);
 
     useEffect(() => {
@@ -90,16 +98,23 @@ function WebtoonViewer() {
     };
 
     const handleConfirmRating = async () => {
+        const savedY = window.scrollY;
         try {
             await api.post("/rating", {
                 contentType: "WEBTOON",
                 episodeId: episodeData.id,
                 score: selectedScore
             });
+            // 최신 평점 반영 및 스크롤 유지
+            if (episodeId) {
+                const response = await api.get(`/episodes/webtoon/${episodeId}`);
+                setEpisodeData(response.data);
+            }
         } catch (error) {
             console.error("평점 등록 실패: ", error);
         }
         setIsRatingOpen(false);
+        window.scrollTo(0, savedY);
     };
 
     const [comments] = useState([
@@ -168,8 +183,8 @@ function WebtoonViewer() {
             <S.ViewerRatingSection>
                 <S.ViewerRatingScore>
                     <S.RatingFullStarIcon src={fullStarIcon} />
-                    <S.ViewerAverageRatingScore>10.0</S.ViewerAverageRatingScore>
-                    <S.ViewerRatingCount>(100)</S.ViewerRatingCount>
+                    <S.ViewerAverageRatingScore>{Number(episodeData.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
+                    <S.ViewerRatingCount>{episodeData.ratingCount ?? 0}</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
                 <S.ViewerRatingCreateBtn onClick={() => setIsRatingOpen(true)}>
                     별점주기

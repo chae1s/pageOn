@@ -31,8 +31,8 @@ export interface ContentDetail {
     keywords: UserKeywordResponse[];
     episodes: EpisodeSummary[];
     serialDay: string;
-    rating: number;
-    ratingCount: number;
+    totalAverageRating: number;
+    totalRatingCount: number;
     status: ContentStatus;
     viewCount: number;
     contentType: string;
@@ -47,7 +47,7 @@ export interface SearchContent {
     author: string;
     keywords: UserKeywordResponse[];
     episodeCount: number;
-    rating: number;
-    ratingCount: number;
+    totalAverageRating: number;
+    totalRatingCount: number;
     contentType: string;
 }

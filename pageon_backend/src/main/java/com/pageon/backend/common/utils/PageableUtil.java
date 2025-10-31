@@ -9,7 +9,7 @@ public class PageableUtil {
     public static Pageable createPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
             case "latest" -> Sort.by(Sort.Order.asc("rating"));
-            case "rating" -> Sort.by(Sort.Order.asc("title"));
+            case "rating" -> Sort.by(Sort.Order.desc("totalAverageRating"));
             default -> Sort.by(Sort.Order.asc("viewCount"));
         };
 

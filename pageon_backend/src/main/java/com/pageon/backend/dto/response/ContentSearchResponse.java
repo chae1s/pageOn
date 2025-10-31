@@ -20,6 +20,8 @@ public class ContentSearchResponse {
     private String author;
     private String cover;
     private String description;
+    private Double totalAverageRating;
+    private Long totalRatingCount;
     private List<KeywordResponse> keywords;
     private String contentType;
 
@@ -31,6 +33,8 @@ public class ContentSearchResponse {
                 .author(webnovel.getCreator().getPenName())
                 .cover(webnovel.getCover())
                 .description(webnovel.getDescription())
+                .totalAverageRating(webnovel.getTotalAverageRating())
+                .totalRatingCount(webnovel.getTotalRatingCount())
                 .keywords(webnovel.getKeywords().stream().map(KeywordResponse::fromEntity).collect(Collectors.toList()))
                 .contentType("webnovels")
                 .build();
@@ -44,6 +48,8 @@ public class ContentSearchResponse {
                 .author(webtoon.getCreator().getPenName())
                 .cover(webtoon.getCover())
                 .description(webtoon.getDescription())
+                .totalAverageRating(webtoon.getTotalAverageRating())
+                .totalRatingCount(webtoon.getTotalRatingCount())
                 .keywords(webtoon.getKeywords().stream().map(KeywordResponse::fromEntity).collect(Collectors.toList()))
                 .contentType("webtoons")
                 .build();

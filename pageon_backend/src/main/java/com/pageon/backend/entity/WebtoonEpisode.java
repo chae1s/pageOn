@@ -51,10 +51,10 @@ public class WebtoonEpisode extends BaseTimeEntity {
         image.addEpisode(this);
     }
 
-    public void addRating(int score) {
-        this.ratingCount = this.ratingCount + 1;
-        this.averageRating = (this.averageRating + score) / this.ratingCount;
-
+    public void addRating(Integer score) {
+        double totalScore = this.averageRating * this.ratingCount;
+        this.ratingCount++;
+        this.averageRating = (totalScore + score) / this.ratingCount;
     }
 
 }

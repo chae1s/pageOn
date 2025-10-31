@@ -139,7 +139,7 @@ class WebtoonEpisodeServiceTest {
         List<WebtoonEpisode> episodes = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             episodes.add(
-                    new WebtoonEpisode((long) i, webtoon, i, "웹툰 제목 " + i, images, 300, 500)
+                    new WebtoonEpisode((long) i, webtoon, i, "웹툰 제목 " + i, images, null, 300, 500, 10.0, 1L)
             );
         }
 

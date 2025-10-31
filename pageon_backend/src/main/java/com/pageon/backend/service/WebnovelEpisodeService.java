@@ -7,11 +7,13 @@ import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.WebnovelEpisodeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WebnovelEpisodeService {
@@ -39,11 +41,13 @@ public class WebnovelEpisodeService {
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );
 
+        log.info("episode title {}, episode AverageRating {}", episode.getEpisodeTitle(), episode.getAverageRating());
+
         Long prevEpisodeId = webnovelEpisodeRepository.findPrevEpisodeId(episode.getWebnovel().getId(), episode.getEpisodeNum());
         Long nextEpisodeId = webnovelEpisodeRepository.findNextEpisodeId(episode.getWebnovel().getId(), episode.getEpisodeNum());
 
         return WebnovelEpisodeDetailResponse.fromEntity(
-                episode.getId(), episode.getWebnovel().getTitle(), episode.getEpisodeNum(), episode.getEpisodeTitle(), episode.getContent(), prevEpisodeId, nextEpisodeId
+                episode, episode.getWebnovel().getTitle(), prevEpisodeId, nextEpisodeId
         );
     }
 }

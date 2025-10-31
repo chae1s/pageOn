@@ -126,6 +126,11 @@ export const ContentRatingContainer = styled.div`
     margin-bottom: 10px;
 `
 
+export const ContentRatingStarIcon = styled.img`
+    width: 17px;
+    height: 17px;
+`
+
 export const ContentRatingScore = styled.div`
     font-size: 16px;
     font-weight: 600;

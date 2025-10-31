@@ -92,8 +92,9 @@ public class Webnovel {
     }
 
     public void addRating(Integer score) {
-        this.totalRatingCount = this.totalRatingCount + 1;
-        this.totalAverageRating = (this.totalAverageRating + score) / totalRatingCount;
+        double totalScore = this.totalAverageRating * this.totalRatingCount;
+        this.totalRatingCount++;
+        this.totalAverageRating = (totalScore + score) / this.totalRatingCount;
     }
 
 }

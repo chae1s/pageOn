@@ -14,6 +14,8 @@ public class WebtoonEpisodeDetailResponse {
     private Long id;
     private String title;
     private Integer episodeNum;
+    private Double averageRating;
+    private Long ratingCount;
     private List<WebtoonImagesResponse> images;
     private Long prevEpisodeId;
     private Long nextEpisodeId;
@@ -23,6 +25,8 @@ public class WebtoonEpisodeDetailResponse {
                 episode.getId(),
                 episode.getEpisodeTitle(),
                 episode.getEpisodeNum(),
+                episode.getAverageRating(),
+                episode.getRatingCount(),
                 images,
                 prevEpisodeId,
                 nextEpisodeId

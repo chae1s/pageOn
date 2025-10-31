@@ -1,5 +1,6 @@
 package com.pageon.backend.dto.response;
 
+import com.pageon.backend.entity.WebnovelEpisode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,16 +14,20 @@ public class WebnovelEpisodeDetailResponse {
     private Integer episodeNum;
     private String episodeTitle;
     private String content;
+    private Double averageRating;
+    private Long ratingCount;
     private Long prevEpisodeId;
     private Long nextEpisodeId;
 
-    public static WebnovelEpisodeDetailResponse fromEntity(Long id, String title, Integer episodeNum, String episodeTitle, String content, Long prevEpisodeId, Long nextEpisodeId) {
+    public static WebnovelEpisodeDetailResponse fromEntity(WebnovelEpisode webnovelEpisode, String title, Long prevEpisodeId, Long nextEpisodeId) {
         return new WebnovelEpisodeDetailResponse(
-                id,
+                webnovelEpisode.getId(),
                 title,
-                episodeNum,
-                episodeTitle,
-                content,
+                webnovelEpisode.getEpisodeNum(),
+                webnovelEpisode.getEpisodeTitle(),
+                webnovelEpisode.getContent(),
+                webnovelEpisode.getAverageRating(),
+                webnovelEpisode.getRatingCount(),
                 prevEpisodeId,
                 nextEpisodeId
         );
