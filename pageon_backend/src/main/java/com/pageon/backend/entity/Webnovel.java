@@ -57,6 +57,7 @@ public class Webnovel {
     private Double totalAverageRating = 0.0;
     @Builder.Default
     private Long totalRatingCount = 0L;
+
     public Webnovel(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
         this.id = id;
         this.title = title;
@@ -88,6 +89,11 @@ public class Webnovel {
 
     public void updateDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public void addRating(Integer score) {
+        this.totalRatingCount = this.totalRatingCount + 1;
+        this.totalAverageRating = (this.totalAverageRating + score) / totalRatingCount;
     }
 
 }

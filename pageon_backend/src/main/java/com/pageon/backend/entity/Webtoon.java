@@ -91,5 +91,10 @@ public class Webtoon {
         this.deleted = deleted;
     }
 
+    public void addRating(Integer score) {
+        this.totalRatingCount = this.totalRatingCount + 1;
+        this.totalAverageRating = (this.totalAverageRating + score) / totalRatingCount;
+    }
+
 
 }

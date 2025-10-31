@@ -45,4 +45,9 @@ public class WebnovelEpisode extends BaseTimeEntity {
     @Builder.Default
     private Long ratingCount = 0L;
 
+    public void addRating(Integer score) {
+        this.ratingCount = this.ratingCount + 1;
+        this.averageRating = (this.averageRating + score) / this.ratingCount;
+    }
+
 }

@@ -59,7 +59,9 @@ public enum ErrorCode {
     WEBTOON_NOT_FOUND("존재하지 않는 웹툰입니다.", HttpStatus.NOT_FOUND),
     EPISODE_NOT_FOUND("해당 에피소드를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CONTENT_TYPE("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", HttpStatus.BAD_REQUEST),
-    INTEREST_NOT_FOUND("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND)
+    INTEREST_NOT_FOUND("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    WEBNOVEL_EPISODE_NOT_FOUND("존재하지 않는 웹소설 에피소드입니다.", HttpStatus.NOT_FOUND),
+    WEBTOON_EPISODE_NOT_FOUND("존재하지 않는 웹툰 에피소드입니다.", HttpStatus.NOT_FOUND),
 
     ;
 
