@@ -20,7 +20,8 @@ function WebnovelViewer() {
         averageRating: 0.0,
         ratingCount: 0,
         prevEpisodeId: null,
-        nextEpisodeId: null
+        nextEpisodeId: null,
+        userScore: 0
     });
 
 
@@ -34,8 +35,11 @@ function WebnovelViewer() {
 
             const savedY = window.scrollY;
             try {
-                const response = await axios.get(`/api/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+
+                console.log(response.data);
                 setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
 
                 if (preserveScroll) {
                     window.scrollTo(0, savedY);
@@ -104,7 +108,7 @@ function WebnovelViewer() {
 
     
 
-    // 버튼을 클릭했을 때 발생
+    // 새 평점 등록
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
         try {
@@ -120,6 +124,26 @@ function WebnovelViewer() {
             }
         } catch (error) {
             console.error("평점 등록 실패: ", error);
+        }
+        setIsRatingOpen(false);
+        window.scrollTo(0, savedY);
+    };
+
+    // 기존 평점 수정
+    const handleUpdateRating = async () => {
+        const savedY = window.scrollY;
+        try {
+            await api.patch("/rating", {
+                contentType: "WEBNOVEL",
+                episodeId: episodeData.id,
+                score: selectedScore
+            });
+            if (episodeId) {
+                const response = await axios.get(`/api/episodes/webnovel/${episodeId}`);
+                setEpisodeData(response.data);
+            }
+        } catch (error) {
+            console.error("평점 수정 실패: ", error);
         }
         setIsRatingOpen(false);
         window.scrollTo(0, savedY);
@@ -196,7 +220,7 @@ function WebnovelViewer() {
                     <S.ViewerAverageRatingScore>{Number(episodeData.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
                     <S.ViewerRatingCount>({episodeData.ratingCount ?? 0})</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
-                <S.ViewerRatingCreateBtn onClick={() => setIsRatingOpen(true)}>
+                <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore(episodeData.userScore && episodeData.userScore !== 0 ? episodeData.userScore : 0); setIsRatingOpen(true); }}>
                     별점주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
@@ -217,7 +241,9 @@ function WebnovelViewer() {
                         <S.RatingScoreText>{getDisplayScore()}</S.RatingScoreText>
                         <S.RatingModalActions>
                             <S.RatingCancelBtn onClick={() => { setSelectedScore(0); setIsRatingOpen(false); }}>취소</S.RatingCancelBtn>
-                            <S.RatingConfirmBtn onClick={handleConfirmRating} disabled={selectedScore === null}>확인</S.RatingConfirmBtn>
+                            <S.RatingConfirmBtn onClick={episodeData.userScore && episodeData.userScore !== 0 ? handleUpdateRating : handleConfirmRating} disabled={selectedScore === null}>
+                                {episodeData.userScore && episodeData.userScore !== 0 ? "수정" : "확인"}
+                            </S.RatingConfirmBtn>
                         </S.RatingModalActions>
                     </S.RatingModal>
                 </S.RatingModalOverlay>

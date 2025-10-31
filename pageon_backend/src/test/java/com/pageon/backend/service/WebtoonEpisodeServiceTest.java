@@ -91,7 +91,7 @@ class WebtoonEpisodeServiceTest {
         when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.of(webtoonEpisode));
 
         //when
-        WebtoonEpisodeDetailResponse result = webtoonEpisodeService.getWebtoonEpisodeById(1L);
+        WebtoonEpisodeDetailResponse result = webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L);
 
 
         // then
@@ -108,7 +108,7 @@ class WebtoonEpisodeServiceTest {
         when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.empty());
 
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> webtoonEpisodeService.getWebtoonEpisodeById(1L));
+        CustomException exception = assertThrows(CustomException.class, () -> webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L));
 
         // then
         assertEquals("해당 에피소드를 찾을 수 없습니다.", exception.getErrorMessage());

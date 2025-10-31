@@ -19,7 +19,8 @@ function WebtoonViewer() {
         ratingCount: 0,
         images: [],
         prevEpisodeId: null,
-        nextEpisodeId: null
+        nextEpisodeId: null,
+        userScore: null
     });
 
     const [showTitleSection, setShowTitleSection] = useState(true);
@@ -33,6 +34,7 @@ function WebtoonViewer() {
             try {
                 const response = await api.get(`/episodes/webtoon/${episodeId}`);
                 setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
 
                 if (preserveScroll) {
                     window.scrollTo(0, savedY);
@@ -117,6 +119,25 @@ function WebtoonViewer() {
         window.scrollTo(0, savedY);
     };
 
+    const handleUpdateRating = async () => {
+        const savedY = window.scrollY;
+        try {
+            await api.patch("/rating", {
+                contentType: "WEBTOON",
+                episodeId: episodeData.id,
+                score: selectedScore
+            });
+            if (episodeId) {
+                const response = await api.get(`/episodes/webtoon/${episodeId}`);
+                setEpisodeData(response.data);
+            }
+        } catch (error) {
+            console.error("평점 수정 실패: ", error);
+        }
+        setIsRatingOpen(false);
+        window.scrollTo(0, savedY);
+    };
+
     const [comments] = useState([
         {
           id: 1,
@@ -186,7 +207,7 @@ function WebtoonViewer() {
                     <S.ViewerAverageRatingScore>{Number(episodeData.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
                     <S.ViewerRatingCount>{episodeData.ratingCount ?? 0}</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
-                <S.ViewerRatingCreateBtn onClick={() => setIsRatingOpen(true)}>
+                <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore((episodeData.userScore ?? 0) as number); setIsRatingOpen(true); }}>
                     별점주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
@@ -207,7 +228,9 @@ function WebtoonViewer() {
                         <S.RatingScoreText>{getDisplayScore()}</S.RatingScoreText>
                         <S.RatingModalActions>
                             <S.RatingCancelBtn onClick={() => { setSelectedScore(0); setIsRatingOpen(false); }}>취소</S.RatingCancelBtn>
-                            <S.RatingConfirmBtn onClick={handleConfirmRating} disabled={selectedScore === null}>확인</S.RatingConfirmBtn>
+                            <S.RatingConfirmBtn onClick={(episodeData.userScore !== null && episodeData.userScore !== 0) ? handleUpdateRating : handleConfirmRating} disabled={selectedScore === null}>
+                                {episodeData.userScore !== null && episodeData.userScore !== 0 ? "수정" : "확인"}
+                            </S.RatingConfirmBtn>
                         </S.RatingModalActions>
                     </S.RatingModal>
                 </S.RatingModalOverlay>

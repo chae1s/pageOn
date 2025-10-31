@@ -18,8 +18,9 @@ public class WebnovelEpisodeDetailResponse {
     private Long ratingCount;
     private Long prevEpisodeId;
     private Long nextEpisodeId;
+    private Integer userScore;
 
-    public static WebnovelEpisodeDetailResponse fromEntity(WebnovelEpisode webnovelEpisode, String title, Long prevEpisodeId, Long nextEpisodeId) {
+    public static WebnovelEpisodeDetailResponse fromEntity(WebnovelEpisode webnovelEpisode, String title, Long prevEpisodeId, Long nextEpisodeId, Integer userScore) {
         return new WebnovelEpisodeDetailResponse(
                 webnovelEpisode.getId(),
                 title,
@@ -29,7 +30,8 @@ public class WebnovelEpisodeDetailResponse {
                 webnovelEpisode.getAverageRating(),
                 webnovelEpisode.getRatingCount(),
                 prevEpisodeId,
-                nextEpisodeId
+                nextEpisodeId,
+                userScore
         );
     }
 }

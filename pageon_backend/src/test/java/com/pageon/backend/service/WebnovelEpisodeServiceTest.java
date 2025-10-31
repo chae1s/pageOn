@@ -83,7 +83,7 @@ class WebnovelEpisodeServiceTest {
 
         when(webnovelEpisodeRepository.findById(1L)).thenReturn(Optional.of(webnovelEpisode));
         //when
-        WebnovelEpisodeDetailResponse result = webnovelEpisodeService.getWebnovelEpisodeById(1L);
+        WebnovelEpisodeDetailResponse result = webnovelEpisodeService.getWebnovelEpisodeById(1L, 1L);
 
         // then
         assertEquals(webnovelEpisode.getEpisodeTitle(), result.getEpisodeTitle());
@@ -100,7 +100,7 @@ class WebnovelEpisodeServiceTest {
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            webnovelEpisodeService.getWebnovelEpisodeById(1L);
+            webnovelEpisodeService.getWebnovelEpisodeById(1L, 1L);
         });
 
         // then

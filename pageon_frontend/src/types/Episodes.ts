@@ -19,6 +19,7 @@ export interface WebnovelEpisodeDetail {
     ratingCount: number;
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
+    userScore: number | null;
 }
 
 export interface WebtoonEpisodeDetail {
@@ -30,4 +31,5 @@ export interface WebtoonEpisodeDetail {
     images: WebtoonImagesResponse[];
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
+    userScore: number | null;
 }
