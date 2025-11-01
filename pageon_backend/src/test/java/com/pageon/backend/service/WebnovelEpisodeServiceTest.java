@@ -81,7 +81,7 @@ class WebnovelEpisodeServiceTest {
                 .purchasePrice(100)
                 .build();
 
-        when(webnovelEpisodeRepository.findById(1L)).thenReturn(Optional.of(webnovelEpisode));
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(1L)).thenReturn(Optional.of(webnovelEpisode));
         //when
         WebnovelEpisodeDetailResponse result = webnovelEpisodeService.getWebnovelEpisodeById(1L, 1L);
 
@@ -96,7 +96,7 @@ class WebnovelEpisodeServiceTest {
     @DisplayName("DB에 존재하지 않는 에피소드일 경우 CustomException 발생")
     void getWebnovelEpisodeById_whenInvalidWebnovelEpisodeId_shouldThrowCustomException() {
         // given
-        when(webnovelEpisodeRepository.findById(1L)).thenReturn(Optional.empty());
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {

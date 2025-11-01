@@ -76,7 +76,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
         ArgumentCaptor<WebnovelEpisodeRating> ratingCaptor = ArgumentCaptor.forClass(WebnovelEpisodeRating.class);
 
@@ -117,7 +117,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
         ArgumentCaptor<WebtoonEpisodeRating> ratingCaptor = ArgumentCaptor.forClass(WebtoonEpisodeRating.class);
 
@@ -151,7 +151,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.empty());
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -182,7 +182,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.empty());
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -221,7 +221,7 @@ class RatingServiceTest {
 
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, score);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
         ArgumentCaptor<WebtoonEpisodeRating> ratingCaptor = ArgumentCaptor.forClass(WebtoonEpisodeRating.class);
 
@@ -268,7 +268,7 @@ class RatingServiceTest {
 
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
         when(webnovelEpisodeRatingRepository.findScoreByWebnovelEpisodeAndUser(episodeId, userId)).thenReturn(oldScore);
 
@@ -311,7 +311,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
         when(webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(episodeId, userId)).thenReturn(oldScore);
 
@@ -348,7 +348,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
         when(webnovelEpisodeRatingRepository.findByWebnovelEpisodeAndUser(episodeId, userId)).thenReturn(Optional.empty());
 
         //when
@@ -386,7 +386,7 @@ class RatingServiceTest {
         ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
         when(webtoonEpisodeRatingRepository.findByWebtoonEpisodeAndUser(episodeId, userId)).thenReturn(Optional.empty());
 

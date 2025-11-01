@@ -88,7 +88,7 @@ class WebtoonEpisodeServiceTest {
 
         doReturn(webtoonImages).when(webtoonImageService).getWebtoonImages(webtoonEpisode.getId());
 
-        when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(1L)).thenReturn(Optional.of(webtoonEpisode));
 
         //when
         WebtoonEpisodeDetailResponse result = webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L);
@@ -105,7 +105,7 @@ class WebtoonEpisodeServiceTest {
     void getWebtoonEpisodeById_whenInvalidWebtoonEpisodeId_shouldThrowCustomException() {
 
         // given
-        when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.empty());
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L));

@@ -1,5 +1,6 @@
 package com.pageon.backend.repository;
 
+import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.entity.WebtoonEpisode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,9 @@ public interface WebtoonEpisodeRepository extends JpaRepository<WebtoonEpisode, 
 
     List<WebtoonEpisode> findByWebtoonId(Long id);
     Optional<WebtoonEpisode> findById(Long id);
+
+    @Query("SELECT w FROM WebtoonEpisode w JOIN FETCH w.webtoon WHERE w.id = :episodeId")
+    Optional<WebtoonEpisode> findByIdWithWebtoon(@Param("episodeId") Long episodeId);
 
     @Query("""
         SELECT e.id FROM WebtoonEpisode e 

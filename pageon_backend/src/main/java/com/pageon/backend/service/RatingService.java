@@ -30,7 +30,7 @@ public class RatingService {
 
         User user = userRepository.getReferenceById(userId);
 
-        WebtoonEpisode webtoonEpisode = webtoonEpisodeRepository.findById(episodeId).orElseThrow(
+        WebtoonEpisode webtoonEpisode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebtoonEpisode: episodeId = {}", episodeId);
                     return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
@@ -66,7 +66,7 @@ public class RatingService {
 
         User user = userRepository.getReferenceById(userId);
 
-        WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findById(episodeId).orElseThrow(
+        WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
                     return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
@@ -99,10 +99,10 @@ public class RatingService {
         final Integer newScore = contentEpisodeRatingRequest.getScore();
 
         log.info("[START] updateWebnovelRating: userId={}, episodeId={}", userId, episodeId);
-        WebnovelEpisode episode = webnovelEpisodeRepository.findById(episodeId).orElseThrow(
+        WebnovelEpisode episode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
-                    throw new CustomException(ErrorCode.EPISODE_NOT_FOUND);
+                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
                 }
         );
 
@@ -130,10 +130,10 @@ public class RatingService {
         final Integer newScore = contentEpisodeRatingRequest.getScore();
 
         log.info("[START] updateWebtoonRating: userId={}, episodeId={}", userId, episodeId);
-        WebtoonEpisode episode = webtoonEpisodeRepository.findById(episodeId).orElseThrow(
+        WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebtoonEpisode: episodeId = {}", episodeId);
-                    throw new CustomException(ErrorCode.EPISODE_NOT_FOUND);
+                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
                 }
         );
 

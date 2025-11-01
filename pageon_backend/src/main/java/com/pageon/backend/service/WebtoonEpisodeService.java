@@ -37,7 +37,7 @@ public class WebtoonEpisodeService {
 
     @Transactional(readOnly = true)
     public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long userId, Long id) {
-        WebtoonEpisode episode = webtoonEpisodeRepository.findById(id).orElseThrow(
+        WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(id).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );
 
