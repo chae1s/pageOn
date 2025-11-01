@@ -12,5 +12,8 @@ public interface WebtoonEpisodeRatingRepository extends JpaRepository<WebtoonEpi
     @Query("SELECT r.score FROM WebtoonEpisodeRating r WHERE r.webtoonEpisode.id = :episodeId AND r.user.id = :userId")
     Integer findScoreByWebtoonEpisodeAndUser(Long episodeId, Long userId);
 
+    @Query("SELECT r FROM WebtoonEpisodeRating r WHERE r.webtoonEpisode.id = :episodeId And r.user.id = :userId")
+    Optional<WebtoonEpisodeRating> findByWebtoonEpisodeAndUser(Long episodeId, Long userId);
+
 
 }

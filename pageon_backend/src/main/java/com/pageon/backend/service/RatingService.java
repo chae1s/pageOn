@@ -33,7 +33,7 @@ public class RatingService {
         WebtoonEpisode webtoonEpisode = webtoonEpisodeRepository.findById(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebtoonEpisode: episodeId = {}", episodeId);
-                    return new CustomException(ErrorCode.WEBTOON_EPISODE_NOT_FOUND);
+                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
                 }
         );
 
@@ -69,7 +69,7 @@ public class RatingService {
         WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findById(episodeId).orElseThrow(
                 () -> {
                     log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
-                    return new CustomException(ErrorCode.WEBTOON_EPISODE_NOT_FOUND);
+                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
                 }
         );
 
@@ -91,5 +91,67 @@ public class RatingService {
         webnovel.addRating(score);
 
         log.info("[SUCCESS] createWebnovelRating committed: userId={}, episodeId={}", userId, episodeId);
+    }
+
+    @Transactional
+    public void updateWebnovelRating(Long userId, ContentEpisodeRatingRequest contentEpisodeRatingRequest) {
+        final Long episodeId = contentEpisodeRatingRequest.getEpisodeId();
+        final Integer newScore = contentEpisodeRatingRequest.getScore();
+
+        log.info("[START] updateWebnovelRating: userId={}, episodeId={}", userId, episodeId);
+        WebnovelEpisode episode = webnovelEpisodeRepository.findById(episodeId).orElseThrow(
+                () -> {
+                    log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
+                    throw new CustomException(ErrorCode.EPISODE_NOT_FOUND);
+                }
+        );
+
+        WebnovelEpisodeRating webnovelEpisodeRating = webnovelEpisodeRatingRepository.findByWebnovelEpisodeAndUser(episodeId, userId).orElseThrow(
+                () -> new CustomException(ErrorCode.EPISODE_RATING_NOT_FOUND)
+        );
+
+        Integer oldScore = webnovelEpisodeRating.getScore();
+
+        log.info("Found webnovelEpisodeRating old score = {}", oldScore);
+
+        log.info("Updating for WebnovelEpisodeRating: new score = {}", newScore);
+        webnovelEpisodeRating.updateRating(newScore);
+
+        Webnovel webnovel = episode.getWebnovel();
+        log.info("Updating aggregates for WebnovelEpisode and Webnovel: webnovelEpisodeId = {}, webnovelId = {}", episodeId, webnovel.getId());
+        episode.updateRating(oldScore, newScore);
+        webnovel.updateRating(oldScore, newScore);
+    }
+
+
+    @Transactional
+    public void updateWebtoonRating(Long userId, ContentEpisodeRatingRequest contentEpisodeRatingRequest) {
+        final Long episodeId = contentEpisodeRatingRequest.getEpisodeId();
+        final Integer newScore = contentEpisodeRatingRequest.getScore();
+
+        log.info("[START] updateWebtoonRating: userId={}, episodeId={}", userId, episodeId);
+        WebtoonEpisode episode = webtoonEpisodeRepository.findById(episodeId).orElseThrow(
+                () -> {
+                    log.error("Failed to find WebtoonEpisode: episodeId = {}", episodeId);
+                    throw new CustomException(ErrorCode.EPISODE_NOT_FOUND);
+                }
+        );
+
+        WebtoonEpisodeRating webtoonEpisodeRating = webtoonEpisodeRatingRepository.findByWebtoonEpisodeAndUser(episodeId, userId).orElseThrow(
+                () -> new CustomException(ErrorCode.EPISODE_RATING_NOT_FOUND)
+        );
+
+        Integer oldScore = webtoonEpisodeRating.getScore();
+        log.info("Found webtoonEpisodeRating old score = {}", oldScore);
+
+
+        log.info("Updating for WebtoonEpisodeRating: new score = {}", newScore);
+        webtoonEpisodeRating.updateRating(newScore);
+
+        Webtoon webtoon = episode.getWebtoon();
+
+        log.info("Updating aggregates for WebtoonEpisode and Webtoon: webtoonEpisodeId = {}, webtoonId = {}", episodeId, webtoon.getId());
+        episode.updateRating(oldScore, newScore);
+        webtoon.updateRating(oldScore, newScore);
     }
 }

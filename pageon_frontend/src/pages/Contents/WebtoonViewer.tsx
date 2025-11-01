@@ -101,6 +101,12 @@ function WebtoonViewer() {
 
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
         try {
             await api.post("/rating", {
                 contentType: "WEBTOON",
@@ -121,6 +127,12 @@ function WebtoonViewer() {
 
     const handleUpdateRating = async () => {
         const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
         try {
             await api.patch("/rating", {
                 contentType: "WEBTOON",
@@ -130,6 +142,7 @@ function WebtoonViewer() {
             if (episodeId) {
                 const response = await api.get(`/episodes/webtoon/${episodeId}`);
                 setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
             }
         } catch (error) {
             console.error("평점 수정 실패: ", error);

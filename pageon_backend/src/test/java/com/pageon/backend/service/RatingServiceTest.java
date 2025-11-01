@@ -70,7 +70,6 @@ class RatingServiceTest {
                 .build();
 
         Webnovel webnovel = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
-        Webtoon webtoon = Webtoon.builder().id(3L).title("감정을 읽는 소녀").deleted(false).build();
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
 
@@ -160,8 +159,8 @@ class RatingServiceTest {
         });
 
         // then
-        assertEquals("존재하지 않는 웹소설 에피소드입니다.",  exception.getErrorMessage());
-        assertEquals(ErrorCode.WEBNOVEL_EPISODE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("해당 에피소드를 찾을 수 없습니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.EPISODE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
@@ -191,8 +190,8 @@ class RatingServiceTest {
         });
 
         // then
-        assertEquals("존재하지 않는 웹툰 에피소드입니다.",  exception.getErrorMessage());
-        assertEquals(ErrorCode.WEBTOON_EPISODE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("해당 에피소드를 찾을 수 없습니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.EPISODE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
@@ -239,5 +238,169 @@ class RatingServiceTest {
         assertEquals(1, rating.getWebtoonEpisode().getRatingCount());
         
     }
+
+    @Test
+    @DisplayName("이미 등록된 평점이 있을 때 새로운 평점을 입력하면 해당 웹소설 에피소드의 내 평점을 수정한다.")
+    void shouldUpdateWebnovelRating_whenWebnovelEpisodeRatingExist() {
+        // given
+        int oldScore = 10;
+        int newScore = 8;
+        Long userId = 1L;
+        Long episodeId = 10L;
+        double averageRating = 5.0;
+        long ratingCount = 10L;
+
+        Double changeRating = ((averageRating * ratingCount) - oldScore + newScore) / ratingCount;
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .deleted(false)
+                .build();
+        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").totalRatingCount(ratingCount).deleted(false).build();
+
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).averageRating(averageRating).ratingCount(ratingCount).build();
+
+        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
+
+
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+
+        when(webnovelEpisodeRatingRepository.findScoreByWebnovelEpisodeAndUser(episodeId, userId)).thenReturn(oldScore);
+
+
+        //when
+        ratingService.updateWebnovelRating(userId, contentEpisodeRatingRequest);
+
+        // then
+        assertEquals(changeRating, webnovelEpisode.getAverageRating());
+        assertEquals(changeRating, webnovel.getTotalAverageRating());
+
+
+    }
+
+    @Test
+    @DisplayName("이미 등록된 평점이 있을 때 새로운 평점을 입력하면 해당 웹툰 에피소드의 내 평점을 수정한다.")
+    void shouldUpdateWebtoonRating_whenWebtoonEpisodeRatingExist() {
+        // given
+        int oldScore = 10;
+        int newScore = 8;
+        Long userId = 1L;
+        Long episodeId = 10L;
+        double averageRating = 5.0;
+        long ratingCount = 10L;
+
+        Double changeRating = ((averageRating * ratingCount) - oldScore + newScore) / ratingCount;
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .deleted(false)
+                .build();
+
+        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").totalAverageRating(averageRating).totalRatingCount(ratingCount).deleted(false).build();
+
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).averageRating(averageRating).ratingCount(ratingCount).build();
+
+        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+
+        when(webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(episodeId, userId)).thenReturn(oldScore);
+
+
+        //when
+        ratingService.updateWebtoonRating(userId, contentEpisodeRatingRequest);
+
+        // then
+        assertEquals(changeRating, webtoonEpisode.getAverageRating());
+        assertEquals(changeRating, webtoon.getTotalAverageRating());
+
+
+    }
+
+    @Test
+    @DisplayName("해당 웹소설 에피소드에 저장된 평점이 없을 경우 예외가 발생한다.")
+    void shouldThrowException_whenWebnovelEpisodeRatingNotExist() {
+        // given
+        int newScore = 8;
+        Long userId = 1L;
+        Long episodeId = 10L;
+        
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .deleted(false)
+                .build();
+        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").deleted(false).build();
+
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
+
+        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(webnovelEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+        when(webnovelEpisodeRatingRepository.findByWebnovelEpisodeAndUser(episodeId, userId)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            ratingService.updateWebnovelRating(userId, contentEpisodeRatingRequest);
+        });
+
+        // then
+        assertEquals("해당 에피소드에 저장된 평점이 없습니다.", exception.getMessage());
+        assertEquals(ErrorCode.EPISODE_RATING_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+
+    }
+
+    @Test
+    @DisplayName("해당 웹툰 에피소드에 저장된 평점이 없을 경우 예외가 발생한다.")
+    void shouldThrowException_whenWebtoonEpisodeRatingNotExist() {
+        // given
+        int newScore = 8;
+        Long userId = 1L;
+        Long episodeId = 10L;
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .nickname("nickname")
+                .deleted(false)
+                .build();
+
+        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").deleted(false).build();
+
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
+
+        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
+
+        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(webtoonEpisodeRepository.findById(episodeId)).thenReturn(Optional.of(webtoonEpisode));
+
+        when(webtoonEpisodeRatingRepository.findByWebtoonEpisodeAndUser(episodeId, userId)).thenReturn(Optional.empty());
+
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            ratingService.updateWebtoonRating(userId, contentEpisodeRatingRequest);
+        });
+
+        // then
+        assertEquals("해당 에피소드에 저장된 평점이 없습니다.", exception.getMessage());
+        assertEquals(ErrorCode.EPISODE_RATING_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
 
 }

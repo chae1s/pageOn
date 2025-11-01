@@ -111,6 +111,12 @@ function WebnovelViewer() {
     // 새 평점 등록
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
         try {
             await api.post("/rating", {
                 contentType: "WEBNOVEL",
@@ -119,7 +125,7 @@ function WebnovelViewer() {
             });
             // 최신 평점 반영 및 스크롤 유지
             if (episodeId) {
-                const response = await axios.get(`/api/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
                 setEpisodeData(response.data);
             }
         } catch (error) {
@@ -132,6 +138,12 @@ function WebnovelViewer() {
     // 기존 평점 수정
     const handleUpdateRating = async () => {
         const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
         try {
             await api.patch("/rating", {
                 contentType: "WEBNOVEL",
@@ -139,8 +151,9 @@ function WebnovelViewer() {
                 score: selectedScore
             });
             if (episodeId) {
-                const response = await axios.get(`/api/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
                 setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
             }
         } catch (error) {
             console.error("평점 수정 실패: ", error);

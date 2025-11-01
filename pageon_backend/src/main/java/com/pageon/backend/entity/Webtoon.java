@@ -97,5 +97,11 @@ public class Webtoon {
         this.totalAverageRating = (totalScore + score) / this.totalRatingCount;
     }
 
+    public void updateRating(Integer oldScore, Integer newScore) {
+        if (this.totalRatingCount == 0) return;
+
+        this.totalAverageRating = this.totalAverageRating + ((double) (newScore - oldScore) / this.totalRatingCount);
+    }
+
 
 }

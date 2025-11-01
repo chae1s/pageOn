@@ -28,4 +28,8 @@ public class WebnovelEpisodeRating {
     @Column(nullable = false)
     private Integer score;
 
+    public void updateRating(Integer newScore) {
+        this.score = newScore;
+    }
+
 }
