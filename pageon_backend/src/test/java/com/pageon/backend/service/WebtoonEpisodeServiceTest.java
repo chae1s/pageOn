@@ -88,10 +88,10 @@ class WebtoonEpisodeServiceTest {
 
         doReturn(webtoonImages).when(webtoonImageService).getWebtoonImages(webtoonEpisode.getId());
 
-        when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.of(webtoonEpisode));
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(1L)).thenReturn(Optional.of(webtoonEpisode));
 
         //when
-        WebtoonEpisodeDetailResponse result = webtoonEpisodeService.getWebtoonEpisodeById(1L);
+        WebtoonEpisodeDetailResponse result = webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L);
 
 
         // then
@@ -105,10 +105,10 @@ class WebtoonEpisodeServiceTest {
     void getWebtoonEpisodeById_whenInvalidWebtoonEpisodeId_shouldThrowCustomException() {
 
         // given
-        when(webtoonEpisodeRepository.findById(1L)).thenReturn(Optional.empty());
+        when(webtoonEpisodeRepository.findByIdWithWebtoon(1L)).thenReturn(Optional.empty());
 
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> webtoonEpisodeService.getWebtoonEpisodeById(1L));
+        CustomException exception = assertThrows(CustomException.class, () -> webtoonEpisodeService.getWebtoonEpisodeById(1L, 1L));
 
         // then
         assertEquals("해당 에피소드를 찾을 수 없습니다.", exception.getErrorMessage());
@@ -139,7 +139,7 @@ class WebtoonEpisodeServiceTest {
         List<WebtoonEpisode> episodes = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             episodes.add(
-                    new WebtoonEpisode((long) i, webtoon, i, "웹툰 제목 " + i, images, 300, 500)
+                    new WebtoonEpisode((long) i, webtoon, i, "웹툰 제목 " + i, images, null, 300, 500, 10.0, 1L)
             );
         }
 

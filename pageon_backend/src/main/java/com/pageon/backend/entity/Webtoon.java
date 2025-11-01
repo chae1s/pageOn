@@ -53,6 +53,11 @@ public class Webtoon {
     @Builder.Default
     private Boolean deleted = false;
 
+    @Builder.Default
+    private Double totalAverageRating = 0.0;
+    @Builder.Default
+    private Long totalRatingCount = 0L;
+
     public Webtoon(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
         this.id = id;
         this.title = title;
@@ -84,6 +89,18 @@ public class Webtoon {
 
     public void updateDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public void addRating(Integer score) {
+        double totalScore = this.totalAverageRating * this.totalRatingCount;
+        this.totalRatingCount++;
+        this.totalAverageRating = (totalScore + score) / this.totalRatingCount;
+    }
+
+    public void updateRating(Integer oldScore, Integer newScore) {
+        if (this.totalRatingCount == 0) return;
+
+        this.totalAverageRating = this.totalAverageRating + ((double) (newScore - oldScore) / this.totalRatingCount);
     }
 
 

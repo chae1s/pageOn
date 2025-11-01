@@ -1,9 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, ReactEventHandler } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { WebnovelEpisodeDetail } from "../../types/Episodes";
 import * as S from "./Viewer.styles"
 import CommentList from "../../components/Comments/CommentList";
+import fullStarIcon from "../../assets/fullStarIcon.png"
+import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
+import emptyStarIcon from "../../assets/emptyStarIcon.png"
+import api from "../../api/axiosInstance";
 
 function WebnovelViewer() {
     const { episodeId , contentId } = useParams();
@@ -13,28 +17,44 @@ function WebnovelViewer() {
         episodeNum: 0,
         episodeTitle: "",
         content: "",
+        averageRating: 0.0,
+        ratingCount: 0,
         prevEpisodeId: null,
-        nextEpisodeId: null
+        nextEpisodeId: null,
+        userScore: 0
     });
+
+
     const [showTitleSection, setShowTitleSection] = useState(true);
     const lastScrollY = useRef(0);
 
+
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData(preserveScroll: boolean = false) {
             if (!episodeId) return;
 
+            const savedY = window.scrollY;
             try {
-                const response = await axios.get(`/api/episodes/webnovel/${episodeId}`);
-                setEpisodeData(response.data);
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
 
-                window.scrollTo(0, 0);
+                console.log(response.data);
+                setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
+
+                if (preserveScroll) {
+                    window.scrollTo(0, savedY);
+                } else {
+                    window.scrollTo(0, 0);
+                }
             } catch (err) {
                 alert("에피소드 정보를 불러오지 못했습니다.");
                 return;
             }
         }
 
-        fetchData();
+        // 에피소드 이동 시 선택 점수 초기화
+        setSelectedScore(0);
+        fetchData(false);
     }, [episodeId]);
 
     useEffect(() => {
@@ -58,6 +78,89 @@ function WebnovelViewer() {
             window.removeEventListener("scroll", handleScroll);
         };
     }, []);
+
+    const [isRatingOpen, setIsRatingOpen] = useState(false);
+    const [selectedScore, setSelectedScore] = useState<number>(0); // 0 ~ 10 (0.5 step)
+
+    const getDisplayScore = () => (selectedScore ?? 0);
+
+    const getStarIcon = (starIndex: number, score: number) => {
+        const fullThreshold = starIndex * 2;
+        const halfThreshold = fullThreshold - 1;
+        if (score >= fullThreshold) return fullStarIcon;
+        if (score >= halfThreshold) return halfFullStarIcon;
+        return emptyStarIcon;
+    };
+
+    const computeHalfOrFull = (e: React.MouseEvent<HTMLDivElement>): 1 | 2 => {
+        const width = (e.currentTarget as HTMLDivElement).clientWidth;
+        const offsetX = (e.nativeEvent as MouseEvent).offsetX;
+        return offsetX < width / 2 ? 1 : 2; // 1: left half (0.5), 2: right half (1.0)
+    };
+
+    const handleStarClick = (idx: number) => (e: React.MouseEvent<HTMLDivElement>) => {
+        const half = computeHalfOrFull(e);
+        const score = half === 1 ? idx * 2 - 1 : idx * 2;
+        setSelectedScore(score);
+    };
+
+    
+
+    
+
+    // 새 평점 등록
+    const handleConfirmRating = async () => {
+        const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
+        try {
+            await api.post("/rating", {
+                contentType: "WEBNOVEL",
+                episodeId: episodeData.id,
+                score: selectedScore
+            });
+            // 최신 평점 반영 및 스크롤 유지
+            if (episodeId) {
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+                setEpisodeData(response.data);
+            }
+        } catch (error) {
+            console.error("평점 등록 실패: ", error);
+        }
+        setIsRatingOpen(false);
+        window.scrollTo(0, savedY);
+    };
+
+    // 기존 평점 수정
+    const handleUpdateRating = async () => {
+        const savedY = window.scrollY;
+        const currentUserScore = episodeData.userScore ?? 0;
+        if (selectedScore === currentUserScore) {
+            setIsRatingOpen(false);
+            window.scrollTo(0, savedY);
+            return;
+        }
+        try {
+            await api.patch("/rating", {
+                contentType: "WEBNOVEL",
+                episodeId: episodeData.id,
+                score: selectedScore
+            });
+            if (episodeId) {
+                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+                setEpisodeData(response.data);
+                setSelectedScore(response.data.userScore ?? 0);
+            }
+        } catch (error) {
+            console.error("평점 수정 실패: ", error);
+        }
+        setIsRatingOpen(false);
+        window.scrollTo(0, savedY);
+    };
 
     const [comments] = useState([
         {
@@ -124,15 +227,51 @@ function WebnovelViewer() {
                 </S.EpisodeContentContainer>
                 
             </S.ViewerBodySection>
+            <S.ViewerRatingSection>
+                <S.ViewerRatingScore>
+                    <S.RatingFullStarIcon src={fullStarIcon} />
+                    <S.ViewerAverageRatingScore>{Number(episodeData.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
+                    <S.ViewerRatingCount>({episodeData.ratingCount ?? 0})</S.ViewerRatingCount>
+                </S.ViewerRatingScore>
+                <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore(episodeData.userScore && episodeData.userScore !== 0 ? episodeData.userScore : 0); setIsRatingOpen(true); }}>
+                    별점주기
+                </S.ViewerRatingCreateBtn>
+            </S.ViewerRatingSection>
+            {isRatingOpen && (
+                <S.RatingModalOverlay onClick={() => { setSelectedScore(0); setIsRatingOpen(false); }}>
+                    <S.RatingModal onClick={(e) => e.stopPropagation()}>
+                        <S.RatingModalTitle>에피소드 별점 남기기</S.RatingModalTitle>
+                        <S.RatingStars>
+                            {[1,2,3,4,5].map((i) => (
+                                <S.RatingStarWrapper
+                                    key={i}
+                                    onClick={handleStarClick(i)}
+                                >
+                                    <S.RatingStarImage src={getStarIcon(i, getDisplayScore())} />
+                                </S.RatingStarWrapper>
+                            ))}
+                        </S.RatingStars>
+                        <S.RatingScoreText>{getDisplayScore()}</S.RatingScoreText>
+                        <S.RatingModalActions>
+                            <S.RatingCancelBtn onClick={() => { setSelectedScore(0); setIsRatingOpen(false); }}>취소</S.RatingCancelBtn>
+                            <S.RatingConfirmBtn onClick={episodeData.userScore && episodeData.userScore !== 0 ? handleUpdateRating : handleConfirmRating} disabled={selectedScore === null}>
+                                {episodeData.userScore && episodeData.userScore !== 0 ? "수정" : "확인"}
+                            </S.RatingConfirmBtn>
+                        </S.RatingModalActions>
+                    </S.RatingModal>
+                </S.RatingModalOverlay>
+            )}
             <S.ViewerCommentSection>
                 <CommentList comments={comments} mypage={false}/>
             </S.ViewerCommentSection>
-
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>
                     <S.ViewerNextEpisodeBtn to={`/webnovels/${contentId}/viewer/${episodeData.nextEpisodeId}`} $disabled={episodeData.nextEpisodeId === null} aria-disabled={episodeData.nextEpisodeId === null}>다음화 보기</S.ViewerNextEpisodeBtn>
                 </S.ViewerNextEpisodeBtnContainer>
             </S.ViewerNextEpisodeBtnSection>
+            
+
+            
         </S.Viewer>
     )
 

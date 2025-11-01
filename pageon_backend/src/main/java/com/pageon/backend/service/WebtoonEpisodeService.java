@@ -6,6 +6,7 @@ import com.pageon.backend.dto.response.WebtoonImagesResponse;
 import com.pageon.backend.entity.WebtoonEpisode;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.WebtoonEpisodeRatingRepository;
 import com.pageon.backend.repository.WebtoonEpisodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 public class WebtoonEpisodeService {
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final WebtoonImageService webtoonImageService;
+    private final WebtoonEpisodeRatingRepository  webtoonEpisodeRatingRepository;
 
     public List<EpisodeListResponse> getEpisodesByWebtoonId(Long webtoonId) {
         List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
@@ -34,8 +36,8 @@ public class WebtoonEpisodeService {
     }
 
     @Transactional(readOnly = true)
-    public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long id) {
-        WebtoonEpisode episode = webtoonEpisodeRepository.findById(id).orElseThrow(
+    public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long userId, Long id) {
+        WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(id).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );
 
@@ -44,8 +46,10 @@ public class WebtoonEpisodeService {
         Long prevEpisodeId = webtoonEpisodeRepository.findPrevEpisodeId(episode.getWebtoon().getId(), episode.getEpisodeNum());
         Long nextEpisodeId = webtoonEpisodeRepository.findNextEpisodeId(episode.getWebtoon().getId(), episode.getEpisodeNum());
 
+        Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
+
         return WebtoonEpisodeDetailResponse.fromEntity(
-                episode, webtoonImages, prevEpisodeId, nextEpisodeId
+                episode, webtoonImages, prevEpisodeId, nextEpisodeId, userScore
         );
     }
 }

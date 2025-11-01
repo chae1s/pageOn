@@ -144,8 +144,8 @@ function ContentDetailLayout({content}: Props) {
                     <S.ContentScoreContainer>
                         <S.ContentRatingContainer>
                             <RatingFullIcon />
-                            <S.ContentRatingScore>{content.rating}</S.ContentRatingScore>
-                            <S.ContentRatingCount>({content.ratingCount})</S.ContentRatingCount>
+                            <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>
+                            <S.ContentRatingCount>({content.totalRatingCount ?? 0})</S.ContentRatingCount>
                         </S.ContentRatingContainer>
                         <S.ContentViewCount>
                             <S.ContentViewCountName>조회 수</S.ContentViewCountName>

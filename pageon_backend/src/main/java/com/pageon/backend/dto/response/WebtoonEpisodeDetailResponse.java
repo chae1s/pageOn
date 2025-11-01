@@ -14,18 +14,24 @@ public class WebtoonEpisodeDetailResponse {
     private Long id;
     private String title;
     private Integer episodeNum;
+    private Double averageRating;
+    private Long ratingCount;
     private List<WebtoonImagesResponse> images;
     private Long prevEpisodeId;
     private Long nextEpisodeId;
+    private Integer userScore;
 
-    public static WebtoonEpisodeDetailResponse fromEntity(WebtoonEpisode episode, List<WebtoonImagesResponse> images, Long prevEpisodeId, Long nextEpisodeId) {
+    public static WebtoonEpisodeDetailResponse fromEntity(WebtoonEpisode episode, List<WebtoonImagesResponse> images, Long prevEpisodeId, Long nextEpisodeId, Integer userScore) {
         return new WebtoonEpisodeDetailResponse(
                 episode.getId(),
                 episode.getEpisodeTitle(),
                 episode.getEpisodeNum(),
+                episode.getAverageRating(),
+                episode.getRatingCount(),
                 images,
                 prevEpisodeId,
-                nextEpisodeId
+                nextEpisodeId,
+                userScore
         );
     }
 }

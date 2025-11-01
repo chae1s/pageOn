@@ -21,8 +21,8 @@ public class UserWebtoonResponse {
     private List<UserKeywordResponse> keywords;
     private SerialDay serialDay;
     private SeriesStatus status;
-    private Double rating;
-    private Integer ratingCount;
+    private Double totalAverageRating;
+    private Long totalRatingCount;
     private Long viewCount;
     private String contentType;
     private Boolean isInterested;
@@ -40,8 +40,8 @@ public class UserWebtoonResponse {
         userWebtoonResponse.setKeywords(keywords);
         userWebtoonResponse.setSerialDay(webtoon.getSerialDay());
         userWebtoonResponse.setStatus(webtoon.getStatus());
-        userWebtoonResponse.setRating(4.9231);
-        userWebtoonResponse.setRatingCount(125039);
+        userWebtoonResponse.setTotalAverageRating(webtoon.getTotalAverageRating());
+        userWebtoonResponse.setTotalRatingCount(webtoon.getTotalRatingCount());
         userWebtoonResponse.setViewCount(webtoon.getViewCount());
         userWebtoonResponse.setContentType("webtoons");
         userWebtoonResponse.setEpisodes(episodes);

@@ -21,8 +21,8 @@ public class UserWebnovelResponse {
     private List<UserKeywordResponse> keywords;
     private SerialDay serialDay;
     private SeriesStatus status;
-    private Double rating;
-    private Integer ratingCount;
+    private Double totalAverageRating;
+    private Long totalRatingCount;
     private Long viewCount;
     private String contentType;
     private Boolean isInterested;
@@ -40,8 +40,8 @@ public class UserWebnovelResponse {
         userWebnovelResponse.setKeywords(keywords);
         userWebnovelResponse.setSerialDay(webnovel.getSerialDay());
         userWebnovelResponse.setStatus(webnovel.getStatus());
-        userWebnovelResponse.setRating(4.9231);
-        userWebnovelResponse.setRatingCount(125039);
+        userWebnovelResponse.setTotalAverageRating(webnovel.getTotalAverageRating());
+        userWebnovelResponse.setTotalRatingCount(webnovel.getTotalRatingCount());
         userWebnovelResponse.setViewCount(webnovel.getViewCount());
         userWebnovelResponse.setContentType("webnovels");
         userWebnovelResponse.setEpisodes(episodes);

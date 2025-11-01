@@ -163,3 +163,138 @@ export const ViewerNextEpisodeBtn = styled(Link)<{ $disabled?: boolean }>`
     cursor: ${props => props.$disabled ? 'default' : 'pointer'};
 `
 
+export const ViewerRatingSection = styled.div`
+    max-width: 720px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: space-between;
+`
+
+export const ViewerRatingScore = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+`
+
+export const RatingFullStarIcon = styled.img`
+    width: 24px;
+    height: 24px;
+`
+
+export const ViewerAverageRatingScore = styled.span`
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+`
+
+export const ViewerRatingCount = styled.span`
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+`
+
+export const ViewerRatingCreateBtn = styled.button`
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 24px;
+    color: #888;
+`
+
+// Rating Modal
+export const RatingModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+`
+
+export const RatingModal = styled.div`
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+`
+
+export const RatingModalTitle = styled.h3`
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+`
+
+export const RatingModalSubtitle = styled.p`
+    margin: 0 0 16px 0;
+    font-size: 13px;
+    line-height: 18px;
+    color: #666;
+    text-align: center;
+`
+
+export const RatingStars = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0 4px;
+`
+
+export const RatingStarWrapper = styled.div`
+    position: relative;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+`
+
+export const RatingStarImage = styled.img`
+    width: 34px;
+    height: 34px;
+    user-select: none;
+`
+
+export const RatingScoreText = styled.div`
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+`
+
+export const RatingModalActions = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+`
+
+export const RatingCancelBtn = styled.button`
+    min-width: 96px;
+    height: 40px;
+    border-radius: 8px;
+    background: #f1f3f5;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+`
+
+export const RatingConfirmBtn = styled.button`
+    min-width: 96px;
+    height: 40px;
+    border-radius: 8px;
+    background: #528efa;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+`

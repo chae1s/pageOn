@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { SearchContent } from "../../types/Content";
 import * as S from "../Styles/SearchContents.styles"
 import { keyboard } from "@testing-library/user-event/dist/keyboard";
+import FullStarIcon from "../../assets/fullStarIcon.png";
 
 interface Props {
     contents?: SearchContent[];
@@ -50,9 +51,9 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                                         <S.ContentAuthor>{content.author}</S.ContentAuthor>
                                         <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
                                         <S.ContentRatingContainer>
-                                            <RatingFullIcon />
-                                            <S.ContentRatingScore>4.33</S.ContentRatingScore>
-                                            <S.ContentRatingCount>(356214)</S.ContentRatingCount>
+                                            <S.ContentRatingStarIcon src={FullStarIcon} />
+                                            <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>
+                                            <S.ContentRatingCount>({content.totalRatingCount ?? 0})</S.ContentRatingCount>
                                         </S.ContentRatingContainer>
                                         <S.ContentDescriptionLink to={`/${content.contentType}/${content.id}`}>
                                         <S.ContentDescription>{content.description}</S.ContentDescription>

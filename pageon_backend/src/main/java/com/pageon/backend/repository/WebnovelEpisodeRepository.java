@@ -13,6 +13,10 @@ public interface WebnovelEpisodeRepository extends JpaRepository<WebnovelEpisode
     List<WebnovelEpisode> findByWebnovelId(Long id);
     Optional<WebnovelEpisode> findById(Long id);
 
+    @Query("SELECT w FROM WebnovelEpisode w JOIN FETCH w.webnovel WHERE w.id = :episodeId")
+    Optional<WebnovelEpisode> findByIdWithWebnovel(@Param("episodeId") Long episodeId);
+
+
     @Query("""
         SELECT e.id FROM WebnovelEpisode e 
         WHERE e.webnovel.id = :webnovelId
