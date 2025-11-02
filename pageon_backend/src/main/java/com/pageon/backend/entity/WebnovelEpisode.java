@@ -35,6 +35,9 @@ public class WebnovelEpisode extends BaseTimeEntity {
     @OneToMany(mappedBy = "webnovelEpisode", cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<WebnovelEpisodeRating> webnovelEpisodeRatings = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "webnovelEpisode", cascade = CascadeType.ALL,  orphanRemoval = true)
+    private List<WebnovelEpisodeComment> webnovelEpisodeComments = new ArrayList<>();
 
     // 구매 금액
     private Integer purchasePrice;
@@ -44,6 +47,9 @@ public class WebnovelEpisode extends BaseTimeEntity {
 
     @Builder.Default
     private Long ratingCount = 0L;
+
+    @Builder.Default
+    private Boolean deleted = false;
 
     public void addRating(Integer score) {
         double totalScore = this.averageRating * this.ratingCount;
