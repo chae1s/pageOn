@@ -6,5 +6,10 @@ export interface Comment {
     episodeNum: number;
     nickname: string;
     date: string;
-    likes: number
+    likes: number;
+}
+
+export interface CreateComment {
+    text: string;
+    isSpoiler: boolean;
 }

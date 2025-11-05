@@ -61,6 +61,8 @@ public enum ErrorCode {
     INVALID_CONTENT_TYPE("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", HttpStatus.BAD_REQUEST),
     INTEREST_NOT_FOUND("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     EPISODE_RATING_NOT_FOUND("해당 에피소드에 저장된 평점이 없습니다.", HttpStatus.NOT_FOUND),
+    COMMENT_TEXT_IS_BLANK("댓글 내용이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    EPISODE_IS_DELETED("삭제된 에피소드입니다.", HttpStatus.NOT_FOUND),
 
     ;
 

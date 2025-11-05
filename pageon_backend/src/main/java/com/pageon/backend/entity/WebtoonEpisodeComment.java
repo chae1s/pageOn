@@ -31,10 +31,12 @@ public class WebtoonEpisodeComment extends BaseTimeEntity {
     private WebtoonEpisode webtoonEpisode;
 
     @Column(nullable = false)
-    private String comment;
+    private String text;
 
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean isDeleted = false;
+
+    private Boolean isSpoiler;
 
 
     @Builder.Default

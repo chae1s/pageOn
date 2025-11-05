@@ -1,4 +1,5 @@
 import { styled } from "styled-components";
+import { Link } from "react-router-dom";
 
 export const CommentList = styled.div`
     width: 100%;
@@ -18,6 +19,102 @@ export const SortBtnList = styled.div`
     display: flex;
     padding: 16px 0;
     gap: 10px;
+`
+
+export const CommentInputSection = styled.div`
+    width: 100%;
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column
+`
+
+export const CommentInputWrap = styled.div`
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    height: 40px;
+    width: 100%;
+    flex: 1;
+    padding-inline: 16px;
+`
+
+export const CommentInputFlex = styled.div`
+    display: flex;
+    flex: 1;
+
+`
+
+export const CommentInputTextarea = styled.textarea`
+    height: 18px;
+    outline-style: none;
+    color: #444;
+    word-break: break-all;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    resize: none;
+    width: 100%;
+`
+
+export const CommentInputBtn = styled.span`
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    cursor: pointer;
+    margin-left: 12px;
+`
+
+export const CommentSpoilerCheckSection = styled.div`
+    padding-bottom: 15px;
+    padding-top: 10px;
+    line-height: 1.4;
+`
+
+export const CommentSpoilerCheckWrap = styled.div`
+    align-items: center;
+    cursor: pointer;
+    height: 20px;
+    display: inline-flex;
+    line-height: 1.4;
+    box-sizing: border-box;
+`
+
+export const CommentSpoilerCheckboxWrap = styled.div`
+    aligh-items: center;
+    min-width: fit-content;
+    display: flex;
+    position: relative;
+    line-height: 1.4;
+    margin-right: 10px;
+
+`
+
+export const CommentSpoilerCheckbox = styled.input`
+    cursor: pointer;
+    position: relative;
+    box-sizing: border-box;
+    padding: 0;
+    overflow: visible;
+`
+
+export const CommentSpoilerCheckboxCheckIcon = styled.img`
+    width: 18px;
+    height: 18px;
+`
+
+export const CommentSpoilerCheckboxEmptyIcon = styled.img`
+    width; 18px;
+    height: 18px;
+`
+
+export const CommentSpoilerText = styled.span`
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+
 `
 
 export const CommentListUl = styled.ul`
@@ -67,7 +164,7 @@ export const CommentContent = styled.p`
     overflow-wrap: anywhere;
 `
 
-export const Commentinfo = styled.div`
+export const CommentInfo = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -131,6 +228,17 @@ export const CommentEditBtn = styled.button`
     color: #a5a5a5;
 `
 
+export const LikeEmptyIcon = styled.img`
+    width: 16px;
+    height: 16px;
+`
+
+export const LikeFullIcon = styled.img`
+    width: 16px;
+    height: 16px;
+`
+
+
 export const CommentLikeBtn = styled.button`
     display: flex;
     justify-content: center;
@@ -144,5 +252,36 @@ export const CommentLikeBtn = styled.button`
     font-size: 14px;
     gap: 10px;
 `
+
+export const CommentListBtn = styled.button`
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 24px;
+    color: #888;
+`
+export const CommentBestInfo = styled.div`
+    display: flex;
+    gap: 6px;
+    color: #a5a5a5;
+    line-height: 20px;
+`
+
+export const CommentBestUserInfo = styled.div`
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    margin: 2px 3px;
+`
+
+export const CommentBestIcon = styled.div`
+    padding: 2px 5px;
+    background: var(--error-color);
+    color: #fff;
+    font-size: 14px;
+    border-radius: 3px;
+`
+
 
 

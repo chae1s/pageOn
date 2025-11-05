@@ -1,16 +1,21 @@
 import React, { useEffect, useState, useRef, ReactEventHandler } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigationType, useParams } from "react-router-dom";
 import { WebnovelEpisodeDetail } from "../../types/Episodes";
 import * as S from "./Viewer.styles"
-import CommentList from "../../components/Comments/CommentList";
+import BestComment from "../../components/Comments/BestComment"
 import fullStarIcon from "../../assets/fullStarIcon.png"
 import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
 import emptyStarIcon from "../../assets/emptyStarIcon.png"
 import api from "../../api/axiosInstance";
 
 function WebnovelViewer() {
-    const { episodeId , contentId } = useParams();
+    const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
+     
+    const location = useLocation();
+    
+    const navigationType = useNavigationType();
+
     const [ episodeData, setEpisodeData ] = useState<WebnovelEpisodeDetail>({
         id: 0,
         title: "",
@@ -32,20 +37,33 @@ function WebnovelViewer() {
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
             if (!episodeId) return;
-
+            
             const savedY = window.scrollY;
             try {
                 const response = await api.get(`/episodes/webnovel/${episodeId}`);
 
-                console.log(response.data);
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
-
-                if (preserveScroll) {
-                    window.scrollTo(0, savedY);
+                
+                if (navigationType !== 'POP') {
+                    if (preserveScroll) {
+                        window.scrollTo(0, savedY);
+                    }  else {
+                        window.scrollTo(0, 0);
+                    }
+                    
                 } else {
-                    window.scrollTo(0, 0);
+                    
+                    const scrollPosition = sessionStorage.getItem("scrollPosition");
+                    
+                    if (scrollPosition) {
+                        window.scrollTo(0, parseInt(scrollPosition, 10));
+                        sessionStorage.removeItem("scrollPosition");
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
                 }
+                
             } catch (err) {
                 alert("에피소드 정보를 불러오지 못했습니다.");
                 return;
@@ -56,6 +74,7 @@ function WebnovelViewer() {
         setSelectedScore(0);
         fetchData(false);
     }, [episodeId]);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -103,9 +122,6 @@ function WebnovelViewer() {
         const score = half === 1 ? idx * 2 - 1 : idx * 2;
         setSelectedScore(score);
     };
-
-    
-
     
 
     // 새 평점 등록
@@ -172,28 +188,18 @@ function WebnovelViewer() {
           nickname: "닉네임1",
           date: "2024-06-01",
           likes: 12
-        },
-        {
-          id: 2,
-          bookTitle: "작품 제목 2",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "스토리가 신선해서 좋았어요.",
-          episodeNum: 3,
-          nickname: "닉네임2",
-          date: "2024-05-28",
-          likes: 5
-        },
-        {
-          id: 3,
-          bookTitle: "작품 제목 3",
-          bookCover: "https://via.placeholder.com/60x80?text=작품+3",
-          content: "그림체가 마음에 들어요.",
-          episodeNum: 7,
-          nickname: "닉네임3",
-          date: "2024-05-20",
-          likes: 8
         }
-      ]);
+    ]);
+
+
+
+    
+      
+    if (!episodeId || !contentId) {
+        return null;
+    }
+    
+    
 
     return (
         <S.Viewer>
@@ -234,7 +240,7 @@ function WebnovelViewer() {
                     <S.ViewerRatingCount>({episodeData.ratingCount ?? 0})</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
                 <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore(episodeData.userScore && episodeData.userScore !== 0 ? episodeData.userScore : 0); setIsRatingOpen(true); }}>
-                    별점주기
+                    별점 주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
             {isRatingOpen && (
@@ -262,7 +268,7 @@ function WebnovelViewer() {
                 </S.RatingModalOverlay>
             )}
             <S.ViewerCommentSection>
-                <CommentList comments={comments} mypage={false}/>
+                <BestComment comment = {comments[0]!} contentType="webnovels" contentId={contentId} episodeId={episodeId}/>
             </S.ViewerCommentSection>
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>

@@ -2,51 +2,100 @@ import React, {useState, useEffect} from "react";
 import { Link, NavLink} from "react-router-dom";
 import { SortBtn } from "../../styles/Layout.styles";
 import * as C from "../Styles/Comment.styles";
-import { Comment } from "../../types/Comments";
+import { Comment, CreateComment } from "../../types/Comments";
+import LikeEmptyIcon from "../../assets/emptyHeartIcon.png";
+import LikeFullIcon from "../../assets/fullHeartIcon.png";
+import BlankCheckboxIcon from "../../assets/blankCheckboxIcon.png";
+import FullCheckboxIcon from "../../assets/fullCheckboxIcon.png";
+import api from "../../api/axiosInstance";
 
 interface Props {
     comments: Comment[];
-    mypage: boolean
+    mypage: boolean;
+    contentType?: string;
+    episodeId?: string;
 }
 
-function CommentList({comments, mypage} : Props) {
-    const LikeEmptyIcon = () => (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path
-                d="M9 16s-5.5-4.35-7.2-6.19C.6 8.36.5 6.13 2.01 4.61 3.53 3.09 5.98 3.09 7.5 4.61L9 6.11l1.5-1.5c1.52-1.52 3.97-1.52 5.49 0 1.51 1.52 1.41 3.75.21 5.2C14.5 11.65 9 16 9 16z"
-                fill="#FFF"
-                stroke="#444"
-                strokeWidth="1"
-            />
-        </svg>
-    )
-
-    const LikeFullIcon = () => (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path
-                d="M9 16s-5.5-4.35-7.2-6.19C.6 8.36.5 6.13 2.01 4.61 3.53 3.09 5.98 3.09 7.5 4.61L9 6.11l1.5-1.5c1.52-1.52 3.97-1.52 5.49 0 1.51 1.52 1.41 3.75.21 5.2C14.5 11.65 9 16 9 16z"
-                fill="#444"
-                stroke="#444"
-                strokeWidth="1"
-            />
-        </svg>
-    )
+function CommentList({comments, mypage, contentType, episodeId} : Props) {
+    
 
     const [sort, setSort] = useState<string>("liked") // recent | liked
+    const [commentText, setCommentText] = useState<string>("")
+    const [isSpoiler, setIsSpoiler] = useState<boolean>(false)
+
+    const handleRegister = async () => {
+        const text = commentText.trim()
+
+        if (mypage || !text || !contentType || !episodeId) return
+        
+        const newComment: CreateComment = {
+            text: text,
+            isSpoiler: isSpoiler
+        }
+
+        console.log(newComment)
+
+        try {
+            await api.post(`/${contentType}/episodes/${episodeId}/comments`, newComment);
+                
+            setCommentText("");
+            setIsSpoiler(false);
+        } catch (error) {
+            console.error("댓글 등록 실패 : ", error);
+        }
+        
+    }
 
     return (
         <C.CommentList>
             {!mypage && (
-                <C.CommentHeader>
-                    <C.CommentCount>
-                        댓글 {comments.length}개
-                    </C.CommentCount>
-                    <C.SortBtnList>
-                        <SortBtn $active={sort === "recent"} type="button" onClick={()=>setSort('recent')}>최신순</SortBtn>
-                        <SortBtn $active={sort === "liked"} type="button" onClick={()=>setSort('liked')}>공감순</SortBtn>
-                    </C.SortBtnList>
-                </C.CommentHeader>
-            
+                <>
+                    <C.CommentHeader>
+                        <C.CommentCount>
+                            댓글 {comments.length}개
+                        </C.CommentCount>
+                        <C.SortBtnList>
+                            <SortBtn $active={sort === "recent"} type="button" onClick={()=>setSort('recent')}>최신순</SortBtn>
+                            <SortBtn $active={sort === "liked"} type="button" onClick={()=>setSort('liked')}>공감순</SortBtn>
+                        </C.SortBtnList>
+                    </C.CommentHeader>
+                    <C.CommentInputSection>
+                        <C.CommentInputWrap>
+                            <C.CommentInputFlex>
+                                <C.CommentInputTextarea
+                                    value={commentText}
+                                    onChange={(e)=>setCommentText(e.target.value)}
+                                >
+                                </C.CommentInputTextarea>
+                            </C.CommentInputFlex>
+                            {commentText.trim().length > 0 && (
+                                <C.CommentInputBtn onClick={handleRegister}>
+                                    등록
+                                </C.CommentInputBtn>
+                            )}
+                        </C.CommentInputWrap>
+                        <C.CommentSpoilerCheckSection>
+                            <C.CommentSpoilerCheckWrap>
+                                <C.CommentSpoilerCheckboxWrap onClick={() => setIsSpoiler(prev => !prev)}>
+                                    <C.CommentSpoilerCheckbox
+                                        type="checkbox"
+                                        checked={isSpoiler}
+                                        onChange={(e)=>setIsSpoiler(e.target.checked)}
+                                        style={{ display: 'none' }}
+                                    />
+                                    {isSpoiler ? (
+                                        <C.CommentSpoilerCheckboxCheckIcon src={FullCheckboxIcon} />
+                                    ) : (
+                                        <C.CommentSpoilerCheckboxEmptyIcon src={BlankCheckboxIcon} />
+                                    )}
+                                </C.CommentSpoilerCheckboxWrap>
+                                <C.CommentSpoilerText onClick={() => setIsSpoiler(prev => !prev)}>
+                                    댓글에 스포일러 포함
+                                </C.CommentSpoilerText>
+                            </C.CommentSpoilerCheckWrap>
+                        </C.CommentSpoilerCheckSection>
+                    </C.CommentInputSection>
+                </>
             )}
             <C.CommentListUl>
                 {comments.length === 0 ? (
@@ -61,7 +110,7 @@ function CommentList({comments, mypage} : Props) {
                             <C.CommentContentWrap>
                                 <C.CommentContent>{comment.content}</C.CommentContent>
                             </C.CommentContentWrap>
-                            <C.Commentinfo>
+                            <C.CommentInfo>
                                 <C.CommentInfoLeft>
                                     <C.CommentUserInfo>
                                         <div>
@@ -78,11 +127,11 @@ function CommentList({comments, mypage} : Props) {
                                 </C.CommentInfoLeft>
                                 <div>
                                     <C.CommentLikeBtn type="button">
-                                        <LikeEmptyIcon />
+                                        <C.LikeEmptyIcon src={LikeEmptyIcon} />
                                         <span>{comment.likes}</span>
                                     </C.CommentLikeBtn>
                                 </div>
-                            </C.Commentinfo>
+                            </C.CommentInfo>
                         </C.CommentListLi>
                     ))
                 )}

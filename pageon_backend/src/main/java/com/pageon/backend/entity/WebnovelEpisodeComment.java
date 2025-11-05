@@ -30,10 +30,12 @@ public class WebnovelEpisodeComment extends BaseTimeEntity {
     private WebnovelEpisode webnovelEpisode;
 
     @Column(nullable = false)
-    private String comment;
+    private String text;
 
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean isDeleted = false;
+
+    private Boolean isSpoiler;
 
     @Builder.Default
     @OneToMany(mappedBy = "webnovelEpisodeComment", cascade = CascadeType.ALL,  orphanRemoval = true)

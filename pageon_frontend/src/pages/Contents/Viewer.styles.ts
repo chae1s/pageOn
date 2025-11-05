@@ -298,3 +298,31 @@ export const RatingConfirmBtn = styled.button`
     font-size: 14px;
     font-weight: 700;
 `
+
+export const CommentPageHeaderSection = styled.div`
+    display: flex;
+    width: 100%;
+    min-height: 52px;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+`
+
+export const CommentPageHeader = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0px 12px;
+`
+
+export const CommentPageCloseLink = styled(Link)`
+    width: 20px;
+    height: 20px;
+`
+
+export const CommentPageCloseIcon = styled.img`
+    width: 16px;
+    height: 16px;
+`

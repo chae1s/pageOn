@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { WebtoonEpisodeDetail } from "../../types/Episodes";
 import * as S from "./Viewer.styles"
 import CommentList from "../../components/Comments/CommentList";
@@ -8,9 +8,14 @@ import fullStarIcon from "../../assets/fullStarIcon.png"
 import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
 import emptyStarIcon from "../../assets/emptyStarIcon.png"
 import api from "../../api/axiosInstance";
+import BestComment from "../../components/Comments/BestComment";
 
 function WebtoonViewer() {
     const { episodeId , contentId } = useParams();
+
+    const location = useLocation();
+    const restoreScrollY = location.state?.restoreScrollY;
+
     const [ episodeData, setEpisodeData ] = useState<WebtoonEpisodeDetail>({
         id: 0,
         title: "",
@@ -51,6 +56,7 @@ function WebtoonViewer() {
         setSelectedScore(0);
         fetchData(false);
     }, [episodeId]);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -161,28 +167,13 @@ function WebtoonViewer() {
           nickname: "닉네임1",
           date: "2024-06-01",
           likes: 12
-        },
-        {
-          id: 2,
-          bookTitle: "작품 제목 2",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "스토리가 신선해서 좋았어요.",
-          episodeNum: 3,
-          nickname: "닉네임2",
-          date: "2024-05-28",
-          likes: 5
-        },
-        {
-          id: 3,
-          bookTitle: "작품 제목 3",
-          bookCover: "https://via.placeholder.com/60x80?text=작품+3",
-          content: "그림체가 마음에 들어요.",
-          episodeNum: 7,
-          nickname: "닉네임3",
-          date: "2024-05-20",
-          likes: 8
         }
-      ]);
+    ]);
+
+    if (!episodeId || !contentId) {
+        return null;
+    }
+    
 
     return (
         <S.Viewer>
@@ -221,7 +212,7 @@ function WebtoonViewer() {
                     <S.ViewerRatingCount>{episodeData.ratingCount ?? 0}</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
                 <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore((episodeData.userScore ?? 0) as number); setIsRatingOpen(true); }}>
-                    별점주기
+                    별점 주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
             {isRatingOpen && (
@@ -249,7 +240,7 @@ function WebtoonViewer() {
                 </S.RatingModalOverlay>
             )}
             <S.ViewerCommentSection>
-                <CommentList comments={comments} mypage={false}/>
+                <BestComment comment = {comments[0]!} contentType="webtoons" contentId={contentId} episodeId={episodeId}/>
             </S.ViewerCommentSection>
 
             <S.ViewerNextEpisodeBtnSection>
