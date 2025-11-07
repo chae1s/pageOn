@@ -29,7 +29,7 @@ import WebnovelViewer from "./pages/Contents/WebnovelViewer";
 import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 import KeywordSearch from "./pages/Search/KeywordSearch";
 import TitleCreatorSearch from "./pages/Search/TitleCreatorSearch";
-import Comment from "./pages/Contents/Comment";
+import EpisodeCommentsPage from "./pages/Contents/EpisodeCommentsPage";
 
 function Router() {
     const location = useLocation();
@@ -75,7 +75,7 @@ function Router() {
                 <Route path="/mock-verify" element={<MockVerify/>}  />
                 <Route path="/webnovels/:contentId/viewer/:episodeId" element={<WebnovelViewer />} />
                 <Route path="/webtoons/:contentId/viewer/:episodeId" element={<WebtoonViewer />} />
-                <Route path="/:contentType/:contentId/viewer/:episodeId/comments" element={<Comment />} />
+                <Route path="/:contentType/:contentId/viewer/:episodeId/comments" element={<EpisodeCommentsPage />} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={["ROLE_CREATOR"]}/>}>

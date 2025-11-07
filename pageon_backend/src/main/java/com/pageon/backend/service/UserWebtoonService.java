@@ -86,7 +86,7 @@ public class UserWebtoonService {
     @Transactional(readOnly = true)
     public Page<ContentSearchResponse> getWebtoonsByKeyword(String keywordName, String sort, Pageable pageable) {
 
-        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
 
         Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, sortedPageable);
 
@@ -97,7 +97,7 @@ public class UserWebtoonService {
     @Transactional(readOnly = true)
     public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, String sort, Pageable pageable) {
 
-        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
 
         log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrPenNameContaining(query, sortedPageable);

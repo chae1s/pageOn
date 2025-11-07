@@ -52,7 +52,7 @@ public class WebtoonEpisode extends BaseTimeEntity {
     private Long ratingCount = 0L;
 
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean isDeleted = false;
 
     public void addImage(WebtoonImage image) {
         this.images.add(image);

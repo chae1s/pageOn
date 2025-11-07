@@ -49,7 +49,7 @@ public class WebnovelEpisode extends BaseTimeEntity {
     private Long ratingCount = 0L;
 
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean isDeleted = false;
 
     public void addRating(Integer score) {
         double totalScore = this.averageRating * this.ratingCount;

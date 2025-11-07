@@ -38,6 +38,9 @@ public class WebtoonEpisodeComment extends BaseTimeEntity {
 
     private Boolean isSpoiler;
 
+    @Builder.Default
+    private Long likeCount = 0L;
+
 
     @Builder.Default
     @OneToMany(mappedBy = "webtoonEpisodeComment", cascade = CascadeType.ALL, orphanRemoval = true)

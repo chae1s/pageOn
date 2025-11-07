@@ -89,7 +89,7 @@ public class UserWebnovelService {
 
     @Transactional(readOnly = true)
     public Page<ContentSearchResponse> getWebnovelsByKeyword(String keywordName, String sort, Pageable pageable) {
-        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
 
         Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, sortedPageable);
 
@@ -99,7 +99,7 @@ public class UserWebnovelService {
     @Transactional(readOnly = true)
     public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, String sort, Pageable pageable) {
 
-        Pageable sortedPageable = PageableUtil.createPageable(pageable, sort);
+        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
 
         log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, sortedPageable);

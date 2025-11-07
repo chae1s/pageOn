@@ -1,6 +1,8 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
+import com.pageon.backend.dto.response.EpisodeCommentResponse;
+import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.WebnovelEpisode;
@@ -18,9 +20,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -156,7 +160,7 @@ class WebnovelEpisodeCommentServiceTest {
         String text = "좋은 작품입니다.";
 
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
-        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").deleted(true).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
 
@@ -171,8 +175,244 @@ class WebnovelEpisodeCommentServiceTest {
         // then
         assertEquals("삭제된 에피소드입니다.",  exception.getErrorMessage());
         assertEquals(ErrorCode.EPISODE_IS_DELETED, ErrorCode.valueOf(exception.getErrorCode()));
+        
+    }
+    
+    @Test
+    @DisplayName("콘텐츠의 댓글 리스트를 정상적으로 반환한다.")
+    void shouldReturnCommentList_whenValidEpisodeIdProvided() {
+        // given
+        Long userId1 = 1L;
+        User user1 = User.builder().id(userId1).email("test1@mail.com").nickname("로그인작성자").deleted(false).build();
+
+        Long userId2 = 1L;
+        User user2 = User.builder().id(userId2).email("test2@mail.com").nickname("비로그인작성자").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user1).webnovelEpisode(webnovelEpisode).text(text).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user2).webnovelEpisode(webnovelEpisode).text(text).build();
+
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        
+        //when
+        Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId1, episodeId, pageable, "popular");
+        
+        // then
+        assertEquals(2, result.getContent().size());
+        assertEquals(commentId1, result.getContent().get(0).getId());
+        assertEquals("로그인작성자", result.getContent().get(0).getNickname());
+        
+    }
+
+    @Test
+    @DisplayName("댓글이 존재하지 않으면 빈 리스트를 반환한다.")
+    void shouldReturnEmptyList_whenNoCommentsExist() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
+
+
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
+
+        //when
+        Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
+
+        // then
+        assertEquals(0, result.getContent().size());
 
 
     }
+
+    @Test
+    @DisplayName("삭제된 에피소드의 댓글을 조회하면 예외가 발생한다.")
+    void shouldThrowException_whenCommentSearchEpisodeIsDeleted() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+
+
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
+        });
+
+        // then
+        assertEquals("삭제된 에피소드입니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.EPISODE_IS_DELETED, ErrorCode.valueOf(exception.getErrorCode()));
+
+
+    }
+
+    @Test
+    @DisplayName("댓글 리스트는 좋아요 기준 내림차순으로 정렬되어 반환된다.")
+    void shouldReturnCommentsSortedByLikeCountDesc() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).likeCount(10L).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).likeCount(100L).build();
+
+
+        when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
+
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+
+        //when
+        Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
+
+        // then
+        assertEquals(2, result.getContent().size());
+        assertEquals(commentId1, result.getContent().get(0).getId());
+        assertEquals(commentId2, result.getContent().get(1).getId());
+
+    }
+
+    @Test
+    @DisplayName("내가 작성한 댓글 리스트 조회 시 각 댓글에 콘텐츠의 정보가 포함된다.")
+    void shouldReturnMyComments_whenUserHasComments() {
+        // given
+        Long userId1 = 1L;
+        User user1 = User.builder().id(userId1).email("test1@mail.com").nickname("로그인작성자").deleted(false).build();
+
+        Long userId2 = 1L;
+        User user2 = User.builder().id(userId2).email("test2@mail.com").nickname("비로그인작성자").deleted(false).build();
+
+        Long webnovelId1 = 10L;
+        Long webnovelId2 = 11L;
+
+        Long episodeId1 = 100L;
+        Long episodeId2 = 101L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+        Long commentId3 = 220L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Webnovel webnovel1 = Webnovel.builder().id(webnovelId1).title("테스트 웹소설1").deleted(false).build();
+        Webnovel webnovel2 = Webnovel.builder().id(webnovelId2).title("테스트 웹소설2").deleted(false).build();
+
+        WebnovelEpisode webnovelEpisode1 = WebnovelEpisode.builder().id(episodeId1).webnovel(webnovel1).episodeTitle("테스트 웹소설 에피소드").build();
+        WebnovelEpisode webnovelEpisode2 = WebnovelEpisode.builder().id(episodeId2).webnovel(webnovel2).episodeTitle("테스트 웹소설 에피소드").build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user1).webnovelEpisode(webnovelEpisode1).text(text).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user1).webnovelEpisode(webnovelEpisode2).text(text).build();
+        WebnovelEpisodeComment comment3 = WebnovelEpisodeComment.builder().id(commentId3).user(user2).webnovelEpisode(webnovelEpisode1).text(text).build();
+
+
+        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId1), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+
+        //when
+        Page<MyCommentResponse> result = webnovelEpisodeCommentService.getCommentsByUserId(userId1, pageable);
+
+        // then
+        assertEquals(2, result.getContent().size());
+        assertEquals(commentId1, result.getContent().get(0).getId());
+        assertEquals("테스트 웹소설1", result.getContent().get(0).getContentTitle());
+
+
+    }
+
+
+    @Test
+    @DisplayName("삭제된 댓글은 내 댓글 리스트에서 제외된다.")
+    void shouldExcludeDeletedComments_whenFetchingMyComments() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test1@mail.com").nickname("닉네임").deleted(false).build();
+
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId1 = 200L;
+        Long commentId2 = 210L;
+        Long commentId3 = 220L;
+
+        String text = "좋은 작품입니다.";
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(false).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(false).build();
+        WebnovelEpisodeComment comment3 = WebnovelEpisodeComment.builder().id(commentId3).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(true).build();
+
+
+        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+
+        //when
+        Page<MyCommentResponse> result = webnovelEpisodeCommentService.getCommentsByUserId(userId, pageable);
+
+        // then
+        assertEquals(2, result.getContent().size());
+        assertEquals(commentId1, result.getContent().get(0).getId());
+    }
+
 
 }

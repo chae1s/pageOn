@@ -1,6 +1,9 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
+import com.pageon.backend.dto.response.EpisodeCommentResponse;
+import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.entity.WebnovelEpisodeComment;
@@ -11,7 +14,10 @@ import com.pageon.backend.repository.WebnovelEpisodeCommentRepository;
 import com.pageon.backend.repository.WebnovelEpisodeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -22,6 +28,7 @@ public class WebnovelEpisodeCommentService {
     private final UserRepository userRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
 
+    @Transactional
     public void createComment(Long userId, Long episodeId, ContentEpisodeCommentRequest commentRequest) {
         final String text = commentRequest.getText();
         final Boolean isSpoiler = commentRequest.getIsSpoiler();
@@ -29,17 +36,7 @@ public class WebnovelEpisodeCommentService {
         log.info("[START] createComment: userId = {}, episodeId = {}", userId, episodeId);
 
         User user = userRepository.getReferenceById(userId);
-        WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
-                () -> {
-                    log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
-                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
-                }
-        );
-
-        if (webnovelEpisode.getDeleted()) {
-            log.error("WebnovelEpisode is deleted: episodeId = {}", episodeId);
-            throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
-        }
+        WebnovelEpisode webnovelEpisode = getWebnovelEpisode(episodeId);
 
         if (text.isBlank()) {
             log.error("Comment text is blank: episodeId = {}", episodeId);
@@ -57,4 +54,56 @@ public class WebnovelEpisodeCommentService {
         log.info("[SUCCESS] createComment committed: userId = {}, episodeId = {}", userId, episodeId);
 
     }
+
+    @Transactional
+    public Page<EpisodeCommentResponse> getCommentsByEpisodeId(Long userId, Long episodeId, Pageable pageable, String sort) {
+        log.info("[START] getCommentsByEpisodeId: userId = {}, episodeId = {}, sort = {}", userId, episodeId, sort);
+        Pageable sortedPageable = PageableUtil.createCommentPageable(pageable, sort);
+
+        WebnovelEpisode webnovelEpisode = getWebnovelEpisode(episodeId);
+
+        String webnovelTitle = webnovelEpisode.getWebnovel().getTitle();
+        Integer episodeNum = webnovelEpisode.getEpisodeNum();
+
+        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(episodeId, sortedPageable);
+
+        return commentPage.map(comment ->
+                EpisodeCommentResponse.fromWebnovelEntity(comment, userId, webnovelTitle, episodeNum)
+        );
+
+    }
+
+    @Transactional
+    public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
+        Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
+
+        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(userId, sortedPageable);
+
+        return commentPage.map(comment -> {
+            Long contentId = comment.getWebnovelEpisode().getWebnovel().getId();
+            String contentTitle = comment.getWebnovelEpisode().getWebnovel().getTitle();
+
+            return MyCommentResponse.fromWebnovelEntity(comment, contentId, contentTitle);
+
+        });
+
+    }
+
+    private WebnovelEpisode getWebnovelEpisode(Long episodeId) {
+        WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
+                () -> {
+                    log.error("Failed to find WebnovelEpisode: episodeId = {}", episodeId);
+                    return new CustomException(ErrorCode.EPISODE_NOT_FOUND);
+                }
+        );
+
+        if (webnovelEpisode.getIsDeleted()) {
+            log.error("WebnovelEpisode is deleted: episodeId = {}", episodeId);
+            throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
+        }
+
+        return webnovelEpisode;
+    }
+
+
 }

@@ -1,20 +1,23 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { WebtoonEpisodeDetail } from "../../types/Episodes";
 import * as S from "./Viewer.styles"
-import CommentList from "../../components/Comments/CommentList";
+import * as C from "./Comment.styles";
 import fullStarIcon from "../../assets/fullStarIcon.png"
 import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
 import emptyStarIcon from "../../assets/emptyStarIcon.png"
 import api from "../../api/axiosInstance";
-import BestComment from "../../components/Comments/BestComment";
+import { EpisodeComment } from "../../types/Comments";
 
 function WebtoonViewer() {
-    const { episodeId , contentId } = useParams();
+    const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
+    
+    const navigationType = useNavigationType();
+    const navigate = useNavigate();
 
-    const location = useLocation();
-    const restoreScrollY = location.state?.restoreScrollY;
+    const [showTitleSection, setShowTitleSection] = useState(true);
+    const lastScrollY = useRef(0);
 
     const [ episodeData, setEpisodeData ] = useState<WebtoonEpisodeDetail>({
         id: 0,
@@ -28,9 +31,6 @@ function WebtoonViewer() {
         userScore: null
     });
 
-    const [showTitleSection, setShowTitleSection] = useState(true);
-    const lastScrollY = useRef(0);
-
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
             if (!episodeId) return;
@@ -41,11 +41,25 @@ function WebtoonViewer() {
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
 
-                if (preserveScroll) {
-                    window.scrollTo(0, savedY);
+                if (navigationType !== 'POP') {
+                    if (preserveScroll) {
+                        window.scrollTo(0, savedY);
+                    }  else {
+                        window.scrollTo(0, 0);
+                    }
+                    
                 } else {
-                    window.scrollTo(0, 0);
+                    
+                    const scrollPosition = sessionStorage.getItem("scrollPosition");
+                    
+                    if (scrollPosition) {
+                        window.scrollTo(0, parseInt(scrollPosition, 10));
+                        sessionStorage.removeItem("scrollPosition");
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
                 }
+
             } catch (err) {
                 alert("에피소드 정보를 불러오지 못했습니다.");
                 return;
@@ -157,19 +171,20 @@ function WebtoonViewer() {
         window.scrollTo(0, savedY);
     };
 
-    const [comments] = useState([
-        {
-          id: 1,
-          bookTitle: "작품 제목 1",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "정말 재미있게 읽었습니다! 다음 편도 기대돼요.",
-          episodeNum: 12,
-          nickname: "닉네임1",
-          date: "2024-06-01",
-          likes: 12
-        }
-    ]);
+    const [episodeComment, setEpisodeComment] = useState<EpisodeComment | null>(null);
 
+    const handleGoToComments = (e:React.MouseEvent) => {
+        e.preventDefault();
+
+        const scrollPosition = window.scrollY;
+        const commentUrl = `/webtoons/${contentId}/viewer/${episodeId}/comments`;
+        
+        sessionStorage.setItem("scrollPosition", scrollPosition.toString());
+
+        navigate(commentUrl);
+    }
+    
+    
     if (!episodeId || !contentId) {
         return null;
     }
@@ -240,7 +255,34 @@ function WebtoonViewer() {
                 </S.RatingModalOverlay>
             )}
             <S.ViewerCommentSection>
-                <BestComment comment = {comments[0]!} contentType="webtoons" contentId={contentId} episodeId={episodeId}/>
+                <C.CommentList>
+                    <C.CommentHeader>
+                        <C.CommentCount>
+                            댓글 0개
+                        </C.CommentCount>
+                        <C.CommentListBtn onClick={handleGoToComments}>
+                            댓글 보기
+                        </C.CommentListBtn>
+                    </C.CommentHeader>
+                    <C.CommentListLi>
+                        <C.CommentInfo>
+                            <C.CommentBestInfo>
+                                <C.CommentBestIcon>
+                                    BEST
+                                </C.CommentBestIcon>
+                                <C.CommentBestUserInfo>
+                                    <div>닉네임</div>
+                                </C.CommentBestUserInfo>
+                            </C.CommentBestInfo>
+                        </C.CommentInfo>
+                        <C.CommentContentWrap>
+                            <C.CommentContent>내용</C.CommentContent>
+                        </C.CommentContentWrap>
+                        <C.CommentDateBtn>
+                            <div>날짜</div>
+                        </C.CommentDateBtn>
+                    </C.CommentListLi>
+                </C.CommentList>
             </S.ViewerCommentSection>
 
             <S.ViewerNextEpisodeBtnSection>

@@ -35,7 +35,7 @@ export const CommentInputWrap = styled.div`
     display: flex;
     align-items: center;
     padding: 10px;
-    height: 40px;
+    height: auto;
     width: 100%;
     flex: 1;
     padding-inline: 16px;
@@ -57,6 +57,7 @@ export const CommentInputTextarea = styled.textarea`
     line-height: 18px;
     resize: none;
     width: 100%;
+    overflow: hidden;
 `
 
 export const CommentInputBtn = styled.span`
@@ -138,13 +139,13 @@ export const CommentListLi = styled.li`
 
 export const CommentEpisode = styled.div`
     display: flex;
-    font-size: 15px;
+    font-size: 12px;
     color: #a5a5a5;
-    line-height: 18px;
+    line-height: 15px;
 `
 
 export const CommentTitle = styled.div`
-    margin-right: 10px;
+    margin-right: 6px;
 `
 
 export const CommentContentWrap = styled.div`
@@ -162,6 +163,32 @@ export const CommentContent = styled.p`
     white-space: pre-line;
     word-break: break-all;
     overflow-wrap: anywhere;
+`
+
+export const CommentSpoiler = styled.div`
+    font-size: 14px;
+    line-height: 22px;
+    color: #888;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+`
+
+export const HiddenCommentContent = styled(CommentContent)`
+    visibility: hidden;
+`
+
+export const CommentSpoilerOverlay = styled.div`
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    color: #888;
+    cursor: pointer;
+    user-select: none;
 `
 
 export const CommentInfo = styled.div`
@@ -184,8 +211,9 @@ export const CommentUserInfo = styled.div`
     width: fit-content;
     gap: 4px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
     line-height: 17px;
+    color: #444;
 `
 
 export const CommentDateBtn = styled.div`
@@ -206,7 +234,7 @@ export const CommentSpace = styled.div`
     margin: 0 7px;
 `
 
-export const CommentReportBtn = styled.button`
+export const CommentLeftBtn = styled.button`
     font-weight: 500;
     background: none;
     box-shadow: none;
@@ -221,7 +249,7 @@ export const CommentBtnDivider = styled.div`
     background: #e6e6e6;
 `
 
-export const CommentEditBtn = styled.button`
+export const CommentRightBtn = styled.button`
     font-weight: 500;
     background: none;
     box-shadow: none;

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort;
 
 public class PageableUtil {
 
-    public static Pageable createPageable(Pageable pageable, String sort) {
+    public static Pageable createContentPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
             case "latest" -> Sort.by(Sort.Order.asc("rating"));
             case "rating" -> Sort.by(Sort.Order.desc("totalAverageRating"));
@@ -26,4 +26,21 @@ public class PageableUtil {
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
+
+    public static Pageable createCommentPageable(Pageable pageable, String sort) {
+        Sort sortOrder = switch (sort) {
+            case "latest" -> Sort.by(Sort.Order.desc("createdAt"));
+            default -> Sort.by(Sort.Order.desc("likeCount"));
+        };
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+    }
+
+    public static Pageable createMyCommentPageable(Pageable pageable) {
+        Sort sortOrder = Sort.by(Sort.Order.desc("createdAt"));
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+    }
+
+
 }

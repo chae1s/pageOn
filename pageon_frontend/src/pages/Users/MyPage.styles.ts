@@ -65,6 +65,10 @@ export const MypageBooksSearchSelectSort = styled.div`
     justify-content: space-between;
 `
 
+export const MypageCommentsSection = styled.section`
+    padding-left: 10px;
+`
+
 export const MypageBooksSearchGroup = styled.div`
     display: flex;
     align-items: center;

@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContentPageResponse<T> {
+public class PageResponse<T> {
     private List<T> content;
     private Integer totalPages;
     private Long totalElements;
@@ -20,7 +20,7 @@ public class ContentPageResponse<T> {
     private Boolean first;
 
 
-    public ContentPageResponse(Page<T> page) {
+    public PageResponse(Page<T> page) {
         this.content = page.getContent();
         this.totalPages = page.getTotalPages();
         this.totalElements = page.getTotalElements();

@@ -38,6 +38,9 @@ public class WebnovelEpisodeComment extends BaseTimeEntity {
     private Boolean isSpoiler;
 
     @Builder.Default
+    private Long likeCount = 0L;
+
+    @Builder.Default
     @OneToMany(mappedBy = "webnovelEpisodeComment", cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<WebnovelEpisodeCommentLike> commentLikes = new ArrayList<>();
 }

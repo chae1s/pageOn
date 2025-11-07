@@ -1,6 +1,6 @@
 package com.pageon.backend.controller;
 
-import com.pageon.backend.dto.response.ContentPageResponse;
+import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.ContentSearchResponse;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -32,23 +31,23 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/keywords")
-    public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getContentsByKeyword(
+    public ResponseEntity<PageResponse<ContentSearchResponse>> getContentsByKeyword(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable) {
 
         if (contentType.equals("webnovels")) {
             Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByKeyword(query, sort, pageable);
-            return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
+            return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
         } else if (contentType.equals("webtoons")) {
             Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByKeyword(query, sort, pageable);
 
-            return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
+            return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
         }
 
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping
-    public ResponseEntity<ContentPageResponse<ContentSearchResponse>> getContentsByTitleOrCreator(
+    public ResponseEntity<PageResponse<ContentSearchResponse>> getContentsByTitleOrCreator(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable
     ) {
 
@@ -65,19 +64,19 @@ public class SearchController {
                 log.debug("Routing to 'webnovel' service");
                 Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
 
-                return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
+                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
             }
             case "webtoons" -> {
                 log.debug("Routing to 'webtoon' service");
                 Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
 
-                return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
+                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
             }
             case "all" -> {
                 log.debug("Routing to 'all' service");
                 Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(query, sort, pageable);
 
-                return ResponseEntity.ok(new ContentPageResponse<>(contentSearchResponses));
+                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
             }
         }
 

@@ -1,20 +1,24 @@
 import React, { useEffect, useState, useRef, ReactEventHandler } from "react";
 import axios from "axios";
-import { useLocation, useNavigationType, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { WebnovelEpisodeDetail } from "../../types/Episodes";
-import * as S from "./Viewer.styles"
-import BestComment from "../../components/Comments/BestComment"
-import fullStarIcon from "../../assets/fullStarIcon.png"
-import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
-import emptyStarIcon from "../../assets/emptyStarIcon.png"
+import * as S from "./Viewer.styles";
+import * as C from "./Comment.styles";
+import fullStarIcon from "../../assets/fullStarIcon.png";
+import halfFullStarIcon from "../../assets/halfFullStarIcon.png";
+import emptyStarIcon from "../../assets/emptyStarIcon.png";
 import api from "../../api/axiosInstance";
+import { EpisodeComment } from "../../types/Comments";
 
 function WebnovelViewer() {
     const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
-     
-    const location = useLocation();
     
     const navigationType = useNavigationType();
+    const navigate = useNavigate();
+
+    const [showTitleSection, setShowTitleSection] = useState(true);
+    const lastScrollY = useRef(0);
+
 
     const [ episodeData, setEpisodeData ] = useState<WebnovelEpisodeDetail>({
         id: 0,
@@ -28,11 +32,6 @@ function WebnovelViewer() {
         nextEpisodeId: null,
         userScore: 0
     });
-
-
-    const [showTitleSection, setShowTitleSection] = useState(true);
-    const lastScrollY = useRef(0);
-
 
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
@@ -99,7 +98,7 @@ function WebnovelViewer() {
     }, []);
 
     const [isRatingOpen, setIsRatingOpen] = useState(false);
-    const [selectedScore, setSelectedScore] = useState<number>(0); // 0 ~ 10 (0.5 step)
+    const [selectedScore, setSelectedScore] = useState<number>(0); 
 
     const getDisplayScore = () => (selectedScore ?? 0);
 
@@ -123,7 +122,6 @@ function WebnovelViewer() {
         setSelectedScore(score);
     };
     
-
     // 새 평점 등록
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
@@ -178,21 +176,18 @@ function WebnovelViewer() {
         window.scrollTo(0, savedY);
     };
 
-    const [comments] = useState([
-        {
-          id: 1,
-          bookTitle: "작품 제목 1",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "정말 재미있게 읽었습니다! 다음 편도 기대돼요.",
-          episodeNum: 12,
-          nickname: "닉네임1",
-          date: "2024-06-01",
-          likes: 12
-        }
-    ]);
+    const [episodeComment, setEpisodeComment] = useState<EpisodeComment | null>(null);
 
+    const handleGoToComments = (e:React.MouseEvent) => {
+        e.preventDefault();
 
+        const scrollPosition = window.scrollY;
+        const commentUrl = `/webnovels/${contentId}/viewer/${episodeId}/comments`;
+        
+        sessionStorage.setItem("scrollPosition", scrollPosition.toString());
 
+        navigate(commentUrl);
+    }
     
       
     if (!episodeId || !contentId) {
@@ -268,7 +263,34 @@ function WebnovelViewer() {
                 </S.RatingModalOverlay>
             )}
             <S.ViewerCommentSection>
-                <BestComment comment = {comments[0]!} contentType="webnovels" contentId={contentId} episodeId={episodeId}/>
+                <C.CommentList>
+                    <C.CommentHeader>
+                        <C.CommentCount>
+                            댓글 0개
+                        </C.CommentCount>
+                        <C.CommentListBtn onClick={handleGoToComments}>
+                            댓글 보기
+                        </C.CommentListBtn>
+                    </C.CommentHeader>
+                    <C.CommentListLi>
+                        <C.CommentInfo>
+                            <C.CommentBestInfo>
+                                <C.CommentBestIcon>
+                                    BEST
+                                </C.CommentBestIcon>
+                                <C.CommentBestUserInfo>
+                                    <div>닉네임</div>
+                                </C.CommentBestUserInfo>
+                            </C.CommentBestInfo>
+                        </C.CommentInfo>
+                        <C.CommentContentWrap>
+                            <C.CommentContent>내용</C.CommentContent>
+                        </C.CommentContentWrap>
+                        <C.CommentDateBtn>
+                            <div>날짜</div>
+                        </C.CommentDateBtn>
+                    </C.CommentListLi>
+                </C.CommentList>
             </S.ViewerCommentSection>
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>
