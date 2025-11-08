@@ -45,4 +45,9 @@ public class WebtoonEpisodeComment extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "webtoonEpisodeComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WebtoonEpisodeCommentLike> commentLikes = new ArrayList<>();
+
+    public void updateComment(String newText, Boolean isSpoiler) {
+        this.text = newText;
+        this.isSpoiler = isSpoiler;
+    }
 }

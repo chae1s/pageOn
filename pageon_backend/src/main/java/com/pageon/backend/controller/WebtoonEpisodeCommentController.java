@@ -46,4 +46,16 @@ public class WebtoonEpisodeCommentController {
 
         return ResponseEntity.ok(new PageResponse<>(commentResponses));
     }
+
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<Void> updateComment(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PathVariable Long episodeId,
+            @PathVariable Long commentId,
+            @RequestBody ContentEpisodeCommentRequest commentRequest
+    ) {
+        webnovelEpisodeCommentService.updateComment(principalUser.getId(), commentId, commentRequest);
+
+        return ResponseEntity.ok().build();
+    }
 }

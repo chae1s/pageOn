@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
@@ -88,6 +89,28 @@ public class WebtoonEpisodeCommentService {
 
     }
 
+    @Transactional
+    public void updateComment(Long userId, Long commentId, ContentEpisodeCommentRequest commentRequest) {
+        final String newText = commentRequest.getText();
+        final Boolean isSpoiler = commentRequest.getIsSpoiler();
+
+        log.info("[START] updateComment: contentType = {}, userId = {}, commentId = {}", ContentType.WEBTOON, userId, commentId);
+
+        WebtoonEpisodeComment comment = webtoonEpisodeCommentRepository.findById(commentId).orElseThrow(
+                () -> {
+                    log.error("Comment id not found: commentId = {}", commentId);
+                    return new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+                }
+        );
+
+        if (comment.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
+
+        if (newText.isBlank()) throw new CustomException(ErrorCode.COMMENT_TEXT_IS_BLANK);
+
+        comment.updateComment(newText, isSpoiler);
+        log.info("[SUCCESS] updateComment committed: userId = {}, commentId = {}", userId, commentId);
+    }
+
     private WebtoonEpisode getWebtoonEpisode(Long episodeId) {
         WebtoonEpisode webtoonEpisode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
                 () -> {
@@ -103,4 +126,6 @@ public class WebtoonEpisodeCommentService {
 
         return webtoonEpisode;
     }
+
+
 }

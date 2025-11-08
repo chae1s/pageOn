@@ -14,6 +14,7 @@ public enum ErrorCode {
     OAUTH_PROVIDER_MISMATCH("지원하지 않는 OAuth Provider입니다.", HttpStatus.BAD_REQUEST),
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
     CREATOR_PERMISSION_DENIED("creator 권한이 존재하지 않습니다.", HttpStatus.FORBIDDEN),
+    COMMENT_FORBIDDEN("본인 댓글만 수정할 수 있습니다.", HttpStatus.FORBIDDEN),
 
     // 본인인증
     INVALID_VERIFICATION_METHOD("지원하지 않는 본인인증 방식입니다.", HttpStatus.BAD_REQUEST),
@@ -63,6 +64,7 @@ public enum ErrorCode {
     EPISODE_RATING_NOT_FOUND("해당 에피소드에 저장된 평점이 없습니다.", HttpStatus.NOT_FOUND),
     COMMENT_TEXT_IS_BLANK("댓글 내용이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     EPISODE_IS_DELETED("삭제된 에피소드입니다.", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND("존재하지 않는 댓글입니다.", HttpStatus.NOT_FOUND),
 
     ;
 

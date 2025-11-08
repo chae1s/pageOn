@@ -24,9 +24,11 @@ public class Keyword {
     private Category category;
     private String name;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "keywords")
     private List<Webnovel> webnovels = new ArrayList<>();
 
+    @Builder.Default
     @ManyToMany(mappedBy = "keywords")
     private List<Webtoon> webtoons = new ArrayList<>();
 

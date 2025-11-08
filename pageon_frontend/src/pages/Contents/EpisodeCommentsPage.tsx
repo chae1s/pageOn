@@ -27,6 +27,9 @@ function EpisodeCommentsPage() {
     const [episodeComments, setEpisodeComments] = useState<EpisodeComment[]>([]);
     const [pageData, setPageData] = useState<Pagination<EpisodeComment> | null>(null);
     const [revealedSpoilers, setRevealedSpoilers] = useState<Set<number>>(new Set());
+    const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+    const [editingCommentText, setEditingCommentText] = useState<string>("");
+    const [editingCommentSpoiler, setEditingCommentSpoiler] = useState<boolean>(false);
 
     const navigate = useNavigate();
 
@@ -121,6 +124,43 @@ function EpisodeCommentsPage() {
         const newParams = new URLSearchParams(searchParams);
         newParams.set("page", newPage.toString());
         setSearchParams(newParams);
+    }
+
+    const handleEditClick = (comment: EpisodeComment) => {
+        setEditingCommentId(comment.id);
+        setEditingCommentText(comment.text);
+        setEditingCommentSpoiler(comment.isSpoiler);
+    }
+
+    const handleCancelEdit = () => {
+        setEditingCommentId(null);
+        setEditingCommentText("");
+        setEditingCommentSpoiler(false);
+    }
+
+    const handleUpdateComment = async (commentId: number) => {
+        const text = editingCommentText.trim();
+        
+        if (!text) {
+            return;
+        }
+
+        const updateComment: CreateComment = {
+            text: text,
+            isSpoiler: editingCommentSpoiler
+        }
+
+        try {
+            await api.patch(`/${contentType}/episodes/${episodeId}/comments/${commentId}`, updateComment);
+            
+            setEditingCommentId(null);
+            setEditingCommentText("");
+            setEditingCommentSpoiler(false);
+
+            getComments();
+        } catch (error) {
+            console.error("댓글 수정 실패 : ", error);
+        }
     }
 
     const getPageNumbers = () => {
@@ -222,53 +262,121 @@ function EpisodeCommentsPage() {
                             <C.CommentListEmptyText>댓글이 없습니다.</C.CommentListEmptyText>
                         ) : (
                             episodeComments.map((comment) => (
-                                <C.CommentListLi>
+                                <C.CommentListLi key={comment.id}>
                                     <C.CommentUserInfo>
                                         <div>
                                             {comment.nickname}
                                         </div>
                                     </C.CommentUserInfo>
-                                    <C.CommentContentWrap>
-                                        {comment.isSpoiler && !revealedSpoilers.has(comment.id) ? (
-                                            <>
-                                                <C.HiddenCommentContent>{comment.text}</C.HiddenCommentContent>
-                                                <C.CommentSpoilerOverlay onClick={() => toggleSpoilerReveal(comment.id)}>
-                                                    <C.CommentSpoiler>스포일러가 포함된 댓글입니다.</C.CommentSpoiler>
-                                                </C.CommentSpoilerOverlay>
-                                            </>
-                                        ) : (
-                                            <C.CommentContent>{comment.text}</C.CommentContent>
-                                        )}
-                                    </C.CommentContentWrap>
-                                    <C.CommentInfo>
-                                        <C.CommentInfoLeft>
-                                            <C.CommentEpisode>
-                                                <C.CommentTitle>{comment.contentTitle}</C.CommentTitle>
-                                                <div>{comment.episodeNum}화</div>
-                                            </C.CommentEpisode>
-                                            <C.CommentDateBtn>
-                                                <div>{formatDate(comment.createdAt)}</div>
-                                                <C.CommentSpace></C.CommentSpace>
-                                                {comment.isMine ? (
+                                    {editingCommentId === comment.id ? (
+                                        <>
+                                            <C.CommentContentWrap>
+                                                <C.CommentInputWrap style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
+                                                    <C.CommentInputFlex>
+                                                        <C.CommentInputTextarea
+                                                            value={editingCommentText}
+                                                            onChange={(e) => setEditingCommentText(e.target.value)}
+                                                            onInput={(e) => {
+                                                                const el = e.currentTarget;
+                                                                el.style.height = '18px';
+                                                                el.style.height = `${el.scrollHeight}px`;
+                                                            }}
+                                                            rows={1}
+                                                            style={{ border: 'none', padding: 0, background: 'transparent' }}
+                                                        />
+                                                    </C.CommentInputFlex>
+                                                    {editingCommentText.trim().length > 0 && (
+                                                        <C.CommentInputBtn onClick={() => handleUpdateComment(comment.id)}>
+                                                            저장
+                                                        </C.CommentInputBtn>
+                                                    )}
+                                                </C.CommentInputWrap>
+                                                <C.CommentSpoilerCheckSection>
+                                                    <C.CommentSpoilerCheckWrap>
+                                                        <C.CommentSpoilerCheckboxWrap onClick={() => setEditingCommentSpoiler(prev => !prev)}>
+                                                            <C.CommentSpoilerCheckbox
+                                                                type="checkbox"
+                                                                checked={editingCommentSpoiler}
+                                                                onChange={(e) => setEditingCommentSpoiler(e.target.checked)}
+                                                                style={{ display: 'none' }}
+                                                            />
+                                                            {editingCommentSpoiler ? (
+                                                                <C.CommentSpoilerCheckboxCheckIcon src={FullCheckboxIcon} />
+                                                            ) : (
+                                                                <C.CommentSpoilerCheckboxEmptyIcon src={BlankCheckboxIcon} />
+                                                            )}
+                                                        </C.CommentSpoilerCheckboxWrap>
+                                                        <C.CommentSpoilerText onClick={() => setEditingCommentSpoiler(prev => !prev)}>
+                                                            댓글에 스포일러 포함
+                                                        </C.CommentSpoilerText>
+                                                    </C.CommentSpoilerCheckWrap>
+                                                </C.CommentSpoilerCheckSection>
+                                            </C.CommentContentWrap>
+                                            <C.CommentInfo>
+                                                <C.CommentInfoLeft>
+                                                    <C.CommentEpisode>
+                                                        <C.CommentTitle>{comment.contentTitle}</C.CommentTitle>
+                                                        <div>{comment.episodeNum}화</div>
+                                                    </C.CommentEpisode>
+                                                    <C.CommentDateBtn>
+                                                        <div>{formatDate(comment.createdAt)}</div>
+                                                        <C.CommentSpace></C.CommentSpace>
+                                                        <C.CommentLeftBtn onClick={handleCancelEdit}>취소</C.CommentLeftBtn>
+                                                    </C.CommentDateBtn>  
+                                                </C.CommentInfoLeft>
+                                                <div>
+                                                    <C.CommentLikeBtn type="button">
+                                                        <C.LikeEmptyIcon src={LikeEmptyIcon} />
+                                                        <span>{comment.likeCount}</span>
+                                                    </C.CommentLikeBtn>
+                                                </div>
+                                            </C.CommentInfo>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <C.CommentContentWrap>
+                                                {comment.isSpoiler && !revealedSpoilers.has(comment.id) ? (
                                                     <>
-                                                        <C.CommentLeftBtn>수정</C.CommentLeftBtn>
-                                                        <C.CommentBtnDivider></C.CommentBtnDivider>
-                                                        <C.CommentRightBtn type="button">삭제</C.CommentRightBtn>
+                                                        <C.HiddenCommentContent>{comment.text}</C.HiddenCommentContent>
+                                                        <C.CommentSpoilerOverlay onClick={() => toggleSpoilerReveal(comment.id)}>
+                                                            <C.CommentSpoiler>스포일러가 포함된 댓글입니다.</C.CommentSpoiler>
+                                                        </C.CommentSpoilerOverlay>
                                                     </>
                                                 ) : (
-                                                    <>
-                                                        <C.CommentLeftBtn>신고</C.CommentLeftBtn>
-                                                    </>
+                                                    <C.CommentContent>{comment.text}</C.CommentContent>
                                                 )}
-                                            </C.CommentDateBtn>  
-                                        </C.CommentInfoLeft>
-                                        <div>
-                                            <C.CommentLikeBtn type="button">
-                                                <C.LikeEmptyIcon src={LikeEmptyIcon} />
-                                                <span>{comment.likeCount}</span>
-                                            </C.CommentLikeBtn>
-                                        </div>
-                                    </C.CommentInfo>
+                                            </C.CommentContentWrap>
+                                            <C.CommentInfo>
+                                                <C.CommentInfoLeft>
+                                                    <C.CommentEpisode>
+                                                        <C.CommentTitle>{comment.contentTitle}</C.CommentTitle>
+                                                        <div>{comment.episodeNum}화</div>
+                                                    </C.CommentEpisode>
+                                                    <C.CommentDateBtn>
+                                                        <div>{formatDate(comment.createdAt)}</div>
+                                                        <C.CommentSpace></C.CommentSpace>
+                                                        {comment.isMine ? (
+                                                            <>
+                                                                <C.CommentLeftBtn onClick={() => handleEditClick(comment)}>수정</C.CommentLeftBtn>
+                                                                <C.CommentBtnDivider></C.CommentBtnDivider>
+                                                                <C.CommentRightBtn type="button">삭제</C.CommentRightBtn>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <C.CommentLeftBtn>신고</C.CommentLeftBtn>
+                                                            </>
+                                                        )}
+                                                    </C.CommentDateBtn>  
+                                                </C.CommentInfoLeft>
+                                                <div>
+                                                    <C.CommentLikeBtn type="button">
+                                                        <C.LikeEmptyIcon src={LikeEmptyIcon} />
+                                                        <span>{comment.likeCount}</span>
+                                                    </C.CommentLikeBtn>
+                                                </div>
+                                            </C.CommentInfo>
+                                        </>
+                                    )}
                                 </C.CommentListLi>
                             ))
                         )}

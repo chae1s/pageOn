@@ -238,10 +238,6 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
-        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
-        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
-
-
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
         when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
@@ -264,11 +260,6 @@ class WebnovelEpisodeCommentServiceTest {
 
         Long webnovelId = 10L;
         Long episodeId = 100L;
-
-        Long commentId1 = 200L;
-        Long commentId2 = 210L;
-
-        String text = "좋은 작품입니다.";
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
@@ -412,6 +403,142 @@ class WebnovelEpisodeCommentServiceTest {
         // then
         assertEquals(2, result.getContent().size());
         assertEquals(commentId1, result.getContent().get(0).getId());
+    }
+
+    @Test
+    @DisplayName("댓글 내용을 수정하면 정상적으로 변경된다.")
+    void shouldUpdateCommentText_whenValidRequestProvided() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String oldText = "기존 댓글 내용";
+        String newText = "수정 댓글 내용";
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
+
+        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+
+        when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        webnovelEpisodeCommentService.updateComment(userId, commentId, commentRequest);
+
+        // then
+        assertEquals(newText, comment.getText());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 댓글을 수정하면 예외가 발생한다.")
+    void shouldThrowException_whenCommentDoesNotExist() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String oldText = "기존 댓글 내용";
+        String newText = "수정 댓글 내용";
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
+
+        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+
+        when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelEpisodeCommentService.updateComment(userId, commentId, commentRequest);
+        });
+
+        // then
+        assertEquals("존재하지 않는 댓글입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("본인 댓글이 아닌 댓글을 수정하려고 하면 예외가 발생한다.")
+    void shouldThrowException_whenUserIsNotOwnerOfComment() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long writerId = 2L;
+        User writer = User.builder().id(writerId).email("writer@mail.com").nickname("댓글작성자").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String oldText = "기존 댓글 내용";
+        String newText = "수정 댓글 내용";
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(writer).webnovelEpisode(webnovelEpisode).build();
+
+        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+
+        when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelEpisodeCommentService.updateComment(userId, commentId, commentRequest);
+        });
+
+
+        // then
+        assertEquals("본인 댓글만 수정할 수 있습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_FORBIDDEN, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("수정한 댓글 내용이 비어 있으면 예외가 발생한다.")
+    void shouldThrowException_whenContentIsBlank() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webnovelId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String oldText = "기존 댓글 내용";
+        String newText = "";
+
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
+
+        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+
+        when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webnovelEpisodeCommentService.updateComment(userId, commentId, commentRequest);
+        });
+
+        // then
+        assertEquals("댓글 내용이 존재하지 않습니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_TEXT_IS_BLANK, ErrorCode.valueOf(exception.getErrorCode()));
+
     }
 
 
