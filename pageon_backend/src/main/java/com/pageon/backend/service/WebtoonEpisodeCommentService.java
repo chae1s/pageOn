@@ -67,7 +67,7 @@ public class WebtoonEpisodeCommentService {
         String webtoonTitle = webtoonEpisode.getWebtoon().getTitle();
         Integer episodeNum = webtoonEpisode.getEpisodeNum();
 
-        Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndIsDeletedFalse(episodeId, sortedPageable);
+        Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndDeletedAtNull(episodeId, sortedPageable);
 
         return commentPage.map(comment ->
                 EpisodeCommentResponse.fromWebtoonEntity(comment, userId, webtoonTitle, episodeNum)
@@ -78,7 +78,7 @@ public class WebtoonEpisodeCommentService {
     public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
         Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
 
-        Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(userId, sortedPageable);
+        Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(userId, sortedPageable);
 
         return commentPage.map(comment -> {
             Long contentId = comment.getWebtoonEpisode().getWebtoon().getId();

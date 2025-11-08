@@ -24,6 +24,7 @@ import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,7 +207,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
-        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
         
         //when
         Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId1, episodeId, pageable, "popular");
@@ -240,7 +241,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
-        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
 
         //when
         Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
@@ -307,7 +308,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
 
-        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<EpisodeCommentResponse> result = webnovelEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
@@ -354,7 +355,7 @@ class WebnovelEpisodeCommentServiceTest {
         WebnovelEpisodeComment comment3 = WebnovelEpisodeComment.builder().id(commentId3).user(user2).webnovelEpisode(webnovelEpisode1).text(text).build();
 
 
-        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId1), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(eq(userId1), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<MyCommentResponse> result = webnovelEpisodeCommentService.getCommentsByUserId(userId1, pageable);
@@ -390,12 +391,13 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
-        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(false).build();
-        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(false).build();
-        WebnovelEpisodeComment comment3 = WebnovelEpisodeComment.builder().id(commentId3).user(user).webnovelEpisode(webnovelEpisode).text(text).isDeleted(true).build();
+
+        WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
+        WebnovelEpisodeComment comment2 = WebnovelEpisodeComment.builder().id(commentId2).user(user).webnovelEpisode(webnovelEpisode).text(text).build();
+        WebnovelEpisodeComment comment3 = WebnovelEpisodeComment.builder().id(commentId3).user(user).webnovelEpisode(webnovelEpisode).text(text).deletedAt(LocalDateTime.now()).build();
 
 
-        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webnovelEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<MyCommentResponse> result = webnovelEpisodeCommentService.getCommentsByUserId(userId, pageable);
@@ -538,6 +540,76 @@ class WebnovelEpisodeCommentServiceTest {
         // then
         assertEquals("댓글 내용이 존재하지 않습니다.",  exception.getErrorMessage());
         assertEquals(ErrorCode.COMMENT_TEXT_IS_BLANK, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+    
+    @Test
+    @DisplayName("본인 댓글 삭제 시 정상적으로 삭제된다.")
+    void shouldSoftDeleteComment_whenUserIsOwner() {
+        // given
+
+
+        //when
+
+
+        // then
+
+
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 댓글을 삭제하면 예외가 발생한다. ")
+    void shouldThrowException_whenCommentDoesNotExistDuringDelete() {
+        // given
+
+
+        //when
+
+
+        // then
+
+
+    }
+
+    @Test
+    @DisplayName("이미 삭제된 댓글을 다시 삭제하려 하면 예외가 발생한다.")
+    void shouldThrowException_whenCommentAlreadyDeleted() {
+        // given
+
+
+        //when
+
+
+        // then
+
+
+    }
+
+    @Test
+    @DisplayName("본인 댓글이 아닌 댓글을 삭제하려 하면 예외가 발생한다.")
+    void shouldThrowException_whenUserIsNotOwnerOfCommentDuringDelete() {
+        // given
+
+
+        //when
+
+
+        // then
+
+
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 후 DeletedAt 값이 변경된다.")
+    void shouldSetDeletedNotNull_whenCommentDeleted() {
+        // given
+
+
+        //when
+
+
+        // then
+
 
     }
 

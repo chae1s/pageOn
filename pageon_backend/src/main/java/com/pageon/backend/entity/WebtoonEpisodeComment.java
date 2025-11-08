@@ -4,6 +4,7 @@ package com.pageon.backend.entity;
 import com.pageon.backend.common.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Builder
+@SuperBuilder
 @DynamicUpdate
 @Table(name = "webtoon_episode_comments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,8 +34,6 @@ public class WebtoonEpisodeComment extends BaseTimeEntity {
     @Column(nullable = false)
     private String text;
 
-    @Builder.Default
-    private Boolean isDeleted = false;
 
     private Boolean isSpoiler;
 

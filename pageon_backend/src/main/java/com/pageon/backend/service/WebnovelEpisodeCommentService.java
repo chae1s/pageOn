@@ -66,7 +66,7 @@ public class WebnovelEpisodeCommentService {
         String webnovelTitle = webnovelEpisode.getWebnovel().getTitle();
         Integer episodeNum = webnovelEpisode.getEpisodeNum();
 
-        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndIsDeletedFalse(episodeId, sortedPageable);
+        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByWebnovelEpisode_IdAndDeletedAtNull(episodeId, sortedPageable);
 
         return commentPage.map(comment ->
                 EpisodeCommentResponse.fromWebnovelEntity(comment, userId, webnovelTitle, episodeNum)
@@ -78,7 +78,7 @@ public class WebnovelEpisodeCommentService {
     public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
         Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
 
-        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(userId, sortedPageable);
+        Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(userId, sortedPageable);
 
         return commentPage.map(comment -> {
             Long contentId = comment.getWebnovelEpisode().getWebnovel().getId();

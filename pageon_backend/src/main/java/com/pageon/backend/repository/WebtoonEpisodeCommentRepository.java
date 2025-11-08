@@ -9,8 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WebtoonEpisodeCommentRepository extends JpaRepository<WebtoonEpisodeComment, Long> {
 
     @EntityGraph(attributePaths = {"user"})
-    Page<WebtoonEpisodeComment> findAllByWebtoonEpisode_IdAndIsDeletedFalse(Long episodeId, Pageable pageable);
+    Page<WebtoonEpisodeComment> findAllByWebtoonEpisode_IdAndDeletedAtNull(Long episodeId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"webtoonEpisode", "webtoonEpisode.webtoon", "user"})
-    Page<WebtoonEpisodeComment> findAllByUser_IdAndIsDeletedFalse(Long userId, Pageable pageable);
+    Page<WebtoonEpisodeComment> findAllByUser_IdAndDeletedAtNull(Long userId, Pageable pageable);
+    
 }

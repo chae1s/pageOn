@@ -21,6 +21,7 @@ import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -204,7 +205,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
-        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<EpisodeCommentResponse> result = webtoonEpisodeCommentService.getCommentsByEpisodeId(userId1, episodeId, pageable, "popular");
@@ -242,7 +243,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
-        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
+        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(Page.empty());
 
         //when
         Page<EpisodeCommentResponse> result = webtoonEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
@@ -314,7 +315,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
-        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndIsDeletedFalse(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndDeletedAtNull(eq(episodeId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<EpisodeCommentResponse> result = webtoonEpisodeCommentService.getCommentsByEpisodeId(userId, episodeId, pageable, "popular");
@@ -361,7 +362,7 @@ class WebtoonEpisodeCommentServiceTest {
         WebtoonEpisodeComment comment3 = WebtoonEpisodeComment.builder().id(commentId3).user(user2).webtoonEpisode(webtoonEpisode1).text(text).build();
 
 
-        when(webtoonEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId1), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webtoonEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(eq(userId1), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<MyCommentResponse> result = webtoonEpisodeCommentService.getCommentsByUserId(userId1, pageable);
@@ -397,12 +398,12 @@ class WebtoonEpisodeCommentServiceTest {
         Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
-        WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user).webtoonEpisode(webtoonEpisode).text(text).isDeleted(false).build();
-        WebtoonEpisodeComment comment2 = WebtoonEpisodeComment.builder().id(commentId2).user(user).webtoonEpisode(webtoonEpisode).text(text).isDeleted(false).build();
-        WebtoonEpisodeComment comment3 = WebtoonEpisodeComment.builder().id(commentId3).user(user).webtoonEpisode(webtoonEpisode).text(text).isDeleted(true).build();
+        WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user).webtoonEpisode(webtoonEpisode).text(text).build();
+        WebtoonEpisodeComment comment2 = WebtoonEpisodeComment.builder().id(commentId2).user(user).webtoonEpisode(webtoonEpisode).text(text).build();
+        WebtoonEpisodeComment comment3 = WebtoonEpisodeComment.builder().id(commentId3).user(user).webtoonEpisode(webtoonEpisode).text(text).deletedAt(LocalDateTime.now()).build();
 
 
-        when(webtoonEpisodeCommentRepository.findAllByUser_IdAndIsDeletedFalse(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
+        when(webtoonEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(comment1, comment2), pageable, 2));
 
         //when
         Page<MyCommentResponse> result = webtoonEpisodeCommentService.getCommentsByUserId(userId, pageable);
