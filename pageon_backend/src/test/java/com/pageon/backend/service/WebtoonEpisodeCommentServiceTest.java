@@ -510,7 +510,7 @@ class WebtoonEpisodeCommentServiceTest {
 
 
         // then
-        assertEquals("본인 댓글만 수정할 수 있습니다.", exception.getErrorMessage());
+        assertEquals("본인 댓글만 수정/삭제할 수 있습니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.COMMENT_FORBIDDEN, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
@@ -546,6 +546,132 @@ class WebtoonEpisodeCommentServiceTest {
         // then
         assertEquals("댓글 내용이 존재하지 않습니다.",  exception.getErrorMessage());
         assertEquals(ErrorCode.COMMENT_TEXT_IS_BLANK, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("본인 댓글 삭제 시 정상적으로 삭제된다.")
+    void shouldSoftDeleteComment_whenUserIsOwner() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webtoonId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String text = "댓글 내용";
+
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
+        WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).build();
+
+        when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        webtoonEpisodeCommentService.deleteComment(userId, commentId);
+
+        // then
+        assertNotNull(comment.getDeletedAt());
+        verify(webtoonEpisodeCommentRepository, times(1)).findById(commentId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 댓글을 삭제하면 예외가 발생한다. ")
+    void shouldThrowException_whenCommentDoesNotExistDuringDelete() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webtoonId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String text = "댓글 내용";
+
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
+        WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).build();
+
+        when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonEpisodeCommentService.deleteComment(userId, commentId);
+        });
+
+        // then
+        assertEquals("존재하지 않는 댓글입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+
+    }
+
+    @Test
+    @DisplayName("이미 삭제된 댓글을 다시 삭제하려 하면 예외가 발생한다.")
+    void shouldThrowException_whenCommentAlreadyDeleted() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long webtoonId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String text = "댓글 내용";
+
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
+        WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).deletedAt(LocalDateTime.now()).build();
+
+        when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonEpisodeCommentService.deleteComment(userId, commentId);
+        });
+
+
+        // then
+        assertEquals("이미 삭제된 댓글입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_ALREADY_DELETED, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("본인 댓글이 아닌 댓글을 삭제하려 하면 예외가 발생한다.")
+    void shouldThrowException_whenUserIsNotOwnerOfCommentDuringDelete() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@mail.com").nickname("테스트").deleted(false).build();
+
+        Long writerId = 2L;
+        User writer = User.builder().id(writerId).email("writer@mail.com").nickname("댓글작성자").deleted(false).build();
+
+        Long webtoonId = 10L;
+        Long episodeId = 100L;
+
+        Long commentId = 200L;
+
+        String text = "댓글 내용";
+
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
+        WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(writer).webtoonEpisode(webtoonEpisode).build();
+
+        when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        //when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            webtoonEpisodeCommentService.deleteComment(userId, commentId);
+        });
+
+        // then
+        assertEquals("본인 댓글만 수정/삭제할 수 있습니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.COMMENT_FORBIDDEN, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 

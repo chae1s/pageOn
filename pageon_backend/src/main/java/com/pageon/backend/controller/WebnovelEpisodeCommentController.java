@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/webnovels/episodes/{episodeId}/comments")
+@RequestMapping("/api/webnovels")
 @RequiredArgsConstructor
 public class WebnovelEpisodeCommentController {
     private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
 
-    @PostMapping()
+    @PostMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<Void> createComment(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @PathVariable Long episodeId,
@@ -31,7 +31,7 @@ public class WebnovelEpisodeCommentController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<PageResponse<EpisodeCommentResponse>> getCommentsByEpisodeId(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @PathVariable Long episodeId,
@@ -45,14 +45,23 @@ public class WebnovelEpisodeCommentController {
         return ResponseEntity.ok(new PageResponse<>(commentResponses));
     }
 
-    @PatchMapping("/{commentId}")
+    @PatchMapping("/comments/{commentId}")
     public ResponseEntity<Void> updateComment(
             @AuthenticationPrincipal PrincipalUser principalUser,
-            @PathVariable Long episodeId,
             @PathVariable Long commentId,
             @RequestBody ContentEpisodeCommentRequest commentRequest
     ) {
         webnovelEpisodeCommentService.updateComment(principalUser.getId(), commentId, commentRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PathVariable Long commentId
+    ) {
+        webnovelEpisodeCommentService.deleteComment(principalUser.getId(), commentId);
 
         return ResponseEntity.ok().build();
     }

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import axios from "axios";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import * as M from "./MyPage.styles"
@@ -31,27 +31,30 @@ function MyComments() {
         setSearchParams(newParams);
     }
 
-    useEffect(() => {
-        async function getMyComments() {
-            try {
-                const response = await api.get("/users/comments", {
-                    params: {
-                        type: type,
-                        page: page
-                    }
-                })
+    
 
-                setMyComments(response.data.content ?? []);
-                setPageData(response.data);
+    const getMyComments = useCallback(async () => {
+        try {
+            const response = await api.get("/users/comments", {
+                params: {
+                    type: type,
+                    page: page
+                }
+            })
 
-                console.log(response.data.content)
-            } catch (error) {
-                console.log("내가 작성한 댓글 조회 실패: ", error)
-            }
+            setMyComments(response.data.content ?? []);
+            setPageData(response.data);
+
+            console.log(response.data.content)
+        } catch (error) {
+            console.log("내가 작성한 댓글 조회 실패: ", error)
         }
-
-        getMyComments();
     }, [type, page]);
+
+    useEffect(() => {
+        getMyComments();
+        
+    }, [getMyComments]);
 
 
     const handlePageChange = (newPage: number) => {
@@ -84,24 +87,33 @@ function MyComments() {
         }
 
         try {
-            await api.patch(`/${contentType}/episodes/${comment.episodeId}/comments/${comment.id}`, updateComment);
+            await api.patch(`/${contentType}/comments/${comment.id}`, updateComment);
             
             setEditingCommentId(null);
             setEditingCommentText("");
 
             // 댓글 목록 새로고침
-            const response = await api.get("/users/comments", {
-                params: {
-                    type: type,
-                    page: page
-                }
-            });
-            setMyComments(response.data.content ?? []);
-            setPageData(response.data);
+            getMyComments();
         } catch (error) {
             console.error("댓글 수정 실패 : ", error);
         }
     }
+
+    const handleDeleteComment = async (comment: MyComment) => {
+        if (!window.confirm("댓글을 삭제하시겠습니까?")) {
+            return;
+        }
+        
+        try {
+            await api.delete(`/${type}/comments/${comment.id}`)
+
+            getMyComments();
+
+        } catch (error) {
+            console.error("댓글 삭제 실패: ", error);
+        }
+    }
+
 
     const getPageNumbers = () => {
         if (!pageData) return [];
@@ -208,7 +220,7 @@ function MyComments() {
                                                             <C.CommentSpace></C.CommentSpace>
                                                             <C.CommentLeftBtn onClick={() => handleEditClick(comment)}>수정</C.CommentLeftBtn>
                                                             <C.CommentBtnDivider></C.CommentBtnDivider>
-                                                            <C.CommentRightBtn type="button">삭제</C.CommentRightBtn>
+                                                            <C.CommentRightBtn type="button" onClick={() => handleDeleteComment(comment)}>삭제</C.CommentRightBtn>
                                                         </C.CommentDateBtn>  
                                                     </C.CommentInfoLeft>
                                                     <div>

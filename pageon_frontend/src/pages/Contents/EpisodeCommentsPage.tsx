@@ -151,7 +151,7 @@ function EpisodeCommentsPage() {
         }
 
         try {
-            await api.patch(`/${contentType}/episodes/${episodeId}/comments/${commentId}`, updateComment);
+            await api.patch(`/${contentType}/comments/${commentId}`, updateComment);
             
             setEditingCommentId(null);
             setEditingCommentText("");
@@ -160,6 +160,22 @@ function EpisodeCommentsPage() {
             getComments();
         } catch (error) {
             console.error("댓글 수정 실패 : ", error);
+        }
+    }
+
+    const handleDeleteComment = async (commentId: number) => {
+        if (!window.confirm("댓글을 삭제하시겠습니까?")) {
+            return;
+        }
+        
+        
+        try {
+            await api.delete(`${contentType}/comments/${commentId}`)
+
+            getComments();
+
+        } catch (error) {
+            console.error("댓글 삭제 실패: ", error);
         }
     }
 
@@ -359,7 +375,7 @@ function EpisodeCommentsPage() {
                                                             <>
                                                                 <C.CommentLeftBtn onClick={() => handleEditClick(comment)}>수정</C.CommentLeftBtn>
                                                                 <C.CommentBtnDivider></C.CommentBtnDivider>
-                                                                <C.CommentRightBtn type="button">삭제</C.CommentRightBtn>
+                                                                <C.CommentRightBtn type="button" onClick={() => handleDeleteComment(comment.id)}>삭제</C.CommentRightBtn>
                                                             </>
                                                         ) : (
                                                             <>

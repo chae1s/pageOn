@@ -20,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -103,12 +105,32 @@ public class WebtoonEpisodeCommentService {
                 }
         );
 
-        if (comment.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
+        if (!comment.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
 
         if (newText.isBlank()) throw new CustomException(ErrorCode.COMMENT_TEXT_IS_BLANK);
 
         comment.updateComment(newText, isSpoiler);
         log.info("[SUCCESS] updateComment committed: userId = {}, commentId = {}", userId, commentId);
+    }
+
+    @Transactional
+    public void deleteComment(Long userId, Long commentId) {
+        log.info("[START] deleteComment: contentType = {}, userId = {}, commentId = {}", ContentType.WEBTOON, userId, commentId);
+
+        WebtoonEpisodeComment comment = webtoonEpisodeCommentRepository.findById(commentId).orElseThrow(
+                () -> {
+                    log.error("Comment id not found: commentId = {}", commentId);
+                    return new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+                }
+        );
+
+        if (!comment.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
+
+        if (comment.getDeletedAt() != null) throw new CustomException(ErrorCode.COMMENT_ALREADY_DELETED);
+
+        comment.deleteComment(LocalDateTime.now());
+
+        log.info("[SUCCESS] deleteComment committed: userId = {}, commentId = {}", userId, commentId);
     }
 
     private WebtoonEpisode getWebtoonEpisode(Long episodeId) {
@@ -126,6 +148,7 @@ public class WebtoonEpisodeCommentService {
 
         return webtoonEpisode;
     }
+
 
 
 }

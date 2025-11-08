@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,5 +47,9 @@ public class WebnovelEpisodeComment extends BaseTimeEntity {
     public void updateComment(String newText, Boolean isSpoiler) {
         this.text = newText;
         this.isSpoiler = isSpoiler;
+    }
+
+    public void deleteComment(LocalDateTime deleteTime) {
+        this.setDeletedAt(deleteTime);
     }
 }

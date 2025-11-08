@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface WebtoonEpisodeCommentRepository extends JpaRepository<WebtoonEpisodeComment, Long> {
 
     @EntityGraph(attributePaths = {"user"})
@@ -13,5 +15,7 @@ public interface WebtoonEpisodeCommentRepository extends JpaRepository<WebtoonEp
 
     @EntityGraph(attributePaths = {"webtoonEpisode", "webtoonEpisode.webtoon", "user"})
     Page<WebtoonEpisodeComment> findAllByUser_IdAndDeletedAtNull(Long userId, Pageable pageable);
-    
+
+    @EntityGraph(attributePaths = {"user", "webtoonEpisode"})
+    Optional<WebtoonEpisodeComment> findById(Long commentId);
 }

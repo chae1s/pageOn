@@ -8,6 +8,7 @@ import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.entity.WebnovelEpisodeComment;
+import com.pageon.backend.entity.WebtoonEpisodeComment;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -112,6 +115,27 @@ public class WebnovelEpisodeCommentService {
         log.info("[SUCCESS] updateComment committed: userId = {}, commentId = {}", userId, commentId);
     }
 
+    @Transactional
+    public void deleteComment(Long userId, Long commentId) {
+
+        log.info("[START] deleteComment: contentType = {}, userId = {}, commentId = {}", ContentType.WEBNOVEL, userId, commentId);
+
+        WebnovelEpisodeComment comment = webnovelEpisodeCommentRepository.findById(commentId).orElseThrow(
+                () -> {
+                    log.error("Comment id not found: commentId = {}", commentId);
+                    return new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+                }
+        );
+
+        if (!comment.getUser().getId().equals(userId)) throw new CustomException(ErrorCode.COMMENT_FORBIDDEN);
+
+        if (comment.getDeletedAt() != null) throw new CustomException(ErrorCode.COMMENT_ALREADY_DELETED);
+
+        comment.deleteComment(LocalDateTime.now());
+
+        log.info("[SUCCESS] deleteComment committed: userId = {}, commentId = {}", userId, commentId);
+    }
+
     private WebnovelEpisode getWebnovelEpisode(Long episodeId) {
         WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
                 () -> {
@@ -127,5 +151,6 @@ public class WebnovelEpisodeCommentService {
 
         return webnovelEpisode;
     }
+
 
 }
