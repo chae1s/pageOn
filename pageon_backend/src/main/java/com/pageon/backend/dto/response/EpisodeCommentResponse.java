@@ -23,9 +23,10 @@ public class EpisodeCommentResponse {
     private Boolean isSpoiler;
     private Boolean isMine;
     private Long likeCount;
+    private Boolean isLiked;
 
 
-    public static EpisodeCommentResponse fromWebnovelEntity(WebnovelEpisodeComment comment, Long currentUserId, String contentTitle, Integer episodeNum) {
+    public static EpisodeCommentResponse fromWebnovelEntity(WebnovelEpisodeComment comment, Long currentUserId, String contentTitle, Integer episodeNum, Boolean isLiked) {
         Boolean isMine = (comment.getUser().getId().equals(currentUserId));
 
         return EpisodeCommentResponse.builder()
@@ -38,10 +39,11 @@ public class EpisodeCommentResponse {
                 .isSpoiler(comment.getIsSpoiler())
                 .isMine(isMine)
                 .likeCount(comment.getLikeCount())
+                .isLiked(isLiked)
                 .build();
     }
 
-    public static EpisodeCommentResponse fromWebtoonEntity(WebtoonEpisodeComment comment, Long currentUserId, String contentTitle, Integer episodeNum) {
+    public static EpisodeCommentResponse fromWebtoonEntity(WebtoonEpisodeComment comment, Long currentUserId, String contentTitle, Integer episodeNum, Boolean isLiked) {
         Boolean isMine = (comment.getUser().getId().equals(currentUserId));
 
         return EpisodeCommentResponse.builder()
@@ -54,6 +56,7 @@ public class EpisodeCommentResponse {
                 .isSpoiler(comment.getIsSpoiler())
                 .isMine(isMine)
                 .likeCount(comment.getLikeCount())
+                .isLiked(isLiked)
                 .build();
     }
 }

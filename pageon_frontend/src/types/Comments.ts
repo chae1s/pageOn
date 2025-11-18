@@ -24,6 +24,7 @@ export interface EpisodeComment {
     isSpoiler: boolean;
     isMine: boolean;
     likeCount: number;
+    isLiked: boolean;
 }
 
 export interface MyComment {

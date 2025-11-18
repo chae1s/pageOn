@@ -213,7 +213,9 @@ function EpisodeCommentsPage() {
             setEpisodeComments((prevComments) =>
                 prevComments.map((comment) =>
                     comment.id === commentId
-                        ? { ...comment, likeCount: comment.likeCount + 1 }
+                        ? comment.isLiked
+                            ? comment
+                            : { ...comment, likeCount: comment.likeCount + 1, isLiked: true }
                         : comment
                 )
             );
@@ -399,10 +401,21 @@ function EpisodeCommentsPage() {
                                                     </C.CommentDateBtn>  
                                                 </C.CommentInfoLeft>
                                                 <div>
-                                                    <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
-                                                        <C.LikeEmptyIcon src={LikeEmptyIcon} />
-                                                        <span>{comment.likeCount}</span>
-                                                    </C.CommentLikeBtn>
+                                                    {comment.isLiked ? (
+                                                        <>
+                                                            <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
+                                                                <C.LikeFullIcon src={LikeFullIcon} />
+                                                                <span>{comment.likeCount}</span>
+                                                            </C.CommentLikeBtn>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
+                                                                <C.LikeEmptyIcon src={LikeEmptyIcon} />
+                                                                <span>{comment.likeCount}</span>
+                                                            </C.CommentLikeBtn>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </C.CommentInfo>
                                         </>

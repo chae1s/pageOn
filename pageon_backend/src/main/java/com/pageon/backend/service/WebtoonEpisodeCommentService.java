@@ -11,6 +11,7 @@ import com.pageon.backend.entity.WebtoonEpisodeComment;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
+import com.pageon.backend.repository.WebtoonEpisodeCommentLikeRepository;
 import com.pageon.backend.repository.WebtoonEpisodeCommentRepository;
 import com.pageon.backend.repository.WebtoonEpisodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class WebtoonEpisodeCommentService {
     private final WebtoonEpisodeCommentRepository webtoonEpisodeCommentRepository;
     private final UserRepository userRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
+    private final WebtoonEpisodeCommentLikeRepository webtoonEpisodeCommentLikeRepository;
 
     @Transactional
     public void createComment(Long userId, Long episodeId, ContentEpisodeCommentRequest commentRequest) {
@@ -71,9 +73,11 @@ public class WebtoonEpisodeCommentService {
 
         Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByWebtoonEpisode_IdAndDeletedAtNull(episodeId, sortedPageable);
 
-        return commentPage.map(comment ->
-                EpisodeCommentResponse.fromWebtoonEntity(comment, userId, webtoonTitle, episodeNum)
-        );
+        return commentPage.map(comment -> {
+            Boolean isLiked = webtoonEpisodeCommentLikeRepository.existsByUser_IdAndWebtoonEpisodeComment_Id(userId, comment.getId());
+            
+            return EpisodeCommentResponse.fromWebtoonEntity(comment, userId, webtoonTitle, episodeNum, isLiked);
+        });
     }
 
     @Transactional
