@@ -54,4 +54,8 @@ public class WebtoonEpisodeComment extends BaseTimeEntity {
     public void deleteComment(LocalDateTime deleteTime) {
         this.setDeletedAt(deleteTime);
     }
+
+    public void updateLikeCount() {
+        this.likeCount = this.likeCount + 1;
+    }
 }

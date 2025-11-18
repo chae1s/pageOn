@@ -206,7 +206,21 @@ function EpisodeCommentsPage() {
 
     const pageNumbers = getPageNumbers();
 
-    
+    const handleLikeComment = async (commentId: number) => {
+        try {
+            await api.post(`/${contentType}/comments/${commentId}/likes`)
+
+            setEpisodeComments((prevComments) =>
+                prevComments.map((comment) =>
+                    comment.id === commentId
+                        ? { ...comment, likeCount: comment.likeCount + 1 }
+                        : comment
+                )
+            );
+        } catch (error) {
+            console.error("댓글 좋아요 실패: ", error);
+        }
+    }
       
     if (!contentType || !episodeId || !contentId) {
         return null;
@@ -341,7 +355,7 @@ function EpisodeCommentsPage() {
                                                     </C.CommentDateBtn>  
                                                 </C.CommentInfoLeft>
                                                 <div>
-                                                    <C.CommentLikeBtn type="button">
+                                                    <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
                                                         <C.LikeEmptyIcon src={LikeEmptyIcon} />
                                                         <span>{comment.likeCount}</span>
                                                     </C.CommentLikeBtn>
@@ -385,7 +399,7 @@ function EpisodeCommentsPage() {
                                                     </C.CommentDateBtn>  
                                                 </C.CommentInfoLeft>
                                                 <div>
-                                                    <C.CommentLikeBtn type="button">
+                                                    <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
                                                         <C.LikeEmptyIcon src={LikeEmptyIcon} />
                                                         <span>{comment.likeCount}</span>
                                                     </C.CommentLikeBtn>

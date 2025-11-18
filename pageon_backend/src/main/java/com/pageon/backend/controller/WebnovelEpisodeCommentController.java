@@ -4,6 +4,7 @@ import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.security.PrincipalUser;
+import com.pageon.backend.service.WebnovelEpisodeCommentLikeService;
 import com.pageon.backend.service.WebnovelEpisodeCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class WebnovelEpisodeCommentController {
     private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
+    private final WebnovelEpisodeCommentLikeService webnovelEpisodeCommentLikeService;
 
     @PostMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<Void> createComment(
@@ -62,6 +64,14 @@ public class WebnovelEpisodeCommentController {
             @PathVariable Long commentId
     ) {
         webnovelEpisodeCommentService.deleteComment(principalUser.getId(), commentId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> createCommentLike(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long commentId) {
+
+        webnovelEpisodeCommentLikeService.createCommentLike(principalUser.getId(), commentId);
 
         return ResponseEntity.ok().build();
     }

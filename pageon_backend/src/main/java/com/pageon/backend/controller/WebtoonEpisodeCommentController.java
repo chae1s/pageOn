@@ -4,6 +4,7 @@ import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.security.PrincipalUser;
+import com.pageon.backend.service.WebtoonEpisodeCommentLikeService;
 import com.pageon.backend.service.WebtoonEpisodeCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class WebtoonEpisodeCommentController {
 
-    private final WebtoonEpisodeCommentService  webnovelEpisodeCommentService;
     private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
+    private final WebtoonEpisodeCommentLikeService webtoonEpisodeCommentLikeService;
 
     @PostMapping("/episodes/{episodeId}/comments")
     public ResponseEntity<Void> createComment(
@@ -29,7 +30,7 @@ public class WebtoonEpisodeCommentController {
             @PathVariable Long episodeId,
             @RequestBody ContentEpisodeCommentRequest commentRequest) {
 
-        webnovelEpisodeCommentService.createComment(principalUser.getId(), episodeId, commentRequest);
+        webtoonEpisodeCommentService.createComment(principalUser.getId(), episodeId, commentRequest);
 
         return ResponseEntity.ok().build();
     }
@@ -43,7 +44,7 @@ public class WebtoonEpisodeCommentController {
     ) {
         log.info("Webtoon episode comments request received. userId = {}, episodeId = {}, sort = {}", principalUser.getId(), episodeId, sort);
 
-        Page<EpisodeCommentResponse> commentResponses = webnovelEpisodeCommentService.getCommentsByEpisodeId(principalUser.getId(), episodeId, pageable, sort);
+        Page<EpisodeCommentResponse> commentResponses = webtoonEpisodeCommentService.getCommentsByEpisodeId(principalUser.getId(), episodeId, pageable, sort);
 
         return ResponseEntity.ok(new PageResponse<>(commentResponses));
     }
@@ -65,6 +66,13 @@ public class WebtoonEpisodeCommentController {
             @PathVariable Long commentId
     ) {
         webtoonEpisodeCommentService.deleteComment(principalUser.getId(), commentId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> createCommentLike(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long commentId) {
+        webtoonEpisodeCommentLikeService.createCommentLike(principalUser.getId(), commentId);
 
         return ResponseEntity.ok().build();
     }
