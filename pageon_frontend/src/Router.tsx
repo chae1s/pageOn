@@ -29,13 +29,16 @@ import WebnovelViewer from "./pages/Contents/WebnovelViewer";
 import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 import KeywordSearch from "./pages/Search/KeywordSearch";
 import TitleCreatorSearch from "./pages/Search/TitleCreatorSearch";
+import EpisodeCommentsPage from "./pages/Contents/EpisodeCommentsPage";
 
 function Router() {
     const location = useLocation();
     const hideHeaderFooter =
         location.pathname === "/mock-verify" ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
-        /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname);
+        /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
+        /^\/webnovels\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname) ||       // 웹소설 댓글 페이지
+        /^\/webtoons\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname);   
 
     const creatorHeader = location.pathname.startsWith("/creators");
     const isAuthenticated = !!localStorage.getItem("accessToken");
@@ -72,6 +75,7 @@ function Router() {
                 <Route path="/mock-verify" element={<MockVerify/>}  />
                 <Route path="/webnovels/:contentId/viewer/:episodeId" element={<WebnovelViewer />} />
                 <Route path="/webtoons/:contentId/viewer/:episodeId" element={<WebtoonViewer />} />
+                <Route path="/:contentType/:contentId/viewer/:episodeId/comments" element={<EpisodeCommentsPage />} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={["ROLE_CREATOR"]}/>}>

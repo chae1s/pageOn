@@ -19,7 +19,8 @@ import java.util.List;
 public class WebtoonEpisodeService {
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final WebtoonImageService webtoonImageService;
-    private final WebtoonEpisodeRatingRepository  webtoonEpisodeRatingRepository;
+    private final WebtoonEpisodeRatingRepository webtoonEpisodeRatingRepository;
+    private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
 
     public List<EpisodeListResponse> getEpisodesByWebtoonId(Long webtoonId) {
         List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
@@ -36,8 +37,8 @@ public class WebtoonEpisodeService {
     }
 
     @Transactional(readOnly = true)
-    public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long userId, Long id) {
-        WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(id).orElseThrow(
+    public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long userId, Long episodeId) {
+        WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );
 
@@ -49,7 +50,8 @@ public class WebtoonEpisodeService {
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
 
         return WebtoonEpisodeDetailResponse.fromEntity(
-                episode, webtoonImages, prevEpisodeId, nextEpisodeId, userScore
+                episode, webtoonImages,
+                prevEpisodeId, nextEpisodeId, userScore, webtoonEpisodeCommentService.getBestCommentsByEpisodeId(episodeId)
         );
     }
 }

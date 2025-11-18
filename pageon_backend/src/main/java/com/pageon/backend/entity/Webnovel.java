@@ -39,6 +39,8 @@ public class Webnovel {
             joinColumns = @JoinColumn(name = "webnovel_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
+
+    @Builder.Default
     private List<Keyword> keywords = new ArrayList<>();
 
     // 연재 요일

@@ -35,6 +35,11 @@ public class WebtoonEpisode extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "webtoonEpisode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WebtoonEpisodeRating> webtoonEpisodeRatings = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "webtoonEpisode", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WebtoonEpisodeComment> webtoonEpisodeComments = new ArrayList<>();
+
     // 대여 금액
     private Integer rentalPrice;
     // 구매 금액
@@ -45,6 +50,9 @@ public class WebtoonEpisode extends BaseTimeEntity {
 
     @Builder.Default
     private Long ratingCount = 0L;
+
+    @Builder.Default
+    private Boolean isDeleted = false;
 
     public void addImage(WebtoonImage image) {
         this.images.add(image);

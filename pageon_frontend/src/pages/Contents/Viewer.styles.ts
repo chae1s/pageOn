@@ -298,3 +298,68 @@ export const RatingConfirmBtn = styled.button`
     font-size: 14px;
     font-weight: 700;
 `
+
+export const CommentPageHeaderSection = styled.div`
+    display: flex;
+    width: 100%;
+    min-height: 52px;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+`
+
+export const CommentPageHeader = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0px 12px;
+`
+
+export const CommentPageCloseLink = styled(Link)`
+    width: 20px;
+    height: 20px;
+`
+
+export const CommentPageCloseIcon = styled.img`
+    width: 16px;
+    height: 16px;
+`
+
+export const PaginationContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+    margin: -40px 0;
+`
+
+export const PaginationIconWrapper = styled.button`
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+`
+
+export const PaginationNumberList = styled.ul`
+    display: flex;
+    height: 16px;
+    margin: 0 16px;
+`
+
+export const PaginationNumberListItem = styled.li`
+
+`
+
+export const PaginationNumberBtn = styled.button<{$active: boolean}>`
+    display: inline-block;
+    width: 32px;
+    font-size: 13px;
+    line-height: 16px;
+    text-aligh: center;
+    font-weight: 700;
+    color: ${({$active}) => ($active? "rgba(0, 0, 0, .8)" : "rgba(0, 0, 0, .1)" )};
+`

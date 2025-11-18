@@ -4,6 +4,7 @@ import com.pageon.backend.common.enums.Gender;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
+import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
 import com.pageon.backend.dto.response.UserRoleResponse;
 import com.pageon.backend.dto.token.AccessToken;
@@ -23,6 +24,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,6 +58,8 @@ public class UserService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RestTemplate restTemplate;
     private final CommonService commonService;
+    private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
+    private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -372,5 +377,21 @@ public class UserService {
         }
 
         throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
+    }
+
+    @Transactional
+    public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable, String contentType) {
+        log.info("[Comments]Start getCommentsByUserId userId = {}, contentType = {}", userId, contentType);
+
+        if (contentType.equals("webnovels")) {
+            log.info("[Comments]Content type is webnovels");
+            return webnovelEpisodeCommentService.getCommentsByUserId(userId, pageable);
+        } else if (contentType.equals("webtoons")) {
+            log.info("[Comments]Content type is webtoons");
+            return webtoonEpisodeCommentService.getCommentsByUserId(userId, pageable);
+        } else {
+            return Page.empty();
+        }
+
     }
 }

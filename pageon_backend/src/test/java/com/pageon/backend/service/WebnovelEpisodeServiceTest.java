@@ -131,7 +131,14 @@ class WebnovelEpisodeServiceTest {
         List<WebnovelEpisode> episodes = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             episodes.add(
-                    new WebnovelEpisode((long) i, webnovel, i, "웹소설 제목 " + i,"웹소설 내용", null, 100, 10.0, 1L )
+                    WebnovelEpisode.builder()
+                            .id((long) i)
+                            .webnovel(webnovel)
+                            .episodeNum(i)
+                            .episodeTitle("웹소설 제목 " + i)
+                            .content("웹소설 내용")
+                            .build()
+                    
             );
         }
 

@@ -21,6 +21,7 @@ public class WebnovelEpisodeService {
 
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebnovelEpisodeRatingRepository webnovelEpisodeRatingRepository;
+    private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
 
     @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebnovelId(Long webnovelId) {
@@ -38,8 +39,8 @@ public class WebnovelEpisodeService {
     }
 
     @Transactional(readOnly = true)
-    public WebnovelEpisodeDetailResponse getWebnovelEpisodeById(Long userId, Long id) {
-        WebnovelEpisode episode = webnovelEpisodeRepository.findByIdWithWebnovel(id).orElseThrow(
+    public WebnovelEpisodeDetailResponse getWebnovelEpisodeById(Long userId, Long episodeId) {
+        WebnovelEpisode episode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
         );
 
@@ -51,7 +52,8 @@ public class WebnovelEpisodeService {
         Integer userScore = webnovelEpisodeRatingRepository.findScoreByWebnovelEpisodeAndUser(episode.getId(), userId);
 
         return WebnovelEpisodeDetailResponse.fromEntity(
-                episode, episode.getWebnovel().getTitle(), prevEpisodeId, nextEpisodeId, userScore
+                episode, episode.getWebnovel().getTitle(),
+                prevEpisodeId, nextEpisodeId, userScore, webnovelEpisodeCommentService.getBestCommentsByEpisodeId(episodeId)
         );
     }
 }

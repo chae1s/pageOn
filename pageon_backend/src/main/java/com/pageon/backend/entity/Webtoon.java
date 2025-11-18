@@ -33,6 +33,7 @@ public class Webtoon {
             joinColumns = @JoinColumn(name = "webtoon_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
+    @Builder.Default
     private List<Keyword> keywords = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

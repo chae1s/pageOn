@@ -22,4 +22,13 @@ public abstract class BaseTimeEntity {
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    private LocalDateTime deletedAt;
+
+
+    protected void setDeletedAt(LocalDateTime deleteTime) {
+        this.deletedAt = deleteTime;
+    }
+
+
 }

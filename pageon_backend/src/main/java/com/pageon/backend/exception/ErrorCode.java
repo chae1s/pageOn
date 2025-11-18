@@ -14,6 +14,7 @@ public enum ErrorCode {
     OAUTH_PROVIDER_MISMATCH("지원하지 않는 OAuth Provider입니다.", HttpStatus.BAD_REQUEST),
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
     CREATOR_PERMISSION_DENIED("creator 권한이 존재하지 않습니다.", HttpStatus.FORBIDDEN),
+    COMMENT_FORBIDDEN("본인 댓글만 수정/삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
 
     // 본인인증
     INVALID_VERIFICATION_METHOD("지원하지 않는 본인인증 방식입니다.", HttpStatus.BAD_REQUEST),
@@ -61,6 +62,12 @@ public enum ErrorCode {
     INVALID_CONTENT_TYPE("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", HttpStatus.BAD_REQUEST),
     INTEREST_NOT_FOUND("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     EPISODE_RATING_NOT_FOUND("해당 에피소드에 저장된 평점이 없습니다.", HttpStatus.NOT_FOUND),
+    COMMENT_TEXT_IS_BLANK("댓글 내용이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    EPISODE_IS_DELETED("삭제된 에피소드입니다.", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND("존재하지 않는 댓글입니다.", HttpStatus.NOT_FOUND),
+    COMMENT_ALREADY_DELETED("이미 삭제된 댓글입니다.", HttpStatus.CONFLICT),
+    COMMENT_ALREADY_LIKED("이미 좋아요한 댓글입니다.", HttpStatus.CONFLICT),
+    COMMENT_LIKE_NOT_FOUND("사용자가 좋아요를 하지 않은 댓글입니다.", HttpStatus.NOT_FOUND),
 
     ;
 

@@ -2,12 +2,14 @@ package com.pageon.backend.dto.response;
 
 import com.pageon.backend.entity.WebtoonEpisode;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class WebtoonEpisodeDetailResponse {
@@ -20,18 +22,23 @@ public class WebtoonEpisodeDetailResponse {
     private Long prevEpisodeId;
     private Long nextEpisodeId;
     private Integer userScore;
+    private BestCommentResponse bestComment;
 
-    public static WebtoonEpisodeDetailResponse fromEntity(WebtoonEpisode episode, List<WebtoonImagesResponse> images, Long prevEpisodeId, Long nextEpisodeId, Integer userScore) {
-        return new WebtoonEpisodeDetailResponse(
-                episode.getId(),
-                episode.getEpisodeTitle(),
-                episode.getEpisodeNum(),
-                episode.getAverageRating(),
-                episode.getRatingCount(),
-                images,
-                prevEpisodeId,
-                nextEpisodeId,
-                userScore
-        );
+    public static WebtoonEpisodeDetailResponse fromEntity(
+            WebtoonEpisode episode, List<WebtoonImagesResponse> images,
+            Long prevEpisodeId, Long nextEpisodeId, Integer userScore, BestCommentResponse bestComment)
+    {
+        return WebtoonEpisodeDetailResponse.builder()
+                .id(episode.getId())
+                .title(episode.getEpisodeTitle())
+                .episodeNum(episode.getEpisodeNum())
+                .averageRating(episode.getAverageRating())
+                .ratingCount(episode.getRatingCount())
+                .images(images)
+                .prevEpisodeId(prevEpisodeId)
+                .nextEpisodeId(nextEpisodeId)
+                .userScore(userScore)
+                .bestComment(bestComment)
+                .build();
     }
 }

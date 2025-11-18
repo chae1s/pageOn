@@ -1,16 +1,26 @@
 import React, { useEffect, useState, useRef, ReactEventHandler } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { WebnovelEpisodeDetail } from "../../types/Episodes";
-import * as S from "./Viewer.styles"
-import CommentList from "../../components/Comments/CommentList";
-import fullStarIcon from "../../assets/fullStarIcon.png"
-import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
-import emptyStarIcon from "../../assets/emptyStarIcon.png"
+import * as S from "./Viewer.styles";
+import * as C from "./Comment.styles";
+import fullStarIcon from "../../assets/fullStarIcon.png";
+import halfFullStarIcon from "../../assets/halfFullStarIcon.png";
+import emptyStarIcon from "../../assets/emptyStarIcon.png";
 import api from "../../api/axiosInstance";
+import { BestComment } from "../../types/Comments";
+import { formatDate } from "../../utils/formatDate";
 
 function WebnovelViewer() {
-    const { episodeId , contentId } = useParams();
+    const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
+    
+    const navigationType = useNavigationType();
+    const navigate = useNavigate();
+
+    const [showTitleSection, setShowTitleSection] = useState(true);
+    const lastScrollY = useRef(0);
+
+
     const [ episodeData, setEpisodeData ] = useState<WebnovelEpisodeDetail>({
         id: 0,
         title: "",
@@ -21,31 +31,43 @@ function WebnovelViewer() {
         ratingCount: 0,
         prevEpisodeId: null,
         nextEpisodeId: null,
-        userScore: 0
+        userScore: 0,
+        bestComment: null,
     });
 
-
-    const [showTitleSection, setShowTitleSection] = useState(true);
-    const lastScrollY = useRef(0);
-
+    const [ bestComment, setBestComment ] = useState<BestComment>();
 
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
             if (!episodeId) return;
-
+            
             const savedY = window.scrollY;
             try {
                 const response = await api.get(`/episodes/webnovel/${episodeId}`);
 
-                console.log(response.data);
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
+                setBestComment(response.data.bestComment);
 
-                if (preserveScroll) {
-                    window.scrollTo(0, savedY);
+                if (navigationType !== 'POP') {
+                    if (preserveScroll) {
+                        window.scrollTo(0, savedY);
+                    }  else {
+                        window.scrollTo(0, 0);
+                    }
+                    
                 } else {
-                    window.scrollTo(0, 0);
+                    
+                    const scrollPosition = sessionStorage.getItem("scrollPosition");
+                    
+                    if (scrollPosition) {
+                        window.scrollTo(0, parseInt(scrollPosition, 10));
+                        sessionStorage.removeItem("scrollPosition");
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
                 }
+                
             } catch (err) {
                 alert("에피소드 정보를 불러오지 못했습니다.");
                 return;
@@ -56,6 +78,7 @@ function WebnovelViewer() {
         setSelectedScore(0);
         fetchData(false);
     }, [episodeId]);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -80,7 +103,7 @@ function WebnovelViewer() {
     }, []);
 
     const [isRatingOpen, setIsRatingOpen] = useState(false);
-    const [selectedScore, setSelectedScore] = useState<number>(0); // 0 ~ 10 (0.5 step)
+    const [selectedScore, setSelectedScore] = useState<number>(0); 
 
     const getDisplayScore = () => (selectedScore ?? 0);
 
@@ -103,11 +126,7 @@ function WebnovelViewer() {
         const score = half === 1 ? idx * 2 - 1 : idx * 2;
         setSelectedScore(score);
     };
-
     
-
-    
-
     // 새 평점 등록
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
@@ -162,38 +181,24 @@ function WebnovelViewer() {
         window.scrollTo(0, savedY);
     };
 
-    const [comments] = useState([
-        {
-          id: 1,
-          bookTitle: "작품 제목 1",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "정말 재미있게 읽었습니다! 다음 편도 기대돼요.",
-          episodeNum: 12,
-          nickname: "닉네임1",
-          date: "2024-06-01",
-          likes: 12
-        },
-        {
-          id: 2,
-          bookTitle: "작품 제목 2",
-          bookCover: "https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png",
-          content: "스토리가 신선해서 좋았어요.",
-          episodeNum: 3,
-          nickname: "닉네임2",
-          date: "2024-05-28",
-          likes: 5
-        },
-        {
-          id: 3,
-          bookTitle: "작품 제목 3",
-          bookCover: "https://via.placeholder.com/60x80?text=작품+3",
-          content: "그림체가 마음에 들어요.",
-          episodeNum: 7,
-          nickname: "닉네임3",
-          date: "2024-05-20",
-          likes: 8
-        }
-      ]);
+
+    const handleGoToComments = (e:React.MouseEvent) => {
+        e.preventDefault();
+
+        const scrollPosition = window.scrollY;
+        const commentUrl = `/webnovels/${contentId}/viewer/${episodeId}/comments`;
+        
+        sessionStorage.setItem("scrollPosition", scrollPosition.toString());
+
+        navigate(commentUrl);
+    }
+    
+      
+    if (!episodeId || !contentId) {
+        return null;
+    }
+    
+    
 
     return (
         <S.Viewer>
@@ -234,7 +239,7 @@ function WebnovelViewer() {
                     <S.ViewerRatingCount>({episodeData.ratingCount ?? 0})</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
                 <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore(episodeData.userScore && episodeData.userScore !== 0 ? episodeData.userScore : 0); setIsRatingOpen(true); }}>
-                    별점주기
+                    별점 주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
             {isRatingOpen && (
@@ -262,7 +267,40 @@ function WebnovelViewer() {
                 </S.RatingModalOverlay>
             )}
             <S.ViewerCommentSection>
-                <CommentList comments={comments} mypage={false}/>
+                <C.CommentList>
+                    <C.CommentHeader>
+                        <C.CommentCount>
+                            댓글 {bestComment?.totalCount}개
+                        </C.CommentCount>
+                        <C.CommentListBtn onClick={handleGoToComments}>
+                            댓글 보기
+                        </C.CommentListBtn>
+                    </C.CommentHeader>
+                    <C.CommentListLi>
+                    {(!bestComment || bestComment.id == null) ? (
+                        <C.CommentListEmptyText>베스트 댓글이 없습니다.</C.CommentListEmptyText>
+                    ) : (
+                        <>
+                            <C.CommentInfo>
+                                <C.CommentBestInfo>
+                                    <C.CommentBestIcon>
+                                        BEST
+                                    </C.CommentBestIcon>
+                                    <C.CommentBestUserInfo>
+                                        <div>{bestComment.nickname}</div>
+                                    </C.CommentBestUserInfo>
+                                </C.CommentBestInfo>
+                            </C.CommentInfo>
+                            <C.CommentContentWrap>
+                                <C.CommentContent>{bestComment.text}</C.CommentContent>
+                            </C.CommentContentWrap>
+                            <C.CommentDateBtn>
+                                <div>{formatDate(bestComment.createdAt)}</div>
+                            </C.CommentDateBtn>
+                        </>
+                    )}
+                    </C.CommentListLi>
+                </C.CommentList>
             </S.ViewerCommentSection>
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>

@@ -1,3 +1,4 @@
+import { BestComment } from "./Comments";
 import { WebtoonImagesResponse } from "./WebtoonImage";
 
 export interface EpisodeSummary {
@@ -20,6 +21,7 @@ export interface WebnovelEpisodeDetail {
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
     userScore: number | null;
+    bestComment: BestComment | null;
 }
 
 export interface WebtoonEpisodeDetail {
@@ -32,4 +34,5 @@ export interface WebtoonEpisodeDetail {
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
     userScore: number | null;
+    bestComment: BestComment | null;
 }

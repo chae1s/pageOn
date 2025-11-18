@@ -2,10 +2,7 @@ package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.request.*;
-import com.pageon.backend.dto.response.ContentPageResponse;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.JwtTokenResponse;
-import com.pageon.backend.dto.response.UserInfoResponse;
+import com.pageon.backend.dto.response.*;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserService;
@@ -112,7 +109,7 @@ public class UserController {
     }
 
     @GetMapping("/interests")
-    public ResponseEntity<ContentPageResponse<ContentSimpleResponse>> getInterests(
+    public ResponseEntity<PageResponse<ContentSimpleResponse>> getInterests(
             @AuthenticationPrincipal PrincipalUser principalUser, @PageableDefault Pageable pageable, @RequestParam("sort") String sort, @RequestParam(value = "type", required = false) ContentType contentType
     ){
 
@@ -120,6 +117,17 @@ public class UserController {
                 contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
         Page<ContentSimpleResponse> contentSimpleResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
 
-        return ResponseEntity.ok(new ContentPageResponse<>(contentSimpleResponses));
+        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
+    }
+
+    @GetMapping("/comments")
+    public ResponseEntity<PageResponse<MyCommentResponse>> getCommentsByUserId(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PageableDefault(size = 15) Pageable pageable,
+            @RequestParam("type") String contentType
+    ) {
+        Page<MyCommentResponse> commentResponses = userService.getCommentsByUserId(principalUser.getId(), pageable, contentType);
+
+        return ResponseEntity.ok(new PageResponse<>(commentResponses));
     }
 }
