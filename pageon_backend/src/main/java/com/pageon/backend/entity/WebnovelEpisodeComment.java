@@ -56,4 +56,8 @@ public class WebnovelEpisodeComment extends BaseTimeEntity {
     public void updateLikeCount() {
         this.likeCount = this.likeCount + 1;
     }
+
+    public void deleteLikeCount() {
+        this.likeCount = this.likeCount - 1;
+    }
 }

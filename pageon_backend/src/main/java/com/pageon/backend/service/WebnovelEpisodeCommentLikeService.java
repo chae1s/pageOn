@@ -48,6 +48,26 @@ public class WebnovelEpisodeCommentLikeService {
 
     }
 
+    @Transactional
+    public void deleteCommentLike(Long userId, Long commentId) {
+        WebnovelEpisodeComment comment = getEpisodeComment(commentId);
+
+        WebnovelEpisodeCommentLike commentLike = webnovelEpisodeCommentLikeRepository.findByUser_IdAndWebnovelEpisodeComment_Id(userId, commentId).orElseThrow(
+                () -> {
+                    log.error("WebnovelEpisodeCommentLike not found: userId = {}, commentId = {}", userId, commentId);
+                    return new CustomException(ErrorCode.COMMENT_LIKE_NOT_FOUND);
+                }
+        );
+
+        webnovelEpisodeCommentLikeRepository.delete(commentLike);
+
+        log.info("Webnovel comments delete like count: commentId = {}", commentId);
+        comment.deleteLikeCount();
+
+        log.info("[SUCCESS] commentLike deleted: userId = {}, commentId = {}", userId, commentId);
+
+    }
+
     private WebnovelEpisodeComment getEpisodeComment(Long commentId) {
         WebnovelEpisodeComment comment = webnovelEpisodeCommentRepository.findById(commentId).orElseThrow(
                 () -> {
@@ -63,4 +83,6 @@ public class WebnovelEpisodeCommentLikeService {
 
         return comment;
     }
+
+
 }

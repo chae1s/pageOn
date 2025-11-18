@@ -67,6 +67,7 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND("존재하지 않는 댓글입니다.", HttpStatus.NOT_FOUND),
     COMMENT_ALREADY_DELETED("이미 삭제된 댓글입니다.", HttpStatus.CONFLICT),
     COMMENT_ALREADY_LIKED("이미 좋아요한 댓글입니다.", HttpStatus.CONFLICT),
+    COMMENT_LIKE_NOT_FOUND("사용자가 좋아요를 하지 않은 댓글입니다.", HttpStatus.NOT_FOUND),
 
     ;
 

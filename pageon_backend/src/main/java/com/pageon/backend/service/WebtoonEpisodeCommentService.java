@@ -75,7 +75,7 @@ public class WebtoonEpisodeCommentService {
 
         return commentPage.map(comment -> {
             Boolean isLiked = webtoonEpisodeCommentLikeRepository.existsByUser_IdAndWebtoonEpisodeComment_Id(userId, comment.getId());
-            
+
             return EpisodeCommentResponse.fromWebtoonEntity(comment, userId, webtoonTitle, episodeNum, isLiked);
         });
     }

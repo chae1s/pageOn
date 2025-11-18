@@ -223,6 +223,24 @@ function EpisodeCommentsPage() {
             console.error("댓글 좋아요 실패: ", error);
         }
     }
+
+    const handleDeleteLikeComment = async (commentId: number) => {
+        try {
+            await api.delete(`/${contentType}/comments/${commentId}/likes`)
+            
+            setEpisodeComments((prevComments) =>
+                prevComments.map((comment) =>
+                    comment.id === commentId
+                        ? comment.isLiked
+                            ? { ...comment, likeCount: Math.max(0, comment.likeCount - 1), isLiked: false }
+                            : comment
+                        : comment
+                )
+            );
+        } catch (error) {
+            console.error("댓글 좋아요 삭제 실패: ", error);
+        }
+    } 
       
     if (!contentType || !episodeId || !contentId) {
         return null;
@@ -403,7 +421,7 @@ function EpisodeCommentsPage() {
                                                 <div>
                                                     {comment.isLiked ? (
                                                         <>
-                                                            <C.CommentLikeBtn type="button" onClick={() => handleLikeComment(comment.id)}>
+                                                            <C.CommentLikeBtn type="button" onClick={() => handleDeleteLikeComment(comment.id)}>
                                                                 <C.LikeFullIcon src={LikeFullIcon} />
                                                                 <span>{comment.likeCount}</span>
                                                             </C.CommentLikeBtn>

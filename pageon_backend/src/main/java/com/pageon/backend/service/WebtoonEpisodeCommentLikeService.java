@@ -47,6 +47,25 @@ public class WebtoonEpisodeCommentLikeService {
         log.info("[SUCCESS] createCommentLike saved: userId = {}, commentId = {}, commentLikeId = {}", userId, commentId, commentLike.getId());
     }
 
+    @Transactional
+    public void deleteCommentLike(Long userId, Long commentId) {
+        WebtoonEpisodeComment comment = getEpisodeComment(commentId);
+
+        WebtoonEpisodeCommentLike commentLike = webtoonEpisodeCommentLikeRepository.findByUser_IdAndWebtoonEpisodeComment_Id(userId, commentId).orElseThrow(
+                () -> {
+                    log.error("WebtoonEpisodeCommentLike not found: userId = {}, commentId = {}", userId, commentId);
+                    return new CustomException(ErrorCode.COMMENT_LIKE_NOT_FOUND);
+                }
+        );
+
+        webtoonEpisodeCommentLikeRepository.delete(commentLike);
+
+        log.info("Webtoon comments delete like count: commentId = {}", commentId);
+        comment.deleteLikeCount();
+
+        log.info("[SUCCESS] commentLike deleted: userId = {}, commentId = {}", userId, commentId);
+    }
+
     private WebtoonEpisodeComment getEpisodeComment(Long commentId) {
         WebtoonEpisodeComment comment = webtoonEpisodeCommentRepository.findById(commentId).orElseThrow(
                 () -> {

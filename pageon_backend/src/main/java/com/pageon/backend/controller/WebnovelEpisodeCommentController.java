@@ -76,5 +76,12 @@ public class WebnovelEpisodeCommentController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> deleteCommentLike(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long commentId) {
+        webnovelEpisodeCommentLikeService.deleteCommentLike(principalUser.getId(), commentId);
+
+        return ResponseEntity.ok().build();
+    }
+
 
 }

@@ -76,4 +76,11 @@ public class WebtoonEpisodeCommentController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> deleteCommentLike(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long commentId) {
+        webtoonEpisodeCommentLikeService.deleteCommentLike(principalUser.getId(), commentId);
+
+        return ResponseEntity.ok().build();
+    }
 }
