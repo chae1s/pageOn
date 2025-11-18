@@ -8,7 +8,8 @@ import fullStarIcon from "../../assets/fullStarIcon.png"
 import halfFullStarIcon from "../../assets/halfFullStarIcon.png"
 import emptyStarIcon from "../../assets/emptyStarIcon.png"
 import api from "../../api/axiosInstance";
-import { EpisodeComment } from "../../types/Comments";
+import { BestComment } from "../../types/Comments";
+import { formatDate } from "../../utils/formatDate";
 
 function WebtoonViewer() {
     const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
@@ -28,8 +29,11 @@ function WebtoonViewer() {
         images: [],
         prevEpisodeId: null,
         nextEpisodeId: null,
-        userScore: null
+        userScore: null,
+        bestComment: null
     });
+
+    const [ bestComment, setBestComment ] = useState<BestComment>();
 
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
@@ -40,6 +44,7 @@ function WebtoonViewer() {
                 const response = await api.get(`/episodes/webtoon/${episodeId}`);
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
+                setBestComment(response.data.bestComment);
 
                 if (navigationType !== 'POP') {
                     if (preserveScroll) {
@@ -171,8 +176,6 @@ function WebtoonViewer() {
         window.scrollTo(0, savedY);
     };
 
-    const [episodeComment, setEpisodeComment] = useState<EpisodeComment | null>(null);
-
     const handleGoToComments = (e:React.MouseEvent) => {
         e.preventDefault();
 
@@ -258,29 +261,35 @@ function WebtoonViewer() {
                 <C.CommentList>
                     <C.CommentHeader>
                         <C.CommentCount>
-                            댓글 0개
+                            댓글 {bestComment?.totalCount}개
                         </C.CommentCount>
                         <C.CommentListBtn onClick={handleGoToComments}>
                             댓글 보기
                         </C.CommentListBtn>
                     </C.CommentHeader>
                     <C.CommentListLi>
-                        <C.CommentInfo>
-                            <C.CommentBestInfo>
-                                <C.CommentBestIcon>
-                                    BEST
-                                </C.CommentBestIcon>
-                                <C.CommentBestUserInfo>
-                                    <div>닉네임</div>
-                                </C.CommentBestUserInfo>
-                            </C.CommentBestInfo>
-                        </C.CommentInfo>
-                        <C.CommentContentWrap>
-                            <C.CommentContent>내용</C.CommentContent>
-                        </C.CommentContentWrap>
-                        <C.CommentDateBtn>
-                            <div>날짜</div>
-                        </C.CommentDateBtn>
+                    {(!bestComment || bestComment.id == null) ? (
+                        <C.CommentListEmptyText>베스트 댓글이 없습니다.</C.CommentListEmptyText>
+                    ) : (
+                        <>
+                            <C.CommentInfo>
+                                <C.CommentBestInfo>
+                                    <C.CommentBestIcon>
+                                        BEST
+                                    </C.CommentBestIcon>
+                                    <C.CommentBestUserInfo>
+                                        <div>{bestComment.nickname}</div>
+                                    </C.CommentBestUserInfo>
+                                </C.CommentBestInfo>
+                            </C.CommentInfo>
+                            <C.CommentContentWrap>
+                                <C.CommentContent>{bestComment.text}</C.CommentContent>
+                            </C.CommentContentWrap>
+                            <C.CommentDateBtn>
+                                <div>{formatDate(bestComment.createdAt)}</div>
+                            </C.CommentDateBtn>
+                        </>
+                    )}
                     </C.CommentListLi>
                 </C.CommentList>
             </S.ViewerCommentSection>

@@ -3,6 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
+import com.pageon.backend.dto.response.BestCommentResponse;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
 import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.User;
@@ -138,6 +139,24 @@ public class WebnovelEpisodeCommentService {
         comment.deleteComment(LocalDateTime.now());
 
         log.info("[SUCCESS] deleteComment committed: userId = {}, commentId = {}", userId, commentId);
+    }
+
+    @Transactional(readOnly = true)
+    public BestCommentResponse getBestCommentsByEpisodeId(Long episodeId) {
+        WebnovelEpisodeComment comment =
+                webnovelEpisodeCommentRepository.findFirstByWebnovelEpisode_IdAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(episodeId).orElse(null);
+
+        if (comment == null) {
+            return BestCommentResponse.fromWebnovelEntity(null, 0L);
+        }
+
+        Long totalCount = webnovelEpisodeCommentRepository.countByWebnovelEpisode_IdAndDeletedAtIsNull(episodeId);
+
+        if (comment.getLikeCount() == 0) {
+            comment = null;
+        }
+
+        return BestCommentResponse.fromWebnovelEntity(comment, totalCount);
     }
 
     private WebnovelEpisode getWebnovelEpisode(Long episodeId) {

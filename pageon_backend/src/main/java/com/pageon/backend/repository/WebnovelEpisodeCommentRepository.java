@@ -19,4 +19,8 @@ public interface WebnovelEpisodeCommentRepository extends JpaRepository<Webnovel
 
     @EntityGraph(attributePaths = {"user", "webnovelEpisode"})
     Optional<WebnovelEpisodeComment> findById(Long commentId);
+
+    Optional<WebnovelEpisodeComment> findFirstByWebnovelEpisode_IdAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(Long episodeId);
+
+    Long countByWebnovelEpisode_IdAndDeletedAtIsNull(Long episodeId);
 }

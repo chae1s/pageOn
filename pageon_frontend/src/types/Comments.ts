@@ -37,3 +37,11 @@ export interface MyComment {
     createdAt: string;
     likeCount: number;
 }
+
+export interface BestComment {
+    id: number;
+    text: string;
+    nickname: string;
+    createdAt: string;
+    totalCount: number;
+}

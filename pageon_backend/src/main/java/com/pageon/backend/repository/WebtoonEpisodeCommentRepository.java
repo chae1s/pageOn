@@ -1,5 +1,6 @@
 package com.pageon.backend.repository;
 
+import com.pageon.backend.entity.WebnovelEpisodeComment;
 import com.pageon.backend.entity.WebtoonEpisodeComment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,8 @@ public interface WebtoonEpisodeCommentRepository extends JpaRepository<WebtoonEp
 
     @EntityGraph(attributePaths = {"user", "webtoonEpisode"})
     Optional<WebtoonEpisodeComment> findById(Long commentId);
+
+    Optional<WebtoonEpisodeComment> findFirstByWebtoonEpisode_IdAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(Long episodeId);
+
+    Long countByWebtoonEpisode_IdAndDeletedAtIsNull(Long episodeId);
 }
