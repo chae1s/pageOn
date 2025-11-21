@@ -102,6 +102,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<WebtoonEpisodeComment> webtoonEpisodeComments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private List<EpisodePurchase> episodePurchases = new ArrayList<>();
+
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
