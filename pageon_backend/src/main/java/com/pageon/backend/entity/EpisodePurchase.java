@@ -35,4 +35,7 @@ public class EpisodePurchase extends BaseTimeEntity {
     private LocalDateTime expiredAt;
 
 
+    public void updateExpiredDate(LocalDateTime expiredAt) {
+        this.expiredAt = expiredAt;
+    }
 }

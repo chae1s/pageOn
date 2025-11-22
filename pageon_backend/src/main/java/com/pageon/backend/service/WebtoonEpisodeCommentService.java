@@ -164,7 +164,7 @@ public class WebtoonEpisodeCommentService {
                 }
         );
 
-        if (webtoonEpisode.getIsDeleted()) {
+        if (webtoonEpisode.getDeletedAt() != null) {
             log.error("WebtoonEpisode is deleted: episodeId = {}", episodeId);
             throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
         }

@@ -4,6 +4,7 @@ import * as S from "../Styles/ContentDetail.styles";
 import { EpisodeSummary } from '../../types/Episodes';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+import api from '../../api/axiosInstance';
 
 interface Props {
     type: string,
@@ -13,7 +14,6 @@ interface Props {
 
 // 임시 로그인 여부 함수
 function isLoggedIn() {
-    
     return !!localStorage.getItem('accessToken');
 }
 
@@ -23,8 +23,6 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
     const [showAll, setShowAll] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    
-    
     // 정렬된 에피소드 배열 생성
     const sortedEpisodes = React.useMemo(() => {
         if (sort === "first") {
@@ -77,7 +75,51 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
             return;
         }
         // 실제 구매/대여 로직은 여기에 추가
+
     };
+
+    
+    const handleEpisodePurchase = (episodeId: number) => async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!isLoggedIn()) {
+            e.preventDefault();
+            alert('로그인이 필요합니다.');
+
+            navigate("/users/login");
+            return;
+        }
+
+        if (window.confirm("에피소드를 구매하시겠습니까?")) {
+            try {
+                await api.post(`/${type}/episodes/${episodeId}/subscribe?purchaseType=OWN`);
+
+                navigate(`/${type}/${contentId}/viewer/${episodeId}`);
+            } catch (error) {
+                console.error("에피소드 구매 실패 : ", error);
+            }
+        }
+    };
+
+    const handleEpisodeRent = (episodeId: number) => async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!isLoggedIn()) {
+            e.preventDefault();
+            alert('로그인이 필요합니다.');
+
+            navigate("/users/login");
+            return;
+        }
+
+        if (window.confirm("에피소드를 대여하시겠습니까?")) {
+            try {
+                await api.post(`/${type}/episodes/${episodeId}/subscribe?purchaseType=RENT`);
+
+                navigate(`/${type}/${contentId}/viewer/${episodeId}`);
+            } catch (error) {
+                console.error("에피소드 구매 실패 : ", error);
+            }
+        }
+    } 
+
+    
 
     return (
         <S.EpisodeSection>
@@ -134,7 +176,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                 checked={selectedIds.includes(episodeIdStr)}
                                                 onChange={handleEpisodeCheck(episodeIdStr)}
                                             />
-                                            {type === 'WEBTOON' && 
+                                            {type === 'webtoons' && 
                                                 <S.EpisodeThumbnailContainer>
                                                     <S.EpisodeThumbnailImage src=''/>
                                                 </S.EpisodeThumbnailContainer>
@@ -151,12 +193,15 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                         </S.EpisodeItemLeft>
                                         <S.EpisodeItemRight>
                                             <S.EpisodeSellBtnWrapper>
-                                                {type === 'WEBTOON' && (
-                                                    <S.RentalBtn type="button" onClick={handleRequireLogin}>
+                                                {type === 'webtoons' && (
+                                                    <S.RentalBtn type="button" onClick={handleEpisodeRent(episode.id)}>
                                                         대여
                                                     </S.RentalBtn>
                                                 )}
-                                                <S.PurchaseBtn type="button" onClick={handleRequireLogin}>
+                                                <S.PurchaseBtn
+                                                    type="button"
+                                                    onClick={handleEpisodePurchase(episode.id)}
+                                                >
                                                     구매
                                                 </S.PurchaseBtn>
                                             </S.EpisodeSellBtnWrapper>

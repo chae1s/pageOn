@@ -40,6 +40,11 @@ public class WebtoonEpisode extends EpisodeBase {
     // 대여 금액
     private Integer rentalPrice;
 
+    @Override
+    public Integer getRentalPrice() {
+        return rentalPrice;
+    }
+
     public void addImage(WebtoonImage image) {
         this.images.add(image);
         image.addEpisode(this);

@@ -15,7 +15,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @MappedSuperclass
 @NoArgsConstructor
-public class EpisodeBase extends BaseTimeEntity {
+public abstract class EpisodeBase extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +25,10 @@ public class EpisodeBase extends BaseTimeEntity {
     private String episodeTitle;
 
     private Integer purchasePrice;
+
+    public Integer getRentalPrice() {
+        return null;
+    }
 
     @Builder.Default
     private Double averageRating = 0.0;

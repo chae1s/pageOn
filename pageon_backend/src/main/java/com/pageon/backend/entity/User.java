@@ -155,5 +155,9 @@ public class User {
         this.gender = gender;
     }
 
+    public void usePoints(int amount) {
+        this.pointBalance -= amount;
+    }
+
 
 }

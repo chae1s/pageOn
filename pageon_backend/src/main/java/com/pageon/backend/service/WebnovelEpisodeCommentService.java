@@ -167,7 +167,7 @@ public class WebnovelEpisodeCommentService {
                 }
         );
 
-        if (webnovelEpisode.getIsDeleted()) {
+        if (webnovelEpisode.getDeletedAt() != null) {
             log.error("WebnovelEpisode is deleted: episodeId = {}", episodeId);
             throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
         }
