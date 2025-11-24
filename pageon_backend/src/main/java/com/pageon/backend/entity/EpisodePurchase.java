@@ -35,7 +35,14 @@ public class EpisodePurchase extends BaseTimeEntity {
     private LocalDateTime expiredAt;
 
 
-    public void updateExpiredDate(LocalDateTime expiredAt) {
+    public void extendRental(LocalDateTime expiredAt) {
         this.expiredAt = expiredAt;
     }
+
+    public void upgradeToPurchase() {
+        this.expiredAt = null;
+        this.purchaseType = PurchaseType.OWN;
+    }
+
+
 }

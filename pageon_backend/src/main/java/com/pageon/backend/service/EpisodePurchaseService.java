@@ -148,23 +148,27 @@ public class EpisodePurchaseService {
         EpisodePurchase episodePurchase
                 = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(user.getId(), contentType, episodeId).orElse(null);
 
-        if (purchaseType == PurchaseType.OWN) {
-            if (episodePurchase != null) {
-                throw new CustomException(ErrorCode.EPISODE_ALREADY_PURCHASE);
-            } else {
+        if (episodePurchase == null) {
+            if (purchaseType == PurchaseType.OWN) {
                 return purchaseEpisode(user, contentType, contentId, episodeId);
-            }
-        } else if (purchaseType == PurchaseType.RENT) {
-            if (episodePurchase == null) {
+            } else {
                 return rentEpisode(user, contentType, contentId, episodeId);
             }
+        } else {
+            if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
+                throw new CustomException(ErrorCode.EPISODE_ALREADY_PURCHASE);
+            } else {
+                LocalDateTime now = LocalDateTime.now();
 
-            LocalDateTime now = LocalDateTime.now();
-
-            if (episodePurchase.getExpiredAt().isAfter(now)) {
-                throw new CustomException(ErrorCode.EPISODE_ALREADY_RENTAL);
-            } else if (episodePurchase.getExpiredAt().isBefore(now)) {
-                rerentEpisode(episodePurchase);
+                if (episodePurchase.getExpiredAt().isAfter(now)) {
+                    throw new CustomException(ErrorCode.EPISODE_ALREADY_RENTAL);
+                } else {
+                    if (purchaseType == PurchaseType.OWN) {
+                        episodePurchase.upgradeToPurchase();
+                    } else {
+                        episodePurchase.extendRental(LocalDateTime.now().plusDays(3));
+                    }
+                }
             }
         }
 
@@ -199,12 +203,6 @@ public class EpisodePurchaseService {
                 .build();
 
         return episodePurchaseRepository.save(episodePurchase);
-    }
-
-    private void rerentEpisode(EpisodePurchase episodePurchase) {
-        LocalDateTime expiredAt = LocalDateTime.now().plusDays(3);
-
-        episodePurchase.updateExpiredDate(expiredAt);
     }
 
 
