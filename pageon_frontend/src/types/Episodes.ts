@@ -8,6 +8,7 @@ export interface EpisodeSummary {
     createdAt: string;
     purchasePrice: number;
     rentalPrice: number;
+    episodePurchase: EpisodePurchase | null;
 }
 
 export interface WebnovelEpisodeDetail {
@@ -35,4 +36,10 @@ export interface WebtoonEpisodeDetail {
     nextEpisodeId: number | null;
     userScore: number | null;
     bestComment: BestComment | null;
+}
+
+export interface EpisodePurchase {
+    id: number;
+    purchaseType: string;
+    expiredAt: string;
 }

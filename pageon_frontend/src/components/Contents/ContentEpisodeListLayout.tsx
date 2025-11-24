@@ -5,6 +5,7 @@ import { EpisodeSummary } from '../../types/Episodes';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
+import { expirationCheck, expirationDate } from '../../utils/rentalEpisodeFormat';
 
 interface Props {
     type: string,
@@ -186,24 +187,48 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                     <span>{episode.episodeNum}화</span>
                                                     <S.EpisodeTitle to={`/${type}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
                                                 </S.EpisodeTitleAndNum>
-                                                <S.EpisodeCreateDate>
-                                                    {createDate}
-                                                </S.EpisodeCreateDate>
+                                                <S.EpisodeDateAndPurchaseData>
+                                                    <S.EpisodeCreateDate>
+                                                        {createDate}
+                                                    </S.EpisodeCreateDate>
+                                                    {episode.episodePurchase && (
+                                                        <S.EpisodePurchaseText>
+                                                            {episode.episodePurchase.purchaseType === 'OWN' 
+                                                                ? '소장' 
+                                                                : expirationDate(episode.episodePurchase.expiredAt)
+                                                            }
+                                                        </S.EpisodePurchaseText>
+                                                    )}
+                                                </S.EpisodeDateAndPurchaseData>
                                             </S.EpisodeInfoContainer>
                                         </S.EpisodeItemLeft>
                                         <S.EpisodeItemRight>
                                             <S.EpisodeSellBtnWrapper>
-                                                {type === 'webtoons' && (
-                                                    <S.RentalBtn type="button" onClick={handleEpisodeRent(episode.id)}>
-                                                        대여
-                                                    </S.RentalBtn>
-                                                )}
-                                                <S.PurchaseBtn
-                                                    type="button"
-                                                    onClick={handleEpisodePurchase(episode.id)}
-                                                >
-                                                    구매
-                                                </S.PurchaseBtn>
+                                                {episode.episodePurchase == null || 
+                                                    (episode.episodePurchase.purchaseType === "RENT" && expirationCheck(episode.episodePurchase.expiredAt)) 
+                                                    ? (
+                                                        <>
+                                                            {type === 'webtoons' && (
+                                                                <S.RentalBtn type="button" onClick={handleEpisodeRent(episode.id)}>
+                                                                    대여
+                                                                </S.RentalBtn>
+                                                            )}
+                                                            <S.PurchaseBtn
+                                                                type="button"
+                                                                onClick={handleEpisodePurchase(episode.id)}
+                                                            >
+                                                                구매
+                                                            </S.PurchaseBtn>
+                                                        </>
+                                                    ) : (
+                                                        <S.ViewBtn
+                                                            type="button"
+                                                            onClick={() => navigate(`/${type}/${contentId}/viewer/${episode.id}`)}
+                                                        >
+                                                            보기
+                                                        </S.ViewBtn>
+                                                    )
+                                                }
                                             </S.EpisodeSellBtnWrapper>
                                         </S.EpisodeItemRight>
                                     </S.EpisodeItem>

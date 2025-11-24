@@ -281,6 +281,18 @@ export const PurchaseBtn = styled.button`
     color: #FFF;
 `
 
+export const ViewBtn = styled.button`
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1;
+    border: 1px solid #528efa;
+    color: #528efa;
+`
+
 export const OptionRight = styled.div`
     padding-right: 10px;
 `
@@ -341,10 +353,19 @@ export const EpisodeTitle = styled(Link)`
     margin-left: 5px;
 `
 
-export const EpisodeCreateDate = styled.div`
-    font-size: 14px;
-    color: #A5A5A5;
+export const EpisodeDateAndPurchaseData = styled.div`
+    display: flex;
     margin-top: 4px;
+    font-size: 14px;
+    gap: 10px;
+`
+
+export const EpisodeCreateDate = styled.div`
+    color: #A5A5A5;
+`
+
+export const EpisodePurchaseText = styled.div`
+    color: #528efa;
 `
 
 export const EpisodeItemRight = styled.div`
