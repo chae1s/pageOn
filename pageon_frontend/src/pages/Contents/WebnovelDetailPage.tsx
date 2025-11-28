@@ -33,7 +33,7 @@ function WebnovelDetailPage(){
         <MainContainer>
             <NoSidebarMain>
                 <ContentDetailLayout content={webnovel} />
-                <ContentEpisodeListLayout type="webnovels" contentId={webnovel.id} episodes={webnovel.episodes} />
+                <ContentEpisodeListLayout type="webnovels" contentId={webnovel.id} contentTitle={webnovel.title} episodes={webnovel.episodes} />
             </NoSidebarMain>
         </MainContainer>
     )

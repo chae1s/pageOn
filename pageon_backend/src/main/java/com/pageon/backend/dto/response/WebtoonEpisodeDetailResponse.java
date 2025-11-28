@@ -15,7 +15,10 @@ import java.util.List;
 public class WebtoonEpisodeDetailResponse {
     private Long id;
     private String title;
+    private String episodeTitle;
     private Integer episodeNum;
+    private Integer purchasePrice;
+    private Integer rentalPrice;
     private Double averageRating;
     private Long ratingCount;
     private List<WebtoonImagesResponse> images;
@@ -25,13 +28,16 @@ public class WebtoonEpisodeDetailResponse {
     private BestCommentResponse bestComment;
 
     public static WebtoonEpisodeDetailResponse fromEntity(
-            WebtoonEpisode episode, List<WebtoonImagesResponse> images,
+            WebtoonEpisode episode, String title, List<WebtoonImagesResponse> images,
             Long prevEpisodeId, Long nextEpisodeId, Integer userScore, BestCommentResponse bestComment)
     {
         return WebtoonEpisodeDetailResponse.builder()
                 .id(episode.getId())
-                .title(episode.getEpisodeTitle())
+                .title(title)
+                .episodeTitle(episode.getEpisodeTitle())
                 .episodeNum(episode.getEpisodeNum())
+                .purchasePrice(episode.getPurchasePrice())
+                .rentalPrice(episode.getRentalPrice())
                 .averageRating(episode.getAverageRating())
                 .ratingCount(episode.getRatingCount())
                 .images(images)

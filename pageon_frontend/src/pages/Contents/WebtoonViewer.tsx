@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
-import { WebtoonEpisodeDetail } from "../../types/Episodes";
+import { WebtoonEpisodeDetail, PurchaseTargetEpisode } from "../../types/Episodes";
 import * as S from "./Viewer.styles"
 import * as C from "./Comment.styles";
 import fullStarIcon from "../../assets/fullStarIcon.png"
@@ -10,6 +10,7 @@ import emptyStarIcon from "../../assets/emptyStarIcon.png"
 import api from "../../api/axiosInstance";
 import { BestComment } from "../../types/Comments";
 import { formatDate } from "../../utils/formatDate";
+import PurchaseModal, { PurchaseModalMode } from "../../components/Modals/PurchaseModal";
 
 function WebtoonViewer() {
     const { episodeId , contentId } = useParams<{episodeId: string; contentId: string}>();
@@ -20,20 +21,11 @@ function WebtoonViewer() {
     const [showTitleSection, setShowTitleSection] = useState(true);
     const lastScrollY = useRef(0);
 
-    const [ episodeData, setEpisodeData ] = useState<WebtoonEpisodeDetail>({
-        id: 0,
-        title: "",
-        episodeNum: 0,
-        averageRating: 0.0,
-        ratingCount: 0,
-        images: [],
-        prevEpisodeId: null,
-        nextEpisodeId: null,
-        userScore: null,
-        bestComment: null
-    });
+    const [ episodeData, setEpisodeData ] = useState<WebtoonEpisodeDetail | null>(null);
 
     const [ bestComment, setBestComment ] = useState<BestComment>();
+
+    const [ purchasePrompt, setPurchasePrompt ] = useState<{episode: PurchaseTargetEpisode; mode: PurchaseModalMode; allowRent: boolean} | null>(null);
 
     useEffect(() => {
         async function fetchData(preserveScroll: boolean = false) {
@@ -99,6 +91,73 @@ function WebtoonViewer() {
         };
     }, []);
 
+    function isLoggedIn() {
+        return !!localStorage.getItem('accessToken');
+    }
+
+    const checkLogin = (): boolean => {
+        if (!isLoggedIn()) {
+            alert('로그인이 필요합니다.');
+            navigate("/users/login");
+            return false; 
+        }
+        return true; 
+    };
+
+    const openPurchasePrompt = (episode: PurchaseTargetEpisode, mode: PurchaseModalMode, allowRent: boolean = false) => {
+        setPurchasePrompt({ episode, mode, allowRent });
+    };
+
+    const closePurchasePrompt = () => setPurchasePrompt(null);
+
+    const processTransaction = async (purchaseType: 'OWN' | 'RENT') => {
+        if (!purchasePrompt || !checkLogin()) {
+            return;
+        }
+        const { episode } = purchasePrompt;
+
+        try {
+            await api.post(`/webnovels/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
+            closePurchasePrompt();
+            navigate(`/webnovels/${contentId}/viewer/${episode.id}`);
+        } catch (error) {
+            console.error("에피소드 구매 실패 : ", error);
+        }
+    };
+
+    const handleNavigateEpisode = async (e:React.MouseEvent, targetEpisodeId: number | null | undefined, direction: 'PREV' | 'NEXT') => {
+        e.preventDefault();
+
+        if (!targetEpisodeId) return;
+
+        if (!checkLogin()) return;
+
+        try {
+            const response = await api.get(`/webtoons/episodes/${targetEpisodeId}/subscribe`);
+
+            if (response.data) {
+                navigate(`/webtoons/${contentId}/viewer/${targetEpisodeId}`);
+                return;
+            }
+
+            const currentEpisodeNum = episodeData?.episodeNum || 0;
+
+            const nextNum = direction === 'NEXT' ? currentEpisodeNum + 1 : currentEpisodeNum - 1;
+
+            const targetEpisode: PurchaseTargetEpisode = {
+                id: targetEpisodeId,
+                episodeNum: nextNum,
+                purchasePrice: episodeData?.purchasePrice,
+                rentalPrice: episodeData?.rentalPrice
+            };
+
+            openPurchasePrompt(targetEpisode, 'SELECT', true);
+
+        } catch (error) {
+            console.log("에피소드 정보 확인 중 오류 발생: ", error);
+        }
+    }
+
     const [isRatingOpen, setIsRatingOpen] = useState(false);
     const [selectedScore, setSelectedScore] = useState<number | null>(null);
 
@@ -126,7 +185,7 @@ function WebtoonViewer() {
 
     const handleConfirmRating = async () => {
         const savedY = window.scrollY;
-        const currentUserScore = episodeData.userScore ?? 0;
+        const currentUserScore = episodeData?.userScore ?? 0;
         if (selectedScore === currentUserScore) {
             setIsRatingOpen(false);
             window.scrollTo(0, savedY);
@@ -135,7 +194,7 @@ function WebtoonViewer() {
         try {
             await api.post("/rating", {
                 contentType: "WEBTOON",
-                episodeId: episodeData.id,
+                episodeId: episodeData?.id,
                 score: selectedScore
             });
             // 최신 평점 반영 및 스크롤 유지
@@ -152,7 +211,7 @@ function WebtoonViewer() {
 
     const handleUpdateRating = async () => {
         const savedY = window.scrollY;
-        const currentUserScore = episodeData.userScore ?? 0;
+        const currentUserScore = episodeData?.userScore ?? 0;
         if (selectedScore === currentUserScore) {
             setIsRatingOpen(false);
             window.scrollTo(0, savedY);
@@ -161,7 +220,7 @@ function WebtoonViewer() {
         try {
             await api.patch("/rating", {
                 contentType: "WEBTOON",
-                episodeId: episodeData.id,
+                episodeId: episodeData?.id,
                 score: selectedScore
             });
             if (episodeId) {
@@ -197,10 +256,26 @@ function WebtoonViewer() {
         <S.Viewer>
             <S.EpisodeTitleSection isVisible={showTitleSection}>
                 <S.EpisodeTitleContainer>
-                    <S.WebnovelTitle to={`/webtoons/${contentId}`}>{episodeData.episodeNum}화 {episodeData.title}</S.WebnovelTitle>
+                    <S.WebnovelTitle to={`/webtoons/${contentId}`}>{episodeData?.episodeNum}화 {episodeData?.episodeTitle}</S.WebnovelTitle>
                     <S.EpisodeLinkContainer>
-                        <S.EpisodeLink to={`/webtoons/${contentId}/viewer/${episodeData.prevEpisodeId}`} $disabled={episodeData.prevEpisodeId === null} aria-disabled={episodeData.prevEpisodeId === null}>이전화</S.EpisodeLink>
-                        <S.EpisodeLink to={`/webtoons/${contentId}/viewer/${episodeData.nextEpisodeId}`} $disabled={episodeData.nextEpisodeId === null} aria-disabled={episodeData.nextEpisodeId === null}>다음화</S.EpisodeLink>
+                        <S.EpisodeLink 
+                            as="button"
+                            type="button"
+                            disabled={episodeData?.prevEpisodeId === null}
+                            $disabled={episodeData?.prevEpisodeId === null} 
+                            onClick={(e) => handleNavigateEpisode(e, episodeData?.prevEpisodeId, 'PREV')}
+                        >
+                            이전화
+                        </S.EpisodeLink>
+                        <S.EpisodeLink 
+                            as="button"
+                            type="button"
+                            disabled={episodeData?.nextEpisodeId === null}
+                            $disabled={episodeData?.nextEpisodeId === null} 
+                            onClick={(e) => handleNavigateEpisode(e, episodeData?.nextEpisodeId, 'NEXT')}
+                        >
+                            다음화
+                        </S.EpisodeLink>
                     </S.EpisodeLinkContainer>
                 </S.EpisodeTitleContainer>
             </S.EpisodeTitleSection>
@@ -209,7 +284,7 @@ function WebtoonViewer() {
                     <S.EpisodeViewerContents>
                         <S.ContentWrapper>
                             <S.EpisodeContent>
-                                {episodeData.images.map((image) => (
+                                {episodeData?.images.map((image) => (
                                     <S.EpisodeThumbnailImage key={image.id} src={image.imageUrl} alt={image.sequence.toString()} />
                                 ))}
                             </S.EpisodeContent>
@@ -226,10 +301,10 @@ function WebtoonViewer() {
             <S.ViewerRatingSection>
                 <S.ViewerRatingScore>
                     <S.RatingFullStarIcon src={fullStarIcon} />
-                    <S.ViewerAverageRatingScore>{Number(episodeData.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
-                    <S.ViewerRatingCount>{episodeData.ratingCount ?? 0}</S.ViewerRatingCount>
+                    <S.ViewerAverageRatingScore>{Number(episodeData?.averageRating ?? 0).toFixed(1)}</S.ViewerAverageRatingScore>
+                    <S.ViewerRatingCount>{episodeData?.ratingCount ?? 0}</S.ViewerRatingCount>
                 </S.ViewerRatingScore>
-                <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore((episodeData.userScore ?? 0) as number); setIsRatingOpen(true); }}>
+                <S.ViewerRatingCreateBtn onClick={() => { setSelectedScore((episodeData?.userScore ?? 0) as number); setIsRatingOpen(true); }}>
                     별점 주기
                 </S.ViewerRatingCreateBtn>
             </S.ViewerRatingSection>
@@ -250,8 +325,8 @@ function WebtoonViewer() {
                         <S.RatingScoreText>{getDisplayScore()}</S.RatingScoreText>
                         <S.RatingModalActions>
                             <S.RatingCancelBtn onClick={() => { setSelectedScore(0); setIsRatingOpen(false); }}>취소</S.RatingCancelBtn>
-                            <S.RatingConfirmBtn onClick={(episodeData.userScore !== null && episodeData.userScore !== 0) ? handleUpdateRating : handleConfirmRating} disabled={selectedScore === null}>
-                                {episodeData.userScore !== null && episodeData.userScore !== 0 ? "수정" : "확인"}
+                            <S.RatingConfirmBtn onClick={(episodeData?.userScore !== null && episodeData?.userScore !== 0) ? handleUpdateRating : handleConfirmRating} disabled={selectedScore === null}>
+                                {episodeData?.userScore !== null && episodeData?.userScore !== 0 ? "수정" : "확인"}
                             </S.RatingConfirmBtn>
                         </S.RatingModalActions>
                     </S.RatingModal>
@@ -296,9 +371,27 @@ function WebtoonViewer() {
 
             <S.ViewerNextEpisodeBtnSection>
                 <S.ViewerNextEpisodeBtnContainer>
-                    <S.ViewerNextEpisodeBtn to={`/webtoons/${contentId}/viewer/${episodeData.nextEpisodeId}`}>다음화 보기</S.ViewerNextEpisodeBtn>
+                    <S.ViewerNextEpisodeBtn 
+                        as="button"
+                        type="button"
+                        disabled={episodeData?.nextEpisodeId === null}
+                        $disabled={episodeData?.nextEpisodeId === null} 
+                        onClick={(e) => handleNavigateEpisode(e, episodeData?.nextEpisodeId, 'NEXT')}
+                    >
+                        다음화 보기
+                    </S.ViewerNextEpisodeBtn>
                 </S.ViewerNextEpisodeBtnContainer>
             </S.ViewerNextEpisodeBtnSection>
+            <PurchaseModal 
+                isOpen={!!purchasePrompt}
+                onClose={closePurchasePrompt}
+                onConfirm={processTransaction}
+                contentTitle={episodeData?.title || ""}
+                episode={purchasePrompt?.episode || null}
+                mode={purchasePrompt?.mode || 'SELECT'}
+                allowRent={purchasePrompt?.allowRent || false}
+                isWebnovelType={false}
+            />
         </S.Viewer>
     )
 

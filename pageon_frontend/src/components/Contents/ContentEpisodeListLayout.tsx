@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { ContentType, ContentStatus, ContentDetail } from '../../types/Content';
+import React, { useState } from 'react';
 import * as S from "../Styles/ContentDetail.styles";
-import { EpisodeSummary } from '../../types/Episodes';
+import { EpisodeSummary, PurchaseTargetEpisode } from '../../types/Episodes';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
 import { expirationCheck, expirationDate } from '../../utils/rentalEpisodeFormat';
+import PurchaseModal from '../Modals/PurchaseModal';
 
 interface Props {
     type: string,
     contentId: number,
+    contentTitle: string,
     episodes: EpisodeSummary[];
 }
 
@@ -18,11 +19,17 @@ function isLoggedIn() {
     return !!localStorage.getItem('accessToken');
 }
 
-function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
+type PurchaseModalMode = 'OWN' | 'RENT' | 'SELECT';
+
+function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Props ) {
 
     const [sort, setSort] = useState<string>("recent") // first | recent
     const [showAll, setShowAll] = useState<boolean>(false);
+    const [purchasePrompt, setPurchasePrompt] = useState<{ episode: PurchaseTargetEpisode; mode: PurchaseModalMode; allowRent: boolean } | null>(null);
     const navigate = useNavigate();
+    const normalizedType = type.toLowerCase();
+    const isWebtoonType = normalizedType === 'webtoon' || normalizedType === 'webtoons';
+    const isWebnovelType = normalizedType === 'webnovel' || normalizedType === 'webnovels';
 
     // 정렬된 에피소드 배열 생성
     const sortedEpisodes = React.useMemo(() => {
@@ -67,62 +74,98 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
     };
 
     // 구매/대여 버튼 클릭시 로그인 체크
-    const handleRequireLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const checkLogin = (): boolean => {
         if (!isLoggedIn()) {
-            e.preventDefault();
             alert('로그인이 필요합니다.');
-
             navigate("/users/login");
-            return;
+            return false; // 로그인 실패
         }
-        // 실제 구매/대여 로직은 여기에 추가
-
+        return true; // 로그인 성공
     };
 
     
-    const handleEpisodePurchase = (episodeId: number) => async (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!isLoggedIn()) {
-            e.preventDefault();
-            alert('로그인이 필요합니다.');
+    const openPurchasePrompt = (episode: PurchaseTargetEpisode, mode: PurchaseModalMode, allowRent: boolean = false) => {
+        setPurchasePrompt({ episode, mode, allowRent });
+    };
 
-            navigate("/users/login");
+    const closePurchasePrompt = () => setPurchasePrompt(null);
+
+    const processTransaction = async (purchaseType: 'OWN' | 'RENT') => {
+        if (!purchasePrompt || !checkLogin()) {
             return;
         }
+        const { episode } = purchasePrompt;
 
-        if (window.confirm("에피소드를 구매하시겠습니까?")) {
-            try {
-                await api.post(`/${type}/episodes/${episodeId}/subscribe?purchaseType=OWN`);
-
-                navigate(`/${type}/${contentId}/viewer/${episodeId}`);
-            } catch (error) {
-                console.error("에피소드 구매 실패 : ", error);
-            }
+        try {
+            await api.post(`/${type}/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
+            closePurchasePrompt();
+            navigate(`/${type}/${contentId}/viewer/${episode.id}`);
+        } catch (error) {
+            console.error("에피소드 구매 실패 : ", error);
         }
     };
 
-    const handleEpisodeRent = (episodeId: number) => async (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!isLoggedIn()) {
-            e.preventDefault();
-            alert('로그인이 필요합니다.');
-
-            navigate("/users/login");
+    const handleEpisodePurchase = (episode: EpisodeSummary) => (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (!checkLogin()) {
             return;
         }
+        openPurchasePrompt(episode, 'OWN');
+    };
 
-        if (window.confirm("에피소드를 대여하시겠습니까?")) {
-            try {
-                await api.post(`/${type}/episodes/${episodeId}/subscribe?purchaseType=RENT`);
-
-                navigate(`/${type}/${contentId}/viewer/${episodeId}`);
-            } catch (error) {
-                console.error("에피소드 구매 실패 : ", error);
-            }
+    const handleEpisodeRent = (episode: EpisodeSummary) => (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        if (!checkLogin()) {
+            return;
         }
+        openPurchasePrompt(episode, 'RENT');
     } 
 
+    const handleEpisodeView = (episodeId: number) => async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!checkLogin()) {
+            e.preventDefault();
+            return;
+        }
+
+        try {
+            const response = await api.get(`/${type}/episodes/${episodeId}/subscribe`);
+
+            console.log(response.data)
+            if (!response.data) {
+                const targetEpisode = episodes.find(ep => ep.id === episodeId);
+                if (!targetEpisode) {
+                    return;
+                }
+                
+                openPurchasePrompt(targetEpisode, 'SELECT', isWebtoonType);
+                e.preventDefault(); // Prevent navigation
+                return;
+            }
+            
+            if (response.data) {
+                navigate(`/${type}/${contentId}/viewer/${episodeId}`);
+            }
+        } catch (error) {
+            const targetEpisode = episodes.find(ep => ep.id === episodeId);
+            if (!targetEpisode) {
+                return;
+            }
+            openPurchasePrompt(targetEpisode, 'SELECT', isWebtoonType);
+            e.preventDefault();
+        }
+    }
     
 
+    const formatPointValue = (value?: number | null) => {
+        if (typeof value !== 'number') {
+            return '0';
+        }
+        return value.toLocaleString();
+    };
+
+
     return (
+        <>
         <S.EpisodeSection>
             <form action="">
                 <div>
@@ -141,12 +184,12 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                             </S.OptionItem>
                             <S.OptionItem>
                                 <S.EpisodeSellBtnWrapper>
-                                    {type === 'WEBTOON' && (
-                                        <S.RentalBtn type="button" onClick={handleRequireLogin}>
+                                    {isWebtoonType && (
+                                        <S.RentalBtn type="button" >
                                             선택 대여
                                         </S.RentalBtn>
                                     )}
-                                    <S.PurchaseBtn type="button" onClick={handleRequireLogin}>
+                                    <S.PurchaseBtn type="button" >
                                         선택 구매
                                     </S.PurchaseBtn>
                                 </S.EpisodeSellBtnWrapper>
@@ -177,7 +220,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                 checked={selectedIds.includes(episodeIdStr)}
                                                 onChange={handleEpisodeCheck(episodeIdStr)}
                                             />
-                                            {type === 'webtoons' && 
+                                            {isWebtoonType && 
                                                 <S.EpisodeThumbnailContainer>
                                                     <S.EpisodeThumbnailImage src=''/>
                                                 </S.EpisodeThumbnailContainer>
@@ -185,7 +228,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                             <S.EpisodeInfoContainer>
                                                 <S.EpisodeTitleAndNum>
                                                     <span>{episode.episodeNum}화</span>
-                                                    <S.EpisodeTitle to={`/${type}/${contentId}/viewer/${episode.id}`}>{episode.episodeTitle}</S.EpisodeTitle>
+                                                    <S.EpisodeTitle type='button' onClick={handleEpisodeView(episode.id)}>{episode.episodeTitle}</S.EpisodeTitle>
                                                 </S.EpisodeTitleAndNum>
                                                 <S.EpisodeDateAndPurchaseData>
                                                     <S.EpisodeCreateDate>
@@ -208,14 +251,14 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                     (episode.episodePurchase.purchaseType === "RENT" && expirationCheck(episode.episodePurchase.expiredAt)) 
                                                     ? (
                                                         <>
-                                                            {type === 'webtoons' && (
-                                                                <S.RentalBtn type="button" onClick={handleEpisodeRent(episode.id)}>
+                                                            {isWebtoonType && (
+                                                                <S.RentalBtn type="button" onClick={handleEpisodeRent(episode)}>
                                                                     대여
                                                                 </S.RentalBtn>
                                                             )}
                                                             <S.PurchaseBtn
                                                                 type="button"
-                                                                onClick={handleEpisodePurchase(episode.id)}
+                                                                onClick={handleEpisodePurchase(episode)}
                                                             >
                                                                 구매
                                                             </S.PurchaseBtn>
@@ -223,7 +266,7 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                                                     ) : (
                                                         <S.ViewBtn
                                                             type="button"
-                                                            onClick={() => navigate(`/${type}/${contentId}/viewer/${episode.id}`)}
+                                                            onClick={handleEpisodeView(episode.id)}
                                                         >
                                                             보기
                                                         </S.ViewBtn>
@@ -246,6 +289,17 @@ function ContentEpisodeListLayout( {type, contentId, episodes}: Props ) {
                 </div>
             </form>
         </S.EpisodeSection>
+        <PurchaseModal 
+            isOpen={!!purchasePrompt}
+            onClose={closePurchasePrompt}
+            onConfirm={processTransaction}
+            contentTitle={contentTitle}
+            episode={purchasePrompt?.episode || null}
+            mode={purchasePrompt?.mode || 'SELECT'}
+            allowRent={purchasePrompt?.allowRent || false}
+            isWebnovelType={isWebnovelType}
+        />
+        </>
     )
 
 }

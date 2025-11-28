@@ -68,7 +68,22 @@ public class EpisodePurchaseService {
         pointTransactionService.usePoint(user, episodePrice, description, episodePurchase.getId());
 
 
+    }
 
+    public Boolean checkPurchaseHistory(Long userId, ContentType contentType, Long episodeId) {
+        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, contentType, episodeId).orElse(null);
+
+        if (episodePurchase == null) {
+            return false;
+        }
+
+        if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
+            return true;
+        } else {
+            LocalDateTime now = LocalDateTime.now();
+
+            return episodePurchase.getExpiredAt().isAfter(now);
+        }
     }
 
 

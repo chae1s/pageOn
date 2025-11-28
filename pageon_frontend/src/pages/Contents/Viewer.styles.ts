@@ -47,7 +47,7 @@ export const EpisodeLinkContainer = styled.div`
     gap: 20px;
 `
 
-export const EpisodeLink = styled(Link)<{ $disabled?: boolean }>`
+export const EpisodeLink = styled.button<{ $disabled?: boolean }>`
     font-size: 14px;
     font-weight: 600;
     line-height: 19px;
@@ -145,7 +145,7 @@ export const ViewerNextEpisodeBtnContainer = styled.div`
     text-align: center;
 `
 
-export const ViewerNextEpisodeBtn = styled(Link)<{ $disabled?: boolean }>`
+export const ViewerNextEpisodeBtn = styled.button<{ $disabled?: boolean }>`
     display: inline-flex;
     justify-content: center;
     align-items: center;

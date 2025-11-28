@@ -38,4 +38,20 @@ public class EpisodePurchaseController {
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/webnovels/episodes/{episodeId}/subscribe")
+    public ResponseEntity<Boolean> checkWebnovelPurchaseHistory(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PathVariable Long episodeId
+    ) {
+        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), ContentType.WEBNOVEL, episodeId));
+    }
+
+    @GetMapping("/webtoons/episodes/{episodeId}/subscribe")
+    public ResponseEntity<Boolean> checkWebtoonPurchaseHistory(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PathVariable Long episodeId
+    ) {
+        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), ContentType.WEBTOON, episodeId));
+    }
 }

@@ -17,6 +17,7 @@ export interface WebnovelEpisodeDetail {
     episodeNum: number;
     episodeTitle: string;
     content: string;
+    purchasePrice: number;
     averageRating: number;
     ratingCount: number;
     prevEpisodeId: number | null;
@@ -28,9 +29,12 @@ export interface WebnovelEpisodeDetail {
 export interface WebtoonEpisodeDetail {
     id: number;
     title: string;
+    episodeTitle: string;
     episodeNum: number;
+    purchasePrice: number;
+    rentalPrice: number;
     averageRating: number;
-    ratingCount: number
+    ratingCount: number;
     images: WebtoonImagesResponse[];
     prevEpisodeId: number | null;
     nextEpisodeId: number | null;
@@ -42,4 +46,11 @@ export interface EpisodePurchase {
     id: number;
     purchaseType: string;
     expiredAt: string;
+}
+
+export interface PurchaseTargetEpisode {
+    id: number;
+    episodeNum: number;
+    purchasePrice?: number | null;
+    rentalPrice?: number | null;
 }

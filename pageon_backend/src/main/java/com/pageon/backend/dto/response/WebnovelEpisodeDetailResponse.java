@@ -16,6 +16,7 @@ public class WebnovelEpisodeDetailResponse {
     private Integer episodeNum;
     private String episodeTitle;
     private String content;
+    private Integer purchasePrice;
     private Double averageRating;
     private Long ratingCount;
     private Long prevEpisodeId;
@@ -33,6 +34,7 @@ public class WebnovelEpisodeDetailResponse {
                 .episodeNum(webnovelEpisode.getEpisodeNum())
                 .episodeTitle(webnovelEpisode.getEpisodeTitle())
                 .content(webnovelEpisode.getContent())
+                .purchasePrice(webnovelEpisode.getPurchasePrice())
                 .averageRating(webnovelEpisode.getAverageRating())
                 .ratingCount(webnovelEpisode.getRatingCount())
                 .prevEpisodeId(prevEpisodeId)

@@ -65,7 +65,7 @@ public class WebtoonEpisodeService {
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
 
         return WebtoonEpisodeDetailResponse.fromEntity(
-                episode, webtoonImages,
+                episode, episode.getWebtoon().getTitle(), webtoonImages,
                 prevEpisodeId, nextEpisodeId, userScore, webtoonEpisodeCommentService.getBestCommentsByEpisodeId(episodeId)
         );
     }
