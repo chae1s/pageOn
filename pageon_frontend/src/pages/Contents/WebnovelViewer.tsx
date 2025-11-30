@@ -9,7 +9,7 @@ import halfFullStarIcon from "../../assets/halfFullStarIcon.png";
 import emptyStarIcon from "../../assets/emptyStarIcon.png";
 import api from "../../api/axiosInstance";
 import { BestComment } from "../../types/Comments";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../utils/formatData";
 import PurchaseModal, { PurchaseModalMode } from "../../components/Modals/PurchaseModal";
 
 function WebnovelViewer() {

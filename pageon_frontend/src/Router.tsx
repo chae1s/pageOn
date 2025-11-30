@@ -30,6 +30,7 @@ import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 import KeywordSearch from "./pages/Search/KeywordSearch";
 import TitleCreatorSearch from "./pages/Search/TitleCreatorSearch";
 import EpisodeCommentsPage from "./pages/Contents/EpisodeCommentsPage";
+import PointTransactionPage from "./pages/Users/PointTransactionPage";
 
 function Router() {
     const location = useLocation();
@@ -68,6 +69,7 @@ function Router() {
                 <Route path="/users/check-password" element={<PasswordCheck />} />
                 <Route path="/users/edit" element={<EditProfile />} />
                 <Route path="/users/withdraw" element={<Withdraw />} />
+                <Route path="/points/history" element={<PointTransactionPage />} />
                 <Route path="/library/interests" element={<InterestContents />} />
                 <Route path="/library/recent-view" element={<RecentViewedWorks />} />
                 <Route path="/library/my-comments" element={<MyComments />}  />

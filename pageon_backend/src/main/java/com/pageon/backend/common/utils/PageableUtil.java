@@ -36,7 +36,7 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createMyCommentPageable(Pageable pageable) {
+    public static Pageable createCreatedAtPageable(Pageable pageable) {
         Sort sortOrder = Sort.by(Sort.Order.desc("createdAt"));
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);

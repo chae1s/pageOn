@@ -83,7 +83,7 @@ public class WebtoonEpisodeCommentService {
 
     @Transactional
     public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
-        Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
+        Pageable sortedPageable = PageableUtil.createCreatedAtPageable(pageable);
 
         Page<WebtoonEpisodeComment> commentPage = webtoonEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(userId, sortedPageable);
 

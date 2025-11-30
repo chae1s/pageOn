@@ -11,7 +11,7 @@ import LikeFullIcon from "../../assets/fullHeartIcon.png";
 import BlankCheckboxIcon from "../../assets/blankCheckboxIcon.png";
 import FullCheckboxIcon from "../../assets/fullCheckboxIcon.png";
 import { Pagination } from "../../types/Page";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../utils/formatData";
 
 
 function EpisodeCommentsPage() {

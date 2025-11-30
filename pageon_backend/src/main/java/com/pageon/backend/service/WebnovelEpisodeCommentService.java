@@ -84,7 +84,7 @@ public class WebnovelEpisodeCommentService {
 
     @Transactional
     public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
-        Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
+        Pageable sortedPageable = PageableUtil.createCreatedAtPageable(pageable);
 
         Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(userId, sortedPageable);
 

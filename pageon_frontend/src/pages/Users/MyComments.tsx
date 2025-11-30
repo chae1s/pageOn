@@ -10,7 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import { MyComment } from "../../types/Comments";
 import { Pagination } from "../../types/Page";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../utils/formatData";
 
 function MyComments() {
     const [searchParams, setSearchParams] = useSearchParams();
