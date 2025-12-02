@@ -12,6 +12,7 @@ import BlankCheckboxIcon from "../../assets/blankCheckboxIcon.png";
 import FullCheckboxIcon from "../../assets/fullCheckboxIcon.png";
 import { Pagination } from "../../types/Page";
 import { formatDate } from "../../utils/formatData";
+import PageNavigator from "../../components/Pagination/PageNavigator";
 
 
 function EpisodeCommentsPage() {
@@ -443,37 +444,7 @@ function EpisodeCommentsPage() {
                         )}
                     </C.CommentListUl>
                     {pageData && pageData.totalPages > 0 && (
-                        <S.PaginationContainer>
-                            
-                            <S.PaginationIconWrapper
-                                onClick={() => handlePageChange(pageData.pageNumber - 1)}
-                                disabled={pageData.first}
-                            >
-                                <PrevIcon />
-                            </S.PaginationIconWrapper>
-
-                            <S.PaginationNumberList>
-                                
-                                {pageNumbers.map((number) => (
-                                    <S.PaginationNumberListItem key={number}>
-                                        <S.PaginationNumberBtn
-                                            $active={pageData.pageNumber === number}
-                                            onClick={() => handlePageChange(number)}
-                                        >
-                                            {number + 1}
-                                        </S.PaginationNumberBtn>
-                                    </S.PaginationNumberListItem>
-                                ))}
-                            </S.PaginationNumberList>
-
-                            
-                            <S.PaginationIconWrapper
-                                onClick={() => handlePageChange(pageData.pageNumber + 1)}
-                                disabled={pageData.last}
-                            >
-                                <NextIcon />
-                            </S.PaginationIconWrapper>
-                        </S.PaginationContainer>
+                        <PageNavigator pageData={pageData} handlePageChange={handlePageChange} />
                     )}
                 </C.CommentList>
             </S.ViewerCommentSection>

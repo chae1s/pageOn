@@ -143,6 +143,7 @@ export const PointTransactionList = styled.div`
 
 export const PointTransactionTable = styled.table`
     width: 100%;
+    margin-bottom: 40px;
 `
 
 export const PointTransactionColDate = styled.col`
@@ -229,4 +230,11 @@ export const PointTransactionTdBalance = styled.td`
     line-height: 14px;
     font-weight: 600;
     text-align: right;
+`
+
+export const PointTransactionEmpty = styled.div`
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: #666;
 `
