@@ -84,7 +84,7 @@ public class WebnovelEpisodeCommentService {
 
     @Transactional
     public Page<MyCommentResponse> getCommentsByUserId(Long userId, Pageable pageable) {
-        Pageable sortedPageable = PageableUtil.createMyCommentPageable(pageable);
+        Pageable sortedPageable = PageableUtil.createCreatedAtPageable(pageable);
 
         Page<WebnovelEpisodeComment> commentPage = webnovelEpisodeCommentRepository.findAllByUser_IdAndDeletedAtNull(userId, sortedPageable);
 
@@ -167,7 +167,7 @@ public class WebnovelEpisodeCommentService {
                 }
         );
 
-        if (webnovelEpisode.getIsDeleted()) {
+        if (webnovelEpisode.getDeletedAt() != null) {
             log.error("WebnovelEpisode is deleted: episodeId = {}", episodeId);
             throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
         }

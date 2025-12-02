@@ -48,3 +48,10 @@ export interface DeleteRequest {
     reason: string;
     otherReason: string;
 }
+
+export interface PointTransaction {
+    createdAt: string;
+    description: string;
+    amount: number;
+    balance: number;
+}

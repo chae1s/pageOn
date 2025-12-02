@@ -281,6 +281,18 @@ export const PurchaseBtn = styled.button`
     color: #FFF;
 `
 
+export const ViewBtn = styled.button`
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    white-space: nowrap;
+    line-height: 1;
+    border: 1px solid #528efa;
+    color: #528efa;
+`
+
 export const OptionRight = styled.div`
     padding-right: 10px;
 `
@@ -337,14 +349,23 @@ export const EpisodeTitleAndNum = styled.div`
     font-weight: 500;
 `
 
-export const EpisodeTitle = styled(Link)`
+export const EpisodeTitle = styled.button`
     margin-left: 5px;
 `
 
-export const EpisodeCreateDate = styled.div`
-    font-size: 14px;
-    color: #A5A5A5;
+export const EpisodeDateAndPurchaseData = styled.div`
+    display: flex;
     margin-top: 4px;
+    font-size: 14px;
+    gap: 10px;
+`
+
+export const EpisodeCreateDate = styled.div`
+    color: #A5A5A5;
+`
+
+export const EpisodePurchaseText = styled.div`
+    color: #528efa;
 `
 
 export const EpisodeItemRight = styled.div`
@@ -382,5 +403,56 @@ export const NotificationContainer = styled.div<{$show: boolean}>`
     opacity: ${({$show}) => ($show ? 1 : 0)};
     transition: opacity 0.3s ease-in-out;
     pointer-events: none;
+`
+
+export const PurchaseModalOverlay = styled.div<{$open: boolean}>`
+    position: fixed;
+    inset: 0;
+    display: ${({$open}) => ($open ? 'flex' : 'none')};
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1600;
+    padding: 20px;
+`
+
+export const PurchaseModal = styled.div`
+    width: 100%;
+    max-width: 360px;
+    padding: 24px 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    text-align: center;
+`
+
+export const PurchaseModalTitle = styled.h3`
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+`
+
+export const PurchaseModalDescription = styled.p`
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 20px;
+`
+
+export const PurchaseModalActions = styled.div`
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+`
+
+export const ModalGhostButton = styled.button`
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    color: #5a5a5a;
 `
 

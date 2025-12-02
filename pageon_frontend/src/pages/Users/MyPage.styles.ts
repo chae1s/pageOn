@@ -131,3 +131,110 @@ export const ErrorMessage = styled.div`
     font-size: 0.8rem;
     margin-top: 3px;
 `
+
+export const MypagePointSection = styled.section`
+    padding-left: 10px;
+`
+
+export const PointTransactionList = styled.div`
+    width: 100%;
+    margin: 0 0 80px;
+`
+
+export const PointTransactionTable = styled.table`
+    width: 100%;
+    margin-bottom: 40px;
+`
+
+export const PointTransactionColDate = styled.col`
+    width: 170px;
+    text-align: center;
+`
+
+export const PointTransactionColTitle = styled.col`
+    width: auto;
+    text-align: left;
+`
+
+export const PointTransactionColAmount = styled.col`
+    width: 140px;
+    text-align: right;
+`
+
+export const PointTransactionColBalance = styled.col`
+    width: 140px;
+`
+
+export const PointTransactionTableHead = styled.thead`
+    
+`
+
+export const PointTransactionTheadTr = styled.tr`
+    border-bottom: solid 1px #e5e5e5;
+    font-size: 13px;
+`
+
+export const PointTransactionThDate = styled.th`
+    padding: 12px 15px;
+`
+
+export const PointTransactionThTitle = styled.th`
+    padding: 12px 15px;
+    text-align: left;
+`
+
+export const PointTransactionThAmount = styled.th`
+    padding: 12px 15px;
+    text-align: right;
+`
+
+export const PointTransactionThBalance = styled.th`
+    padding: 12px 15px;
+    text-align: right;
+`
+
+export const PointTransactionTableBody = styled.tbody`
+
+`
+
+export const PointTransactionTbodyTr = styled.tr`
+    border-bottom: solid 1px #e6e6e6;
+`
+
+export const PointTransactionTdDate = styled.td`
+    padding: 13px 15px 12px 14px;
+    font-size: 14px;
+    line-height: 14px;
+    text-align: center;
+`
+
+export const PointTransactionTdTitle = styled.td`
+    font-weight: 600;
+    padding: 13px 15px 12px 14px;
+    font-size: 14px;
+    line-height: 14px;
+`
+
+export const PointTransactionTdAmount = styled.td`
+    padding: 13px 15px 12px 14px;
+    font-size: 14px;
+    line-height: 14px;
+    color: #69a3ff;
+    font-weight: 600;
+    text-align: right;
+`
+
+export const PointTransactionTdBalance = styled.td`
+    padding: 13px 15px 12px 14px;
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: 600;
+    text-align: right;
+`
+
+export const PointTransactionEmpty = styled.div`
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: #666;
+`

@@ -43,14 +43,17 @@ public class UserWebnovelService {
         );
 
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webnovel.getKeywords());
-        List<EpisodeListResponse> episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
+        List<EpisodeListResponse> episodes;
 
         Boolean isInterested = false;
 
         if (principalUser != null) {
             Long userId = principalUser.getId();
             log.info("UserWebnovelService.getWebnovelById: userId = " + userId);
+            episodes = webnovelEpisodeService.getEpisodesByWebnovelId(principalUser.getId(), webnovelId);
             isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBNOVEL, webnovelId);
+        } else {
+            episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
         }
 
         log.info("IsInterested: {}", isInterested);

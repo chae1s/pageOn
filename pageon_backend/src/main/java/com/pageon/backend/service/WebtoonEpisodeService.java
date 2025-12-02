@@ -1,11 +1,15 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.EpisodeListResponse;
+import com.pageon.backend.dto.response.EpisodePurchaseResponse;
 import com.pageon.backend.dto.response.WebtoonEpisodeDetailResponse;
 import com.pageon.backend.dto.response.WebtoonImagesResponse;
+import com.pageon.backend.entity.EpisodePurchase;
 import com.pageon.backend.entity.WebtoonEpisode;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.EpisodePurchaseRepository;
 import com.pageon.backend.repository.WebtoonEpisodeRatingRepository;
 import com.pageon.backend.repository.WebtoonEpisodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +25,30 @@ public class WebtoonEpisodeService {
     private final WebtoonImageService webtoonImageService;
     private final WebtoonEpisodeRatingRepository webtoonEpisodeRatingRepository;
     private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
+    private final EpisodePurchaseRepository episodePurchaseRepository;
 
+    @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebtoonId(Long webtoonId) {
         List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
 
         return webtoonEpisodes.stream()
                 .map(episode -> EpisodeListResponse.fromEntity(
-                        episode.getId(),
-                        episode.getEpisodeNum(),
-                        episode.getEpisodeTitle(),
-                        episode.getCreatedAt(),
-                        episode.getPurchasePrice(),
-                        episode.getRentalPrice()))
+                        episode, null))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EpisodeListResponse> getEpisodesByWebtoonId(Long userId, Long webtoonId) {
+        List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
+
+        return webtoonEpisodes.stream().map(episode -> {
+            EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, ContentType.WEBTOON, episode.getId()).orElse(null);
+            if (episodePurchase == null) {
+                return EpisodeListResponse.fromEntity(episode, null);
+            } else {
+                return EpisodeListResponse.fromEntity(episode, EpisodePurchaseResponse.fromEntity(episodePurchase));
+            }
+        }).toList();
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +65,7 @@ public class WebtoonEpisodeService {
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
 
         return WebtoonEpisodeDetailResponse.fromEntity(
-                episode, webtoonImages,
+                episode, episode.getWebtoon().getTitle(), webtoonImages,
                 prevEpisodeId, nextEpisodeId, userScore, webtoonEpisodeCommentService.getBestCommentsByEpisodeId(episodeId)
         );
     }

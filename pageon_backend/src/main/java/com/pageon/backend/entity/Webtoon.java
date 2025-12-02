@@ -1,6 +1,7 @@
 
 package com.pageon.backend.entity;
 
+import com.pageon.backend.common.base.BaseTimeEntity;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.request.ContentUpdateRequest;
@@ -18,7 +19,7 @@ import java.util.*;
 @Table(name = "webtoons")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Webtoon {
+public class Webtoon extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

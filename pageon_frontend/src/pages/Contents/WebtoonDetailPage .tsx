@@ -34,7 +34,7 @@ function WebtoonDetailPage(){
         <MainContainer>
             <NoSidebarMain>
                 <ContentDetailLayout content={webtoon}></ContentDetailLayout>
-                <ContentEpisodeListLayout type="webtoons" contentId={webtoon.id} episodes={webtoon.episodes} />
+                <ContentEpisodeListLayout type="webtoons" contentId={webtoon.id} contentTitle={webtoon.title} episodes={webtoon.episodes} />
             </NoSidebarMain>
         </MainContainer>
     )

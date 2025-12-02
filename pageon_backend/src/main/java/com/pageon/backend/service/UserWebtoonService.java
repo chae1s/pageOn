@@ -42,13 +42,16 @@ public class UserWebtoonService {
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
-        List<EpisodeListResponse> episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
+        List<EpisodeListResponse> episodes;
 
         Boolean isInterested = false;
 
         if (principalUser != null) {
             Long userId = principalUser.getId();
+            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(userId, webtoonId);
             isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBTOON, webtoonId);
+        } else {
+            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
         }
 
         return UserWebtoonResponse.fromEntity(webtoon, keywords, episodes, isInterested);

@@ -1,6 +1,7 @@
 package com.pageon.backend.entity;
 
 import com.pageon.backend.common.base.BaseTimeEntity;
+import com.pageon.backend.common.base.EpisodeBase;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -16,17 +17,13 @@ import java.util.List;
 @Table(name = "webtoon_episodes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class WebtoonEpisode extends BaseTimeEntity {
+public class WebtoonEpisode extends EpisodeBase {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
 
-    private Integer episodeNum;
-    private String episodeTitle;
 
     @Builder.Default
     @OneToMany(mappedBy = "webtoonEpisode", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -42,33 +39,15 @@ public class WebtoonEpisode extends BaseTimeEntity {
 
     // 대여 금액
     private Integer rentalPrice;
-    // 구매 금액
-    private Integer purchasePrice;
 
-    @Builder.Default
-    private Double averageRating = 0.0;
-
-    @Builder.Default
-    private Long ratingCount = 0L;
-
-    @Builder.Default
-    private Boolean isDeleted = false;
+    @Override
+    public Integer getRentalPrice() {
+        return rentalPrice;
+    }
 
     public void addImage(WebtoonImage image) {
         this.images.add(image);
         image.addEpisode(this);
-    }
-
-    public void addRating(Integer score) {
-        double totalScore = this.averageRating * this.ratingCount;
-        this.ratingCount++;
-        this.averageRating = (totalScore + score) / this.ratingCount;
-    }
-
-    public void updateRating(Integer oldScore, Integer newScore) {
-        if (this.ratingCount == 0) return;
-
-        this.averageRating = this.averageRating + ((double) (newScore - oldScore) / this.ratingCount);
     }
 
 }

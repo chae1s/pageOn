@@ -102,6 +102,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<WebtoonEpisodeComment> webtoonEpisodeComments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private List<EpisodePurchase> episodePurchases = new ArrayList<>();
+
 
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -149,6 +153,10 @@ public class User {
         this.termsAgreed = true;
         this.isPhoneVerified = false;
         this.gender = gender;
+    }
+
+    public void usePoints(int amount) {
+        this.pointBalance -= amount;
     }
 
 

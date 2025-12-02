@@ -15,6 +15,7 @@ public enum ErrorCode {
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
     CREATOR_PERMISSION_DENIED("creator 권한이 존재하지 않습니다.", HttpStatus.FORBIDDEN),
     COMMENT_FORBIDDEN("본인 댓글만 수정/삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
+    INSUFFICIENT_POINTS("포인트가 부족합니다.", HttpStatus.BAD_REQUEST),
 
     // 본인인증
     INVALID_VERIFICATION_METHOD("지원하지 않는 본인인증 방식입니다.", HttpStatus.BAD_REQUEST),
@@ -58,6 +59,7 @@ public enum ErrorCode {
     // 작품
     WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND),
     WEBTOON_NOT_FOUND("존재하지 않는 웹툰입니다.", HttpStatus.NOT_FOUND),
+    CONTENT_IS_DELETED("삭제된 콘텐츠입니다.", HttpStatus.NOT_FOUND),
     EPISODE_NOT_FOUND("해당 에피소드를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CONTENT_TYPE("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", HttpStatus.BAD_REQUEST),
     INTEREST_NOT_FOUND("해당 사용자와 콘텐츠의 관심 정보가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
@@ -68,7 +70,9 @@ public enum ErrorCode {
     COMMENT_ALREADY_DELETED("이미 삭제된 댓글입니다.", HttpStatus.CONFLICT),
     COMMENT_ALREADY_LIKED("이미 좋아요한 댓글입니다.", HttpStatus.CONFLICT),
     COMMENT_LIKE_NOT_FOUND("사용자가 좋아요를 하지 않은 댓글입니다.", HttpStatus.NOT_FOUND),
-
+    EPISODE_ALREADY_PURCHASE("이미 구매한 에피소드입니다.", HttpStatus.CONFLICT),
+    EPISODE_ALREADY_RENTAL("이미 대여한 에피소드입니다.", HttpStatus.CONFLICT),
+    INVALID_PURCHASE_TYPE("해당 구매 방식은 지원하지 않습니다.", HttpStatus.BAD_REQUEST),
     ;
 
 

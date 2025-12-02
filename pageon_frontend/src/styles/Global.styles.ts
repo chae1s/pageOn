@@ -54,6 +54,32 @@ const GlobalStyle = createGlobalStyle`
     border-spacing: 0;
   }
 
+  colgroup {
+    display: table-column-group;
+  }
+
+  col {
+    display: table-column;
+    unicode-bid: isolate;
+  }
+
+  thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: #e5e5e5;
+  }
+
+  tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: #e5e5e5;
+  }
+
+  tbody {
+    display: table-row-group;
+    vertical-align: middle;
+  }
+
   /* GLOBAL CSS */
   :root {
     --main-bg: white;

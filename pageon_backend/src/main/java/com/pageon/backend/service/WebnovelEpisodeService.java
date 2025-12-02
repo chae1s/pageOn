@@ -1,10 +1,14 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.EpisodeListResponse;
+import com.pageon.backend.dto.response.EpisodePurchaseResponse;
 import com.pageon.backend.dto.response.WebnovelEpisodeDetailResponse;
+import com.pageon.backend.entity.EpisodePurchase;
 import com.pageon.backend.entity.WebnovelEpisode;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.EpisodePurchaseRepository;
 import com.pageon.backend.repository.WebnovelEpisodeRatingRepository;
 import com.pageon.backend.repository.WebnovelEpisodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,7 @@ public class WebnovelEpisodeService {
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebnovelEpisodeRatingRepository webnovelEpisodeRatingRepository;
     private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
+    private final EpisodePurchaseRepository episodePurchaseRepository;
 
     @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebnovelId(Long webnovelId) {
@@ -29,13 +34,23 @@ public class WebnovelEpisodeService {
 
         return webnovelEpisodes.stream()
                 .map(episode -> EpisodeListResponse.fromEntity(
-                        episode.getId(),
-                        episode.getEpisodeNum(),
-                        episode.getEpisodeTitle(),
-                        episode.getCreatedAt(),
-                        episode.getPurchasePrice(),
+                        episode,
                         null))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EpisodeListResponse> getEpisodesByWebnovelId(Long userId, Long webnovelId) {
+        List<WebnovelEpisode> webnovelEpisodes = webnovelEpisodeRepository.findByWebnovelId(webnovelId);
+
+        return webnovelEpisodes.stream().map(episode -> {
+            EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, ContentType.WEBNOVEL, episode.getId()).orElse(null);
+            if (episodePurchase == null) {
+                return EpisodeListResponse.fromEntity(episode, null);
+            } else {
+                return EpisodeListResponse.fromEntity(episode, EpisodePurchaseResponse.fromEntity(episodePurchase));
+            }
+        }).toList();
     }
 
     @Transactional(readOnly = true)

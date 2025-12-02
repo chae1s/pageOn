@@ -10,7 +10,8 @@ import { useSearchParams } from "react-router-dom";
 import api from "../../api/axiosInstance";
 import { MyComment } from "../../types/Comments";
 import { Pagination } from "../../types/Page";
-import { formatDate } from "../../utils/formatDate";
+import { formatDate } from "../../utils/formatData";
+import PageNavigator from "../../components/Pagination/PageNavigator";
 
 function MyComments() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -236,38 +237,8 @@ function MyComments() {
                                 ))
                             )}
                           </C.CommentListUl>
-                          {pageData && pageData.totalPages > 0 && (
-                            <S.PaginationContainer>
-                                
-                                <S.PaginationIconWrapper
-                                    onClick={() => handlePageChange(pageData.pageNumber - 1)}
-                                    disabled={pageData.first}
-                                >
-                                    <PrevIcon />
-                                </S.PaginationIconWrapper>
-
-                                <S.PaginationNumberList>
-                                    
-                                    {pageNumbers.map((number) => (
-                                        <S.PaginationNumberListItem key={number}>
-                                            <S.PaginationNumberBtn
-                                                $active={pageData.pageNumber === number}
-                                                onClick={() => handlePageChange(number)}
-                                            >
-                                                {number + 1}
-                                            </S.PaginationNumberBtn>
-                                        </S.PaginationNumberListItem>
-                                    ))}
-                                </S.PaginationNumberList>
-
-                                
-                                <S.PaginationIconWrapper
-                                    onClick={() => handlePageChange(pageData.pageNumber + 1)}
-                                    disabled={pageData.last}
-                                >
-                                    <NextIcon />
-                                </S.PaginationIconWrapper>
-                            </S.PaginationContainer>
+                        {pageData && pageData.totalPages > 0 && (
+                            <PageNavigator pageData={pageData} handlePageChange={handlePageChange} />
                         )}
                         </C.CommentList>
                     </M.MypageCommentsSection>
