@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
@@ -26,5 +28,14 @@ public class ReadingHistory extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ContentType contentType;
     private Long contentId;
+
+    private Long episodeId;
+
+    private LocalDateTime lastReadAt;
+
+    public void updateEpisodeId(Long episodeId) {
+        this.episodeId = episodeId;
+        this.lastReadAt = LocalDateTime.now();
+    }
 
 }
