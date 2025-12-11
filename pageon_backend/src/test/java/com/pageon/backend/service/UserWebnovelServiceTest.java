@@ -76,12 +76,11 @@ class UserWebnovelServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webnovelRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(webnovel));
+        when(webnovelRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.of(webnovel));
         //when
         UserWebnovelResponse response = userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
 
@@ -96,7 +95,7 @@ class UserWebnovelServiceTest {
     @DisplayName("DB에 존재하지 않는 웹소설일 경우 CustomException 발생")
     void getWebnovelById_whenInvalidWebnovelId_shouldThrowCustomException() {
         // given
-        when(webnovelRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.empty());
+        when(webnovelRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
@@ -132,7 +131,6 @@ class UserWebnovelServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         Webnovel webnovel2 = Webnovel.builder()
@@ -143,7 +141,6 @@ class UserWebnovelServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         webnovels.add(webnovel1);
@@ -151,7 +148,7 @@ class UserWebnovelServiceTest {
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webnovelRepository.findByDeleted(false)).thenReturn(webnovels);
+        when(webnovelRepository.findByDeletedAtIsNotNull()).thenReturn(webnovels);
         //when
         List<UserContentListResponse> listResponses = userWebnovelService.getWebnovels();
 
@@ -207,9 +204,9 @@ class UserWebnovelServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
 
-        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
-        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deleted(false).build();
-        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").deleted(false).build();
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").build();
 
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1, webnovel2), pageable, 2));
         
@@ -273,9 +270,9 @@ class UserWebnovelServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
 
-        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
-        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deleted(true).build();
-        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").deleted(false).build();
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deletedAt(LocalDateTime.now()).build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").build();
         
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1), pageable, 1));
         
@@ -329,33 +326,44 @@ class UserWebnovelServiceTest {
                 .build();
         
         return List.of(
-                new Webnovel(1L, "소설1", creator, SerialDay.MONDAY, 15000L),
-                new Webnovel(2L, "소설2", creator, SerialDay.MONDAY, 14000L),
-                new Webnovel(3L, "소설3", creator, SerialDay.MONDAY, 13500L),
-                new Webnovel(4L, "소설4", creator, SerialDay.MONDAY, 13000L),
-                new Webnovel(5L, "소설5", creator, SerialDay.MONDAY, 12800L),
-                new Webnovel(6L, "소설6", creator, SerialDay.MONDAY, 12500L),
-                new Webnovel(7L, "소설7", creator, SerialDay.MONDAY, 12000L),
-                new Webnovel(8L, "소설8", creator, SerialDay.MONDAY, 11800L),
-                new Webnovel(9L, "소설9", creator, SerialDay.MONDAY, 11500L),
-                new Webnovel(10L, "소설10", creator, SerialDay.MONDAY, 11200L),
-                new Webnovel(11L, "소설11", creator, SerialDay.MONDAY, 11000L),
-                new Webnovel(12L, "소설12", creator, SerialDay.MONDAY, 10800L),
-                new Webnovel(13L, "소설13", creator, SerialDay.MONDAY, 10500L),
-                new Webnovel(14L, "소설14", creator, SerialDay.MONDAY, 10200L),
-                new Webnovel(15L, "소설15", creator, SerialDay.MONDAY, 10000L),
-                new Webnovel(16L, "소설16", creator, SerialDay.MONDAY, 9800L),
-                new Webnovel(17L, "소설17", creator, SerialDay.MONDAY, 9500L),
-                new Webnovel(18L, "소설18", creator, SerialDay.MONDAY, 9200L),
+                createWebnovel(1L, "소설1", creator, SerialDay.MONDAY, 15000L),
+                createWebnovel(2L, "소설2", creator, SerialDay.MONDAY, 14000L),
+                createWebnovel(3L, "소설3", creator, SerialDay.MONDAY, 13500L),
+                createWebnovel(4L, "소설4", creator, SerialDay.MONDAY, 13000L),
+                createWebnovel(5L, "소설5", creator, SerialDay.MONDAY, 12800L),
+                createWebnovel(6L, "소설6", creator, SerialDay.MONDAY, 12500L),
+                createWebnovel(7L, "소설7", creator, SerialDay.MONDAY, 12000L),
+                createWebnovel(8L, "소설8", creator, SerialDay.MONDAY, 11800L),
+                createWebnovel(9L, "소설9", creator, SerialDay.MONDAY, 11500L),
+                createWebnovel(10L, "소설10", creator, SerialDay.MONDAY, 11200L),
+                createWebnovel(11L, "소설11", creator, SerialDay.MONDAY, 11000L),
+                createWebnovel(12L, "소설12", creator, SerialDay.MONDAY, 10800L),
+                createWebnovel(13L, "소설13", creator, SerialDay.MONDAY, 10500L),
+                createWebnovel(14L, "소설14", creator, SerialDay.MONDAY, 10200L),
+                createWebnovel(15L, "소설15", creator, SerialDay.MONDAY, 10000L),
+                createWebnovel(16L, "소설16", creator, SerialDay.MONDAY, 9800L),
+                createWebnovel(17L, "소설17", creator, SerialDay.MONDAY, 9500L),
+                createWebnovel(18L, "소설18", creator, SerialDay.MONDAY, 9200L),
 
                 // 18개 이상을 확인하기 위해 추가
-                new Webnovel(19L, "소설19", creator, SerialDay.MONDAY, 9000L),
-                new Webnovel(20L, "소설20", creator, SerialDay.MONDAY, 8800L),
+                createWebnovel(19L, "소설19", creator, SerialDay.MONDAY, 9000L),
+                createWebnovel(20L, "소설20", creator, SerialDay.MONDAY, 8800L),
                 // 다른 요일
-                new Webnovel(19L, "소설21", creator, SerialDay.TUESDAY, 9000L),
-                new Webnovel(20L, "소설22", creator, SerialDay.TUESDAY, 8800L)
+                createWebnovel(19L, "소설21", creator, SerialDay.TUESDAY, 9000L),
+                createWebnovel(20L, "소설22", creator, SerialDay.TUESDAY, 8800L)
 
         );
+
+    }
+
+    private Webnovel createWebnovel(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
+        return Webnovel.builder()
+                .id(id)
+                .title(title)
+                .creator(creator)
+                .serialDay(serialDay)
+                .viewCount(viewCount)
+                .build();
 
     }
 

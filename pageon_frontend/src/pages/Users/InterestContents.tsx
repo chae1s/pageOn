@@ -3,7 +3,7 @@ import { MainContainer, SidebarMain, SortBtn } from "../../styles/Layout.styles"
 import * as M from "./MyPage.styles"
 import axios from "axios";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
-import { SimpleContent } from "../../types/Content";
+import { LibraryContent, SimpleContent } from "../../types/Content";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 import api from "../../api/axiosInstance";
 import { useSearchParams } from "react-router-dom";
@@ -15,7 +15,7 @@ function InterestContents() {
     const type = searchParams.get("type") || "all";
     const page = parseInt(searchParams.get("page") || "0", 10);
 
-    const [interestContents, setInterestContents] = useState<SimpleContent[]>([]);
+    const [interestContents, setInterestContents] = useState<LibraryContent[]>([]);
 
     useEffect(() => {
         async function fetchData() {

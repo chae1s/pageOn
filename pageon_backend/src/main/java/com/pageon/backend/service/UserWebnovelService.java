@@ -38,7 +38,7 @@ public class UserWebnovelService {
     @Transactional(readOnly = true)
     public UserWebnovelResponse getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
 
-        Webnovel webnovel = webnovelRepository.findByIdAndDeleted(webnovelId, false).orElseThrow(
+        Webnovel webnovel = webnovelRepository.findByIdAndDeletedAtIsNotNull(webnovelId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
@@ -63,7 +63,7 @@ public class UserWebnovelService {
 
     @Transactional(readOnly = true)
     public List<UserContentListResponse> getWebnovels() {
-        List<Webnovel> webnovels = webnovelRepository.findByDeleted(false);
+        List<Webnovel> webnovels = webnovelRepository.findByDeletedAtIsNotNull();
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webnovel webnovel : webnovels) {

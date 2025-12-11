@@ -69,7 +69,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        Webnovel webnovel = Webnovel.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(1L).title("고양이가 사라진 마을").build();
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
 
@@ -110,7 +110,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
 
@@ -213,7 +213,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        Webtoon webtoon = Webtoon.builder().id(contentId).title("해와 달의 유치원").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(contentId).title("해와 달의 유치원").build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
 
@@ -259,7 +259,7 @@ class RatingServiceTest {
                 .nickname("nickname")
                 .deleted(false)
                 .build();
-        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").totalRatingCount(ratingCount).deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").totalRatingCount(ratingCount).build();
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).averageRating(averageRating).ratingCount(ratingCount).build();
 
@@ -304,7 +304,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").totalAverageRating(averageRating).totalRatingCount(ratingCount).deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").totalAverageRating(averageRating).totalRatingCount(ratingCount).build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).averageRating(averageRating).ratingCount(ratingCount).build();
 
@@ -341,7 +341,7 @@ class RatingServiceTest {
                 .nickname("nickname")
                 .deleted(false)
                 .build();
-        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(3L).title("고양이가 사라진 마을").build();
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
 
@@ -379,7 +379,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(3L).title("해와 달의 유치원").build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
 

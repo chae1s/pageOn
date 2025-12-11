@@ -75,7 +75,6 @@ class WebtoonImageServiceTest {
                 .creator(creator)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder()

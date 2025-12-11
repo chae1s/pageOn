@@ -105,7 +105,7 @@ public class CreatorWebnovelService implements CreatorContentService {
             throw new CustomException(ErrorCode.CREATOR_UNAUTHORIZED_ACCESS);
 
         if (contentUpdateRequest.getTitle() != null || contentUpdateRequest.getDescription() != null || contentUpdateRequest.getSerialDay() != null) {
-            webnovel.updateWebnovelInfo(contentUpdateRequest);
+            webnovel.updateContentInfo(contentUpdateRequest);
         }
 
         if (contentUpdateRequest.getKeywords() != null) {

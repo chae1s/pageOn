@@ -20,8 +20,8 @@ public class PageableUtil {
 
         Sort sortOrder = switch (sort) {
             // [TODO] 최근에 읽은 순, 업데이트 순으로 sort 기준 변경
-            case "last_read" -> Sort.by(Sort.Order.asc("id"));
-            default -> Sort.by(Sort.Order.asc("createdAt"));
+            case "last_read" -> Sort.by(Sort.Order.asc("h.lastReadAt"));
+            default -> Sort.by(Sort.Order.asc("w.episodeUpdatedAt"));
         };
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);

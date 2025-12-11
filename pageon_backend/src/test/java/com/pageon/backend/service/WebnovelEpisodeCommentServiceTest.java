@@ -62,7 +62,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -96,7 +96,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -128,7 +128,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -160,8 +160,8 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
-        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").deletedAt(LocalDateTime.now()).build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
 
@@ -199,7 +199,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user1).webnovelEpisode(webnovelEpisode).text(text).build();
@@ -236,7 +236,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -264,8 +264,8 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
-        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").isDeleted(true).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
+        WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").deletedAt(LocalDateTime.now()).build();
 
 
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -299,7 +299,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
         WebnovelEpisodeComment comment1 = WebnovelEpisodeComment.builder().id(commentId1).user(user).webnovelEpisode(webnovelEpisode).text(text).likeCount(10L).build();
@@ -344,8 +344,8 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Webnovel webnovel1 = Webnovel.builder().id(webnovelId1).title("테스트 웹소설1").deleted(false).build();
-        Webnovel webnovel2 = Webnovel.builder().id(webnovelId2).title("테스트 웹소설2").deleted(false).build();
+        Webnovel webnovel1 = Webnovel.builder().id(webnovelId1).title("테스트 웹소설1").build();
+        Webnovel webnovel2 = Webnovel.builder().id(webnovelId2).title("테스트 웹소설2").build();
 
         WebnovelEpisode webnovelEpisode1 = WebnovelEpisode.builder().id(episodeId1).webnovel(webnovel1).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisode webnovelEpisode2 = WebnovelEpisode.builder().id(episodeId2).webnovel(webnovel2).episodeTitle("테스트 웹소설 에피소드").build();
@@ -388,7 +388,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
 
@@ -422,7 +422,7 @@ class WebnovelEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
@@ -452,7 +452,7 @@ class WebnovelEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
@@ -489,7 +489,7 @@ class WebnovelEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(writer).webnovelEpisode(webnovelEpisode).build();
 
@@ -524,7 +524,7 @@ class WebnovelEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
@@ -557,7 +557,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(text).user(user).webnovelEpisode(webnovelEpisode).build();
 
@@ -585,7 +585,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(text).user(user).webnovelEpisode(webnovelEpisode).build();
 
@@ -617,7 +617,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(text).user(user).webnovelEpisode(webnovelEpisode).deletedAt(LocalDateTime.now()).build();
 
@@ -652,7 +652,7 @@ class WebnovelEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").deleted(false).build();
+        Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(text).user(writer).webnovelEpisode(webnovelEpisode).build();
 

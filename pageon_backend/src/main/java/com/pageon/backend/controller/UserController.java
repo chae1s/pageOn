@@ -115,9 +115,9 @@ public class UserController {
 
         log.info("My Interests request received. Type: [{}], Sort: [{}], Page: {}, size: {}",
                 contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
-        Page<ContentSimpleResponse> contentSimpleResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
+        Page<ContentSimpleResponse> libraryContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
+        return ResponseEntity.ok(new PageResponse<>(libraryContentResponses));
     }
 
     @GetMapping("/comments")

@@ -79,7 +79,6 @@ class InterestServiceTest {
                 .description("테스트")
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
 
@@ -125,7 +124,6 @@ class InterestServiceTest {
                 .description("테스트")
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
 

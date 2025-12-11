@@ -51,3 +51,15 @@ export interface SearchContent {
     totalRatingCount: number;
     contentType: string;
 }
+
+export interface LibraryContent {
+    id: number;
+    title: string;
+    author: string;
+    cover: string;
+    contentType: string;
+    episodeId: number;
+    lastReadAt: string;
+
+}
+

@@ -59,7 +59,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -93,7 +93,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -125,7 +125,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
@@ -157,8 +157,8 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "좋은 작품입니다.";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
 
         ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
 
@@ -197,7 +197,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2);
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user1).webtoonEpisode(webtoonEpisode).text(text).build();
@@ -234,7 +234,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user).webtoonEpisode(webtoonEpisode).text(text).build();
@@ -271,8 +271,8 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
 
 
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -306,7 +306,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "likeCount"));
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user).webtoonEpisode(webtoonEpisode).text(text).likeCount(10L).build();
@@ -351,8 +351,8 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Webtoon webtoon1 = Webtoon.builder().id(webtoonId1).title("테스트 웹툰1").deleted(false).build();
-        Webtoon webtoon2 = Webtoon.builder().id(webtoonId2).title("테스트 웹툰2").deleted(false).build();
+        Webtoon webtoon1 = Webtoon.builder().id(webtoonId1).title("테스트 웹툰1").build();
+        Webtoon webtoon2 = Webtoon.builder().id(webtoonId2).title("테스트 웹툰2").build();
 
         WebtoonEpisode webtoonEpisode1 = WebtoonEpisode.builder().id(episodeId1).webtoon(webtoon1).episodeTitle("테스트 웹툰 에피소드").build();
         WebtoonEpisode webtoonEpisode2 = WebtoonEpisode.builder().id(episodeId2).webtoon(webtoon2).episodeTitle("테스트 웹툰 에피소드").build();
@@ -395,7 +395,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
         WebtoonEpisodeComment comment1 = WebtoonEpisodeComment.builder().id(commentId1).user(user).webtoonEpisode(webtoonEpisode).text(text).build();
@@ -428,8 +428,8 @@ class WebtoonEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
         ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
@@ -458,8 +458,8 @@ class WebtoonEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
         ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
@@ -495,8 +495,8 @@ class WebtoonEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "수정 댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(writer).webtoonEpisode(webtoonEpisode).build();
 
         ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
@@ -530,8 +530,8 @@ class WebtoonEpisodeCommentServiceTest {
         String oldText = "기존 댓글 내용";
         String newText = "";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
-        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").isDeleted(true).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
+        WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
         ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
@@ -563,7 +563,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).build();
 
@@ -591,7 +591,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).build();
 
@@ -623,7 +623,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(user).webtoonEpisode(webtoonEpisode).deletedAt(LocalDateTime.now()).build();
 
@@ -658,7 +658,7 @@ class WebtoonEpisodeCommentServiceTest {
 
         String text = "댓글 내용";
 
-        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").deleted(false).build();
+        Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(text).user(writer).webtoonEpisode(webtoonEpisode).build();
 

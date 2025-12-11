@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import { SimpleContent } from "../../types/Content";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 
-function RecentViewedWorks() {
+function ReadingHistoryContents() {
 
     const dummyBooks: SimpleContent[] = [
         {
@@ -82,7 +82,7 @@ function RecentViewedWorks() {
     ]
 
     const [sort, setSort] = useState<string>("updated") // updated | recent
-    const [type, setType] = useState<string>("all")     // all | webtoons | webnovels
+    const [type, setType] = useState<string>("webnovels")     // all | webtoons | webnovels
 
     return (
         <MainContainer>
@@ -128,4 +128,4 @@ function RecentViewedWorks() {
 
 }
 
-export default RecentViewedWorks;
+export default ReadingHistoryContents;

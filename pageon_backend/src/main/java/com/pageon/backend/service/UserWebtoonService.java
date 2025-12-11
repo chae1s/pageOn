@@ -38,7 +38,7 @@ public class UserWebtoonService {
 
     @Transactional(readOnly = true)
     public UserWebtoonResponse getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
-        Webtoon webtoon = webtoonRepository.findByIdAndDeleted(webtoonId, false).orElseThrow(
+        Webtoon webtoon = webtoonRepository.findByIdAndDeletedAtIsNotNull(webtoonId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
@@ -59,7 +59,7 @@ public class UserWebtoonService {
 
     @Transactional(readOnly = true)
     public List<UserContentListResponse> getWebtoons() {
-        List<Webtoon> webtoons = webtoonRepository.findByDeleted(false);
+        List<Webtoon> webtoons = webtoonRepository.findByDeletedAtIsNotNull();
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webtoon webtoon : webtoons) {

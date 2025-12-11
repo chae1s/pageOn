@@ -72,7 +72,6 @@ class WebtoonEpisodeServiceTest {
                 .description("test")
                 .serialDay(SerialDay.SATURDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder()
@@ -132,7 +131,6 @@ class WebtoonEpisodeServiceTest {
                 .creator(creator)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         List<WebtoonImage> images = new ArrayList<>();

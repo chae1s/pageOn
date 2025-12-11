@@ -14,6 +14,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +26,7 @@ import java.util.*;
 @Component
 @Order(3)
 @Profile("!test")
+@Transactional
 @RequiredArgsConstructor
 public class InitContentData implements ApplicationRunner {
 
@@ -144,7 +146,6 @@ public class InitContentData implements ApplicationRunner {
                         .serialDay(SerialDay.valueOf(line[6]))
                         .status(SeriesStatus.valueOf(line[7]))
                         .viewCount(Long.parseLong(line[5]))
-                        .deleted(false)
                         .build();
 
                 webnovels.add(webnovel);
@@ -186,7 +187,6 @@ public class InitContentData implements ApplicationRunner {
                         .serialDay(SerialDay.valueOf(line[5]))
                         .status(SeriesStatus.valueOf(line[6]))
                         .viewCount(Long.parseLong(line[7]))
-                        .deleted(false)
                         .build();
 
                 webtoons.add(webtoon);
@@ -255,6 +255,8 @@ public class InitContentData implements ApplicationRunner {
                         .build();
 
                 webnovelEpisodes.add(webnovelEpisode);
+
+                webnovel.updateEpisode();
 
             }
 
@@ -325,6 +327,8 @@ public class InitContentData implements ApplicationRunner {
                 }
 
                 webtoonEpisodes.add(webtoonEpisode);
+
+                webtoon.updateEpisode();
 
             }
             webtoonEpisodeRepository.saveAll(webtoonEpisodes);
