@@ -16,13 +16,13 @@ import java.util.Optional;
 public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
     Optional<Webtoon> findById(Long id);
 
-    Optional<Webtoon> findByIdAndDeletedAtIsNotNull(Long id);
+    Optional<Webtoon> findByIdAndDeletedAtIsNull(Long id);
 
     List<Webtoon> findByCreator(Creator creator);
 
-    List<Webtoon> findByDeletedAtIsNotNull();
+    List<Webtoon> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webtoon w WHERE w.serialDay = :serialDay AND w.deletedAt IS NOT NULL ORDER BY w.viewCount DESC")
+    @Query("SELECT w FROM Webtoon w WHERE w.serialDay = :serialDay AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
     List<Webtoon> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query("SELECT w FROM Webtoon w JOIN FETCH w.creator WHERE w.id IN :ids")
@@ -33,6 +33,6 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     @Query("SELECT w FROM Webtoon w WHERE"
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
-            + "AND w.deletedAt IS NOT NULL")
+            + "AND w.deletedAt IS NULL")
     Page<Webtoon> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 }

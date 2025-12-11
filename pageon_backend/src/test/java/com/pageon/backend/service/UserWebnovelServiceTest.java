@@ -80,7 +80,7 @@ class UserWebnovelServiceTest {
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webnovelRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.of(webnovel));
+        when(webnovelRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(webnovel));
         //when
         UserWebnovelResponse response = userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
 
@@ -95,7 +95,7 @@ class UserWebnovelServiceTest {
     @DisplayName("DB에 존재하지 않는 웹소설일 경우 CustomException 발생")
     void getWebnovelById_whenInvalidWebnovelId_shouldThrowCustomException() {
         // given
-        when(webnovelRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.empty());
+        when(webnovelRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
@@ -148,7 +148,7 @@ class UserWebnovelServiceTest {
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webnovelRepository.findByDeletedAtIsNotNull()).thenReturn(webnovels);
+        when(webnovelRepository.findByDeletedAtIsNull()).thenReturn(webnovels);
         //when
         List<UserContentListResponse> listResponses = userWebnovelService.getWebnovels();
 
@@ -211,7 +211,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1, webnovel2), pageable, 2));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
 
         
         // then
@@ -233,7 +233,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
         
         // then
         assertEquals(0, results.getContent().size());
@@ -252,7 +252,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -277,7 +277,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1), pageable, 1));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
         
         // then
         assertEquals(1, results.getContent().size());

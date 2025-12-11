@@ -38,7 +38,7 @@ public class UserWebnovelService {
     @Transactional(readOnly = true)
     public UserWebnovelResponse getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
 
-        Webnovel webnovel = webnovelRepository.findByIdAndDeletedAtIsNotNull(webnovelId).orElseThrow(
+        Webnovel webnovel = webnovelRepository.findByIdAndDeletedAtIsNull(webnovelId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
@@ -63,7 +63,7 @@ public class UserWebnovelService {
 
     @Transactional(readOnly = true)
     public List<UserContentListResponse> getWebnovels() {
-        List<Webnovel> webnovels = webnovelRepository.findByDeletedAtIsNotNull();
+        List<Webnovel> webnovels = webnovelRepository.findByDeletedAtIsNull();
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webnovel webnovel : webnovels) {
@@ -96,13 +96,13 @@ public class UserWebnovelService {
 
         Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, sortedPageable);
 
-        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
+        return webnovelPage.map(webnovel ->
+                ContentSearchResponse.fromEntity(webnovel, "webnovels")
+        );
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, String sort, Pageable pageable) {
-
-        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
+    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, Pageable sortedPageable) {
 
         log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, sortedPageable);
@@ -113,7 +113,9 @@ public class UserWebnovelService {
                 query,
                 webnovelPage.getTotalElements());
 
-        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
+        return webnovelPage.map(webnovel ->
+                ContentSearchResponse.fromEntity(webnovel, "webnovels")
+        );
     }
 
 }

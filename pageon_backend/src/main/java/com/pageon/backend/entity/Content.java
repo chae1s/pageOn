@@ -27,6 +27,9 @@ public abstract class Content extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "DTYPE", insertable = false, updatable = false)
+    private String dtype;
+
     private String title;
     @Column(length = 1000)
     private  String description;

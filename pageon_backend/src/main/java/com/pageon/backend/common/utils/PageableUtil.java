@@ -8,9 +8,9 @@ public class PageableUtil {
 
     public static Pageable createContentPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
-            case "latest" -> Sort.by(Sort.Order.asc("rating"));
+            case "latest" -> Sort.by(Sort.Order.desc("episodeUpdatedAt"));
             case "rating" -> Sort.by(Sort.Order.desc("totalAverageRating"));
-            default -> Sort.by(Sort.Order.asc("viewCount"));
+            default -> Sort.by(Sort.Order.desc("viewCount"));
         };
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);

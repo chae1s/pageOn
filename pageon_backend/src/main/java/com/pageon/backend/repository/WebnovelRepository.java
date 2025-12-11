@@ -15,13 +15,13 @@ import java.util.Optional;
 public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     Optional<Webnovel> findById(Long id);
-    Optional<Webnovel> findByIdAndDeletedAtIsNotNull(Long id);
+    Optional<Webnovel> findByIdAndDeletedAtIsNull(Long id);
 
     List<Webnovel> findByCreator(Creator creator);
 
-    List<Webnovel> findByDeletedAtIsNotNull();
+    List<Webnovel> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deletedAt IS NOT NULL ORDER BY w.viewCount DESC")
+    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
     List<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query("SELECT w FROM Webnovel w JOIN FETCH w.creator WHERE w.id IN :ids")
@@ -32,6 +32,6 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT w FROM Webnovel w WHERE"
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
-            + "AND w.deletedAt IS NOT NULL")
+            + "AND w.deletedAt IS NULL")
     Page<Webnovel> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 }

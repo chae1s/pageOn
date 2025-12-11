@@ -4,6 +4,7 @@ import { SearchContent } from "../../types/Content";
 import * as S from "../Styles/SearchContents.styles"
 import { keyboard } from "@testing-library/user-event/dist/keyboard";
 import FullStarIcon from "../../assets/fullStarIcon.png";
+import { formatDate } from "../../utils/formatData";
 
 interface Props {
     contents?: SearchContent[];
@@ -47,9 +48,13 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                                     <S.ContentInfoWrapper>
                                         <S.ContentTitleWrapper>
                                             <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
+                                            <S.ContentType>[ {content.contentType === 'webnovels' ? '웹소설' : '웹툰'} ]</S.ContentType>
                                         </S.ContentTitleWrapper>
                                         <S.ContentAuthor>{content.author}</S.ContentAuthor>
-                                        <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
+                                        <S.EpisodeInfoContainer>
+                                            <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
+                                            <S.ContentEpisodeUpdatedAt>{formatDate(content.episodeUpdatedAt)} 업데이트</S.ContentEpisodeUpdatedAt>
+                                        </S.EpisodeInfoContainer>
                                         <S.ContentRatingContainer>
                                             <S.ContentRatingStarIcon src={FullStarIcon} />
                                             <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>

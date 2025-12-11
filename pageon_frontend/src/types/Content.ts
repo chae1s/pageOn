@@ -45,8 +45,9 @@ export interface SearchContent {
     description: string;
     cover: string;
     author: string;
-    keywords: UserKeywordResponse[];
     episodeCount: number;
+    episodeUpdatedAt: string;
+    keywords: UserKeywordResponse[];
     totalAverageRating: number;
     totalRatingCount: number;
     contentType: string;

@@ -38,7 +38,7 @@ public class UserWebtoonService {
 
     @Transactional(readOnly = true)
     public UserWebtoonResponse getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
-        Webtoon webtoon = webtoonRepository.findByIdAndDeletedAtIsNotNull(webtoonId).orElseThrow(
+        Webtoon webtoon = webtoonRepository.findByIdAndDeletedAtIsNull(webtoonId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
         List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
@@ -59,7 +59,7 @@ public class UserWebtoonService {
 
     @Transactional(readOnly = true)
     public List<UserContentListResponse> getWebtoons() {
-        List<Webtoon> webtoons = webtoonRepository.findByDeletedAtIsNotNull();
+        List<Webtoon> webtoons = webtoonRepository.findByDeletedAtIsNull();
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webtoon webtoon : webtoons) {
@@ -94,13 +94,14 @@ public class UserWebtoonService {
         Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, sortedPageable);
 
 
-        return webtoonPage.map(ContentSearchResponse::fromWebtoon);
+        return webtoonPage.map(webtoon ->
+                ContentSearchResponse.fromEntity(webtoon, "webtoons")
+        );
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, String sort, Pageable pageable) {
+    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, Pageable sortedPageable) {
 
-        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
 
         log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Webtoon> webtoonPage = webtoonRepository.findByTitleOrPenNameContaining(query, sortedPageable);
@@ -111,7 +112,9 @@ public class UserWebtoonService {
                 query,
                 webtoonPage.getTotalElements());
 
-        return webtoonPage.map(ContentSearchResponse::fromWebtoon);
+        return webtoonPage.map(webtoon ->
+                ContentSearchResponse.fromEntity(webtoon, "webtoons")
+        );
     }
 
 }
