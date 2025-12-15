@@ -5,16 +5,14 @@ import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.InterestContentResponse;
 import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.InterestRepository;
-import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.repository.WebnovelRepository;
-import com.pageon.backend.repository.WebtoonRepository;
+import com.pageon.backend.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -48,6 +47,8 @@ class InterestServiceTest {
     private WebnovelRepository webnovelRepository;
     @Mock
     private WebtoonRepository webtoonRepository;
+    @Mock
+    private ContentRepository contentRepository;
     
     @BeforeEach
     void setUp() {
@@ -59,7 +60,6 @@ class InterestServiceTest {
     void shouldRegisterLike_whenContentTypeIsWebnovel() {
         // given
         Long userId = 1L;
-        ContentType contentType = ContentType.WEBNOVEL;
         Long webnovelId = 1L;
         
         User user = User.builder()
@@ -81,21 +81,23 @@ class InterestServiceTest {
                 .status(SeriesStatus.ONGOING)
                 .build();
 
+        ReflectionTestUtils.setField(webnovel, "dtype", "WEBNOVEL");
+
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelRepository.findById(webnovelId)).thenReturn(Optional.of(webnovel));
+        when(contentRepository.findByIdAndDeletedAtIsNull(webnovelId)).thenReturn(Optional.of(webnovel));
 
-        ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
+        ArgumentCaptor<Interest> interestCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        interestService.registerInterest(userId, contentType, webnovelId);
+        interestService.registerInterest(userId, webnovelId);
         
         // then
-        verify(interestRepository).save(likeCaptor.capture());
-        Interest like = likeCaptor.getValue();
+        verify(interestRepository).save(interestCaptor.capture());
+        Interest interest = interestCaptor.getValue();
 
-        assertEquals(ContentType.WEBNOVEL, like.getContentType());
-        assertEquals(webnovelId, like.getContentId());
+        assertEquals(ContentType.WEBNOVEL, interest.getContentType());
+        assertEquals(webnovelId, interest.getContentId());
         
     }
 
@@ -126,21 +128,22 @@ class InterestServiceTest {
                 .status(SeriesStatus.ONGOING)
                 .build();
 
+        ReflectionTestUtils.setField(webtoon, "dtype", "WEBTOON");
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonRepository.findById(webtoonId)).thenReturn(Optional.of(webtoon));
+        when(contentRepository.findByIdAndDeletedAtIsNull(webtoonId)).thenReturn(Optional.of(webtoon));
 
-        ArgumentCaptor<Interest> likeCaptor = ArgumentCaptor.forClass(Interest.class);
+        ArgumentCaptor<Interest> interestCaptor = ArgumentCaptor.forClass(Interest.class);
 
         //when
-        interestService.registerInterest(userId, contentType, webtoonId);
+        interestService.registerInterest(userId, webtoonId);
 
         // then
-        verify(interestRepository).save(likeCaptor.capture());
-        Interest like = likeCaptor.getValue();
+        verify(interestRepository).save(interestCaptor.capture());
+        Interest interest = interestCaptor.getValue();
 
-        assertEquals(ContentType.WEBTOON, like.getContentType());
-        assertEquals(webtoonId, like.getContentId());
+        assertEquals(ContentType.WEBTOON, interest.getContentType());
+        assertEquals(webtoonId, interest.getContentId());
 
     }
 
@@ -166,16 +169,16 @@ class InterestServiceTest {
 
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webnovelRepository.findById(webnovelId)).thenReturn(Optional.empty());
+        when(contentRepository.findByIdAndDeletedAtIsNull(webnovelId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, contentType, webnovelId);
+            interestService.registerInterest(userId, webnovelId);
         });
         
         // then
-        assertEquals("존재하지 않는 웹소설입니다.",  exception.getErrorMessage());
-        assertEquals(ErrorCode.WEBNOVEL_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("존재하지 않는 콘텐츠입니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.CONTENT_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
@@ -200,49 +203,17 @@ class InterestServiceTest {
 
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(webtoonRepository.findById(webtoonId)).thenReturn(Optional.empty());
+        when(contentRepository.findByIdAndDeletedAtIsNull(webtoonId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, contentType, webtoonId);
+            interestService.registerInterest(userId, webtoonId);
         });
 
         // then
-        assertEquals("존재하지 않는 웹툰입니다.",  exception.getErrorMessage());
-        assertEquals(ErrorCode.WEBTOON_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("존재하지 않는 콘텐츠입니다.",  exception.getErrorMessage());
+        assertEquals(ErrorCode.CONTENT_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
-    }
-
-    @Test
-    @DisplayName("콘텐츠 타입이 webtoon이나 webnovel이 아닐 경우 예외가 발생한다.")
-    void shouldThrowException_whenContentTypeDoesNotWebnovelOrWebtoon() {
-        // given
-        Long userId = 1L;
-        ContentType contentType = ContentType.valueOf(null);
-        Long contentId = 1L;
-
-        User user = User.builder()
-                .id(userId)
-                .email("test@mail.com")
-                .password("password")
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
-                .build();
-
-
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-
-        //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.registerInterest(userId, contentType, contentId);
-        });
-
-        // then
-        assertEquals("지원하지 않는 콘텐츠 타입입니다. webnovel 또는 webtoon만 가능합니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.INVALID_CONTENT_TYPE, ErrorCode.valueOf(exception.getErrorCode()));
     }
 
     @Test
@@ -271,10 +242,10 @@ class InterestServiceTest {
                 .user(user)
                 .build();
 
-        when(interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId)).thenReturn(Optional.of(interest));
+        when(interestRepository.findByUser_IdAndContentId(userId, contentId)).thenReturn(Optional.of(interest));
 
         //when
-        interestService.deleteInterest(userId, contentType, contentId);
+        interestService.deleteInterest(userId, contentId);
 
         // then
         verify(interestRepository, times(1)).delete(interest);
@@ -289,11 +260,11 @@ class InterestServiceTest {
         ContentType contentType = ContentType.WEBNOVEL;
         Long contentId = 1L;
 
-        when(interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId)).thenReturn(Optional.empty());
+        when(interestRepository.findByUser_IdAndContentId(userId, contentId)).thenReturn(Optional.empty());
         
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
-            interestService.deleteInterest(userId, contentType, contentId);
+            interestService.deleteInterest(userId, contentId);
         });
         
         // then
@@ -337,7 +308,7 @@ class InterestServiceTest {
         when(interestRepository.findAllByUser_Id(eq(userId), eq(pageable))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, sort, pageable);
+        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
 
         // then
         assertEquals(2, result.getContent().size());
@@ -375,7 +346,7 @@ class InterestServiceTest {
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
 
-        when(interestRepository.findAllByUser_IdAndContentType(userId, ContentType.WEBNOVEL, pageable)).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
+        when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
 
         //when
         Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, ContentType.WEBNOVEL, sort, pageable);
@@ -410,7 +381,7 @@ class InterestServiceTest {
         when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(Page.empty(pageable));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, null, sort, pageable);
+        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
 
         // then
         assertNull(result);

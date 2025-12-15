@@ -47,7 +47,7 @@ public class UserWebnovelController {
     ) {
 
         log.info("webnovel : {}", webnovelId);
-        interestService.registerInterest(principalUser.getId(), ContentType.WEBNOVEL, webnovelId);
+        interestService.registerInterest(principalUser.getId(), webnovelId);
 
         return ResponseEntity.ok().build();
     }
@@ -56,7 +56,7 @@ public class UserWebnovelController {
     public ResponseEntity<Void> DeleteInterest(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId
     ) {
-        interestService.deleteInterest(principalUser.getId(), ContentType.WEBNOVEL, webnovelId);
+        interestService.deleteInterest(principalUser.getId(), webnovelId);
 
         return ResponseEntity.ok().build();
     }

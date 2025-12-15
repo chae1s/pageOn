@@ -48,12 +48,16 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                                     <S.ContentInfoWrapper>
                                         <S.ContentTitleWrapper>
                                             <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
-                                            <S.ContentType>[ {content.contentType === 'webnovels' ? '웹소설' : '웹툰'} ]</S.ContentType>
                                         </S.ContentTitleWrapper>
-                                        <S.ContentAuthor>{content.author}</S.ContentAuthor>
+                                        <S.ContentAuthorWrapper>
+                                            <S.ContentAuthor>{content.author}</S.ContentAuthor>
+                                            <S.ContentSeparate>ㆍ</S.ContentSeparate>
+                                            <S.ContentType>{content.contentType === 'webnovels' ? '웹소설' : '웹툰'}</S.ContentType>
+                                        </S.ContentAuthorWrapper>
                                         <S.EpisodeInfoContainer>
                                             <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
-                                            <S.ContentEpisodeUpdatedAt>{formatDate(content.episodeUpdatedAt)} 업데이트</S.ContentEpisodeUpdatedAt>
+                                            <S.ContentSeparate>ㆍ</S.ContentSeparate>
+                                            <S.ContentEpisodeUpdatedAt>{formatDate(content.episodeUpdatedAt)}</S.ContentEpisodeUpdatedAt>
                                         </S.EpisodeInfoContainer>
                                         <S.ContentRatingContainer>
                                             <S.ContentRatingStarIcon src={FullStarIcon} />

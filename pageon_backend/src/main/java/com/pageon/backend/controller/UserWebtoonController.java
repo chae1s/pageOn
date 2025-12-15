@@ -47,7 +47,7 @@ public class UserWebtoonController {
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId
     ) {
         log.info("WEBTOON {} 관심 등록",  webtoonId);
-        interestService.registerInterest(principalUser.getId(), ContentType.WEBTOON, webtoonId);
+        interestService.registerInterest(principalUser.getId(), webtoonId);
 
         return ResponseEntity.ok().build();
     }
@@ -56,7 +56,7 @@ public class UserWebtoonController {
     public ResponseEntity<Void> deleteInterest(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId
     ) {
-        interestService.deleteInterest(principalUser.getId(), ContentType.WEBTOON, webtoonId);
+        interestService.deleteInterest(principalUser.getId(), webtoonId);
 
         return ResponseEntity.ok().build();
     }

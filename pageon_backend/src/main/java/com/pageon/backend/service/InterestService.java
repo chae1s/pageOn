@@ -3,16 +3,11 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.entity.Interest;
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.Webtoon;
+import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.InterestRepository;
-import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.repository.WebnovelRepository;
-import com.pageon.backend.repository.WebtoonRepository;
+import com.pageon.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,22 +31,16 @@ public class InterestService {
     private final UserRepository userRepository;
     private final WebnovelRepository webnovelRepository;
     private final WebtoonRepository webtoonRepository;
+    private final ContentRepository contentRepository;
 
     @Transactional
-    public void registerInterest(Long userId, ContentType contentType, Long contentId) {
+    public void registerInterest(Long userId, Long contentId) {
         User user = userRepository.getReferenceById(userId);
+        Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
+        );
 
-        if (contentType == ContentType.WEBNOVEL) {
-            webnovelRepository.findById(contentId).orElseThrow(
-                    () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
-            );
-
-        } else if (contentType == ContentType.WEBTOON) {
-            webtoonRepository.findById(contentId).orElseThrow(
-                    () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
-            );
-            log.info("WEBTOON ID: {}", contentId);
-        }
+        ContentType contentType = ContentType.valueOf(content.getDtype());
 
         Interest interest = Interest.builder()
                 .user(user)
@@ -64,9 +53,9 @@ public class InterestService {
     }
 
     @Transactional
-    public void deleteInterest(Long userId, ContentType contentType, Long contentId) {
+    public void deleteInterest(Long userId, Long contentId) {
 
-        Interest interest = interestRepository.findByUser_IdAndContentTypeAndContentId(userId, contentType, contentId).orElseThrow(
+        Interest interest = interestRepository.findByUser_IdAndContentId(userId, contentId).orElseThrow(
                 () -> new CustomException(ErrorCode.INTEREST_NOT_FOUND)
         );
 
@@ -75,50 +64,16 @@ public class InterestService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSimpleResponse> getInterestedContents(Long userId, ContentType contentType, String sort, Pageable pageable) {
-        Page<Interest> interests;
+    public Page<InterestContentResponse> getInterestedContents(Long userId, String contentType, String sort, Pageable pageable) {
+        Pageable sortedPageable = PageableUtil.createInterestPageable(pageable, sort);
 
-        Pageable sortedPageable = PageableUtil.createMyPagePageable(pageable, sort);
-
-        if (contentType != null) {
-            interests = interestRepository.findAllByUser_IdAndContentType(userId, contentType, sortedPageable);
-        } else {
-            interests = interestRepository.findAllByUser_Id(userId, sortedPageable);
-        }
-
-        List<Interest> interestsOnThisPage = interests.getContent();
-
-        List<Long> webtoonIds = interestsOnThisPage.stream()
-                .filter(i -> i.getContentType() == ContentType.WEBTOON)
-                .map(Interest::getContentId).toList();
-
-        List<Long> webnovelIds = interestsOnThisPage.stream()
-                .filter(i -> i.getContentType() == ContentType.WEBNOVEL)
-                .map(Interest::getContentId).toList();
-
-        Map<Long, Webtoon> webtoonMap = webtoonRepository.findAllByIdIn(webtoonIds).stream()
-                .collect(Collectors.toMap(Webtoon::getId, Function.identity()));
-
-        Map<Long, Webnovel> webnovelMap = webnovelRepository.findAllByIdIn(webnovelIds).stream()
-                .collect(Collectors.toMap(Webnovel::getId, Function.identity()));
-
-        List<ContentSimpleResponse> contentSimpleResponses = new ArrayList<>();
-
-        for (Interest interest: interestsOnThisPage) {
-            if (interest.getContentType() == ContentType.WEBTOON) {
-                Webtoon webtoon = webtoonMap.get(interest.getContentId());
-                if (webtoon != null) {
-                    contentSimpleResponses.add(ContentSimpleResponse.fromEntity(webtoon.getId(), webtoon.getTitle(), webtoon.getCreator().getPenName(), webtoon.getCover(), "webtoons"));
-                }
-            } else if (interest.getContentType() == ContentType.WEBNOVEL) {
-                Webnovel webnovel = webnovelMap.get(interest.getContentId());
-                if (webnovel != null) {
-                    contentSimpleResponses.add(ContentSimpleResponse.fromEntity(webnovel.getId(), webnovel.getTitle(), webnovel.getCreator().getPenName(), webnovel.getCover(), "webnovels"));
-                }
-            }
-        }
-
-        return new PageImpl<>(contentSimpleResponses, pageable, interests.getTotalElements());
+        return switch (contentType) {
+            case "all" -> contentRepository.findByInterestedContents(userId, sortedPageable);
+            case "webnovels" -> webnovelRepository.findByInterestedWebnovels(userId, sortedPageable);
+            case "webtoons" -> webtoonRepository.findByInterestedWebtoons(userId, sortedPageable);
+            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        };
 
     }
+
 }

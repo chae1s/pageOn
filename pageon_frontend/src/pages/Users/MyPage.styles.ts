@@ -107,6 +107,7 @@ export const MypageBooksSortGroup = styled.div`
 export const BookListSection = styled.section`
     margin-top: 13px;
     margin-bottom: 36px;
+    padding-left: 8px;
 `
 
 export const SubmitBtn = styled.button`
@@ -237,4 +238,17 @@ export const PointTransactionEmpty = styled.div`
     padding: 20px 0;
     font-size: 14px;
     color: #666;
+`
+
+export const LibraryContentListWrapper = styled.div`
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-bottom: 50px;
+`
+
+export const LibraryContentList = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
 `

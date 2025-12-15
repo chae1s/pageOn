@@ -95,7 +95,11 @@ export const ContentTitle = styled(Link)`
 `
 
 export const ContentType = styled.div`
-    margin-left: 10px;
+
+`
+
+export const ContentAuthorWrapper = styled.div`
+    display: flex;
     color: #888;
     font-size: 14px;
     line-height: 19px;
@@ -103,20 +107,14 @@ export const ContentType = styled.div`
 `
 
 export const ContentAuthor = styled.div`
-    display: flex;
-    margin-bottom: 5px;
-    width: 100%;
-    height: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    
     color: #888;
 `
 
 export const EpisodeInfoContainer = styled.div`
     display: flex;
-    gap: 10px;
     margin-bottom: 5px;
+    color: #888;
 `
 
 export const ContentEpisodeCount = styled.div`
@@ -211,5 +209,9 @@ export const NoResultsWrapper = styled.div`
 `
 
 export const NoResultsText = styled.p`
+
+`
+
+export const ContentSeparate = styled.div`
 
 `

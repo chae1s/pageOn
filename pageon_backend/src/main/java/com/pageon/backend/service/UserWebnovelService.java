@@ -51,7 +51,7 @@ public class UserWebnovelService {
             Long userId = principalUser.getId();
             log.info("UserWebnovelService.getWebnovelById: userId = " + userId);
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(principalUser.getId(), webnovelId);
-            isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBNOVEL, webnovelId);
+            isInterested = interestRepository.existsByUser_IdAndContentId(userId, webnovelId);
         } else {
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
         }

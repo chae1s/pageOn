@@ -49,7 +49,7 @@ public class UserWebtoonService {
         if (principalUser != null) {
             Long userId = principalUser.getId();
             episodes = webtoonEpisodeService.getEpisodesByWebtoonId(userId, webtoonId);
-            isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBTOON, webtoonId);
+            isInterested = interestRepository.existsByUser_IdAndContentId(userId, webtoonId);
         } else {
             episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
         }

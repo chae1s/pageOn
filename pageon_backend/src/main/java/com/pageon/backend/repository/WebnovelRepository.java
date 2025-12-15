@@ -1,6 +1,7 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.dto.response.InterestContentResponse;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Webnovel;
 import org.springframework.data.domain.Page;
@@ -34,4 +35,10 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
             + "AND w.deletedAt IS NULL")
     Page<Webnovel> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
+            "FROM Interest i " +
+            "JOIN Webnovel c ON i.contentId = c.id " +
+            "WHERE i.user.id = :userId")
+    Page<InterestContentResponse> findByInterestedWebnovels(@Param("userId") Long userId, Pageable pageable);
 }

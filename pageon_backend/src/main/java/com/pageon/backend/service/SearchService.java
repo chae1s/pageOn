@@ -32,6 +32,7 @@ public class SearchService {
         Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
         List<String> contentTypes = List.of("webnovels", "webtoons", "all");
 
+
         switch (contentType) {
             case "webnovels" -> {
                 return userWebnovelService.getWebnovelsByTitleOrCreator(query, sortedPageable);

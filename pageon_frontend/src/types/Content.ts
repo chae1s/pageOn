@@ -53,6 +53,17 @@ export interface SearchContent {
     contentType: string;
 }
 
+export interface InterestContent {
+    contentId: number;
+    title: string;
+    penName: string;
+    episodeUpdatedAt: string;
+    cover: string;
+    contentType: string;
+    serialDay: string;
+    status: ContentStatus;
+}
+
 export interface LibraryContent {
     id: number;
     title: string;

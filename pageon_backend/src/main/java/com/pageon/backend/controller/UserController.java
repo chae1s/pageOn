@@ -109,13 +109,13 @@ public class UserController {
     }
 
     @GetMapping("/interests")
-    public ResponseEntity<PageResponse<ContentSimpleResponse>> getInterests(
-            @AuthenticationPrincipal PrincipalUser principalUser, @PageableDefault Pageable pageable, @RequestParam("sort") String sort, @RequestParam(value = "type", required = false) ContentType contentType
+    public ResponseEntity<PageResponse<InterestContentResponse>> getInterests(
+            @AuthenticationPrincipal PrincipalUser principalUser, @PageableDefault Pageable pageable, @RequestParam("sort") String sort, @RequestParam(value = "type", required = false) String contentType
     ){
 
         log.info("My Interests request received. Type: [{}], Sort: [{}], Page: {}, size: {}",
                 contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
-        Page<ContentSimpleResponse> libraryContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
+        Page<InterestContentResponse> libraryContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
 
         return ResponseEntity.ok(new PageResponse<>(libraryContentResponses));
     }

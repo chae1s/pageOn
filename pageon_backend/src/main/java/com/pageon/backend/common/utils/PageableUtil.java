@@ -16,6 +16,16 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
+    public static Pageable createInterestPageable(Pageable pageable, String sort) {
+        Sort sortOrder = switch (sort) {
+            case "update" -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
+            case "title" -> Sort.by(Sort.Order.asc("c.title"));
+            default -> Sort.by(Sort.Order.desc("i.createdAt"));
+        };
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+    }
+
     public static Pageable createMyPagePageable(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
