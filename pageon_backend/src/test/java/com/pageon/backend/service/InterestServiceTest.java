@@ -6,10 +6,7 @@ import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.InterestContentResponse;
-import com.pageon.backend.entity.Interest;
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.Webtoon;
+import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
@@ -26,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -292,27 +290,24 @@ class InterestServiceTest {
                 .deleted(false)
                 .build();
 
-        Interest interestWebnovel = Interest.builder()
-                .user(user)
-                .contentType(ContentType.WEBNOVEL)
+        InterestContentResponse interestWebtoon = InterestContentResponse.builder()
                 .contentId(1L)
+                .contentType("WEBTOON")
                 .build();
 
-        Interest interestWebtoon = Interest.builder()
-                .user(user)
-                .contentType(ContentType.WEBTOON)
-                .contentId(3L)
+        InterestContentResponse interestWebnovel = InterestContentResponse.builder()
+                .contentId(10L)
+                .contentType("WEBNOVEL")
                 .build();
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-        when(interestRepository.findAllByUser_Id(eq(userId), eq(pageable))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
+        when(contentRepository.findByInterestedContents(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
 
         //when
         Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
 
         // then
         assertEquals(2, result.getContent().size());
-        assertEquals(interestWebnovel.getId(), result.getContent().get(0).getId());
+        assertEquals(interestWebnovel.getContentId(), result.getContent().get(0).getContentId());
 
 
     }
@@ -331,29 +326,29 @@ class InterestServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
                 .deleted(false)
                 .build();
 
-        Interest interestWebnovel = Interest.builder()
-                .user(user)
-                .contentType(ContentType.WEBNOVEL)
+        InterestContentResponse interestWebtoon = InterestContentResponse.builder()
                 .contentId(1L)
+                .contentType("WEBTOON")
                 .build();
 
+        InterestContentResponse interestWebnovel = InterestContentResponse.builder()
+                .contentId(10L)
+                .contentType("WEBNOVEL")
+                .build();
 
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-
-        when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
+        when(webnovelRepository.findByInterestedWebnovels(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
 
         //when
-        Page<ContentSimpleResponse> result = interestService.getInterestedContents(userId, ContentType.WEBNOVEL, sort, pageable);
+        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "webnovels", sort, pageable);
 
         // then
         assertEquals(1, result.getContent().size());
-        assertEquals(ContentType.WEBNOVEL, result.getContent().get(0).getContentType());
+        assertEquals("WEBNOVEL", result.getContent().get(0).getContentType());
 
     }
 
@@ -377,8 +372,6 @@ class InterestServiceTest {
                 .deleted(false)
                 .build();
 
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
-        when(interestRepository.findAllByUser_Id(userId, pageable)).thenReturn(Page.empty(pageable));
 
         //when
         Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
