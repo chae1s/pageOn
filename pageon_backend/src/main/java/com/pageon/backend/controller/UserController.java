@@ -5,6 +5,7 @@ import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.InterestService;
+import com.pageon.backend.service.ReadingHistoryService;
 import com.pageon.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ public class UserController {
 
     private final UserService userService;
     private final InterestService interestService;
+    private final ReadingHistoryService readingHistoryService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest signupDto) {
@@ -110,14 +112,15 @@ public class UserController {
 
     @GetMapping("/interests")
     public ResponseEntity<PageResponse<InterestContentResponse>> getInterests(
-            @AuthenticationPrincipal PrincipalUser principalUser, @PageableDefault Pageable pageable, @RequestParam("sort") String sort, @RequestParam(value = "type", required = false) String contentType
-    ){
+            @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
+    ) {
 
         log.info("My Interests request received. Type: [{}], Sort: [{}], Page: {}, size: {}",
                 contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
-        Page<InterestContentResponse> libraryContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(libraryContentResponses));
+        Page<InterestContentResponse> interestContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(interestContentResponses));
     }
 
     @GetMapping("/comments")
@@ -129,5 +132,15 @@ public class UserController {
         Page<MyCommentResponse> commentResponses = userService.getCommentsByUserId(principalUser.getId(), pageable, contentType);
 
         return ResponseEntity.ok(new PageResponse<>(commentResponses));
+    }
+
+    @GetMapping("/reading-history")
+    public ResponseEntity<PageResponse<ReadingContentsResponse>> getReadingHistories(
+            @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
+    ) {
+
+        Page<ReadingContentsResponse> readingContentsResponses = readingHistoryService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(readingContentsResponses));
     }
 }

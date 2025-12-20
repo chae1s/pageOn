@@ -10,7 +10,7 @@ export const ContentItem = styled.div`
     min-height: 160px;
     box-sizing: border-box;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-
+    cursor: default;
 
     @media (max-width: 768px) {
         width: 100%;
@@ -29,12 +29,13 @@ export const ContentImage = styled.img`
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: pointer;
 `;
 
 export const ContentInfoCover = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     min-width: 0;
     margin: auto 0;
 `;
@@ -107,4 +108,31 @@ export const ContentBadge = styled.span`
 export const ContentStatus = styled.span`
     
 `;
+
+export const ContentLastReadHistory = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 14px;
+    line-height: 19px;
+`;
+
+export const ContentEpisodeReadBtn = styled.button`
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+`
+
+export const ContentEpisodeReadBtnText = styled.div`
+    font-size: 14px;
+    line-height: 19px;
+    color: #444;
+`
+
+export const ContentEpisodeReadIcon = styled.img`
+    width: 19px;
+    height: 19px;
+`
+
+
 

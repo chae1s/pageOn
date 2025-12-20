@@ -117,9 +117,9 @@ function WebtoonViewer() {
         const { episode } = purchasePrompt;
 
         try {
-            await api.post(`/webnovels/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
+            await api.post(`/webtoons/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
             closePurchasePrompt();
-            navigate(`/webnovels/${contentId}/viewer/${episode.id}`);
+            navigate(`/webtoons/${contentId}/viewer/${episode.id}`);
         } catch (error) {
             console.error("에피소드 구매 실패 : ", error);
         }

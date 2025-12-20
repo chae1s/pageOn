@@ -64,14 +64,16 @@ export interface InterestContent {
     status: ContentStatus;
 }
 
-export interface LibraryContent {
-    id: number;
+export interface RecentReadContent {
+    contentId: number;
     title: string;
-    author: string;
+    penName: string;
     cover: string;
-    contentType: string;
-    episodeId: number;
+    episodeUpdatedAt: string;
     lastReadAt: string;
-
+    lastReadEpisodeId: number;
+    contentType: string;
+    serialDay: string;
+    status: string;
 }
 

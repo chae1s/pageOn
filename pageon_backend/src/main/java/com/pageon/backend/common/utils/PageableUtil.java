@@ -26,12 +26,12 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createMyPagePageable(Pageable pageable, String sort) {
+    public static Pageable createReadingHistory(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
             // [TODO] 최근에 읽은 순, 업데이트 순으로 sort 기준 변경
-            case "last_read" -> Sort.by(Sort.Order.asc("h.lastReadAt"));
-            default -> Sort.by(Sort.Order.asc("w.episodeUpdatedAt"));
+            case "recently_read" -> Sort.by(Sort.Order.desc("r.lastReadAt"));
+            default -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
         };
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);

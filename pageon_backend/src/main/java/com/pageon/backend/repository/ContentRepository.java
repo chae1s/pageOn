@@ -1,7 +1,9 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Content;
+import com.pageon.backend.entity.ReadingHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +26,10 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
             "JOIN Content c ON i.contentId = c.id " +
             "WHERE i.user.id = :userId")
     Page<InterestContentResponse> findByInterestedContents(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT new com.pageon.backend.dto.response.ReadingContentsResponse(c.id, c.title, c.creator.penName, c.cover, c.episodeUpdatedAt, r.lastReadAt, r.episodeId, c.dtype, c.serialDay, c.status) " +
+            "FROM ReadingHistory r " +
+            "JOIN Content c ON r.contentId = c.id " +
+            "WHERE r.user.id = :userId")
+    Page<ReadingContentsResponse> findByReadingContents(@Param("userId") Long userId, Pageable pageable);
 }

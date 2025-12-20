@@ -31,7 +31,7 @@ function InterestContents() {
 
             try {
                 
-                const response = await api.get("/interests", {params: params})    
+                const response = await api.get("/users/interests", {params: params})    
                 
                 setInterestContents(response.data.content);
                 setPageData(response.data);
@@ -109,9 +109,9 @@ function InterestContents() {
                                     </S.MypageBooksSearchBtn>
                                 </S.MypageBooksSearchGroup>
                                 <S.MypageBooksSortGroup>
-                                    <SortBtn $active={sort === "recently_added"} onClick={() => handleParamClick("sort", "recently_added")}>관심 등록순</SortBtn>
-                                    <SortBtn $active={sort === "update"} onClick={() => handleParamClick("sort", "update")}>업데이트순</SortBtn>
-                                    <SortBtn $active={sort === "title"} onClick={() => handleParamClick("sort", "title")}>제목순</SortBtn>
+                                    <SortBtn $active={sort === "recently_added"} onClick={() => handleParamClick("sort", "recently_added")}>관심 등록 순</SortBtn>
+                                    <SortBtn $active={sort === "update"} onClick={() => handleParamClick("sort", "update")}>업데이트 순</SortBtn>
+                                    <SortBtn $active={sort === "title"} onClick={() => handleParamClick("sort", "title")}>제목 순</SortBtn>
                                 </S.MypageBooksSortGroup>
                             </S.MypageBooksSearchSelectSort>
                         </S.mypageBooksSortBtnList>

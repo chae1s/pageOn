@@ -2,7 +2,9 @@ package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import org.springframework.data.domain.Page;
@@ -42,4 +44,10 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
             "JOIN Webtoon c ON i.contentId = c.id " +
             "WHERE i.user.id = :userId")
     Page<InterestContentResponse> findByInterestedWebtoons(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT new com.pageon.backend.dto.response.ReadingContentsResponse(c.id, c.title, c.creator.penName, c.cover, c.episodeUpdatedAt, r.lastReadAt, r.episodeId, c.dtype, c.serialDay, c.status) " +
+            "FROM ReadingHistory r " +
+            "JOIN Webtoon c ON r.contentId = c.id " +
+            "WHERE r.user.id = :userId")
+    Page<ReadingContentsResponse> findByReadingWebtoons(@Param("userId") Long userId, Pageable pageable);
 }

@@ -2,7 +2,9 @@ package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.Webnovel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,4 +43,10 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
             "JOIN Webnovel c ON i.contentId = c.id " +
             "WHERE i.user.id = :userId")
     Page<InterestContentResponse> findByInterestedWebnovels(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT new com.pageon.backend.dto.response.ReadingContentsResponse(c.id, c.title, c.creator.penName, c.cover, c.episodeUpdatedAt, r.lastReadAt, r.episodeId, c.dtype, c.serialDay, c.status) " +
+            "FROM ReadingHistory r " +
+            "JOIN Webnovel c ON r.contentId = c.id " +
+            "WHERE r.user.id = :userId")
+    Page<ReadingContentsResponse> findByReadingWebnovels(@Param("userId") Long userId, Pageable pageable);
 }

@@ -41,14 +41,5 @@ public class InterestController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("")
-    public ResponseEntity<PageResponse<InterestContentResponse>> getInterests(
-            @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
-    ) {
-        Page<InterestContentResponse> interestContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
-
-        return ResponseEntity.ok(new PageResponse<>(interestContentResponses));
-    }
-
 
 }

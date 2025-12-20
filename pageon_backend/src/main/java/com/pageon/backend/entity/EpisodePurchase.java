@@ -26,10 +26,12 @@ public class EpisodePurchase extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private ContentType contentType;
     private Long contentId;
     private Long episodeId;
 
+    @Enumerated(EnumType.STRING)
     private PurchaseType purchaseType;
 
     private LocalDateTime expiredAt;
