@@ -94,8 +94,8 @@ class InterestServiceTest {
         verify(interestRepository).save(interestCaptor.capture());
         Interest interest = interestCaptor.getValue();
 
-        assertEquals(ContentType.WEBNOVEL, interest.getContentType());
-        assertEquals(webnovelId, interest.getContentId());
+        assertEquals("WEBNOVEL", interest.getContent().getDtype());
+        assertEquals(webnovelId, interest.getContent().getId());
         
     }
 
@@ -140,8 +140,8 @@ class InterestServiceTest {
         verify(interestRepository).save(interestCaptor.capture());
         Interest interest = interestCaptor.getValue();
 
-        assertEquals(ContentType.WEBTOON, interest.getContentType());
-        assertEquals(webtoonId, interest.getContentId());
+        assertEquals("WEBTOON", interest.getContent().getDtype());
+        assertEquals(webtoonId, interest.getContent().getId());
 
     }
 
@@ -221,6 +221,10 @@ class InterestServiceTest {
         Long userId = 1L;
         ContentType contentType = ContentType.WEBNOVEL;
         Long contentId = 1L;
+        Webnovel webnovel = Webnovel.builder()
+                .id(contentId)
+                .title("콘텐츠 제목")
+                .build();
 
         User user = User.builder()
                 .id(userId)
@@ -235,8 +239,7 @@ class InterestServiceTest {
 
         Interest interest = Interest.builder()
                 .id(1L)
-                .contentId(contentId)
-                .contentType(contentType)
+                .content(webnovel)
                 .user(user)
                 .build();
 
@@ -300,7 +303,7 @@ class InterestServiceTest {
                 .contentType("WEBNOVEL")
                 .build();
 
-        when(contentRepository.findByInterestedContents(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
+        when(interestRepository.findAllInterests(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
 
         //when
         Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
@@ -341,7 +344,7 @@ class InterestServiceTest {
                 .contentType("WEBNOVEL")
                 .build();
 
-        when(webnovelRepository.findByInterestedWebnovels(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
+        when(interestRepository.findWebnovelInterests(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
 
         //when
         Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "webnovels", sort, pageable);

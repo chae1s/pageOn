@@ -2,7 +2,6 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.InterestContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
@@ -11,16 +10,10 @@ import com.pageon.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,8 +22,6 @@ public class InterestService {
 
     private final InterestRepository interestRepository;
     private final UserRepository userRepository;
-    private final WebnovelRepository webnovelRepository;
-    private final WebtoonRepository webtoonRepository;
     private final ContentRepository contentRepository;
 
     @Transactional
@@ -44,8 +35,7 @@ public class InterestService {
 
         Interest interest = Interest.builder()
                 .user(user)
-                .contentType(contentType)
-                .contentId(contentId)
+                .content(content)
                 .build();
 
         interestRepository.save(interest);
@@ -68,9 +58,9 @@ public class InterestService {
         Pageable sortedPageable = PageableUtil.createInterestPageable(pageable, sort);
 
         return switch (contentType) {
-            case "all" -> contentRepository.findByInterestedContents(userId, sortedPageable);
-            case "webnovels" -> webnovelRepository.findByInterestedWebnovels(userId, sortedPageable);
-            case "webtoons" -> webtoonRepository.findByInterestedWebtoons(userId, sortedPageable);
+            case "all" -> interestRepository.findAllInterests(userId, sortedPageable);
+            case "webnovels" -> interestRepository.findWebnovelInterests(userId, sortedPageable);
+            case "webtoons" -> interestRepository.findWebtoonInterests(userId, sortedPageable);
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         };
 

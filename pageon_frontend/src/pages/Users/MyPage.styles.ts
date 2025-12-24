@@ -252,3 +252,7 @@ export const LibraryContentList = styled.div`
     flex-wrap: wrap;
     gap: 16px;
 `
+
+export const EmptyListText = styled.div`
+    margin: 10px auto;
+`

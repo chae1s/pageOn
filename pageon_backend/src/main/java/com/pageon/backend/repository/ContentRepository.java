@@ -21,15 +21,5 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
             "AND c.deletedAt IS NULL")
     Page<Content> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
-            "FROM Interest i " +
-            "JOIN Content c ON i.contentId = c.id " +
-            "WHERE i.user.id = :userId")
-    Page<InterestContentResponse> findByInterestedContents(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT new com.pageon.backend.dto.response.ReadingContentsResponse(c.id, c.title, c.creator.penName, c.cover, c.episodeUpdatedAt, r.lastReadAt, r.episodeId, c.dtype, c.serialDay, c.status) " +
-            "FROM ReadingHistory r " +
-            "JOIN Content c ON r.contentId = c.id " +
-            "WHERE r.user.id = :userId")
-    Page<ReadingContentsResponse> findByReadingContents(@Param("userId") Long userId, Pageable pageable);
 }

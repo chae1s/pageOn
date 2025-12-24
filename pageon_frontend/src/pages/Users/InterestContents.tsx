@@ -120,9 +120,13 @@ function InterestContents() {
                     <S.BookListSection>
                         <S.LibraryContentListWrapper>
                             <S.LibraryContentList>
-                                {interestContents.map((content) => (
-                                    <InterestContentItem key={content.contentId} content={content}/>
-                                ))}
+                                {interestContents.length === 0 ? (
+                                    <S.EmptyListText>관심 작품이 없습니다.</S.EmptyListText>
+                                ) : (
+                                    interestContents.map((content) => (
+                                        <InterestContentItem key={content.contentId} content={content}/>
+                                    ))
+                                )}
                             </S.LibraryContentList>
                         </S.LibraryContentListWrapper>
                         {pageData && pageData.totalPages > 0 && (

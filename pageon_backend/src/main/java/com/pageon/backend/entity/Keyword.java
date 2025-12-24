@@ -26,11 +26,8 @@ public class Keyword {
 
     @Builder.Default
     @ManyToMany(mappedBy = "keywords")
-    private List<Webnovel> webnovels = new ArrayList<>();
+    private List<Content> contents = new ArrayList<>();
 
-    @Builder.Default
-    @ManyToMany(mappedBy = "keywords")
-    private List<Webtoon> webtoons = new ArrayList<>();
 
     public Keyword(Category category, String name) {
         this.category = category;

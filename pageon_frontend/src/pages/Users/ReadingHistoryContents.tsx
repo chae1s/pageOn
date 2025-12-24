@@ -120,9 +120,13 @@ function ReadingHistoryContents() {
                     <S.BookListSection>
                         <S.LibraryContentListWrapper>
                             <S.LibraryContentList>
-                                {recentReadContents.map((content) => (
-                                    <RecentReadContentItem key={content.contentId} content={content}/>
-                                ))}
+                                {recentReadContents.length === 0 ? (
+                                    <S.EmptyListText>최근 읽은 작품이 없습니다.</S.EmptyListText>
+                                ) : (
+                                    recentReadContents.map((content) => (
+                                        <RecentReadContentItem key={content.contentId} content={content}/>
+                                    ))
+                                )}
                             </S.LibraryContentList>
                         </S.LibraryContentListWrapper>
                         {pageData && pageData.totalPages > 0 && (

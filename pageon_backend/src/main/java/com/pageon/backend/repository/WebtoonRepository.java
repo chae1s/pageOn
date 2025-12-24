@@ -39,15 +39,4 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
             + "AND w.deletedAt IS NULL")
     Page<Webtoon> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
-            "FROM Interest i " +
-            "JOIN Webtoon c ON i.contentId = c.id " +
-            "WHERE i.user.id = :userId")
-    Page<InterestContentResponse> findByInterestedWebtoons(@Param("userId") Long userId, Pageable pageable);
-
-    @Query("SELECT new com.pageon.backend.dto.response.ReadingContentsResponse(c.id, c.title, c.creator.penName, c.cover, c.episodeUpdatedAt, r.lastReadAt, r.episodeId, c.dtype, c.serialDay, c.status) " +
-            "FROM ReadingHistory r " +
-            "JOIN Webtoon c ON r.contentId = c.id " +
-            "WHERE r.user.id = :userId")
-    Page<ReadingContentsResponse> findByReadingWebtoons(@Param("userId") Long userId, Pageable pageable);
 }

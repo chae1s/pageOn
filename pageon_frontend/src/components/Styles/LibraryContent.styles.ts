@@ -32,12 +32,13 @@ export const ContentImage = styled.img`
     cursor: pointer;
 `;
 
-export const ContentInfoCover = styled.div`
+export const ContentInfoCover = styled.div<{$history:boolean}>`
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
     margin: auto 0;
+    ${({$history}) => ($history? "max-width: 166px" : "")};
 `;
 
 export const ContentTitleWrapper = styled.div`
@@ -121,6 +122,7 @@ export const ContentEpisodeReadBtn = styled.button`
     display: flex;
     align-items: center;
     gap: 3px;
+    width: 74px;
 `
 
 export const ContentEpisodeReadBtnText = styled.div`

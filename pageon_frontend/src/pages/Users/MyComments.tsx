@@ -174,7 +174,7 @@ function MyComments() {
                         <C.CommentList>
                           <C.CommentListUl>
                             {myComments.length === 0 ? (
-                                <C.CommentListEmptyText>작성한 댓글이 없습니다.</C.CommentListEmptyText>
+                                <M.EmptyListText>작성한 댓글이 없습니다.</M.EmptyListText>
                             ) : (
                                 myComments.map((comment) => (
                                     <C.CommentListLi key={comment.id}>

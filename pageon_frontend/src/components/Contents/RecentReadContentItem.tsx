@@ -64,7 +64,7 @@ function RecentReadContentItem({ content }: Props) {
                     onClick={handleContentClick(content.contentType, content.contentId)}
                 />
             </S.ContentImageCover>
-            <S.ContentInfoCover>
+            <S.ContentInfoCover $history={true}>
                 <S.ContentTitleWrapper>
                     <S.ContentTitle onClick={handleContentClick(content.contentType, content.contentId)}>{content.title}</S.ContentTitle>
                 </S.ContentTitleWrapper>

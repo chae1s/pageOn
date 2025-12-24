@@ -25,9 +25,9 @@ public class ReadingHistory extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private ContentType contentType;
-    private Long contentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_id")
+    private Content content;
 
     private Long episodeId;
 

@@ -53,7 +53,7 @@ function InterestContentItem({ content }: Props) {
                     onClick={handleContentClick(content.contentType, content.contentId)}
                 />
             </S.ContentImageCover>
-            <S.ContentInfoCover>
+            <S.ContentInfoCover $history={false}>
                 <S.ContentTitleWrapper>
                     <S.ContentTitle onClick={handleContentClick(content.contentType, content.contentId)}>
                         {content.title}
