@@ -14,7 +14,12 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @SuperBuilder
 @DynamicUpdate
-@Table(name = "interests")
+@Table(name = "interests", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_reading_history_user_content",
+                columnNames = {"user_id", "content_id"}
+        )
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Interest extends BaseTimeEntity {

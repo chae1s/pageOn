@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -134,7 +135,7 @@ public class UserController {
         return ResponseEntity.ok(new PageResponse<>(commentResponses));
     }
 
-    @GetMapping("/reading-history")
+    @GetMapping("/reading-histories")
     public ResponseEntity<PageResponse<ReadingContentsResponse>> getReadingHistories(
             @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
     ) {
@@ -142,5 +143,13 @@ public class UserController {
         Page<ReadingContentsResponse> readingContentsResponses = readingHistoryService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
 
         return ResponseEntity.ok(new PageResponse<>(readingContentsResponses));
+    }
+
+    @GetMapping("/reading-histories/today")
+    public ResponseEntity<List<ContentSimpleResponse>> getReadingHistoriesToday(@AuthenticationPrincipal PrincipalUser principalUser) {
+
+        List<ContentSimpleResponse> contentSimpleResponses = readingHistoryService.getTodayReadingHistory(principalUser.getId());
+
+        return ResponseEntity.ok(contentSimpleResponses);
     }
 }

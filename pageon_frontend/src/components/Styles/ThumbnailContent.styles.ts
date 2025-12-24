@@ -102,7 +102,20 @@ export const ContentTitle = styled(Link)`
 `;
 
 export const ContentAuthor = styled.div`
-  font-size: 0.875rem;
-  color: #888;
-  margin-top: 6px;
 `;
+
+export const ContentSeparate = styled.div`
+
+`
+
+export const ContentInfoWrapper = styled.div`
+    display: inline-flex;
+    font-size: 14px;
+    color: #666;
+    line-height: 19px;
+    margin-top: 5px;
+`
+
+export const ContentType = styled.div`
+    
+`

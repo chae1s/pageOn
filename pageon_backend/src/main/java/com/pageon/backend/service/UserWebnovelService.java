@@ -81,12 +81,7 @@ public class UserWebnovelService {
         log.info("{} 웹소설 검색", serialDay);
 
         return webnovels.stream()
-                .map(w -> ContentSimpleResponse.fromEntity(
-                        w.getId(),
-                        w.getTitle(),
-                        w.getCreator().getPenName(),
-                        w.getCover(),
-                        "webnovels"))
+                .map(ContentSimpleResponse::fromEntity)
                 .toList();
     }
 

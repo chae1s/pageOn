@@ -2,7 +2,9 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.base.EpisodeBase;
 import com.pageon.backend.common.enums.ContentType;
+import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.utils.PageableUtil;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.ReadingHistory;
@@ -17,6 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,14 +35,16 @@ public class ReadingHistoryService {
     private final WebtoonRepository webtoonRepository;
 
     @Transactional
-    public void checkReadingHistory(Long userId, ContentType contentType, Long contentId, Long episodeId) {
+    public void checkReadingHistory(Long userId, Long contentId, Long episodeId) {
         User user = userRepository.getReferenceById(userId);
         Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(
                 () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
         );
 
-        ReadingHistory readingHistory = readingHistoryRepository.findByUser_IdAndContent_Id(user.getId(), contentId).orElse(null);
+        log.info("Checking reading history for user {} and content {}", userId, content);
 
+        ReadingHistory readingHistory = readingHistoryRepository.findByUser_IdAndContent_Id(user.getId(), contentId).orElse(null);
+        log.info("readingHistory: {}", readingHistory);
 
         if (readingHistory == null) {
             log.info("ReadingHistory not found");
@@ -53,6 +61,7 @@ public class ReadingHistoryService {
                 .user(user)
                 .content(content)
                 .episodeId(episodeId)
+                .lastReadAt(LocalDateTime.now())
                 .build();
 
         readingHistoryRepository.save(readingHistory);
@@ -73,5 +82,15 @@ public class ReadingHistoryService {
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         };
         
+    }
+
+    public List<ContentSimpleResponse> getTodayReadingHistory(Long userId) {
+        SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
+
+        List<ReadingHistory> histories = readingHistoryRepository.findWithContentByUserIdAndSerialDay(userId, today);
+
+        return histories.stream()
+                .map(h -> ContentSimpleResponse.fromEntity(h.getContent()))
+                .toList();
     }
 }

@@ -77,12 +77,7 @@ public class UserWebtoonService {
         log.info("{} 웹툰 검색", serialDay);
 
         return webtoons.stream()
-                .map(w -> ContentSimpleResponse.fromEntity(
-                        w.getId(),
-                        w.getTitle(),
-                        w.getCreator().getPenName(),
-                        w.getCover(),
-                        "webtoons"))
+                .map(ContentSimpleResponse::fromEntity)
                 .toList();
     }
 

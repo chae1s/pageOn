@@ -3,6 +3,7 @@ import * as S from "../Styles/LibraryContent.styles";
 import { formatDate } from "../../utils/formatData";
 import rightArrowIcon from "../../assets/rightArrowIcon.png";
 import { useNavigate } from "react-router-dom";
+import { formatKorean } from "../../utils/formatContentType";
 
 interface Props {
     content: RecentReadContent
@@ -23,11 +24,6 @@ function RecentReadContentItem({ content }: Props) {
         COMPLETED: "완결",
         ONGOING: "연재",
         REST: "휴재"
-    }
-
-    const contentTypeMap: Record<string, string> = {
-        WEBNOVEL: "웹소설",
-        WEBTOON: "웹툰"
     }
 
     const navigate = useNavigate();
@@ -72,7 +68,7 @@ function RecentReadContentItem({ content }: Props) {
                 <S.ContentInfoWrapper>
                     <S.ContentAuthor>{content.penName}</S.ContentAuthor>
                     <S.ContentSeparate>ㆍ</S.ContentSeparate>
-                    <S.ContentType>{contentTypeMap[content.contentType]}</S.ContentType>
+                    <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                 </S.ContentInfoWrapper>
                 <S.ContentLastReadHistory>
                     {formatDate(content.lastReadAt)} 열람

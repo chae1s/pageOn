@@ -12,7 +12,12 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @DynamicUpdate
-@Table(name = "reading_historys")
+@Table(name = "reading_histories", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_reading_history_user_content",
+                columnNames = {"user_id", "content_id"}
+        )
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ReadingHistory extends BaseTimeEntity {

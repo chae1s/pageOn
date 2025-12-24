@@ -3,6 +3,7 @@ import { InterestContent } from "../../types/Content";
 import * as S from "../Styles/LibraryContent.styles";
 import { formatDate } from "../../utils/formatData";
 import { useNavigate } from "react-router-dom";
+import { formatKorean, formatUrl } from "../../utils/formatContentType";
 
 interface Props {
     content: InterestContent;
@@ -35,12 +36,7 @@ function InterestContentItem({ content }: Props) {
     const handleContentClick = (contentType: string, contentId: number) => (e:React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
 
-
-        if (contentType === 'WEBNOVEL') {
-            navigate(`/webnovels/${contentId}`);
-        } else if (contentType === 'WEBTOON') {
-            navigate(`/webtoons/${contentId}`);
-        }
+        navigate(`/${formatUrl(contentType)}/${contentId}`)
         
     }
 
@@ -63,7 +59,7 @@ function InterestContentItem({ content }: Props) {
                 <S.ContentInfoWrapper>
                     <S.ContentAuthor>{content.penName}</S.ContentAuthor>
                     <S.ContentSeparate>ㆍ</S.ContentSeparate>
-                    <S.ContentType>{contentTypeMap[content.contentType]}</S.ContentType>
+                    <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                 </S.ContentInfoWrapper>
 
                 <S.ContentMetaRow>

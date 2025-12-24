@@ -67,7 +67,7 @@ public class WebnovelEpisodeService {
 
         Integer userScore = webnovelEpisodeRatingRepository.findScoreByWebnovelEpisodeAndUser(episode.getId(), userId);
 
-        readingHistoryService.checkReadingHistory(userId, ContentType.WEBNOVEL, episode.getWebnovel().getId(), episodeId);
+        readingHistoryService.checkReadingHistory(userId, episode.getWebnovel().getId(), episodeId);
 
         return WebnovelEpisodeDetailResponse.fromEntity(
                 episode, episode.getWebnovel().getTitle(),
