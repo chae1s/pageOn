@@ -174,9 +174,11 @@ const UpdateContentListWrapper = styled.div`
 `
 
 const UpdateContentList = styled.div`
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: flex-start;
+    width: 100%;
 `
 
 const EmptyListText = styled.div`
