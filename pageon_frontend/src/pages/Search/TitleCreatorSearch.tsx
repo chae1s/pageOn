@@ -114,9 +114,9 @@ function TitleCreatorSearch() {
                 </S.ContentTypeListInSearch>
                 <S.SelectSortSection>
                     <S.SelectSortBtnGroup>
-                        <SortBtn $active={sort === "latest"} onClick={() => handleParamClick("sort", "latest")}>최신순</SortBtn>
-                        <SortBtn $active={sort === "rating"} onClick={() => handleParamClick("sort", "rating")}>별점순</SortBtn>
-                        <SortBtn $active={sort === "popular"} onClick={() => handleParamClick("sort", "popular")}>인기순</SortBtn>
+                        <SortBtn $active={sort === "latest"} onClick={() => handleParamClick("sort", "latest")}>최신 순</SortBtn>
+                        <SortBtn $active={sort === "rating"} onClick={() => handleParamClick("sort", "rating")}>별점 순</SortBtn>
+                        <SortBtn $active={sort === "popular"} onClick={() => handleParamClick("sort", "popular")}>인기 순</SortBtn>
                     </S.SelectSortBtnGroup>
                 </S.SelectSortSection>
                 {pageData && (

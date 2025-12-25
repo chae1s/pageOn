@@ -213,6 +213,8 @@ public class InitUserData implements ApplicationRunner {
 
                 user.getUserRoles().add(userRole);
             });
+
+            log.info("USER 데이터 ADD");
             users.add(user);
         }
 

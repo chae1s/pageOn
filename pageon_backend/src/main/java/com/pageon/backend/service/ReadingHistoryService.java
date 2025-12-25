@@ -1,0 +1,96 @@
+package com.pageon.backend.service;
+
+import com.pageon.backend.common.base.EpisodeBase;
+import com.pageon.backend.common.enums.ContentType;
+import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.common.utils.PageableUtil;
+import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
+import com.pageon.backend.entity.Content;
+import com.pageon.backend.entity.ReadingHistory;
+import com.pageon.backend.entity.User;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ReadingHistoryService {
+
+    private final ReadingHistoryRepository readingHistoryRepository;
+    private final UserRepository userRepository;
+    private final ContentRepository contentRepository;
+    private final WebnovelRepository webnovelRepository;
+    private final WebtoonRepository webtoonRepository;
+
+    @Transactional
+    public void checkReadingHistory(Long userId, Long contentId, Long episodeId) {
+        User user = userRepository.getReferenceById(userId);
+        Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
+        );
+
+        log.info("Checking reading history for user {} and content {}", userId, content);
+
+        ReadingHistory readingHistory = readingHistoryRepository.findByUser_IdAndContent_Id(user.getId(), contentId).orElse(null);
+        log.info("readingHistory: {}", readingHistory);
+
+        if (readingHistory == null) {
+            log.info("ReadingHistory not found");
+            createReadingHistory(user, content, episodeId);
+        } else {
+            log.info("ReadingHistory found");
+            updateReadingHistory(readingHistory, episodeId);
+        }
+
+    }
+
+    private void createReadingHistory(User user, Content content, Long episodeId) {
+        ReadingHistory readingHistory = ReadingHistory.builder()
+                .user(user)
+                .content(content)
+                .episodeId(episodeId)
+                .lastReadAt(LocalDateTime.now())
+                .build();
+
+        readingHistoryRepository.save(readingHistory);
+    }
+
+    private void updateReadingHistory(ReadingHistory readingHistory, Long episodeId) {
+        readingHistory.updateEpisodeId(episodeId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReadingContentsResponse> getReadingHistory(Long userId, String contentType, String sort, Pageable pageable) {
+        Pageable sortedPageable = PageableUtil.createReadingHistory(pageable, sort);
+
+        return switch (contentType) {
+            case "all" -> readingHistoryRepository.findAllReadingHistories(userId, sortedPageable);
+            case "webnovels" -> readingHistoryRepository.findWebnovelReadingHistories(userId, sortedPageable);
+            case "webtoons" -> readingHistoryRepository.findWebtoonReadingHistories(userId, sortedPageable);
+            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        };
+        
+    }
+
+    public List<ContentSimpleResponse> getTodayReadingHistory(Long userId) {
+        SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
+
+        List<ReadingHistory> histories = readingHistoryRepository.findWithContentByUserIdAndSerialDay(userId, today);
+
+        return histories.stream()
+                .map(h -> ContentSimpleResponse.fromEntity(h.getContent()))
+                .toList();
+    }
+}

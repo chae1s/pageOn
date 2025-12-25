@@ -50,36 +50,8 @@ public class SearchController {
     public ResponseEntity<PageResponse<ContentSearchResponse>> getContentsByTitleOrCreator(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable
     ) {
+        Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(contentType, query, sort, pageable);
 
-        log.info("Search request received. Type: [{}], Query[{}], Sort: [{}], Page: {}, size: {}",
-                contentType, query, sort, pageable.getPageNumber(), pageable.getPageSize());
-
-        List<String> contentTypes = List.of("webnovels", "webtoons", "all");
-        if (!contentTypes.contains(contentType)) {
-            throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-        }
-
-        switch (contentType) {
-            case "webnovels" -> {
-                log.debug("Routing to 'webnovel' service");
-                Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByTitleOrCreator(query, sort, pageable);
-
-                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
-            }
-            case "webtoons" -> {
-                log.debug("Routing to 'webtoon' service");
-                Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
-
-                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
-            }
-            case "all" -> {
-                log.debug("Routing to 'all' service");
-                Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(query, sort, pageable);
-
-                return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
-            }
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
     }
 }

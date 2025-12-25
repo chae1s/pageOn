@@ -38,7 +38,7 @@ public class UserWebnovelService {
     @Transactional(readOnly = true)
     public UserWebnovelResponse getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
 
-        Webnovel webnovel = webnovelRepository.findByIdAndDeleted(webnovelId, false).orElseThrow(
+        Webnovel webnovel = webnovelRepository.findByIdAndDeletedAtIsNull(webnovelId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
@@ -51,7 +51,7 @@ public class UserWebnovelService {
             Long userId = principalUser.getId();
             log.info("UserWebnovelService.getWebnovelById: userId = " + userId);
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(principalUser.getId(), webnovelId);
-            isInterested = interestRepository.existsByUser_IdAndContentTypeAndContentId(userId, ContentType.WEBNOVEL, webnovelId);
+            isInterested = interestRepository.existsByUser_IdAndContentId(userId, webnovelId);
         } else {
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
         }
@@ -63,7 +63,7 @@ public class UserWebnovelService {
 
     @Transactional(readOnly = true)
     public List<UserContentListResponse> getWebnovels() {
-        List<Webnovel> webnovels = webnovelRepository.findByDeleted(false);
+        List<Webnovel> webnovels = webnovelRepository.findByDeletedAtIsNull();
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webnovel webnovel : webnovels) {
@@ -81,12 +81,7 @@ public class UserWebnovelService {
         log.info("{} 웹소설 검색", serialDay);
 
         return webnovels.stream()
-                .map(w -> ContentSimpleResponse.fromEntity(
-                        w.getId(),
-                        w.getTitle(),
-                        w.getCreator().getPenName(),
-                        w.getCover(),
-                        "webnovels"))
+                .map(ContentSimpleResponse::fromEntity)
                 .toList();
     }
 
@@ -96,13 +91,13 @@ public class UserWebnovelService {
 
         Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, sortedPageable);
 
-        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
+        return webnovelPage.map(webnovel ->
+                ContentSearchResponse.fromEntity(webnovel, "webnovels")
+        );
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, String sort, Pageable pageable) {
-
-        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
+    public Page<ContentSearchResponse> getWebnovelsByTitleOrCreator(String query, Pageable sortedPageable) {
 
         log.debug("Entering getWebnovelsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Webnovel> webnovelPage = webnovelRepository.findByTitleOrPenNameContaining(query, sortedPageable);
@@ -113,7 +108,9 @@ public class UserWebnovelService {
                 query,
                 webnovelPage.getTotalElements());
 
-        return webnovelPage.map(ContentSearchResponse::fromWebnovel);
+        return webnovelPage.map(webnovel ->
+                ContentSearchResponse.fromEntity(webnovel, "webnovels")
+        );
     }
 
 }

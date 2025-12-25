@@ -14,7 +14,12 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @SuperBuilder
 @DynamicUpdate
-@Table(name = "interests")
+@Table(name = "interests", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "uk_reading_history_user_content",
+                columnNames = {"user_id", "content_id"}
+        )
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Interest extends BaseTimeEntity {
@@ -26,9 +31,9 @@ public class Interest extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private ContentType contentType;     // 좋아요 작품이 웹툰인지 웹소설인지 표시
-    private Long contentId;      // 해당 작품의 id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_id")
+    private Content content;
 
 
 }

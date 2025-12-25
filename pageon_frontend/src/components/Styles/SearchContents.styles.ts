@@ -91,20 +91,44 @@ export const ContentTitle = styled(Link)`
     font-size: 16px;
     margin-bottom: 4px;
     cursor: pointer;
+    padding-right: 10px;
+`
+
+export const ContentType = styled.div`
+
+`
+
+export const ContentAuthorWrapper = styled.div`
+    display: flex;
+    color: #888;
+    font-size: 14px;
+    line-height: 19px;
+    margin-bottom: 4px;
 `
 
 export const ContentAuthor = styled.div`
+    
+    color: #888;
+`
+
+export const EpisodeInfoContainer = styled.div`
     display: flex;
     margin-bottom: 5px;
-    width: 100%;
-    height: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     color: #888;
 `
 
 export const ContentEpisodeCount = styled.div`
+    color: #888;
+    letter-spacing: -0.0em;
+    overflow-wrap: break-word;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+`
+
+export const ContentEpisodeUpdatedAt = styled.div`
     color: #888;
     letter-spacing: -0.0em;
     overflow-wrap: break-word;
@@ -185,5 +209,9 @@ export const NoResultsWrapper = styled.div`
 `
 
 export const NoResultsText = styled.p`
+
+`
+
+export const ContentSeparate = styled.div`
 
 `

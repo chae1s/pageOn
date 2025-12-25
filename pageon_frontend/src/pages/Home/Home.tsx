@@ -11,10 +11,10 @@ function Home() {
             id: 1,
             cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
             title: '임시 작품 제목 1',
-            author: '작가A',
+            author: '다섯글자제목안하',
             rating: 4.9124,
             ratingCount: 13974,
-            contentType: 'webnovels'
+            contentType: 'WEBNOVEL'
         },
         {
             id: 2,

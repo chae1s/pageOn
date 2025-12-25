@@ -1,7 +1,10 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.Webnovel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +18,13 @@ import java.util.Optional;
 public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     Optional<Webnovel> findById(Long id);
-    Optional<Webnovel> findByIdAndDeleted(Long id, boolean isDeleted);
+    Optional<Webnovel> findByIdAndDeletedAtIsNull(Long id);
 
     List<Webnovel> findByCreator(Creator creator);
 
-    List<Webnovel> findByDeleted(boolean deleted);
+    List<Webnovel> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deleted = false ORDER BY w.viewCount DESC")
+    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
     List<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query("SELECT w FROM Webnovel w JOIN FETCH w.creator WHERE w.id IN :ids")
@@ -32,6 +35,7 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT w FROM Webnovel w WHERE"
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
-            + "AND w.deleted = false")
+            + "AND w.deletedAt IS NULL")
     Page<Webnovel> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
+
 }

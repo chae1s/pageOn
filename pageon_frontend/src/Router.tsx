@@ -16,7 +16,7 @@ import PasswordCheck from "./pages/Users/PasswordCheck";
 import EditProfile from "./pages/Users/EditProfile";
 import Withdraw from "./pages/Users/Withdraw";
 import InterestContents from "./pages/Users/InterestContents";
-import RecentViewedWorks from "./pages/Users/RecentViewedWorks";
+import ReadingHistoryContents from "./pages/Users/ReadingHistoryContents";
 import MyComments from "./pages/Users/MyComments";
 import CreatorRegister from "./pages/Creators/CreatorRegister";
 import MockVerify from "./pages/Users/MockVerify";
@@ -71,7 +71,7 @@ function Router() {
                 <Route path="/users/withdraw" element={<Withdraw />} />
                 <Route path="/points/history" element={<PointTransactionPage />} />
                 <Route path="/library/interests" element={<InterestContents />} />
-                <Route path="/library/recent-view" element={<RecentViewedWorks />} />
+                <Route path="/library/recent-view" element={<ReadingHistoryContents />} />
                 <Route path="/library/my-comments" element={<MyComments />}  />
                 <Route path="/creators/register" element={<CreatorRegister/>}  />
                 <Route path="/mock-verify" element={<MockVerify/>}  />

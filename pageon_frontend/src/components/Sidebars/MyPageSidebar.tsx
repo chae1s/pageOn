@@ -43,7 +43,7 @@ function Sidebar() {
                                     <S.SidebarNavLink to={"/library/interests"} className="sidebar-nav-link">관심 작품</S.SidebarNavLink>
                                 </S.SidebarNavItemLi>
                                 <S.SidebarNavItemLi>
-                                    <S.SidebarNavLink to={"/library/recent-view"} className="sidebar-nav-link">최근 조회 작품</S.SidebarNavLink>
+                                    <S.SidebarNavLink to={"/library/recent-view"} className="sidebar-nav-link">최근 읽은 작품</S.SidebarNavLink>
                                 </S.SidebarNavItemLi>
                                 <S.SidebarNavItemLi>
                                     <S.SidebarNavLink to={"/library/my-comments"} className="sidebar-nav-link">내가 쓴 댓글</S.SidebarNavLink>

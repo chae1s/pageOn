@@ -26,6 +26,7 @@ public class WebtoonEpisodeService {
     private final WebtoonEpisodeRatingRepository webtoonEpisodeRatingRepository;
     private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
     private final EpisodePurchaseRepository episodePurchaseRepository;
+    private final ReadingHistoryService readingHistoryService;
 
     @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebtoonId(Long webtoonId) {
@@ -51,7 +52,7 @@ public class WebtoonEpisodeService {
         }).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public WebtoonEpisodeDetailResponse getWebtoonEpisodeById(Long userId, Long episodeId) {
         WebtoonEpisode episode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
                 () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
@@ -63,6 +64,8 @@ public class WebtoonEpisodeService {
         Long nextEpisodeId = webtoonEpisodeRepository.findNextEpisodeId(episode.getWebtoon().getId(), episode.getEpisodeNum());
 
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
+
+        readingHistoryService.checkReadingHistory(userId, episode.getWebtoon().getId(), episodeId);
 
         return WebtoonEpisodeDetailResponse.fromEntity(
                 episode, episode.getWebtoon().getTitle(), webtoonImages,

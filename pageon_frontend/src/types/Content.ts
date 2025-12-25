@@ -45,9 +45,35 @@ export interface SearchContent {
     description: string;
     cover: string;
     author: string;
-    keywords: UserKeywordResponse[];
     episodeCount: number;
+    episodeUpdatedAt: string;
+    keywords: UserKeywordResponse[];
     totalAverageRating: number;
     totalRatingCount: number;
     contentType: string;
 }
+
+export interface InterestContent {
+    contentId: number;
+    title: string;
+    penName: string;
+    episodeUpdatedAt: string;
+    cover: string;
+    contentType: string;
+    serialDay: string;
+    status: ContentStatus;
+}
+
+export interface RecentReadContent {
+    contentId: number;
+    title: string;
+    penName: string;
+    cover: string;
+    episodeUpdatedAt: string;
+    lastReadAt: string;
+    lastReadEpisodeId: number;
+    contentType: string;
+    serialDay: string;
+    status: string;
+}
+

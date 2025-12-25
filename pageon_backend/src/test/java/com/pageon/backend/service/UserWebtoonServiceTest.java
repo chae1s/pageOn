@@ -74,13 +74,12 @@ class UserWebtoonServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webtoonRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(webtoon));
+        when(webtoonRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(webtoon));
         //when
         UserWebtoonResponse response = userWebtoonService.getWebtoonById(1L, mockPrincipalUser);
 
@@ -95,7 +94,7 @@ class UserWebtoonServiceTest {
     @DisplayName("DB에 존재하지 않는 웹툰일 경우 CustomException 발생")
     void getWebnovelById_whenInvalidWebnovelId_shouldThrowCustomException() {
         // given
-        when(webtoonRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.empty());
+        when(webtoonRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
@@ -131,7 +130,6 @@ class UserWebtoonServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         Webtoon webtoon2 = Webtoon.builder()
@@ -142,7 +140,6 @@ class UserWebtoonServiceTest {
                 .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         webtoons.add(webtoon1);
@@ -150,7 +147,7 @@ class UserWebtoonServiceTest {
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webtoonRepository.findByDeleted(false)).thenReturn(webtoons);
+        when(webtoonRepository.findByDeletedAtIsNull()).thenReturn(webtoons);
         //when
         List<UserContentListResponse> listResponses = userWebtoonService.getWebtoons();
 
@@ -207,14 +204,14 @@ class UserWebtoonServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
 
-        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이가 사라진 마을").deleted(false).build();
-        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").deleted(false).build();
-        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").deleted(false).build();
+        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이가 사라진 마을").build();
+        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").build();
+        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").build();
 
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1, webtoon2), pageable, 2));
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
 
         // then
@@ -236,7 +233,7 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -255,7 +252,7 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -273,14 +270,14 @@ class UserWebtoonServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
 
-        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이는 귀여워").deleted(false).build();
-        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").deleted(true).build();
-        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").deleted(false).build();
+        Webtoon webtoon1 = Webtoon.builder().id(1L).title("고양이는 귀여워").build();
+        Webtoon webtoon2 = Webtoon.builder().id(2L).title("고양이").deletedAt(LocalDateTime.now()).build();
+        Webtoon webtoon3 = Webtoon.builder().id(3L).title("감정을 읽는 소녀").build();
 
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1), pageable, 1));
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, sort, pageable);
+        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(1, results.getContent().size());
@@ -328,34 +325,44 @@ class UserWebtoonServiceTest {
                 .build();
 
         return List.of(
-                new Webtoon(1L, "웹툰1", creator, SerialDay.MONDAY, 15000L),
-                new Webtoon(2L, "웹툰2", creator, SerialDay.MONDAY, 14000L),
-                new Webtoon(3L, "웹툰3", creator, SerialDay.MONDAY, 13500L),
-                new Webtoon(4L, "웹툰4", creator, SerialDay.MONDAY, 13000L),
-                new Webtoon(5L, "웹툰5", creator, SerialDay.MONDAY, 12800L),
-                new Webtoon(6L, "웹툰6", creator, SerialDay.MONDAY, 12500L),
-                new Webtoon(7L, "웹툰7", creator, SerialDay.MONDAY, 12000L),
-                new Webtoon(8L, "웹툰8", creator, SerialDay.MONDAY, 11800L),
-                new Webtoon(9L, "웹툰9", creator, SerialDay.MONDAY, 11500L),
-                new Webtoon(10L, "웹툰10", creator, SerialDay.MONDAY, 11200L),
-                new Webtoon(11L, "웹툰11", creator, SerialDay.MONDAY, 11000L),
-                new Webtoon(12L, "웹툰12", creator, SerialDay.MONDAY, 10800L),
-                new Webtoon(13L, "웹툰13", creator, SerialDay.MONDAY, 10500L),
-                new Webtoon(14L, "웹툰14", creator, SerialDay.MONDAY, 10200L),
-                new Webtoon(15L, "웹툰15", creator, SerialDay.MONDAY, 10000L),
-                new Webtoon(16L, "웹툰16", creator, SerialDay.MONDAY, 9800L),
-                new Webtoon(17L, "웹툰17", creator, SerialDay.MONDAY, 9500L),
-                new Webtoon(18L, "웹툰18", creator, SerialDay.MONDAY, 9200L),
+                createWebtoon(1L, "웹툰1", creator, SerialDay.MONDAY, 15000L),
+                createWebtoon(2L, "웹툰2", creator, SerialDay.MONDAY, 14000L),
+                createWebtoon(3L, "웹툰3", creator, SerialDay.MONDAY, 13500L),
+                createWebtoon(4L, "웹툰4", creator, SerialDay.MONDAY, 13000L),
+                createWebtoon(5L, "웹툰5", creator, SerialDay.MONDAY, 12800L),
+                createWebtoon(6L, "웹툰6", creator, SerialDay.MONDAY, 12500L),
+                createWebtoon(7L, "웹툰7", creator, SerialDay.MONDAY, 12000L),
+                createWebtoon(8L, "웹툰8", creator, SerialDay.MONDAY, 11800L),
+                createWebtoon(9L, "웹툰9", creator, SerialDay.MONDAY, 11500L),
+                createWebtoon(10L, "웹툰10", creator, SerialDay.MONDAY, 11200L),
+                createWebtoon(11L, "웹툰11", creator, SerialDay.MONDAY, 11000L),
+                createWebtoon(12L, "웹툰12", creator, SerialDay.MONDAY, 10800L),
+                createWebtoon(13L, "웹툰13", creator, SerialDay.MONDAY, 10500L),
+                createWebtoon(14L, "웹툰14", creator, SerialDay.MONDAY, 10200L),
+                createWebtoon(15L, "웹툰15", creator, SerialDay.MONDAY, 10000L),
+                createWebtoon(16L, "웹툰16", creator, SerialDay.MONDAY, 9800L),
+                createWebtoon(17L, "웹툰17", creator, SerialDay.MONDAY, 9500L),
+                createWebtoon(18L, "웹툰18", creator, SerialDay.MONDAY, 9200L),
 
                 // 18개 이상을 확인하기 위해 추가
-                new Webtoon(19L, "웹툰19", creator, SerialDay.MONDAY, 9000L),
-                new Webtoon(20L, "웹툰20", creator, SerialDay.MONDAY, 8800L),
+                createWebtoon(19L, "웹툰19", creator, SerialDay.MONDAY, 9000L),
+                createWebtoon(20L, "웹툰20", creator, SerialDay.MONDAY, 8800L),
                 // 다른 요일
-                new Webtoon(19L, "웹툰21", creator, SerialDay.TUESDAY, 9000L),
-                new Webtoon(20L, "웹툰22", creator, SerialDay.TUESDAY, 8800L)
+                createWebtoon(19L, "웹툰21", creator, SerialDay.TUESDAY, 9000L),
+                createWebtoon(20L, "웹툰22", creator, SerialDay.TUESDAY, 8800L)
 
         );
 
+    }
+
+    private Webtoon createWebtoon(Long id, String title, Creator creator, SerialDay serialDay, Long viewCount) {
+        return Webtoon.builder()
+                .id(id)
+                .title(title)
+                .creator(creator)
+                .serialDay(serialDay)
+                .viewCount(viewCount)
+                .build();
     }
 
 }

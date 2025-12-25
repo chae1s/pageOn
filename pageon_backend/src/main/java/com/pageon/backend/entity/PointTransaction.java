@@ -24,6 +24,7 @@ public class PointTransaction extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
     private Integer amount;
     private Integer balance;

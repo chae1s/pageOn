@@ -8,20 +8,30 @@ public class PageableUtil {
 
     public static Pageable createContentPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
-            case "latest" -> Sort.by(Sort.Order.asc("rating"));
+            case "latest" -> Sort.by(Sort.Order.desc("episodeUpdatedAt"));
             case "rating" -> Sort.by(Sort.Order.desc("totalAverageRating"));
-            default -> Sort.by(Sort.Order.asc("viewCount"));
+            default -> Sort.by(Sort.Order.desc("viewCount"));
         };
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createMyPagePageable(Pageable pageable, String sort) {
+    public static Pageable createInterestPageable(Pageable pageable, String sort) {
+        Sort sortOrder = switch (sort) {
+            case "update" -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
+            case "title" -> Sort.by(Sort.Order.asc("c.title"));
+            default -> Sort.by(Sort.Order.desc("i.createdAt"));
+        };
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+    }
+
+    public static Pageable createReadingHistory(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
             // [TODO] 최근에 읽은 순, 업데이트 순으로 sort 기준 변경
-            case "last_read" -> Sort.by(Sort.Order.asc("id"));
-            default -> Sort.by(Sort.Order.asc("createdAt"));
+            case "recently_read" -> Sort.by(Sort.Order.desc("r.lastReadAt"));
+            default -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
         };
 
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);

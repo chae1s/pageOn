@@ -10,6 +10,8 @@ import { SimpleContent } from "../../types/Content";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 import api from "../../api/axiosInstance";
+import { ContentListWrapper } from "../../components/Styles/ThumbnailContent.styles";
+import MyPageSimpleContentItem from "../../components/Contents/MyPageSimpleContentItem";
 
 const MypageSummaryContainer = styled.div`
     display: flex;
@@ -164,12 +166,33 @@ const BookSectionViewAllLink = styled(Link)`
     margin-left: 0;
 `
 
+const UpdateContentListWrapper = styled.div`
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-bottom: 50px;
+`
+
+const UpdateContentList = styled.div`
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+`
+
+const EmptyListText = styled.div`
+    margin: 10px auto;
+`
+
+
+
 function MyPage() {
     const [userInfo, setUserInfo] = useState<UserSimpleProfile>({
         id: 0,
         nickname: "",
         pointBalance: 0
     });
+
+    const [simpleContents, setSimpleContents] = useState<SimpleContent[]>([]);
 
     const {logout} = useAuth();
 
@@ -197,6 +220,20 @@ function MyPage() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        async function fetchContentData() {
+            try {
+                const response = await api.get("/users/reading-histories/today");
+
+                setSimpleContents(response.data);
+            } catch (error) {
+                console.error("마이페이지 오늘 업데이트된 작품 리스트 조회 실패: ", error);
+            }
+        }
+
+        fetchContentData();
+    }, []);
+
     const handleLogoutClick = async (e:React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
         e.preventDefault();
 
@@ -219,78 +256,6 @@ function MyPage() {
     };
 
 
-    const dummyBooks: SimpleContent[] = [
-        {
-            id: 1,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
-            title: '임시 작품 제목 1',
-            author: '작가A',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 2,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
-            title: '임시 작품 제목 2',
-            author: '작가B',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 3,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
-            title: '임시 작품 제목 3',
-            author: '작가C',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 4,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
-            title: '임시 작품 제목 4',
-            author: '작가D',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 5,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
-            title: '임시 작품 제목 5',
-            author: '작가E',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 6,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
-            title: '임시 작품 제목 6',
-            author: '작가E',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 7,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
-            title: '임시 작품 제목 7',
-            author: '작가A',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 8,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
-            title: '임시 작품 제목 8',
-            author: '작가B',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 9,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
-            title: '임시 작품 제목 9',
-            author: '작가C',
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 10,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/10/webnovel10.png',
-            title: '임시 작품 제목 10',
-            author: '작가D',
-            contentType: 'WEBNOVEL'
-        }
-    ]
 
     const PointIcon = () => (
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -381,9 +346,19 @@ function MyPage() {
                         <BookSectionTitle>
                             <BookSectionTitleText>오늘 업데이트된 작품</BookSectionTitleText>
                             <BookSectionTitleLine></BookSectionTitleLine>
-                            <BookSectionViewAllLink to={"#favorite-book"}>더보기</BookSectionViewAllLink>
+                            <BookSectionViewAllLink to="/library/recent-view?sort=update">더보기</BookSectionViewAllLink>
                         </BookSectionTitle>
-                        <ThumbnailContentList layout="grid" contents={dummyBooks}/>
+                        <UpdateContentListWrapper>
+                            <UpdateContentList>
+                                {simpleContents.length === 0 ? (
+                                    <EmptyListText>오늘 업데이트된 작품이 없습니다.</EmptyListText>
+                                ) : (
+                                    simpleContents.map((content) => (
+                                        <MyPageSimpleContentItem content={content}/>
+                                    ))
+                                )}
+                            </UpdateContentList>
+                        </UpdateContentListWrapper>
                     </BookSectionList>
                 </M.SidebarRightWrap>
             </SidebarMain>

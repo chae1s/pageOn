@@ -1,7 +1,10 @@
 package com.pageon.backend.repository;
 
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Creator;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import org.springframework.data.domain.Page;
@@ -16,13 +19,13 @@ import java.util.Optional;
 public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
     Optional<Webtoon> findById(Long id);
 
-    Optional<Webtoon> findByIdAndDeleted(Long id, boolean deleted);
+    Optional<Webtoon> findByIdAndDeletedAtIsNull(Long id);
 
     List<Webtoon> findByCreator(Creator creator);
 
-    List<Webtoon> findByDeleted(boolean deleted);
+    List<Webtoon> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webtoon w WHERE w.serialDay = :serialDay AND w.deleted = false ORDER BY w.viewCount DESC")
+    @Query("SELECT w FROM Webtoon w WHERE w.serialDay = :serialDay AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
     List<Webtoon> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query("SELECT w FROM Webtoon w JOIN FETCH w.creator WHERE w.id IN :ids")
@@ -33,6 +36,7 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     @Query("SELECT w FROM Webtoon w WHERE"
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
-            + "AND w.deleted = false")
+            + "AND w.deletedAt IS NULL")
     Page<Webtoon> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
+
 }

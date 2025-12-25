@@ -56,12 +56,7 @@ function ContentDetailLayout({content}: Props) {
 
         try {
 
-            if (content.contentType === "webnovels") {
-                await api.post(`/webnovels/${content.id}/interests`, {})
-
-            } else if (content.contentType === "webtoons") {
-                await api.post(`/webtoons/${content.id}/interests`, {})
-            }
+            await api.post(`/interests/${content.id}`, {})
             
             setIsInterested(true);
             setNotificationMessage("관심 작품에 등록되었습니다.");
@@ -79,11 +74,7 @@ function ContentDetailLayout({content}: Props) {
 
     const DeleteInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
         try {
-            if (content.contentType === "webtnovels") {
-                await api.delete(`/webnovels/${content.id}/interests`, {})
-            } else if (content.contentType === "webtoons") {
-                await api.delete(`/webtoons/${content.id}/interests`, {})
-            }
+            await api.delete(`/interests/${content.id}`, {})
 
             setIsInterested(false);
             setNotificationMessage("관심 작품에서 삭제되었습니다.");

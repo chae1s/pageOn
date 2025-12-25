@@ -100,7 +100,7 @@ public class CreatorWebtoonService implements CreatorContentService{
 
 
         if (contentUpdateRequest.getTitle() != null || contentUpdateRequest.getDescription() != null || contentUpdateRequest.getSerialDay() != null) {
-            webtoon.updateWebtoonInfo(contentUpdateRequest);
+            webtoon.updateContentInfo(contentUpdateRequest);
         }
 
         if (contentUpdateRequest.getKeywords() != null) {

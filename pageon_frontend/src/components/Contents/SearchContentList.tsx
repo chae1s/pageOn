@@ -4,6 +4,7 @@ import { SearchContent } from "../../types/Content";
 import * as S from "../Styles/SearchContents.styles"
 import { keyboard } from "@testing-library/user-event/dist/keyboard";
 import FullStarIcon from "../../assets/fullStarIcon.png";
+import { formatDate } from "../../utils/formatData";
 
 interface Props {
     contents?: SearchContent[];
@@ -48,8 +49,16 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                                         <S.ContentTitleWrapper>
                                             <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
                                         </S.ContentTitleWrapper>
-                                        <S.ContentAuthor>{content.author}</S.ContentAuthor>
-                                        <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
+                                        <S.ContentAuthorWrapper>
+                                            <S.ContentAuthor>{content.author}</S.ContentAuthor>
+                                            <S.ContentSeparate>ㆍ</S.ContentSeparate>
+                                            <S.ContentType>{content.contentType === 'webnovels' ? '웹소설' : '웹툰'}</S.ContentType>
+                                        </S.ContentAuthorWrapper>
+                                        <S.EpisodeInfoContainer>
+                                            <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
+                                            <S.ContentSeparate>ㆍ</S.ContentSeparate>
+                                            <S.ContentEpisodeUpdatedAt>{formatDate(content.episodeUpdatedAt)}</S.ContentEpisodeUpdatedAt>
+                                        </S.EpisodeInfoContainer>
                                         <S.ContentRatingContainer>
                                             <S.ContentRatingStarIcon src={FullStarIcon} />
                                             <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>

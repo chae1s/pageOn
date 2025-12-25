@@ -69,7 +69,6 @@ class WebnovelEpisodeServiceTest {
                 .description("테스트")
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder()
@@ -125,7 +124,6 @@ class WebnovelEpisodeServiceTest {
                 .creator(creator)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
-                .deleted(false)
                 .build();
 
         List<WebnovelEpisode> episodes = new ArrayList<>();
