@@ -2,6 +2,7 @@ package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
@@ -9,6 +10,10 @@ import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebnovelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +64,13 @@ public class UserWebnovelController {
         interestService.deleteInterest(principalUser.getId(), webnovelId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<PageResponse<ContentSimpleResponse>> getRecentWebnovels(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ContentSimpleResponse> contentSimpleResponses = userWebnovelService.getRecentWebnovels(pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
     }
 }

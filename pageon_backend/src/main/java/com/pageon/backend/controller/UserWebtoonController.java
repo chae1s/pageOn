@@ -2,6 +2,7 @@ package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.dto.response.UserWebtoonResponse;
 import com.pageon.backend.security.PrincipalUser;
@@ -9,6 +10,10 @@ import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebtoonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -61,5 +66,12 @@ public class UserWebtoonController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/recent")
+    public ResponseEntity<PageResponse<ContentSimpleResponse>> getRecentWebtoons(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ContentSimpleResponse> contentSimpleResponses = userWebtoonService.getRecentWebtoons(pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
+    }
 
 }

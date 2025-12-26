@@ -22,6 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,6 +114,16 @@ public class UserWebnovelService {
         return webnovelPage.map(webnovel ->
                 ContentSearchResponse.fromEntity(webnovel, "webnovels")
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentSimpleResponse> getRecentWebnovels(Pageable pageable) {
+
+        LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
+
+        Page<Webnovel> webnovelPage = webnovelRepository.findRecentWebnovels(since, pageable);
+
+        return webnovelPage.map(ContentSimpleResponse::fromEntity);
     }
 
 }

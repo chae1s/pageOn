@@ -23,6 +23,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,6 +112,16 @@ public class UserWebtoonService {
         return webtoonPage.map(webtoon ->
                 ContentSearchResponse.fromEntity(webtoon, "webtoons")
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentSimpleResponse> getRecentWebtoons(Pageable pageable) {
+
+        LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
+
+        Page<Webtoon> webtoonPage = webtoonRepository.findRecentWebtoons(since, pageable);
+
+        return webtoonPage.map(ContentSimpleResponse::fromEntity);
     }
 
 }

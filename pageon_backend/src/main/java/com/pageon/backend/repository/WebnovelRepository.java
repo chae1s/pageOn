@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +25,8 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     List<Webnovel> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
+    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.status = 'ONGOING' AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
     List<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
-
-    @Query("SELECT w FROM Webnovel w JOIN FETCH w.creator WHERE w.id IN :ids")
-    List<Webnovel> findAllByIdIn(@Param("ids") List<Long> ids);
 
     @Query("SELECT DISTINCT w FROM Webnovel w JOIN w.keywords k WHERE k.name = :keywordName")
     Page<Webnovel> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
@@ -37,5 +35,11 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
             + "(w.title LIKE %:query% OR w.creator.penName LIKE %:query%) "
             + "AND w.deletedAt IS NULL")
     Page<Webnovel> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
+
+    // 최근 신작 조회(신작 등록 후 2주가 지나지 않은 콘텐츠만 리턴)
+    @Query("SELECT w FROM Webnovel w " +
+            "WHERE w.createdAt >= :since " +
+            "AND w.deletedAt IS NULL")
+    Page<Webnovel> findRecentWebnovels(LocalDateTime since, Pageable pageable);
 
 }

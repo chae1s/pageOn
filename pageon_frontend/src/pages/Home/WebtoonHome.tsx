@@ -5,6 +5,7 @@ import { SimpleContent, RankingBook } from "../../types/Content";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 import RankingContentList from "../../components/Contents/RankingContentList";
 import axios from "axios";
+import api from "../../api/axiosInstance";
 
 function WebtoonHome() {
     const dummyBooks: RankingBook[] = [
@@ -92,7 +93,7 @@ function WebtoonHome() {
     ]
 
     const [dailyWebtoons, setDailyWebtoons] = useState<SimpleContent[]>([]);
-
+    const [newContents, setNewContents] = useState<SimpleContent[]>([]);
     const todayIndex = new Date().getDay();
 
     const dayOfWeekNames = ["월", "화", "수", "목", "금", "토", "일"];
@@ -106,11 +107,20 @@ function WebtoonHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get(`/api/webtoons/daily/${initialDayEng}`);
-                console.log("요일별 웹툰 데이터: ", response.data);
-                setDailyWebtoons(response.data);
+                const [dailyRes, newRes] = await Promise.all([
+                    api.get(`/webtoons/daily/${initialDayEng}`),
+                    api.get(`/webtoons/recent`, {
+                        params: {
+                            size: 6
+                        }
+                    })
+                ]);
+                
+                setDailyWebtoons(dailyRes.data);
+
+                setNewContents(newRes.data.content);
             } catch (error) {
-                console.error("요일별 웹툰 데이터 조회 실패: ", error);
+                console.error("요일별 웹소설 데이터 조회 실패: ", error);
             }
         }
 
@@ -171,7 +181,7 @@ function WebtoonHome() {
                             ))}
                         </H.WeeklyTabs>
                     </H.WeeklyTabsWrapper>
-                    <ThumbnailContentList contents={dailyWebtoons} layout="slider" key={activeDay}/>
+                    <ThumbnailContentList contents={dailyWebtoons}  key={activeDay}/>
                 </H.SectionBookList>
                 <H.SectionBookList>
                     <H.SectionBookListTitle>웹툰 실시간 랭킹</H.SectionBookListTitle>
@@ -182,21 +192,21 @@ function WebtoonHome() {
                         <H.SectionBookListTitle>장르별 인기(ex.로맨스 웹툰 인기작)</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>   
+                    <ThumbnailContentList contents={dummyBooks} />   
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>    
+                    <ThumbnailContentList contents={dummyBooks} />    
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>정주행 필수 명작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>  
+                    <ThumbnailContentList contents={dummyBooks} />  
                 </H.SectionBookList>
             </NoSidebarMain>
         </MainContainer>

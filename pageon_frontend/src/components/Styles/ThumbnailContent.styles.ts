@@ -2,27 +2,18 @@ import styled, { css } from "styled-components";
 import { Link } from "react-router-dom";
 
 
-export const ContentListWrapper = styled.div<{ $layout: 'grid' | 'slider' }>`
+export const ContentListWrapper = styled.div`
   position: relative;
   width: 100%;
   overflow: hidden;
 `;
 
-export const ContentList = styled.div<{ $layout: 'grid' | 'slider' }>`
-  ${({ $layout }) =>
-    $layout === 'grid'
-      ? css`
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          gap: 12px;
-        `
-      : css`
-          display: flex;
-          gap: 12px;
-          flex-wrap: nowrap;
-          transition: transform 0.3s ease-in-out;
-          will-change: transform;
-        `}
+export const ContentList = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
 `;
 
 export const ContentListArrow = styled.button<{ direction: 'left' | 'right' }>`
@@ -50,26 +41,20 @@ export const ContentListEmptyMsg = styled.p`
   text-align: center;
 `;
 
-export const ContentItem = styled.div<{ $layout: 'grid' | 'slider' }>`
+export const ContentItem = styled.div`
   background: #fff;
   border-radius: 8px;
-  padding: ${({ $layout }) => ($layout === 'grid' ? '12px 8px' : '0')};
-  width: ${({ $layout }) => ($layout === 'slider' ? '163px' : '120px')};
+  width: 163px;
   display: flex;
   flex-direction: column;
-  align-items: ${({ $layout }) => ($layout === 'grid' ? 'center' : 'flex-start')};
+  align-items: flex-start;
   margin: 0 auto;
-
-  ${({ $layout }) =>
-    $layout === 'slider' &&
-    css`
-      flex-shrink: 0;
-    `}
+  flex-shrink: 0;
 `;
 
-export const ContentImageCover = styled(Link)<{ $layout: 'grid' | 'slider' }>`
+export const ContentImageCover = styled(Link)`
   width: 100%;
-  height: ${({ $layout }) => ($layout === 'slider' ? '224px' : '150px')};
+  height: 224px;
   border-radius: 4px;
   overflow: hidden;
 `;
@@ -80,11 +65,11 @@ export const ContentImage = styled.img`
   object-fit: cover;
 `;
 
-export const ContentInfoCover = styled.div<{ $layout: 'grid' | 'slider' }>`
-  margin-top: ${({ $layout }) => ($layout === 'slider' ? '10px' : '8px')};
+export const ContentInfoCover = styled.div`
+  margin-top: 10px;
   text-align: left;
   width: 100%;
-  width: ${({ $layout }) => ($layout === 'slider' ? '163px' : '104px')};
+  width: 163px;
   display: flex;
   flex-direction: column;
   overflow: hidden;

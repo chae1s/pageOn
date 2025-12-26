@@ -203,21 +203,21 @@ function Home() {
                         <H.SectionBookListTitle>이번 주 화제의 작품</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>
+                    <ThumbnailContentList contents={dummyBooks} />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>
+                    <ThumbnailContentList contents={dummyBooks} />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>정주행 랭킹</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} layout="slider"/>  
+                    <ThumbnailContentList contents={dummyBooks} />  
                 </H.SectionBookList>
             </NoSidebarMain>
         </MainContainer>
