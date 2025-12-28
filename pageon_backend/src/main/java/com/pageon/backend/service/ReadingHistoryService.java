@@ -1,11 +1,8 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.base.EpisodeBase;
-import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.utils.PageableUtil;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.ReadingContentsResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.User;
@@ -31,8 +28,6 @@ public class ReadingHistoryService {
     private final ReadingHistoryRepository readingHistoryRepository;
     private final UserRepository userRepository;
     private final ContentRepository contentRepository;
-    private final WebnovelRepository webnovelRepository;
-    private final WebtoonRepository webtoonRepository;
 
     @Transactional
     public void checkReadingHistory(Long userId, Long contentId, Long episodeId) {
@@ -72,25 +67,25 @@ public class ReadingHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadingContentsResponse> getReadingHistory(Long userId, String contentType, String sort, Pageable pageable) {
+    public Page<ContentResponse.RecentRead> getReadingHistory(Long userId, String contentType, String sort, Pageable pageable) {
         Pageable sortedPageable = PageableUtil.createReadingHistory(pageable, sort);
 
+        log.info("contentType: {}", contentType);
         return switch (contentType) {
-            case "all" -> readingHistoryRepository.findAllReadingHistories(userId, sortedPageable);
-            case "webnovels" -> readingHistoryRepository.findWebnovelReadingHistories(userId, sortedPageable);
-            case "webtoons" -> readingHistoryRepository.findWebtoonReadingHistories(userId, sortedPageable);
+            case "all" -> readingHistoryRepository.findAllReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
+            case "webnovels" -> readingHistoryRepository.findWebnovelReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
+            case "webtoons" -> readingHistoryRepository.findWebtoonReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         };
-        
     }
 
-    public List<ContentSimpleResponse> getTodayReadingHistory(Long userId) {
+    public List<ContentResponse.Simple> getTodayReadingHistory(Long userId) {
         SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
 
         List<ReadingHistory> histories = readingHistoryRepository.findWithContentByUserIdAndSerialDay(userId, today);
 
         return histories.stream()
-                .map(h -> ContentSimpleResponse.fromEntity(h.getContent()))
+                .map(h -> ContentResponse.Simple.fromEntity(h.getContent()))
                 .toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.CreatorKeywordResponse;
 import com.pageon.backend.dto.response.UserKeywordResponse;
 import com.pageon.backend.entity.Category;
@@ -7,6 +8,8 @@ import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.repository.CategoryRepository;
 import com.pageon.backend.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

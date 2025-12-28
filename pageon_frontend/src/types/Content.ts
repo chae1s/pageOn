@@ -1,15 +1,17 @@
 import { EpisodeSummary } from "./Episodes";
-import { UserKeywordResponse } from "./Keyword";
+import { Keyword } from "./Keyword";
 
 export type ContentType = 'WEBNOVEL' | 'WEBTOON';
 export type ContentStatus = 'COMPLETED' | 'ONGOING' | 'REST';
 
 export interface SimpleContent {
-    id: number;
-    title: string;
+    contentId: number;
+    contentTitle: string;
     author: string;
     cover: string;
     contentType: string;
+    totalAverageRating: number;
+    totalRatingCount: number;
 }
 
 export interface RankingBook {
@@ -23,12 +25,12 @@ export interface RankingBook {
 }
 
 export interface ContentDetail {
-    id: number;
-    title: string;
+    contentId: number;
+    contentTitle: string;
     description: string;
     cover: string;
     author: string;
-    keywords: UserKeywordResponse[];
+    keywords: Keyword[];
     episodes: EpisodeSummary[];
     serialDay: string;
     totalAverageRating: number;
@@ -40,14 +42,14 @@ export interface ContentDetail {
 }
 
 export interface SearchContent {
-    id: number;
-    title: string;
+    contentId: number;
+    contentTitle: string;
     description: string;
     cover: string;
     author: string;
     episodeCount: number;
     episodeUpdatedAt: string;
-    keywords: UserKeywordResponse[];
+    keywords: Keyword[];
     totalAverageRating: number;
     totalRatingCount: number;
     contentType: string;
@@ -55,8 +57,8 @@ export interface SearchContent {
 
 export interface InterestContent {
     contentId: number;
-    title: string;
-    penName: string;
+    contentTitle: string;
+    author: string;
     episodeUpdatedAt: string;
     cover: string;
     contentType: string;
@@ -66,8 +68,8 @@ export interface InterestContent {
 
 export interface RecentReadContent {
     contentId: number;
-    title: string;
-    penName: string;
+    contentTitle: string;
+    author: string;
     cover: string;
     episodeUpdatedAt: string;
     lastReadAt: string;

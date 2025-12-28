@@ -56,17 +56,17 @@ function RecentReadContentItem({ content }: Props) {
             <S.ContentImageCover>
                 <S.ContentImage
                     src={content.cover || "https://via.placeholder.com/140x200"}
-                    alt={content.title}
+                    alt={content.contentTitle}
                     onClick={handleContentClick(content.contentType, content.contentId)}
                 />
             </S.ContentImageCover>
             <S.ContentInfoCover $history={true}>
                 <S.ContentTitleWrapper>
-                    <S.ContentTitle onClick={handleContentClick(content.contentType, content.contentId)}>{content.title}</S.ContentTitle>
+                    <S.ContentTitle onClick={handleContentClick(content.contentType, content.contentId)}>{content.contentTitle}</S.ContentTitle>
                 </S.ContentTitleWrapper>
 
                 <S.ContentInfoWrapper>
-                    <S.ContentAuthor>{content.penName}</S.ContentAuthor>
+                    <S.ContentAuthor>{content.author}</S.ContentAuthor>
                     <S.ContentSeparate>ㆍ</S.ContentSeparate>
                     <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                 </S.ContentInfoWrapper>

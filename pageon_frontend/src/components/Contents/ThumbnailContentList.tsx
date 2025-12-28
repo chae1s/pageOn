@@ -35,7 +35,7 @@ function ThumbnailContentList({ contents }: Props) {
             {startIdx < maxIdx && <S.ContentListArrow direction="right" onClick={nextPage}><NextIcon /></S.ContentListArrow>}
             <S.ContentList style={{transform: `translateX(${slideX}px)`}} >
                 {contents.map((content) => (
-                    <ThumbnailContentItem key={content.id} content={content} />
+                    <ThumbnailContentItem key={content.contentId} content={content} />
                 ))}
             </S.ContentList>
         </S.ContentListWrapper>

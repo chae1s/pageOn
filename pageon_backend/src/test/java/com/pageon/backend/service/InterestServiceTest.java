@@ -4,8 +4,7 @@ import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
-import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -293,24 +292,31 @@ class InterestServiceTest {
                 .deleted(false)
                 .build();
 
-        InterestContentResponse interestWebtoon = InterestContentResponse.builder()
-                .contentId(1L)
-                .contentType("WEBTOON")
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
                 .build();
 
-        InterestContentResponse interestWebnovel = InterestContentResponse.builder()
-                .contentId(10L)
-                .contentType("WEBNOVEL")
+        Webnovel webnovel = Webnovel.builder()
+                .id(10L)
                 .build();
 
+        Interest interestWebnovel = Interest.builder()
+                .id(110L)
+                .content(webnovel)
+                .build();
+
+        Interest interestWebtoon = Interest.builder()
+                .id(101L)
+                .content(webtoon)
+                .build();
         when(interestRepository.findAllInterests(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel, interestWebtoon), pageable, 2));
 
         //when
-        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
+        Page<ContentResponse.InterestContent> result = interestService.getInterestedContents(userId, "all", sort, pageable);
 
         // then
         assertEquals(2, result.getContent().size());
-        assertEquals(interestWebnovel.getContentId(), result.getContent().get(0).getContentId());
+        assertEquals(interestWebnovel.getContent().getId(), result.getContent().get(0).getContentId());
 
 
     }
@@ -334,20 +340,28 @@ class InterestServiceTest {
                 .deleted(false)
                 .build();
 
-        InterestContentResponse interestWebtoon = InterestContentResponse.builder()
-                .contentId(1L)
-                .contentType("WEBTOON")
+        Webtoon webtoon = Webtoon.builder()
+                .id(1L)
                 .build();
 
-        InterestContentResponse interestWebnovel = InterestContentResponse.builder()
-                .contentId(10L)
-                .contentType("WEBNOVEL")
+        Webnovel webnovel = Webnovel.builder()
+                .id(10L)
+                .build();
+
+        Interest interestWebnovel = Interest.builder()
+                .id(110L)
+                .content(webnovel)
+                .build();
+
+        Interest interestWebtoon = Interest.builder()
+                .id(101L)
+                .content(webtoon)
                 .build();
 
         when(interestRepository.findWebnovelInterests(eq(userId), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(interestWebnovel), pageable, 1));
 
         //when
-        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "webnovels", sort, pageable);
+        Page<ContentResponse.InterestContent> result = interestService.getInterestedContents(userId, "webnovels", sort, pageable);
 
         // then
         assertEquals(1, result.getContent().size());
@@ -377,7 +391,7 @@ class InterestServiceTest {
 
 
         //when
-        Page<InterestContentResponse> result = interestService.getInterestedContents(userId, "all", sort, pageable);
+        Page<ContentResponse.InterestContent> result = interestService.getInterestedContents(userId, "all", sort, pageable);
 
         // then
         assertNull(result);

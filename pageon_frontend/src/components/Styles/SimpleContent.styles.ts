@@ -7,7 +7,7 @@ export const ContentItem = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 auto;
+    margin: 0;
     width: 140px;
 `
 

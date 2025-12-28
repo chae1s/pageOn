@@ -11,11 +11,11 @@ function ThumbnailContentItem({ content }: Props) {
 
     return (
         <S.ContentItem>
-            <S.ContentImageCover to={`/${formatUrl(content.contentType)}/${content.id}`}>
-                <S.ContentImage src={content.cover || 'https://via.placeholder.com/140x200'} alt={content.title} />
+            <S.ContentImageCover to={`/${formatUrl(content.contentType)}/${content.contentId}`}>
+                <S.ContentImage src={content.cover || 'https://via.placeholder.com/140x200'} alt={content.contentTitle} />
             </S.ContentImageCover>
             <S.ContentInfoCover>
-                <S.ContentTitle to={`/${formatUrl(content.contentType)}/${content.id}`}>{content.title}</S.ContentTitle>
+                <S.ContentTitle to={`/${formatUrl(content.contentType)}/${content.contentId}`}>{content.contentTitle}</S.ContentTitle>
                 <S.ContentInfoWrapper>
                     <S.ContentAuthor>{content.author}</S.ContentAuthor>
                     <S.ContentSeparate>ㆍ</S.ContentSeparate>

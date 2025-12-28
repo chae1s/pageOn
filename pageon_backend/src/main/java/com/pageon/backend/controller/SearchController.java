@@ -1,12 +1,8 @@
 package com.pageon.backend.controller;
 
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.PageResponse;
-import com.pageon.backend.dto.response.ContentSearchResponse;
-import com.pageon.backend.exception.CustomException;
-import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.service.SearchService;
-import com.pageon.backend.service.UserWebnovelService;
-import com.pageon.backend.service.UserWebtoonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -26,32 +21,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchController {
 
-    private final UserWebnovelService userWebnovelService;
-    private final UserWebtoonService userWebtoonService;
     private final SearchService searchService;
 
     @GetMapping("/keywords")
-    public ResponseEntity<PageResponse<ContentSearchResponse>> getContentsByKeyword(
+    public ResponseEntity<PageResponse<ContentResponse.Search>> getContentsByKeyword(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable) {
 
-        if (contentType.equals("webnovels")) {
-            Page<ContentSearchResponse> contentSearchResponses = userWebnovelService.getWebnovelsByKeyword(query, sort, pageable);
-            return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
-        } else if (contentType.equals("webtoons")) {
-            Page<ContentSearchResponse> contentSearchResponses = userWebtoonService.getWebtoonsByKeyword(query, sort, pageable);
+        Page<ContentResponse.Search> contents = searchService.getContentsByKeyword(contentType, query, sort, pageable);
 
-            return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new PageResponse<>(contents));
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<ContentSearchResponse>> getContentsByTitleOrCreator(
+    public ResponseEntity<PageResponse<ContentResponse.Search>> getContentsByTitleOrCreator(
             @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<ContentSearchResponse> contentSearchResponses = searchService.getContentsByTitleOrCreator(contentType, query, sort, pageable);
+        Page<ContentResponse.Search> contents = searchService.getContentsByTitleOrCreator(contentType, query, sort, pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(contentSearchResponses));
+        return ResponseEntity.ok(new PageResponse<>(contents));
     }
 }

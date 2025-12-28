@@ -1,10 +1,9 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserWebtoonResponse;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebtoonService;
@@ -30,7 +29,7 @@ public class UserWebtoonController {
     private final InterestService interestService;
 
     @GetMapping("/{webtoonId}")
-    public ResponseEntity<UserWebtoonResponse> getWebnovelById(@PathVariable Long webtoonId, @AuthenticationPrincipal PrincipalUser principalUser) {
+    public ResponseEntity<ContentResponse.Detail> getWebnovelById(@PathVariable Long webtoonId, @AuthenticationPrincipal PrincipalUser principalUser) {
 
         return ResponseEntity.ok(userWebtoonService.getWebtoonById(webtoonId, principalUser));
     }
@@ -42,7 +41,7 @@ public class UserWebtoonController {
     }
 
     @GetMapping("/daily/{day}")
-    public ResponseEntity<List<ContentSimpleResponse>> getWebtoonsByDay(@PathVariable String day) {
+    public ResponseEntity<List<ContentResponse.Simple>> getWebtoonsByDay(@PathVariable String day) {
 
         return ResponseEntity.ok(userWebtoonService.getWebtoonsByDay(day));
     }
@@ -67,11 +66,11 @@ public class UserWebtoonController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<PageResponse<ContentSimpleResponse>> getRecentWebtoons(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebtoons(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ContentSimpleResponse> contentSimpleResponses = userWebtoonService.getRecentWebtoons(pageable);
+        Page<ContentResponse.Simple> contents = userWebtoonService.getRecentWebtoons(pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
+        return ResponseEntity.ok(new PageResponse<>(contents));
     }
 
 }

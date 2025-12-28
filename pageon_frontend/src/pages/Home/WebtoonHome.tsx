@@ -92,7 +92,7 @@ function WebtoonHome() {
         }
     ]
 
-    const [dailyWebtoons, setDailyWebtoons] = useState<SimpleContent[]>([]);
+    const [dailyContents, setDailyContents] = useState<SimpleContent[]>([]);
     const [newContents, setNewContents] = useState<SimpleContent[]>([]);
     const todayIndex = new Date().getDay();
 
@@ -116,8 +116,8 @@ function WebtoonHome() {
                     })
                 ]);
                 
-                setDailyWebtoons(dailyRes.data);
-
+                setDailyContents(dailyRes.data);
+                console.log(dailyContents);
                 setNewContents(newRes.data.content);
             } catch (error) {
                 console.error("요일별 웹소설 데이터 조회 실패: ", error);
@@ -132,12 +132,12 @@ function WebtoonHome() {
         const dayName = dayOfWeekNames[dayIndex];
         setActiveDay(dayName);
         const day = dayOfWeekNamesEng[dayIndex];
-        setDailyWebtoons([]);
+        setDailyContents([]);
 
         try {
             const response = await axios.get(`/api/webtoons/daily/${day}`);
             console.log("요일별 웹툰 데이터: ", response.data);
-            setDailyWebtoons(response.data);
+            setDailyContents(response.data);
         } catch (error) {
             console.error("요일별 웹툰 데이터 조회 실패: ", error);
         }
@@ -181,7 +181,7 @@ function WebtoonHome() {
                             ))}
                         </H.WeeklyTabs>
                     </H.WeeklyTabsWrapper>
-                    <ThumbnailContentList contents={dailyWebtoons}  key={activeDay}/>
+                    <ThumbnailContentList contents={dailyContents}  key={activeDay}/>
                 </H.SectionBookList>
                 <H.SectionBookList>
                     <H.SectionBookListTitle>웹툰 실시간 랭킹</H.SectionBookListTitle>
@@ -192,21 +192,21 @@ function WebtoonHome() {
                         <H.SectionBookListTitle>장르별 인기(ex.로맨스 웹툰 인기작)</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} />   
+                    <ThumbnailContentList contents={newContents} />   
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} />    
+                    <ThumbnailContentList contents={newContents} />    
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>정주행 필수 명작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={dummyBooks} />  
+                    <ThumbnailContentList contents={newContents} />  
                 </H.SectionBookList>
             </NoSidebarMain>
         </MainContainer>

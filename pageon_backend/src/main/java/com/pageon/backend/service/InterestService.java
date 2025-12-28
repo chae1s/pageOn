@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
-import com.pageon.backend.dto.response.InterestContentResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -54,16 +54,26 @@ public class InterestService {
     }
 
     @Transactional(readOnly = true)
-    public Page<InterestContentResponse> getInterestedContents(Long userId, String contentType, String sort, Pageable pageable) {
+    public Page<ContentResponse.InterestContent> getInterestedContents(Long userId, String contentType, String sort, Pageable pageable) {
         Pageable sortedPageable = PageableUtil.createInterestPageable(pageable, sort);
 
-        return switch (contentType) {
-            case "all" -> interestRepository.findAllInterests(userId, sortedPageable);
-            case "webnovels" -> interestRepository.findWebnovelInterests(userId, sortedPageable);
-            case "webtoons" -> interestRepository.findWebtoonInterests(userId, sortedPageable);
-            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        switch (contentType) {
+            case "all" -> {
+                Page<Interest> interests = interestRepository.findAllInterests(userId, sortedPageable);
+                return interests.map(interest -> ContentResponse.InterestContent.fromEntity(interest.getContent()));
+            }
+            case "webnovels" -> {
+                Page<Interest> interests = interestRepository.findWebnovelInterests(userId, sortedPageable);
+                return interests.map(interest -> ContentResponse.InterestContent.fromEntity(interest.getContent()));
+            }
+            case "webtoons" -> {
+                Page<Interest> interests = interestRepository.findWebtoonInterests(userId, sortedPageable);
+                return interests.map(interest -> ContentResponse.InterestContent.fromEntity(interest.getContent()));
+            }
+
         };
 
+        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
     }
 
 }

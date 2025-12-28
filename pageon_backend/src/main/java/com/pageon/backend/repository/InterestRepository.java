@@ -1,7 +1,5 @@
 package com.pageon.backend.repository;
 
-import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.dto.response.InterestContentResponse;
 import com.pageon.backend.entity.Interest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,25 +17,34 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
     Page<Interest> findAllByUser_Id(Long userId, Pageable pageable);
 
 
-    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
-            "FROM Interest i " +
-            "JOIN i.content c " +
-            "WHERE i.user.id = :userId")
-    Page<InterestContentResponse> findAllInterests(@Param("userId") Long userId, Pageable pageable);
+    @Query(value = "SELECT DISTINCT i FROM Interest i " +
+            "JOIN FETCH i.content c " +
+            "JOIN FETCH c.creator " +
+            "WHERE i.user.id = :userId",
+            countQuery = "SELECT COUNT(DISTINCT i.id) FROM Interest i " +
+                    "WHERE i.user.id = :userId"
+    )
+    Page<Interest> findAllInterests(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
-            "FROM Interest i " +
-            "JOIN i.content c " +
-            "WHERE i.user.id = :userId " +
-            "AND TYPE(c) = Webnovel")
-    Page<InterestContentResponse> findWebnovelInterests(@Param("userId") Long userId, Pageable pageable);
+    @Query(value = "SELECT DISTINCT i FROM Interest i " +
+            "JOIN FETCH i.content c " +
+            "JOIN FETCH c.creator " +
+            "WHERE i.user.id = :userId AND TYPE(c) = Webnovel",
+            countQuery = "SELECT COUNT(DISTINCT i.id) FROM Interest i " +
+                    "JOIN i.content c " +
+                    "WHERE i.user.id = :userId AND TYPE(c) = Webnovel "
+    )
+    Page<Interest> findWebnovelInterests(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT new com.pageon.backend.dto.response.InterestContentResponse(c.id, c.title, c.creator.penName, c.episodeUpdatedAt, c.dtype, c.cover, c.serialDay, c.status) " +
-            "FROM Interest i " +
-            "JOIN i.content c " +
-            "WHERE i.user.id = :userId " +
-            "AND TYPE(c) = Webtoon")
-    Page<InterestContentResponse> findWebtoonInterests(@Param("userId") Long userId, Pageable pageable);
+    @Query(value = "SELECT DISTINCT i FROM Interest i " +
+            "JOIN FETCH i.content c " +
+            "JOIN FETCH c.creator " +
+            "WHERE i.user.id = :userId AND TYPE(c) = Webtoon ",
+            countQuery = "SELECT COUNT(DISTINCT i.id) FROM Interest i " +
+                    "JOIN i.content c " +
+                    "WHERE i.user.id = :userId AND TYPE(c) = Webtoon "
+    )
+    Page<Interest> findWebtoonInterests(@Param("userId") Long userId, Pageable pageable);
 
 
 }

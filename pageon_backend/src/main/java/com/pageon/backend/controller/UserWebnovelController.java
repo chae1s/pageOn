@@ -1,10 +1,9 @@
 package com.pageon.backend.controller;
 
 import com.pageon.backend.common.enums.ContentType;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserWebnovelResponse;
 import com.pageon.backend.security.PrincipalUser;
 import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebnovelService;
@@ -29,19 +28,19 @@ public class UserWebnovelController {
     private final InterestService interestService;
 
     @GetMapping("/{webnovelId}")
-    public ResponseEntity<UserWebnovelResponse> getWebnovelById(@PathVariable Long webnovelId, @AuthenticationPrincipal PrincipalUser principalUser) {
+    public ResponseEntity<ContentResponse.Detail> getWebnovelById(@PathVariable Long webnovelId, @AuthenticationPrincipal PrincipalUser principalUser) {
 
         return ResponseEntity.ok(userWebnovelService.getWebnovelById(webnovelId, principalUser));
     }
 
     @GetMapping()
-    public ResponseEntity<List<UserContentListResponse>> getWebnovels() {
+    public ResponseEntity<List<ContentResponse.Summary>> getWebnovels() {
 
         return ResponseEntity.ok(userWebnovelService.getWebnovels());
     }
 
     @GetMapping("/daily/{day}")
-    public ResponseEntity<List<ContentSimpleResponse>> getWebnovelsByDay(@PathVariable String day) {
+    public ResponseEntity<List<ContentResponse.Simple>> getWebnovelsByDay(@PathVariable String day) {
 
         return ResponseEntity.ok(userWebnovelService.getWebnovelsByDay(day));
     }
@@ -67,10 +66,10 @@ public class UserWebnovelController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<PageResponse<ContentSimpleResponse>> getRecentWebnovels(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebnovels(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ContentSimpleResponse> contentSimpleResponses = userWebnovelService.getRecentWebnovels(pageable);
+        Page<ContentResponse.Simple> contents = userWebnovelService.getRecentWebnovels(pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(contentSimpleResponses));
+        return ResponseEntity.ok(new PageResponse<>(contents));
     }
 }

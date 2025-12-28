@@ -35,6 +35,7 @@ spring:
         order_insert: true
         order_updates: true
         format_sql: true
+        default_batch_fetch_size: 100
     open-in-view: false
 
 
