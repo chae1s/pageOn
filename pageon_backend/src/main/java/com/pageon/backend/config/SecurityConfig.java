@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
                                 "/api/users/login", "/api/users/find-password", "/api/auth/refresh",
                                 "/api/webnovels", "/api/webnovels/**", "/api/webtoons", "/api/webtoons/**", "/api/episodes/**", "/api/webnovels/daily/*", "/api/webtoons/daily/*",
-                                "/api/keywords", "/api/search/**", "/api/webnovels/recent", "/api/webtoons/recent"
+                                "/api/keywords", "/api/search/**", "/api/webnovels/recent", "/api/webtoons/recent", "/api/webnovels/masterpiece", "/api/contents/masterpiece", "/api/webtoons/masterpiece"
                         ).permitAll()
                         .requestMatchers("/api/webnovels/*/likes", "/api/webtoons/*/likes", "/api/webnovels/comments/*", "api/webtoons/comments/*", "api/interests/**").authenticated()
                         .requestMatchers("/api/**").authenticated()

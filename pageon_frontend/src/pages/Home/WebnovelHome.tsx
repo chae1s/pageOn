@@ -95,6 +95,7 @@ function WebnovelHome() {
 
     const [dailyContents, setDailyContents] = useState<SimpleContent[]>([]);
     const [newContents, setNewContents] = useState<SimpleContent[]>([]);
+    const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
     
     const todayIndex = new Date().getDay();
 
@@ -110,9 +111,14 @@ function WebnovelHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const [dailyRes, newRes] = await Promise.all([
+                const [dailyRes, newRes, masterpieceRes] = await Promise.all([
                     api.get(`/webnovels/daily/${initialDayEng}`),
                     api.get(`/webnovels/recent`, {
+                        params: {
+                            size: 6
+                        }
+                    }),
+                    api.get(`/webnovels/masterpiece`, {
                         params: {
                             size: 6
                         }
@@ -122,8 +128,10 @@ function WebnovelHome() {
                 setDailyContents(dailyRes.data);
 
                 setNewContents(newRes.data.content);
+
+                setMasterpieceContents(masterpieceRes.data.content);
             } catch (error) {
-                console.error("요일별 웹소설 데이터 조회 실패: ", error);
+                console.error("웹소설 데이터 조회 실패: ", error);
             }
         }
 
@@ -138,10 +146,10 @@ function WebnovelHome() {
 
         try {
             const response = await axios.get(`/api/webnovels/daily/${day}`);
-            console.log("요일별 웹소설 데이터: ", response.data);
+            
             setDailyContents(response.data);
         } catch (error) {
-            console.error("요일별 웹소설 데이터 조회 실패: ", error);
+            console.error("웹소설 데이터 조회 실패: ", error);
         }
     }
 
@@ -200,7 +208,7 @@ function WebnovelHome() {
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
-                        <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
+                        <H.SectionBookListTitle>웹소설 신작</H.SectionBookListTitle>
                         <H.SectionBookListMoreViewLink to={"/webnovels/new"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={ newContents } />   
@@ -208,9 +216,9 @@ function WebnovelHome() {
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>정주행 필수 명작</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={"/webnovels/masterpiece"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={ newContents } />    
+                    <ThumbnailContentList contents={ masterpieceContents } />    
                 </H.SectionBookList>
             </NoSidebarMain>
         </MainContainer>

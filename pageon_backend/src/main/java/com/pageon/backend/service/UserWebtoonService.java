@@ -115,4 +115,11 @@ public class UserWebtoonService {
         return webtoonPage.map(ContentResponse.Simple::fromEntity);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getMasterpieceWebtoons(Pageable pageable) {
+        Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
+
+        return webtoons.map(ContentResponse.Simple::fromEntity);
+    }
+
 }

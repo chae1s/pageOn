@@ -109,4 +109,11 @@ public class UserWebnovelService {
         return webnovelPage.map(ContentResponse.Simple::fromEntity);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getMasterpieceWebnovels(Pageable pageable) {
+        Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
+
+        return webnovels.map(ContentResponse.Simple::fromEntity);
+    }
+
 }

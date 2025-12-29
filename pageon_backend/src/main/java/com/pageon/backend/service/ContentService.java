@@ -31,6 +31,13 @@ public class ContentService {
         return contentPage.map(ContentResponse.Search::fromEntity);
     }
 
+    public Page<ContentResponse.Simple> getMasterpieceContents(Pageable pageable) {
+
+        Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
+
+        return contents.map(ContentResponse.Simple::fromEntity);
+    }
+
 
 
 

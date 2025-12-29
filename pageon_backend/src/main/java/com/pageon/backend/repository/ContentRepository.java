@@ -32,4 +32,11 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     Page<Content> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 
 
+    @Query(value = "SELECT DISTINCT c FROM Content c " +
+            "JOIN FETCH c.creator " +
+            "WHERE c.status = 'COMPLETED' AND c.totalAverageRating >= 0 AND c.deletedAt IS NULL",
+            countQuery = "SELECT COUNT(DISTINCT c.id) FROM Content c " +
+                    "WHERE c.status = 'COMPLETED' AND c.totalAverageRating >= 0 AND c.deletedAt IS NULL "
+    )
+    Page<Content> findCompletedMasterpieces(Pageable pageable);
 }

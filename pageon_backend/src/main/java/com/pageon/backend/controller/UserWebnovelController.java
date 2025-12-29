@@ -73,4 +73,11 @@ public class UserWebnovelController {
 
         return ResponseEntity.ok(new PageResponse<>(contents));
     }
+
+    @GetMapping("/masterpiece")
+    public ResponseEntity<PageResponse<ContentResponse.Simple>> getMasterpieceWebnovels(@PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ContentResponse.Simple> contents = userWebnovelService.getMasterpieceWebnovels(pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(contents));
+    }
 }

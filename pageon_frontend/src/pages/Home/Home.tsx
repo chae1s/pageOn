@@ -4,6 +4,7 @@ import * as H from "./Home.styles"
 import { SimpleContent, RankingBook } from "../../types/Content";
 import RankingContentList from "../../components/Contents/RankingContentList";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
+import api from "../../api/axiosInstance";
 
 function Home() {
     const dummyBooks: RankingBook[] = [
@@ -170,6 +171,31 @@ function Home() {
             contentType: 'webnovels'
         }
     ]
+
+    const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const [masterpieceRes] = await Promise.all([
+                    api.get(`/contents/masterpiece`, {
+                        params: {
+                            size: 6
+                        }
+                    })
+
+                ]);
+                
+
+                setMasterpieceContents(masterpieceRes.data.content);
+            } catch (error) {
+                console.error("작품 데이터 조회 실패: ", error);
+            }
+        }
+
+        fetchData();
+    }, []);
+
     return(
         <MainContainer>
             <NoSidebarMain>
@@ -215,9 +241,9 @@ function Home() {
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>정주행 랭킹</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={"/contents/masterpiece"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    {/* <ThumbnailContentList contents={dummyBooks} />   */}
+                    <ThumbnailContentList contents={masterpieceContents} />
                 </H.SectionBookList>
             </NoSidebarMain>
         </MainContainer>
