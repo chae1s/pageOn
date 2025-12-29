@@ -57,31 +57,6 @@ function InterestContents() {
         setSearchParams(newParams);
     }
 
-    const getPageNumbers = () => {
-        if (!pageData) return [];
-
-        const currentPage = pageData.pageNumber;
-        const totalPages = pageData.totalPages;
-
-        // 한 번에 보여줄 페이지 번호 개수
-        const pageBlockSize = 6;
-
-        const startPage = Math.floor(currentPage / pageBlockSize) * pageBlockSize;
-
-        let endPage = startPage + pageBlockSize - 1;
-
-        if (endPage >= totalPages) {
-            endPage = totalPages - 1;
-        }
-
-        const pages = [];
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(i)
-        }
-
-        return pages;
-    }
-
     return (
         <MainContainer>
             <SidebarMain>

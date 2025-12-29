@@ -21,7 +21,7 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
             "JOIN FETCH w.creator " +
             "JOIN FETCH w.keywords " +
             "WHERE w.id = :webnovelId")
-    Optional<Webnovel> findByIdWithEpisodes(@Param("webnovelId") Long webnovelId);
+    Optional<Webnovel> findByIdWithDetailInfo(@Param("webnovelId") Long webnovelId);
 
     List<Webnovel> findByCreator(Creator creator);
 

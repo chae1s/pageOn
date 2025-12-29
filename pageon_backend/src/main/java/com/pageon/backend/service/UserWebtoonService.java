@@ -1,12 +1,9 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
-import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.entity.Content;
-import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -19,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +37,7 @@ public class UserWebtoonService {
 
     @Transactional(readOnly = true)
     public ContentResponse.Detail getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
-        Content webtoon = contentRepository.findByIdWithDetailInfo(webtoonId).orElseThrow(
+        Webtoon webtoon = webtoonRepository.findByIdWithDetailInfo(webtoonId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
 
@@ -54,7 +50,7 @@ public class UserWebtoonService {
             episodes = webtoonEpisodeService.getEpisodesByWebtoonId(userId, webtoonId);
             isInterested = interestRepository.existsByUser_IdAndContentId(userId, webtoonId);
         } else {
-            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
+            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(null, webtoonId);
         }
 
         return ContentResponse.Detail.fromEntity(webtoon, episodes, isInterested);

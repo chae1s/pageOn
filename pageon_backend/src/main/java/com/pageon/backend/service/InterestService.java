@@ -31,8 +31,6 @@ public class InterestService {
                 () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
         );
 
-        ContentType contentType = ContentType.valueOf(content.getDtype());
-
         Interest interest = Interest.builder()
                 .user(user)
                 .content(content)

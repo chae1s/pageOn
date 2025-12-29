@@ -2,11 +2,9 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
-import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.InterestRepository;
 import com.pageon.backend.repository.WebnovelRepository;
 import com.pageon.backend.security.PrincipalUser;
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -29,19 +26,16 @@ import java.util.List;
 public class UserWebnovelService {
 
     private final WebnovelRepository webnovelRepository;
-    private final KeywordService keywordService;
     private final WebnovelEpisodeService  webnovelEpisodeService;
     private final InterestRepository interestRepository;
-    private final ContentRepository contentRepository;
 
     @Transactional(readOnly = true)
     public ContentResponse.Detail getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
 
-        Content webnovel = contentRepository.findByIdWithDetailInfo(webnovelId).orElseThrow(
+        Webnovel webnovel = webnovelRepository.findByIdWithDetailInfo(webnovelId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
 
-        log.info("principal: {}", principalUser);
         Boolean isInterested = false;
 
         List<EpisodeListResponse> episodes;
@@ -52,7 +46,7 @@ public class UserWebnovelService {
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(principalUser.getId(), webnovelId);
             isInterested = interestRepository.existsByUser_IdAndContentId(userId, webnovelId);
         } else {
-            episodes = webnovelEpisodeService.getEpisodesByWebnovelId(webnovelId);
+            episodes = webnovelEpisodeService.getEpisodesByWebnovelId(null, webnovelId);
         }
 
         log.info("IsInterested: {}", isInterested);

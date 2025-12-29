@@ -201,7 +201,7 @@ function WebnovelHome() {
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={"/webnovels/new"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={ newContents } />   
                 </H.SectionBookList>

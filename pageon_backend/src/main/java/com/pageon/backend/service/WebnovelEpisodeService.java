@@ -30,28 +30,21 @@ public class WebnovelEpisodeService {
     private final ReadingHistoryService readingHistoryService;
 
     @Transactional(readOnly = true)
-    public List<EpisodeListResponse> getEpisodesByWebnovelId(Long webnovelId) {
-        List<WebnovelEpisode> webnovelEpisodes = webnovelEpisodeRepository.findByWebnovelId(webnovelId);
-
-        return webnovelEpisodes.stream()
-                .map(episode -> EpisodeListResponse.fromEntity(
-                        episode,
-                        null))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebnovelId(Long userId, Long webnovelId) {
         List<WebnovelEpisode> webnovelEpisodes = webnovelEpisodeRepository.findByWebnovelId(webnovelId);
 
-        return webnovelEpisodes.stream().map(episode -> {
-            EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, ContentType.WEBNOVEL, episode.getId()).orElse(null);
-            if (episodePurchase == null) {
-                return EpisodeListResponse.fromEntity(episode, null);
-            } else {
-                return EpisodeListResponse.fromEntity(episode, EpisodePurchaseResponse.fromEntity(episodePurchase));
-            }
-        }).toList();
+        if (userId == null) {
+            return webnovelEpisodes.stream()
+                    .map(episode -> EpisodeListResponse.fromEntity(episode, null)).toList();
+        } else {
+            return webnovelEpisodes.stream().map(episode -> {
+                EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, webnovelId, episode.getId()).orElse(null);
+                return EpisodeListResponse.fromEntity(
+                        episode,
+                        (episodePurchase != null) ? EpisodePurchaseResponse.fromEntity(episodePurchase) : null
+                );
+            }).toList();
+        }
     }
 
     @Transactional

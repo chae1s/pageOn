@@ -29,7 +29,7 @@ public class UserWebtoonController {
     private final InterestService interestService;
 
     @GetMapping("/{webtoonId}")
-    public ResponseEntity<ContentResponse.Detail> getWebnovelById(@PathVariable Long webtoonId, @AuthenticationPrincipal PrincipalUser principalUser) {
+    public ResponseEntity<ContentResponse.Detail> getWebtoonById(@PathVariable Long webtoonId, @AuthenticationPrincipal PrincipalUser principalUser) {
 
         return ResponseEntity.ok(userWebtoonService.getWebtoonById(webtoonId, principalUser));
     }
@@ -66,7 +66,7 @@ public class UserWebtoonController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebtoons(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebtoons(@PageableDefault(size = 60, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<ContentResponse.Simple> contents = userWebtoonService.getRecentWebtoons(pageable);
 

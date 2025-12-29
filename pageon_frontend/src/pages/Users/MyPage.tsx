@@ -173,7 +173,7 @@ const UpdateContentListWrapper = styled.div`
 const UpdateContentList = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 2px;
     justify-content: flex-start;
     width: 100%;
 `

@@ -19,9 +19,8 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
     @Query("SELECT w FROM Webtoon w " +
             "JOIN FETCH w.creator " +
             "JOIN FETCH w.keywords " +
-            "JOIN FETCH w.webtoonEpisodes " +
-            "WHERE w.id = :webnovelId")
-    Optional<Webtoon> findByIdWithEpisodes(Long id);
+            "WHERE w.id = :webtoonId")
+    Optional<Webtoon> findByIdWithDetailInfo(@Param("webtoonId") Long webtoonId);
 
     List<Webtoon> findByCreator(Creator creator);
 

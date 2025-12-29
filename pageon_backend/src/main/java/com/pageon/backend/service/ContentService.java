@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class ContentService {
     private final ContentRepository contentRepository;
 
+    @Transactional(readOnly = true)
     public Page<ContentResponse.Search> getContentsByTitleOrCreator(String query, Pageable sortedPageable) {
 
         log.debug("Entering getContentsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
@@ -26,6 +30,8 @@ public class ContentService {
 
         return contentPage.map(ContentResponse.Search::fromEntity);
     }
+
+
 
 
 }

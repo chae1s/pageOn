@@ -23,8 +23,6 @@ import java.util.Map;
 public class EpisodePurchaseService {
 
     private final UserRepository userRepository;
-    private final WebnovelRepository webnovelRepository;
-    private final WebtoonRepository webtoonRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final EpisodePurchaseRepository episodePurchaseRepository;
@@ -71,7 +69,7 @@ public class EpisodePurchaseService {
     }
 
     public Boolean checkPurchaseHistory(Long userId, ContentType contentType, Long episodeId) {
-        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, contentType, episodeId).orElse(null);
+        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, null, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             return false;
@@ -161,7 +159,7 @@ public class EpisodePurchaseService {
         log.info("Validate episode purchase or rent: userId = {}, contentType = {}, episodeId = {}", user.getId(), contentType, episodeId);
 
         EpisodePurchase episodePurchase
-                = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(user.getId(), contentType, episodeId).orElse(null);
+                = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(user.getId(), null, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             if (purchaseType == PurchaseType.OWN) {
@@ -195,7 +193,6 @@ public class EpisodePurchaseService {
     private EpisodePurchase purchaseEpisode(User user, ContentType contentType, Long contentId, Long episodeId) {
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
-                .contentType(contentType)
                 .contentId(contentId)
                 .episodeId(episodeId)
                 .purchaseType(PurchaseType.OWN)
@@ -210,7 +207,6 @@ public class EpisodePurchaseService {
 
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
-                .contentType(contentType)
                 .contentId(contentId)
                 .episodeId(episodeId)
                 .purchaseType(PurchaseType.RENT)

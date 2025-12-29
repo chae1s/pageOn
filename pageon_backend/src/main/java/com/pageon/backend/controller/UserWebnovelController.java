@@ -5,6 +5,7 @@ import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.security.PrincipalUser;
+import com.pageon.backend.service.ContentService;
 import com.pageon.backend.service.InterestService;
 import com.pageon.backend.service.UserWebnovelService;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class UserWebnovelController {
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebnovels(@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentWebnovels(@PageableDefault(size = 60, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<ContentResponse.Simple> contents = userWebnovelService.getRecentWebnovels(pageable);
 
