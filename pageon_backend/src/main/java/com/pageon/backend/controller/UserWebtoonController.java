@@ -18,6 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -78,6 +80,13 @@ public class UserWebtoonController {
         Page<ContentResponse.Simple> contents = userWebtoonService.getMasterpieceWebtoons(pageable);
 
         return ResponseEntity.ok(new PageResponse<>(contents));
+    }
+
+    @GetMapping("/recommend/by-keyword")
+    public ResponseEntity<Map<String, Object>> getRecommendKeywordWebtoons(@PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable) {
+        Map<String, Object> result = userWebtoonService.getRecommendKeywordWebtoons(pageable);
+
+        return ResponseEntity.ok(result);
     }
 
 }

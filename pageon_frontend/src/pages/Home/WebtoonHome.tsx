@@ -95,6 +95,8 @@ function WebtoonHome() {
     const [dailyContents, setDailyContents] = useState<SimpleContent[]>([]);
     const [newContents, setNewContents] = useState<SimpleContent[]>([]);
     const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
+    const [keywordContents, setKeywordContents] = useState<SimpleContent[]>([]);
+    const [keywordName, setKeywordName] = useState<string>("");
 
     const todayIndex = new Date().getDay();
 
@@ -109,7 +111,7 @@ function WebtoonHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const [dailyRes, newRes, masterpieceRes] = await Promise.all([
+                const [dailyRes, newRes, masterpieceRes, keywordRes] = await Promise.all([
                     api.get(`/webtoons/daily/${initialDayEng}`),
                     api.get(`/webtoons/recent`, {
                         params: {
@@ -117,6 +119,11 @@ function WebtoonHome() {
                         }
                     }), 
                     api.get(`/webtoons/masterpiece`, {
+                        params: {
+                            size: 6
+                        }
+                    }), 
+                    api.get('/webtoons/recommend/by-keyword', {
                         params: {
                             size: 6
                         }
@@ -129,6 +136,10 @@ function WebtoonHome() {
                 setNewContents(newRes.data.content);
 
                 setMasterpieceContents(masterpieceRes.data.content);
+
+                setKeywordName(keywordRes.data.keyword);
+
+                setKeywordContents(keywordRes.data.contents.content);
             } catch (error) {
                 console.error("웹툰 데이터 조회 실패: ", error);
             }
@@ -199,10 +210,10 @@ function WebtoonHome() {
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
-                        <H.SectionBookListTitle>장르별 인기(ex.로맨스 웹툰 인기작)</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListTitle>추천 {keywordName} 웹툰</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"/webtoons/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={newContents} />   
+                    <ThumbnailContentList contents={keywordContents} />   
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>

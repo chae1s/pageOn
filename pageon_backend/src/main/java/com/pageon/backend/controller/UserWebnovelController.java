@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -79,5 +80,12 @@ public class UserWebnovelController {
         Page<ContentResponse.Simple> contents = userWebnovelService.getMasterpieceWebnovels(pageable);
 
         return ResponseEntity.ok(new PageResponse<>(contents));
+    }
+
+    @GetMapping("/recommend/by-keyword")
+    public ResponseEntity<Map<String, Object>> getRecommendKeywordWebnovel(@PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable) {
+        Map<String, Object> result = userWebnovelService.getRecommendKeywordWebnovels(pageable);
+
+        return ResponseEntity.ok(result);
     }
 }

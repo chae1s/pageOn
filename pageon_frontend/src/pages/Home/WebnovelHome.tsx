@@ -96,6 +96,8 @@ function WebnovelHome() {
     const [dailyContents, setDailyContents] = useState<SimpleContent[]>([]);
     const [newContents, setNewContents] = useState<SimpleContent[]>([]);
     const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
+    const [keywordContents, setKeywordContents] = useState<SimpleContent[]>([]);
+    const [keywordName, setKeywordName] = useState<string>("");
     
     const todayIndex = new Date().getDay();
 
@@ -111,7 +113,7 @@ function WebnovelHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const [dailyRes, newRes, masterpieceRes] = await Promise.all([
+                const [dailyRes, newRes, masterpieceRes, keywordRes] = await Promise.all([
                     api.get(`/webnovels/daily/${initialDayEng}`),
                     api.get(`/webnovels/recent`, {
                         params: {
@@ -119,6 +121,11 @@ function WebnovelHome() {
                         }
                     }),
                     api.get(`/webnovels/masterpiece`, {
+                        params: {
+                            size: 6
+                        }
+                    }), 
+                    api.get('/webnovels/recommend/by-keyword', {
                         params: {
                             size: 6
                         }
@@ -130,6 +137,10 @@ function WebnovelHome() {
                 setNewContents(newRes.data.content);
 
                 setMasterpieceContents(masterpieceRes.data.content);
+
+                setKeywordName(keywordRes.data.keyword);
+
+                setKeywordContents(keywordRes.data.contents.content);
             } catch (error) {
                 console.error("웹소설 데이터 조회 실패: ", error);
             }
@@ -201,10 +212,10 @@ function WebnovelHome() {
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
-                        <H.SectionBookListTitle>추천 판타지 웹소설</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListTitle>추천 {keywordName} 웹소설</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"/webnovels/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    <ThumbnailContentList contents={ newContents } />    
+                    <ThumbnailContentList contents={ keywordContents } />    
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>

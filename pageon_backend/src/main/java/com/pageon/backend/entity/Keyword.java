@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -28,10 +29,17 @@ public class Keyword {
     @ManyToMany(mappedBy = "keywords")
     private List<Content> contents = new ArrayList<>();
 
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public Keyword(Category category, String name) {
         this.category = category;
         this.name = name;
+    }
+
+    public void updateTime(LocalDate startDate, LocalDate endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
 

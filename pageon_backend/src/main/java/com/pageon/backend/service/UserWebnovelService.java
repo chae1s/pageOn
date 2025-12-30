@@ -2,10 +2,12 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
+import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.InterestRepository;
+import com.pageon.backend.repository.KeywordRepository;
 import com.pageon.backend.repository.WebnovelRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +18,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -28,6 +33,7 @@ public class UserWebnovelService {
     private final WebnovelRepository webnovelRepository;
     private final WebnovelEpisodeService  webnovelEpisodeService;
     private final InterestRepository interestRepository;
+    private final KeywordRepository keywordRepository;
 
     @Transactional(readOnly = true)
     public ContentResponse.Detail getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
@@ -114,6 +120,24 @@ public class UserWebnovelService {
         Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
 
         return webnovels.map(ContentResponse.Simple::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getRecommendKeywordWebnovels(Pageable pageable) {
+        LocalDate currentDate = LocalDate.now();
+
+        Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
+                () -> new CustomException(ErrorCode.INVALID_KEYWORD)
+        );
+
+        Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keyword.getName(), pageable);
+        Page<ContentResponse.Simple> responses = webnovels.map(ContentResponse.Simple::fromEntity);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("keyword", keyword.getName());
+        result.put("contents", new PageResponse<>(responses));
+
+        return result;
     }
 
 }

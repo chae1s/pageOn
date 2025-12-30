@@ -4,11 +4,13 @@ import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.dto.response.UserContentListResponse;
 import com.pageon.backend.entity.Content;
+import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.InterestRepository;
+import com.pageon.backend.repository.KeywordRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -34,6 +39,7 @@ public class UserWebtoonService {
     private final WebtoonEpisodeService webtoonEpisodeService;
     private final InterestRepository interestRepository;
     private final ContentRepository contentRepository;
+    private final KeywordRepository keywordRepository;
 
     @Transactional(readOnly = true)
     public ContentResponse.Detail getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
@@ -120,6 +126,23 @@ public class UserWebtoonService {
         Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
 
         return webtoons.map(ContentResponse.Simple::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getRecommendKeywordWebtoons(Pageable pageable) {
+        LocalDate currentDate = LocalDate.now();
+        Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
+                () -> new CustomException(ErrorCode.INVALID_KEYWORD)
+        );
+
+        Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
+        Page<ContentResponse.Simple> responses = webtoons.map(ContentResponse.Simple::fromEntity);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("keyword", keyword.getName());
+        result.put("contents", new PageResponse<>(responses));
+
+        return result;
     }
 
 }
