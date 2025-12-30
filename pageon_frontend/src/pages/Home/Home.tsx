@@ -174,11 +174,27 @@ function Home() {
 
     const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
 
+    const [webnovelKeywordContents, setWebnovelKeywordContents] = useState<SimpleContent[]>([]);
+    const [webnovelKeywordName, setWebnovelKeywordName] = useState<string>("");
+
+    const [webtoonKeywordContents, setWebtoonKeywordContents] = useState<SimpleContent[]>([]);
+    const [webtoonKeywordName, setWebtoonKeywordName] = useState<string>("");
+
     useEffect(() => {
         async function fetchData() {
             try {
-                const [masterpieceRes] = await Promise.all([
+                const [masterpieceRes, webnovelKeywordRes, webtoonKeywordRes] = await Promise.all([
                     api.get(`/contents/masterpiece`, {
+                        params: {
+                            size: 6
+                        }
+                    }), 
+                    api.get('/webnovels/recommend/by-keyword', {
+                        params: {
+                            size: 6
+                        }
+                    }), 
+                    api.get('/webtoons/recommend/by-keyword', {
                         params: {
                             size: 6
                         }
@@ -186,8 +202,13 @@ function Home() {
 
                 ]);
                 
-
                 setMasterpieceContents(masterpieceRes.data.content);
+
+                setWebnovelKeywordName(webnovelKeywordRes.data.keyword);
+                setWebnovelKeywordContents(webnovelKeywordRes.data.contents.content);
+
+                setWebtoonKeywordName(webtoonKeywordRes.data.keyword);
+                setWebtoonKeywordContents(webtoonKeywordRes.data.contents.content);
             } catch (error) {
                 console.error("작품 데이터 조회 실패: ", error);
             }
@@ -226,17 +247,17 @@ function Home() {
                 </H.SectionBookList>
                 <H.SectionBookList>
                     <H.SectionBookTitleWrapper>
-                        <H.SectionBookListTitle>이번 주 화제의 작품</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListTitle>추천 {webnovelKeywordName} 웹소설</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"/webnovels/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    {/* <ThumbnailContentList contents={dummyBooks} /> */}
+                    <ThumbnailContentList contents={webnovelKeywordContents} />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
-                        <H.SectionBookListTitle>오늘의 신작</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"#"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListTitle>추천 {webtoonKeywordName} 웹툰</H.SectionBookListTitle>
+                        <H.SectionBookListMoreViewLink to={"/webtoons/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
-                    {/* <ThumbnailContentList contents={dummyBooks} /> */}
+                    <ThumbnailContentList contents={webtoonKeywordContents} />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
