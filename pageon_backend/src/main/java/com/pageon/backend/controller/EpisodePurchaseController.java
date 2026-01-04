@@ -42,16 +42,18 @@ public class EpisodePurchaseController {
     @GetMapping("/webnovels/episodes/{episodeId}/subscribe")
     public ResponseEntity<Boolean> checkWebnovelPurchaseHistory(
             @AuthenticationPrincipal PrincipalUser principalUser,
-            @PathVariable Long episodeId
+            @PathVariable Long episodeId,
+            @RequestParam Long contentId
     ) {
-        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), ContentType.WEBNOVEL, episodeId));
+        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), contentId, episodeId));
     }
 
     @GetMapping("/webtoons/episodes/{episodeId}/subscribe")
     public ResponseEntity<Boolean> checkWebtoonPurchaseHistory(
             @AuthenticationPrincipal PrincipalUser principalUser,
-            @PathVariable Long episodeId
+            @PathVariable Long episodeId,
+            @RequestParam Long contentId
     ) {
-        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), ContentType.WEBTOON, episodeId));
+        return ResponseEntity.ok(episodePurchaseService.checkPurchaseHistory(principalUser.getId(), contentId, episodeId));
     }
 }

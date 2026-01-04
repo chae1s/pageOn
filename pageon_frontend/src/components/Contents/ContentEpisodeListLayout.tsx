@@ -128,7 +128,11 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
         }
 
         try {
-            const response = await api.get(`/${type}/episodes/${episodeId}/subscribe`);
+            const response = await api.get(`/${type}/episodes/${episodeId}/subscribe`, {
+                params: {
+                    contentId: contentId,
+                }
+            });
 
             console.log(response.data)
             if (!response.data) {

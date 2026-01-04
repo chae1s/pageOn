@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.EpisodeListResponse;
 import com.pageon.backend.dto.response.EpisodePurchaseResponse;
@@ -27,6 +28,7 @@ public class WebtoonEpisodeService {
     private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final ReadingHistoryService readingHistoryService;
+    private final ActionLogService actionLogService;
 
 
     @Transactional(readOnly = true)
@@ -61,6 +63,10 @@ public class WebtoonEpisodeService {
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
 
         readingHistoryService.checkReadingHistory(userId, episode.getWebtoon().getId(), episodeId);
+
+        actionLogService.createActionLog(userId, episode.getWebtoon().getId(), ActionType.VIEW);
+
+        episode.getWebtoon().updateViewCount();
 
         return WebtoonEpisodeDetailResponse.fromEntity(
                 episode, episode.getWebtoon().getTitle(), webtoonImages,

@@ -1,6 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.base.EpisodeBase;
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.PurchaseType;
 import com.pageon.backend.common.enums.TransactionType;
@@ -27,6 +28,7 @@ public class EpisodePurchaseService {
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final PointTransactionService pointTransactionService;
+    private final ActionLogService actionLogService;
 
 
     private record EpisodeInfo(Long contentId, String contentTitle, Integer episodePrice, EpisodeBase episodeBase) {}
@@ -68,8 +70,8 @@ public class EpisodePurchaseService {
 
     }
 
-    public Boolean checkPurchaseHistory(Long userId, ContentType contentType, Long episodeId) {
-        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, null, episodeId).orElse(null);
+    public Boolean checkPurchaseHistory(Long userId, Long contentId, Long episodeId) {
+        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, contentId, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             return false;
@@ -159,13 +161,13 @@ public class EpisodePurchaseService {
         log.info("Validate episode purchase or rent: userId = {}, contentType = {}, episodeId = {}", user.getId(), contentType, episodeId);
 
         EpisodePurchase episodePurchase
-                = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(user.getId(), null, episodeId).orElse(null);
+                = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(user.getId(), contentId, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             if (purchaseType == PurchaseType.OWN) {
-                return purchaseEpisode(user, contentType, contentId, episodeId);
+                return purchaseEpisode(user, contentId, episodeId);
             } else {
-                return rentEpisode(user, contentType, contentId, episodeId);
+                return rentEpisode(user, contentId, episodeId);
             }
         } else {
             if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
@@ -180,6 +182,7 @@ public class EpisodePurchaseService {
                         episodePurchase.upgradeToPurchase();
                     } else {
                         episodePurchase.extendRental(LocalDateTime.now().plusDays(3));
+                        actionLogService.createActionLog(user.getId(), contentId, ActionType.RENTAL);
                     }
                 }
             }
@@ -190,7 +193,7 @@ public class EpisodePurchaseService {
 
     }
 
-    private EpisodePurchase purchaseEpisode(User user, ContentType contentType, Long contentId, Long episodeId) {
+    private EpisodePurchase purchaseEpisode(User user, Long contentId, Long episodeId) {
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
                 .contentId(contentId)
@@ -198,11 +201,13 @@ public class EpisodePurchaseService {
                 .purchaseType(PurchaseType.OWN)
                 .build();
 
+        actionLogService.createActionLog(user.getId(), contentId, ActionType.PURCHASE);
+
         return episodePurchaseRepository.save(episodePurchase);
 
     }
 
-    private EpisodePurchase rentEpisode(User user, ContentType contentType, Long contentId, Long episodeId) {
+    private EpisodePurchase rentEpisode(User user, Long contentId, Long episodeId) {
         LocalDateTime expiredAt = LocalDateTime.now().plusDays(3);
 
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
@@ -212,6 +217,8 @@ public class EpisodePurchaseService {
                 .purchaseType(PurchaseType.RENT)
                 .expiredAt(expiredAt)
                 .build();
+
+        actionLogService.createActionLog(user.getId(), contentId, ActionType.RENTAL);
 
         return episodePurchaseRepository.save(episodePurchase);
     }

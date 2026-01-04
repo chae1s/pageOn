@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.EpisodeListResponse;
 import com.pageon.backend.dto.response.EpisodePurchaseResponse;
@@ -28,6 +29,7 @@ public class WebnovelEpisodeService {
     private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final ReadingHistoryService readingHistoryService;
+    private final ActionLogService actionLogService;
 
     @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebnovelId(Long userId, Long webnovelId) {
@@ -61,6 +63,10 @@ public class WebnovelEpisodeService {
         Integer userScore = webnovelEpisodeRatingRepository.findScoreByWebnovelEpisodeAndUser(episode.getId(), userId);
 
         readingHistoryService.checkReadingHistory(userId, episode.getWebnovel().getId(), episodeId);
+
+        actionLogService.createActionLog(userId, episode.getWebnovel().getId(), ActionType.VIEW);
+
+        episode.getWebnovel().updateViewCount();
 
         return WebnovelEpisodeDetailResponse.fromEntity(
                 episode, episode.getWebnovel().getTitle(),

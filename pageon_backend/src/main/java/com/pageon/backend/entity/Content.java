@@ -112,4 +112,8 @@ public abstract class Content extends BaseTimeEntity {
         this.episodeUpdatedAt = LocalDateTime.now();
         this.episodeCount++;
     }
+
+    public void updateViewCount() {
+        this.viewCount++;
+    }
 }

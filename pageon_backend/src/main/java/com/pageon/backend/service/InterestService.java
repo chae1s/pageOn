@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
@@ -23,6 +24,7 @@ public class InterestService {
     private final InterestRepository interestRepository;
     private final UserRepository userRepository;
     private final ContentRepository contentRepository;
+    private final ActionLogService actionLogService;
 
     @Transactional
     public void registerInterest(Long userId, Long contentId) {
@@ -37,6 +39,8 @@ public class InterestService {
                 .build();
 
         interestRepository.save(interest);
+
+        actionLogService.createActionLog(userId, contentId, ActionType.INTEREST);
 
     }
 
