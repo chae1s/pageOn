@@ -26,10 +26,11 @@ function NewContents({contentType} : NewContentsProps) {
         console.log(contentType);
         async function fetchData() {
             const params: any = {
-                page: page
+                page: page, 
+                contentType: formatUrl(contentType)
             }
             try {
-                const response = await api.get(`/${formatUrl(contentType)}/recent`, {params: params});
+                const response = await api.get('/recommendation/recent', {params: params});
 
                 setNewContents(response.data.content);
                 setPageData(response.data);

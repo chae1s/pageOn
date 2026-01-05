@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import * as H from "./Home.styles"
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { SimpleContent, RankingBook } from "../../types/Content";
 import axios from "axios";
 import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
@@ -9,95 +9,13 @@ import RankingContentList from "../../components/Contents/RankingContentList";
 import api from "../../api/axiosInstance";
 
 function WebnovelHome() {
-    const dummyBooks: RankingBook[] = [
-        {
-            id: 1,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/1/webnovel1.png',
-            title: '임시 작품 제목 1',
-            author: '작가A',
-            rating: 4.9124,
-            ratingCount: 13974,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 2,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/2/webnovel2.png',
-            title: '임시 작품 제목 2',
-            author: '작가B',
-            rating: 4.9124,
-            ratingCount: 10266,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 3,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/3/webnovel3.png',
-            title: '임시 작품 제목 3',
-            author: '작가C',
-            rating: 4.9124,
-            ratingCount: 758,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 4,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/4/webnovel4.png',
-            title: '임시 작품 제목 4',
-            author: '작가D',
-            rating: 4.9124,
-            ratingCount: 108,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 5,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/5/webnovel5.png',
-            title: '임시 작품 제목 5',
-            author: '작가E',
-            rating: 4.8124,
-            ratingCount: 4751,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 6,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/6/webnovel6.png',
-            title: '임시 작품 제목 6',
-            author: '작가E',
-            rating: 4.8124,
-            ratingCount: 7793,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 7,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/7/webnovel7.png',
-            title: '임시 작품 제목 7',
-            author: '작가A',
-            rating: 4.7124,
-            ratingCount: 4582,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 8,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/8/webnovel8.png',
-            title: '임시 작품 제목 8',
-            author: '작가B',
-            rating: 4.7124,
-            ratingCount: 591,
-            contentType: 'WEBNOVEL'
-        },
-        {
-            id: 9,
-            cover: 'https://d2ge55k9wic00e.cloudfront.net/webnovels/9/webnovel9.png',
-            title: '임시 작품 제목 9',
-            author: '작가C',
-            rating: 4.8124,
-            ratingCount: 6574,
-            contentType: 'WEBNOVEL'
-        }
-    ]
 
     const [dailyContents, setDailyContents] = useState<SimpleContent[]>([]);
     const [newContents, setNewContents] = useState<SimpleContent[]>([]);
     const [masterpieceContents, setMasterpieceContents] = useState<SimpleContent[]>([]);
     const [keywordContents, setKeywordContents] = useState<SimpleContent[]>([]);
     const [keywordName, setKeywordName] = useState<string>("");
+    const [rankingContents, setRankingContents] = useState<SimpleContent[]>([]);
     
     const todayIndex = new Date().getDay();
 
@@ -110,24 +28,30 @@ function WebnovelHome() {
     
     const [activeDay, setActiveDay] = useState<string>(initialDay);
 
+
     useEffect(() => {
         async function fetchData() {
             try {
-                const [dailyRes, newRes, masterpieceRes, keywordRes] = await Promise.all([
+
+                const params = {
+                    size: 6,
+                    contentType: 'webnovels'
+                }
+                
+                const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
                     api.get(`/webnovels/daily/${initialDayEng}`),
-                    api.get(`/webnovels/recent`, {
-                        params: {
-                            size: 6
-                        }
+                    api.get('/recommendation/recent', {
+                        params: params
                     }),
-                    api.get(`/webnovels/masterpiece`, {
-                        params: {
-                            size: 6
-                        }
+                    api.get('/recommendation/masterpiece', {
+                        params: params
                     }), 
-                    api.get('/webnovels/recommend/by-keyword', {
+                    api.get('/recommendation/by-keyword', {
+                        params: params
+                    }), 
+                    api.get('recommendation/hourly-ranking', {
                         params: {
-                            size: 6
+                            contentType: 'webnovels'
                         }
                     })
                 ]);
@@ -141,6 +65,8 @@ function WebnovelHome() {
                 setKeywordName(keywordRes.data.keyword);
 
                 setKeywordContents(keywordRes.data.contents.content);
+
+                setRankingContents(rankingRes.data.content);
             } catch (error) {
                 console.error("웹소설 데이터 조회 실패: ", error);
             }
@@ -208,7 +134,7 @@ function WebnovelHome() {
                 </H.SectionBookList>
                 <H.SectionBookList>
                     <H.SectionBookListTitle>웹소설 실시간 랭킹</H.SectionBookListTitle>
-                    <RankingContentList contents={ dummyBooks } layout="grid" />
+                    <RankingContentList contents={ rankingContents } layout="grid" />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>

@@ -40,7 +40,7 @@ public class InterestService {
 
         interestRepository.save(interest);
 
-        actionLogService.createActionLog(userId, contentId, ActionType.INTEREST);
+        actionLogService.createActionLog(userId, contentId, ContentType.valueOf(content.getDtype()), ActionType.INTEREST);
 
     }
 

@@ -61,7 +61,7 @@ public class WebnovelEpisodeCommentService {
 
         webnovelEpisodeCommentRepository.save(comment);
 
-        actionLogService.createActionLog(userId, webnovelEpisode.getWebnovel().getId(), ActionType.COMMENT);
+        actionLogService.createActionLog(userId, webnovelEpisode.getWebnovel().getId(), ContentType.WEBNOVEL, ActionType.COMMENT);
         log.info("[SUCCESS] createComment committed: userId = {}, episodeId = {}", userId, episodeId);
 
     }

@@ -26,10 +26,11 @@ function RecommendKeywordContents ({contentType} : Props) {
         console.log(contentType);
         async function fetchData() {
             const params: any = {
-                page: page
+                page: page, 
+                contentType: formatUrl(contentType)
             }
             try {
-                const response = await api.get(`/${formatUrl(contentType)}/recommend/by-keyword`, {params: params});
+                const response = await api.get('/recommendation/by-keyword', {params: params});
 
                 setKeywordName(response.data.keyword);
 

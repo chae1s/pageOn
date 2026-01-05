@@ -60,7 +60,7 @@ public class WebtoonEpisodeCommentService {
                 .build();
 
         webtoonEpisodeCommentRepository.save(comment);
-        actionLogService.createActionLog(userId, webtoonEpisode.getWebtoon().getId(), ActionType.COMMENT);
+        actionLogService.createActionLog(userId, webtoonEpisode.getWebtoon().getId(), ContentType.WEBTOON, ActionType.COMMENT);
         log.info("[SUCCESS] createComment committed: userId = {}, episodeId = {}", userId, episodeId);
 
     }

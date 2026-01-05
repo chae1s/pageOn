@@ -26,10 +26,13 @@ function MasterpieceContents({contentType} : Props) {
         console.log(contentType);
         async function fetchData() {
             const params: any = {
-                page: page
+                page: page,
+                contentType: formatUrl(contentType)
             }
             try {
-                const response = await api.get(`/${formatUrl(contentType)}/masterpiece`, {params: params});
+                const response = await api.get('/recommendation/masterpiece', {
+                    params: params
+                });
 
                 setMasterpieceContents(response.data.content);
                 setPageData(response.data);

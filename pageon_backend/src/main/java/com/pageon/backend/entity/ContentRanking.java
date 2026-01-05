@@ -1,30 +1,33 @@
 package com.pageon.backend.entity;
 
-import com.pageon.backend.common.base.BaseTimeEntity;
-import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
 @DynamicUpdate
-@Table(name = "content_action_logs")
+@Table(name = "content_rankings")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ContentActionLog extends BaseTimeEntity {
+public class ContentRanking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long contentId;
-    private Long userId;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ActionType actionType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_Id")
+    private Content content;
+
     @Enumerated(EnumType.STRING)
     private ContentType contentType;
+    private Integer rankNo;
+    private Long totalScore;
+
+    private LocalDateTime rankingHour;
 }

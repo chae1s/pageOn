@@ -75,12 +75,6 @@ public class UserWebtoonController {
         return ResponseEntity.ok(new PageResponse<>(contents));
     }
 
-    @GetMapping("/masterpiece")
-    public ResponseEntity<PageResponse<ContentResponse.Simple>> getMasterpieceWebtoons(@PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ContentResponse.Simple> contents = userWebtoonService.getMasterpieceWebtoons(pageable);
-
-        return ResponseEntity.ok(new PageResponse<>(contents));
-    }
 
     @GetMapping("/recommend/by-keyword")
     public ResponseEntity<Map<String, Object>> getRecommendKeywordWebtoons(@PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable) {

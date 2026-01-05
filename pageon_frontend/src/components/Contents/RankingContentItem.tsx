@@ -1,10 +1,11 @@
 import React from "react";
 import * as S from "../Styles/RankingContent.styles"
 import { Link } from "react-router-dom";
-import { RankingBook } from "../../types/Content";
+import { SimpleContent } from "../../types/Content";
+import { formatUrl } from "../../utils/formatContentType";
 
 interface Props {
-    content: RankingBook;
+    content: SimpleContent;
     rank: number;
 }
 
@@ -19,12 +20,12 @@ function RankingContentItem({ content, rank }: Props) {
         <S.ContentItem>
             <S.ContentItemWrapper>
                 <S.ContentImageContainer>
-                    <Link to={`/${content.contentType}/${content.id}`}>
+                    <Link to={`/${formatUrl(content.contentType)}/${content.contentId}`}>
                         <S.ContentImageWrapper>
                             <S.ContentImageCover>
                                 <S.ContentImage
                                     src={content.cover}
-                                    alt={content.title}
+                                    alt={content.contentTitle}
                                 />
                             </S.ContentImageCover>
                         </S.ContentImageWrapper>
@@ -38,8 +39,8 @@ function RankingContentItem({ content, rank }: Props) {
                 <S.ContentInfoWrapper>
                     <S.ContentInfoSection>
                         <S.ContentAuthorWrapper>
-                            <S.ContentTitle to={`/${content.contentType}/${content.id}`}>
-                                {content.title}
+                            <S.ContentTitle to={`/${formatUrl(content.contentType)}/${content.contentId}`}>
+                                {content.contentTitle}
                             </S.ContentTitle>
                         </S.ContentAuthorWrapper>
                         <S.ContentAuthorWrapper>
@@ -51,9 +52,9 @@ function RankingContentItem({ content, rank }: Props) {
                         <S.ContentRatingSection>
                             <S.ContentRatingScoreWrapper>
                                 <RatingFullIcon />
-                                <S.ContentRatingScore>{content.rating}</S.ContentRatingScore>
+                                <S.ContentRatingScore>{content.totalAverageRating}</S.ContentRatingScore>
                                 <S.ContentRatingCount>
-                                    ({content.ratingCount})
+                                    ({content.totalRatingCount})
                                 </S.ContentRatingCount>
                             </S.ContentRatingScoreWrapper>
                         </S.ContentRatingSection>

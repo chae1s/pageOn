@@ -1,16 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { RankingBook } from "../../types/Content";
+import { SimpleContent } from "../../types/Content";
 import { useRankingSlide } from "./Hooks/useRankingSlide";
 import * as S from "../Styles/RankingContent.styles"
 import RankingContentItem from "./RankingContentItem";
 
 interface Props {
-    contents: RankingBook[];
+    contents: SimpleContent[];
     layout: "grid" | "slider";
 }
 
-function RankingContentList({ contents, layout = 'grid' }: Props) {
+function RankingContentList({ contents = [], layout = 'grid' }: Props) {
     const isSlider = layout === 'slider';
     const containerWidth = 1040; // 한 슬라이드의 너비
 
@@ -20,13 +20,13 @@ function RankingContentList({ contents, layout = 'grid' }: Props) {
         prevPage,
         nextPage,
         totalPages
-      } = useRankingSlide(contents.length, 3, 346.666);
+    } = useRankingSlide(contents.length, 3, 346.666);
 
-  
-      const groupedColumns = [];
-      for (let i = 0; i < contents.length; i += 3) {
-          groupedColumns.push(contents.slice(i, i + 3));
-      }
+
+    const groupedColumns = [];
+    for (let i = 0; i < contents.length; i += 3) {
+        groupedColumns.push(contents.slice(i, i + 3));
+    }
   
     const NextIcon = () => (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -58,7 +58,7 @@ function RankingContentList({ contents, layout = 'grid' }: Props) {
                                 {column.map((content, itemIndex) => {
                                     const rank = colIndex * 3 + itemIndex + 1;
                                     return (
-                                        <RankingContentItem key={content.id} content={content} rank={rank} />
+                                        <RankingContentItem key={content.contentId} content={content} rank={rank} />
                                     );
                                 })}
                             </ol>

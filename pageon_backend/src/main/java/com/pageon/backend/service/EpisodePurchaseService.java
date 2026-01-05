@@ -165,9 +165,9 @@ public class EpisodePurchaseService {
 
         if (episodePurchase == null) {
             if (purchaseType == PurchaseType.OWN) {
-                return purchaseEpisode(user, contentId, episodeId);
+                return purchaseEpisode(user, contentId, contentType, episodeId);
             } else {
-                return rentEpisode(user, contentId, episodeId);
+                return rentEpisode(user, contentId, contentType, episodeId);
             }
         } else {
             if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
@@ -182,7 +182,7 @@ public class EpisodePurchaseService {
                         episodePurchase.upgradeToPurchase();
                     } else {
                         episodePurchase.extendRental(LocalDateTime.now().plusDays(3));
-                        actionLogService.createActionLog(user.getId(), contentId, ActionType.RENTAL);
+                        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL);
                     }
                 }
             }
@@ -193,7 +193,7 @@ public class EpisodePurchaseService {
 
     }
 
-    private EpisodePurchase purchaseEpisode(User user, Long contentId, Long episodeId) {
+    private EpisodePurchase purchaseEpisode(User user, Long contentId, ContentType contentType, Long episodeId) {
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
                 .contentId(contentId)
@@ -201,13 +201,13 @@ public class EpisodePurchaseService {
                 .purchaseType(PurchaseType.OWN)
                 .build();
 
-        actionLogService.createActionLog(user.getId(), contentId, ActionType.PURCHASE);
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.PURCHASE);
 
         return episodePurchaseRepository.save(episodePurchase);
 
     }
 
-    private EpisodePurchase rentEpisode(User user, Long contentId, Long episodeId) {
+    private EpisodePurchase rentEpisode(User user, Long contentId, ContentType contentType, Long episodeId) {
         LocalDateTime expiredAt = LocalDateTime.now().plusDays(3);
 
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
@@ -218,7 +218,7 @@ public class EpisodePurchaseService {
                 .expiredAt(expiredAt)
                 .build();
 
-        actionLogService.createActionLog(user.getId(), contentId, ActionType.RENTAL);
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL);
 
         return episodePurchaseRepository.save(episodePurchase);
     }

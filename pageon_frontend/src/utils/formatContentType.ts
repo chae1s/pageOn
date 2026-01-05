@@ -12,6 +12,6 @@ export function formatUrl(contentType: string) : string {
     } else if (contentType === 'WEBTOON') {
         return 'webtoons';
     } else {
-        return 'contents';
+        return 'all';
     }
 }
