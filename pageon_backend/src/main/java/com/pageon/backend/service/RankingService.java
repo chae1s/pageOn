@@ -39,18 +39,18 @@ public class RankingService {
     public void updateHourlyRanking() {
         LocalDateTime now = LocalDateTime.now();
 
+        LocalDateTime rankingHour = now.withMinute(0).withSecond(0).withNano(0);
         LocalDateTime startTime = now.minusHours(1);
-        LocalDateTime endTime = now.withMinute(0).withSecond(0).withNano(0);
 
-        List<ActionCountResponse> actionCounts = actionLogRepository.countActionsByTimeRange(startTime, endTime);
+        List<ActionCountResponse> actionCounts = actionLogRepository.countActionsByTimeRange(startTime, rankingHour);
 
         Map<ContentType, List<ActionCountResponse>> actionCountsMap = actionCounts.stream()
                 .collect(Collectors.groupingBy(ActionCountResponse::getContentType));
 
         List<ContentRanking> rankings = new ArrayList<>();
 
-        rankings.addAll(createRankingList(actionCountsMap.get(ContentType.WEBNOVEL), ContentType.WEBNOVEL, now));
-        rankings.addAll(createRankingList(actionCountsMap.get(ContentType.WEBTOON), ContentType.WEBTOON, now));
+        rankings.addAll(createRankingList(actionCountsMap.get(ContentType.WEBNOVEL), ContentType.WEBNOVEL, rankingHour));
+        rankings.addAll(createRankingList(actionCountsMap.get(ContentType.WEBTOON), ContentType.WEBTOON, rankingHour));
 
         rankingRepository.saveAll(rankings);
 
@@ -92,13 +92,15 @@ public class RankingService {
         return contentRankings;
     }
 
+    @Transactional(readOnly = true)
     public List<ContentResponse.Simple> getHourlyRankingContents(String contentType) {
 
+        LocalDateTime rankingHour = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         List<ContentRanking> contentRankings;
         switch (contentType) {
-            case "all" -> contentRankings = rankingRepository.findAllRankings();
-            case "webnovels" -> contentRankings = rankingRepository.findWebnovelRankings();
-            case "webtoons" -> contentRankings = rankingRepository.findWebtoonRankings();
+            case "all" -> contentRankings = rankingRepository.findAllRankings(rankingHour);
+            case "webnovels" -> contentRankings = rankingRepository.findWebnovelRankings(rankingHour);
+            case "webtoons" -> contentRankings = rankingRepository.findWebtoonRankings(rankingHour);
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         }
 

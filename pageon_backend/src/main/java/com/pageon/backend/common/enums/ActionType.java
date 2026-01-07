@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum ActionType {
     VIEW(1),
     COMMENT(3),
+    RATING(1),
     INTEREST(5),
     RENTAL(10),
     PURCHASE(20);

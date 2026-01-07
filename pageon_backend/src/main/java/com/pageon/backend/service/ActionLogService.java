@@ -25,13 +25,14 @@ public class ActionLogService {
     private final ActionLogRepository actionLogRepository;
 
     @Transactional
-    public void createActionLog(Long userId, Long contentId, ContentType contentType, ActionType actionType) {
+    public void createActionLog(Long userId, Long contentId, ContentType contentType, ActionType actionType, Integer ratingScore) {
 
         ContentActionLog actionLog = ContentActionLog.builder()
                 .contentId(contentId)
                 .userId(userId)
                 .contentType(contentType)
                 .actionType(actionType)
+                .ratingScore(ratingScore)
                 .build();
 
         actionLogRepository.save(actionLog);

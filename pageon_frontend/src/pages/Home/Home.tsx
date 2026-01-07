@@ -39,7 +39,7 @@ function Home() {
                             contentType: 'webtoons'
                         }
                     }), 
-                    api.get('recommendation/hourly-ranking', {
+                    api.get('/recommendation/hourly-ranking', {
                         params: {
                             contentType: 'all'
                         }
@@ -55,7 +55,7 @@ function Home() {
                 setWebtoonKeywordName(webtoonKeywordRes.data.keyword);
                 setWebtoonKeywordContents(webtoonKeywordRes.data.contents.content);
 
-                setRankingContents(rankingRes.data.content);
+                setRankingContents(rankingRes.data);
             } catch (error) {
                 console.error("작품 데이터 조회 실패: ", error);
             }

@@ -64,7 +64,7 @@ public class WebtoonEpisodeService {
 
         readingHistoryService.checkReadingHistory(userId, episode.getWebtoon().getId(), episodeId);
 
-        actionLogService.createActionLog(userId, episode.getWebtoon().getId(), ContentType.WEBTOON, ActionType.VIEW);
+        actionLogService.createActionLog(userId, episode.getWebtoon().getId(), ContentType.WEBTOON, ActionType.VIEW, 0);
 
         episode.getWebtoon().updateViewCount();
 

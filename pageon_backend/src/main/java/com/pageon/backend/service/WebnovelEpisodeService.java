@@ -64,7 +64,7 @@ public class WebnovelEpisodeService {
 
         readingHistoryService.checkReadingHistory(userId, episode.getWebnovel().getId(), episodeId);
 
-        actionLogService.createActionLog(userId, episode.getWebnovel().getId(), ContentType.WEBNOVEL, ActionType.VIEW);
+        actionLogService.createActionLog(userId, episode.getWebnovel().getId(), ContentType.WEBNOVEL, ActionType.VIEW, 0);
 
         episode.getWebnovel().updateViewCount();
 

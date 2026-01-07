@@ -52,7 +52,7 @@ function RankingContentItem({ content, rank }: Props) {
                         <S.ContentRatingSection>
                             <S.ContentRatingScoreWrapper>
                                 <RatingFullIcon />
-                                <S.ContentRatingScore>{content.totalAverageRating}</S.ContentRatingScore>
+                                <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>
                                 <S.ContentRatingCount>
                                     ({content.totalRatingCount})
                                 </S.ContentRatingCount>

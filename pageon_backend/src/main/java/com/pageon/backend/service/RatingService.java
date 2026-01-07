@@ -1,5 +1,7 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
+import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.request.ContentEpisodeRatingRequest;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
@@ -20,6 +22,7 @@ public class RatingService {
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRatingRepository webtoonEpisodeRatingRepository;
     private final WebnovelEpisodeRatingRepository webnovelEpisodeRatingRepository;
+    private final ActionLogService actionLogService;
 
     @Transactional
     public void createWebtoonRating(Long userId, ContentEpisodeRatingRequest contentEpisodeRatingRequest) {
@@ -54,6 +57,7 @@ public class RatingService {
         log.info("Updating aggregates for Webtoon: webtoonId = {}", webtoon.getId());
         webtoon.addRating(score);
 
+        actionLogService.createActionLog(userId, webtoon.getId(), ContentType.WEBTOON, ActionType.RATING, score);
         log.info("[SUCCESS] createWebtoonRating committed: userId={}, episodeId={}", userId, episodeId);
     }
 
@@ -89,6 +93,8 @@ public class RatingService {
         Webnovel webnovel = webnovelEpisode.getWebnovel();
         log.info("Updating aggregates for Webnovel: webnovelId = {}", webnovel.getId());
         webnovel.addRating(score);
+
+        actionLogService.createActionLog(userId, webnovel.getId(), ContentType.WEBNOVEL, ActionType.RATING, score);
 
         log.info("[SUCCESS] createWebnovelRating committed: userId={}, episodeId={}", userId, episodeId);
     }

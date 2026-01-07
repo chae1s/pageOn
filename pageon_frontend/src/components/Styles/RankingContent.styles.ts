@@ -107,6 +107,7 @@ export const ContentInfoWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    padding-right: 12px;
 `;
 
 export const ContentInfoSection = styled.div`
@@ -117,7 +118,7 @@ export const ContentTitle = styled(Link)`
     overflow: hidden;
     text-overflow: ellipsis;
     overflow-wrap: break-word;
-    white-space: normal
+    white-space: normal;
     line-height: 19px;
     word-break: break-all;
     font-size: 16px;

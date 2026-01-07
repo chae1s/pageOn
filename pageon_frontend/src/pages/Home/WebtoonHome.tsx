@@ -47,7 +47,7 @@ function WebtoonHome() {
                     api.get('/recommendation/by-keyword', {
                         params: params
                     }), 
-                    api.get('recommendation/hourly-ranking', {
+                    api.get('/recommendation/hourly-ranking', {
                         params: {
                             contentType: 'webtoons'
                         }
@@ -64,6 +64,8 @@ function WebtoonHome() {
                 setKeywordName(keywordRes.data.keyword);
 
                 setKeywordContents(keywordRes.data.contents.content);
+
+                setRankingContents(rankingRes.data);
             } catch (error) {
                 console.error("웹툰 데이터 조회 실패: ", error);
             }

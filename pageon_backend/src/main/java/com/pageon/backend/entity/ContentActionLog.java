@@ -27,4 +27,6 @@ public class ContentActionLog extends BaseTimeEntity {
     private ActionType actionType;
     @Enumerated(EnumType.STRING)
     private ContentType contentType;
+    @Builder.Default
+    private Integer ratingScore = 0;
 }

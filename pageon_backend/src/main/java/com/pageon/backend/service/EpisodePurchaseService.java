@@ -182,7 +182,7 @@ public class EpisodePurchaseService {
                         episodePurchase.upgradeToPurchase();
                     } else {
                         episodePurchase.extendRental(LocalDateTime.now().plusDays(3));
-                        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL);
+                        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL, 0);
                     }
                 }
             }
@@ -201,7 +201,7 @@ public class EpisodePurchaseService {
                 .purchaseType(PurchaseType.OWN)
                 .build();
 
-        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.PURCHASE);
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.PURCHASE, 0);
 
         return episodePurchaseRepository.save(episodePurchase);
 
@@ -218,7 +218,7 @@ public class EpisodePurchaseService {
                 .expiredAt(expiredAt)
                 .build();
 
-        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL);
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL, 0);
 
         return episodePurchaseRepository.save(episodePurchase);
     }
