@@ -1,12 +1,11 @@
-package com.pageon.backend.common.base;
+package com.pageon.backend.entity;
 
+import com.pageon.backend.common.base.BaseTimeEntity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -31,9 +30,11 @@ public abstract class EpisodeBase extends BaseTimeEntity {
     }
 
     @Builder.Default
+    @Setter(AccessLevel.PROTECTED)
     private Double averageRating = 0.0;
 
     @Builder.Default
+    @Setter(AccessLevel.PROTECTED)
     private Long ratingCount = 0L;
 
     public void addRating(Integer score) {

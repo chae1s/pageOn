@@ -127,12 +127,13 @@ export const ContentTitle = styled(Link)`
 
 export const ContentAuthorWrapper = styled.div`
     margin-top: 6px;
+    display: flex;
+    font-size: 14px;
+    color: #666;
+    line-height: 19px;
 `;
 
 export const ContentAuthor = styled.p`
-    line-heigth: 17px;
-    font-size: 15px;
-    color: #888;
     display: block;
     white-space: nowrap;
     flex: 0 1 auto;
@@ -141,6 +142,16 @@ export const ContentAuthor = styled.p`
     text-overflow: ellipsis;
     overflow-wrap: break-word;
 `;
+
+export const ContentSeparate = styled.div`
+
+`
+
+export const ContentType = styled.div`
+    font-size: 14px;
+    color: #666;
+    line-height: 19px;
+`
 
 export const ContentRatingSection = styled.div`
     display: flex;

@@ -1,6 +1,6 @@
 package com.pageon.backend.dto.response;
 
-import com.pageon.backend.common.base.EpisodeBase;
+import com.pageon.backend.entity.EpisodeBase;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

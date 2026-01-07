@@ -212,7 +212,13 @@ public class UserBehaviorSimulator {
     private void actionContentsPurchase(Long userId, ContentInfoRequest contentInfo) {
         // 구매 내역 확인
         boolean purchaseCheck = episodePurchaseService.checkPurchaseHistory(userId, contentInfo.getContentId(), contentInfo.getEpisodeId());
+        boolean actionCheck = random.nextBoolean();
 
+        int randomScore = random.nextInt(5) + 6;
+        ContentEpisodeRatingRequest ratingRequest = new ContentEpisodeRatingRequest(contentInfo.getContentType(), contentInfo.getEpisodeId(), randomScore);
+
+        boolean isSpoiler = random.nextBoolean();
+        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(getRandomComment(), isSpoiler);
         // 구매 내역 없으면 에피소드 구매
         if (!purchaseCheck) {
             episodePurchaseService.createPurchaseHistory(userId, contentInfo.getContentType(), contentInfo.getEpisodeId(), PurchaseType.OWN);
@@ -221,9 +227,16 @@ public class UserBehaviorSimulator {
         // 에피소드 페이지로 이동
         if (contentInfo.getContentType() == ContentType.WEBTOON) {
             webtoonEpisodeService.getWebtoonEpisodeById(userId, contentInfo.getEpisodeId());
-
+            if (actionCheck) {
+                ratingService.createWebtoonRating(userId, ratingRequest);
+                webtoonEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+            }
         } else {
             webnovelEpisodeService.getWebnovelEpisodeById(userId, contentInfo.getEpisodeId());
+            if (actionCheck) {
+                ratingService.createWebnovelRating(userId, ratingRequest);
+                webnovelEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+            }
 
         }
     }

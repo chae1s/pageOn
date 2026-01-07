@@ -2,7 +2,7 @@ import React from "react";
 import * as S from "../Styles/RankingContent.styles"
 import { Link } from "react-router-dom";
 import { SimpleContent } from "../../types/Content";
-import { formatUrl } from "../../utils/formatContentType";
+import { formatKorean, formatUrl } from "../../utils/formatContentType";
 
 interface Props {
     content: SimpleContent;
@@ -47,6 +47,8 @@ function RankingContentItem({ content, rank }: Props) {
                             <S.ContentAuthor>
                                 <Link to="#author">{content.author}</Link>
                             </S.ContentAuthor>
+                            <S.ContentSeparate>ㆍ</S.ContentSeparate>
+                            <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                         </S.ContentAuthorWrapper>
 
                         <S.ContentRatingSection>

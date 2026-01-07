@@ -1,10 +1,9 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.base.EpisodeBase;
+import com.pageon.backend.entity.EpisodeBase;
 import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.PurchaseType;
-import com.pageon.backend.common.enums.TransactionType;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
