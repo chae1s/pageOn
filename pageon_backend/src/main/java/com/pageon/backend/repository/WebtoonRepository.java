@@ -62,6 +62,6 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
     // 정주행 작품 추천 (완결 작품 중 조회수 높은 작품 리스트 출력) -> WHERE 절의 평점 점수는 나중에 수정
     @Query(value = "SELECT DISTINCT w FROM Webtoon w " +
             "JOIN FETCH w.creator " +
-            "WHERE w.status = 'COMPLETED' AND w.totalAverageRating >= 0 AND w.deletedAt IS NULL")
+            "WHERE w.status = 'COMPLETED' AND w.totalAverageRating >= 8 AND w.deletedAt IS NULL")
     Page<Webtoon> findCompletedMasterpieces(Pageable pageable);
 }
