@@ -1,9 +1,6 @@
 package com.pageon.backend.repository;
 
-import com.pageon.backend.dto.response.InterestContentResponse;
-import com.pageon.backend.dto.response.ReadingContentsResponse;
 import com.pageon.backend.entity.Content;
-import com.pageon.backend.entity.ReadingHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,9 +14,26 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
     Optional<Content> findByIdAndDeletedAtIsNull(Long id);
 
     @Query("SELECT c FROM Content c " +
+            "JOIN FETCH c.creator " +
+            "JOIN FETCH c.keywords " +
+            "WHERE c.id = :contentId")
+    Optional<Content> findByIdWithDetailInfo(Long contentId);
+
+    @Query(value = "SELECT DISTINCT c FROM Content c " +
+            "JOIN FETCH c.creator " +
+            "JOIN FETCH c.keywords k " +
             "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
-            "AND c.deletedAt IS NULL")
+            "AND c.deletedAt IS NULL",
+            countQuery = "SELECT COUNT(DISTINCT c.id) FROM Content c " +
+                    "JOIN c.keywords k " +
+                    "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
+                    "AND c.deletedAt IS NULL "
+    )
     Page<Content> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
 
 
+    @Query(value = "SELECT DISTINCT c FROM Content c " +
+            "JOIN FETCH c.creator " +
+            "WHERE c.status = 'COMPLETED' AND c.totalAverageRating >= 0 AND c.deletedAt IS NULL")
+    Page<Content> findCompletedMasterpieces(Pageable pageable);
 }

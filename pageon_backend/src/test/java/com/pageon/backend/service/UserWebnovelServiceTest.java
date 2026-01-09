@@ -10,6 +10,7 @@ import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.WebnovelRepository;
 import com.pageon.backend.security.PrincipalUser;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,8 @@ class UserWebnovelServiceTest {
     private WebnovelRepository webnovelRepository;
     @Mock
     private KeywordService keywordService;
+    @Mock
+    private ContentRepository contentRepository;
     private PrincipalUser mockPrincipalUser;
 
     @BeforeEach
@@ -66,27 +69,27 @@ class UserWebnovelServiceTest {
                 .aiPolicyAgreedAt(LocalDateTime.now())
                 .build();
 
-        List<Keyword> kewords = createKeywords("하나,둘,셋,넷");
+        List<Keyword> keywords = createKeywords("하나,둘,셋,넷");
 
         Webnovel webnovel = Webnovel.builder()
                 .id(1L)
                 .title("테스트")
                 .description("테스트")
                 .creator(creator)
-                .keywords(kewords)
+                .keywords(keywords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
-        List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
+        List<UserKeywordResponse> userKeywordResponses = createUserKeywords(keywords);
 
-        doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webnovelRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(webnovel));
+        doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(keywords);
+        when(contentRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(webnovel));
         //when
-        UserWebnovelResponse response = userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
+        ContentResponse.Detail response = userWebnovelService.getWebnovelById(1L, mockPrincipalUser);
 
         // then
-        assertEquals(webnovel.getId(), response.getId());
-        assertEquals(webnovel.getTitle(), response.getTitle());
+        assertEquals(webnovel.getId(), response.getContentId());
+        assertEquals(webnovel.getTitle(), response.getContentTitle());
         assertEquals(webnovel.getCreator().getPenName(), response.getAuthor());
 
     }
@@ -95,7 +98,7 @@ class UserWebnovelServiceTest {
     @DisplayName("DB에 존재하지 않는 웹소설일 경우 CustomException 발생")
     void getWebnovelById_whenInvalidWebnovelId_shouldThrowCustomException() {
         // given
-        when(webnovelRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+        when(contentRepository.findByIdWithDetailInfo(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
@@ -168,12 +171,12 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(webnovels.subList(0, 18));
 
         //when
-        List<ContentSimpleResponse> result = userWebnovelService.getWebnovelsByDay(serialDay);
+        List<ContentResponse.Simple> result = userWebnovelService.getWebnovelsByDay(serialDay);
         
         // then
         assertEquals(18, result.size());
-        assertEquals("소설1", result.get(0).getTitle());
-        assertEquals("소설18", result.get(17).getTitle());
+        assertEquals("소설1", result.get(0).getContentTitle());
+        assertEquals("소설18", result.get(17).getContentTitle());
         
     }
 
@@ -187,7 +190,7 @@ class UserWebnovelServiceTest {
         Pageable pageable = PageRequest.of(0, 18);
         when(webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(Collections.emptyList());
         //when
-        List<ContentSimpleResponse> result = userWebnovelService.getWebnovelsByDay(serialDay);
+        List<ContentResponse.Simple> result = userWebnovelService.getWebnovelsByDay(serialDay);
 
         // then
         assertEquals(0, result.size());
@@ -200,24 +203,24 @@ class UserWebnovelServiceTest {
         // given
         String query = "고양이";
 
-        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
+        Creator creator = Creator.builder().penName("작가").build();
 
-        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").build();
-        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").build();
-        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").build();
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").creator(creator).build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").creator(creator).build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").creator(creator).build();
 
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1, webnovel2), pageable, 2));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
 
         
         // then
         assertEquals(2, results.getContent().size());
         assertTrue(results.getContent().stream()
-                .allMatch(w -> w.getTitle().equals("고양")));
+                .allMatch(w -> w.getContentTitle().contains("고양")));
         
     }
     
@@ -233,7 +236,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
         
         // then
         assertEquals(0, results.getContent().size());
@@ -252,7 +255,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -266,18 +269,20 @@ class UserWebnovelServiceTest {
         // given
         String query = "고양이";
 
-        String sort = "popular";
         Pageable pageable = PageRequest.of(0, 10);
 
+        Creator creator = Creator.builder().penName("작가").build();
 
-        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").build();
-        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").deletedAt(LocalDateTime.now()).build();
-        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").build();
+        Webnovel webnovel1 = Webnovel.builder().id(1L).title("고양이가 사라진 마을").creator(creator).build();
+        Webnovel webnovel2 = Webnovel.builder().id(2L).title("고양이").creator(creator).deletedAt(LocalDateTime.now()).build();
+        Webnovel webnovel3 = Webnovel.builder().id(3L).title("별의 감정을 모르는 나에게").creator(creator).build();
+
+
         
         when(webnovelRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webnovel1), pageable, 1));
         
         //when
-        Page<ContentSearchResponse> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebnovelService.getWebnovelsByTitleOrCreator(query, pageable);
         
         // then
         assertEquals(1, results.getContent().size());

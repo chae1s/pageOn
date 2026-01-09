@@ -5,12 +5,9 @@ import * as M from "./MyPage.styles"
 import { UserSimpleProfile } from "../../types/User";
 import { useNavigate, Link} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import axios from "axios";
 import { SimpleContent } from "../../types/Content";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
-import ThumbnailContentList from "../../components/Contents/ThumbnailContentList";
 import api from "../../api/axiosInstance";
-import { ContentListWrapper } from "../../components/Styles/ThumbnailContent.styles";
 import MyPageSimpleContentItem from "../../components/Contents/MyPageSimpleContentItem";
 
 const MypageSummaryContainer = styled.div`
@@ -176,7 +173,7 @@ const UpdateContentListWrapper = styled.div`
 const UpdateContentList = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 2px;
     justify-content: flex-start;
     width: 100%;
 `
@@ -194,7 +191,7 @@ function MyPage() {
         pointBalance: 0
     });
 
-    const [simpleContents, setSimpleContents] = useState<SimpleContent[]>([]);
+    const [updateContents, setUpdateContents] = useState<SimpleContent[]>([]);
 
     const {logout} = useAuth();
 
@@ -227,7 +224,7 @@ function MyPage() {
             try {
                 const response = await api.get("/users/reading-histories/today");
 
-                setSimpleContents(response.data);
+                setUpdateContents(response.data);
             } catch (error) {
                 console.error("마이페이지 오늘 업데이트된 작품 리스트 조회 실패: ", error);
             }
@@ -352,10 +349,10 @@ function MyPage() {
                         </BookSectionTitle>
                         <UpdateContentListWrapper>
                             <UpdateContentList>
-                                {simpleContents.length === 0 ? (
+                                {updateContents.length === 0 ? (
                                     <EmptyListText>오늘 업데이트된 작품이 없습니다.</EmptyListText>
                                 ) : (
-                                    simpleContents.map((content) => (
+                                    updateContents.map((content) => (
                                         <MyPageSimpleContentItem content={content}/>
                                     ))
                                 )}

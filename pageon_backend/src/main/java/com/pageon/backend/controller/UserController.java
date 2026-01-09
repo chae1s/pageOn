@@ -112,16 +112,16 @@ public class UserController {
     }
 
     @GetMapping("/interests")
-    public ResponseEntity<PageResponse<InterestContentResponse>> getInterests(
+    public ResponseEntity<PageResponse<ContentResponse.InterestContent>> getInterests(
             @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
     ) {
 
         log.info("My Interests request received. Type: [{}], Sort: [{}], Page: {}, size: {}",
                 contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<InterestContentResponse> interestContentResponses = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
+        Page<ContentResponse.InterestContent> interestContents = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(interestContentResponses));
+        return ResponseEntity.ok(new PageResponse<>(interestContents));
     }
 
     @GetMapping("/comments")
@@ -136,19 +136,19 @@ public class UserController {
     }
 
     @GetMapping("/reading-histories")
-    public ResponseEntity<PageResponse<ReadingContentsResponse>> getReadingHistories(
+    public ResponseEntity<PageResponse<ContentResponse.RecentRead>> getReadingHistories(
             @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
     ) {
 
-        Page<ReadingContentsResponse> readingContentsResponses = readingHistoryService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
+        Page<ContentResponse.RecentRead> readingContents = readingHistoryService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
 
-        return ResponseEntity.ok(new PageResponse<>(readingContentsResponses));
+        return ResponseEntity.ok(new PageResponse<>(readingContents));
     }
 
     @GetMapping("/reading-histories/today")
-    public ResponseEntity<List<ContentSimpleResponse>> getReadingHistoriesToday(@AuthenticationPrincipal PrincipalUser principalUser) {
+    public ResponseEntity<List<ContentResponse.Simple>> getReadingHistoriesToday(@AuthenticationPrincipal PrincipalUser principalUser) {
 
-        List<ContentSimpleResponse> contentSimpleResponses = readingHistoryService.getTodayReadingHistory(principalUser.getId());
+        List<ContentResponse.Simple> contentSimpleResponses = readingHistoryService.getTodayReadingHistory(principalUser.getId());
 
         return ResponseEntity.ok(contentSimpleResponses);
     }

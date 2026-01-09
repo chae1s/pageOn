@@ -1,17 +1,16 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
-import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.*;
-import com.pageon.backend.dto.response.ContentSimpleResponse;
 import com.pageon.backend.dto.response.UserContentListResponse;
-import com.pageon.backend.dto.response.UserWebtoonResponse;
-import com.pageon.backend.entity.Webnovel;
+import com.pageon.backend.entity.Content;
+import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.InterestRepository;
+import com.pageon.backend.repository.KeywordRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -35,13 +38,15 @@ public class UserWebtoonService {
     private final KeywordService keywordService;
     private final WebtoonEpisodeService webtoonEpisodeService;
     private final InterestRepository interestRepository;
+    private final ContentRepository contentRepository;
+    private final KeywordRepository keywordRepository;
 
     @Transactional(readOnly = true)
-    public UserWebtoonResponse getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
-        Webtoon webtoon = webtoonRepository.findByIdAndDeletedAtIsNull(webtoonId).orElseThrow(
+    public ContentResponse.Detail getWebtoonById(Long webtoonId, PrincipalUser principalUser) {
+        Webtoon webtoon = webtoonRepository.findByIdWithDetailInfo(webtoonId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBTOON_NOT_FOUND)
         );
-        List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
+
         List<EpisodeListResponse> episodes;
 
         Boolean isInterested = false;
@@ -51,10 +56,10 @@ public class UserWebtoonService {
             episodes = webtoonEpisodeService.getEpisodesByWebtoonId(userId, webtoonId);
             isInterested = interestRepository.existsByUser_IdAndContentId(userId, webtoonId);
         } else {
-            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(webtoonId);
+            episodes = webtoonEpisodeService.getEpisodesByWebtoonId(null, webtoonId);
         }
 
-        return UserWebtoonResponse.fromEntity(webtoon, keywords, episodes, isInterested);
+        return ContentResponse.Detail.fromEntity(webtoon, episodes, isInterested);
     }
 
     @Transactional(readOnly = true)
@@ -71,31 +76,27 @@ public class UserWebtoonService {
     }
 
     @Transactional(readOnly = true)
-    public List<ContentSimpleResponse> getWebtoonsByDay(String serialDay) {
+    public List<ContentResponse.Simple> getWebtoonsByDay(String serialDay) {
         Pageable pageable = PageRequest.of(0, 18);
         List<Webtoon> webtoons = webtoonRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable);
         log.info("{} 웹툰 검색", serialDay);
 
         return webtoons.stream()
-                .map(ContentSimpleResponse::fromEntity)
+                .map(ContentResponse.Simple::fromEntity)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebtoonsByKeyword(String keywordName, String sort, Pageable pageable) {
-
-        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
+    public Page<ContentResponse.Search> getWebtoonsByKeyword(String keywordName, Pageable sortedPageable) {
 
         Page<Webtoon> webtoonPage = webtoonRepository.findByKeywordName(keywordName, sortedPageable);
 
 
-        return webtoonPage.map(webtoon ->
-                ContentSearchResponse.fromEntity(webtoon, "webtoons")
-        );
+        return webtoonPage.map(ContentResponse.Search::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getWebtoonsByTitleOrCreator(String query, Pageable sortedPageable) {
+    public Page<ContentResponse.Search> getWebtoonsByTitleOrCreator(String query, Pageable sortedPageable) {
 
 
         log.debug("Entering getWebtoonsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
@@ -107,9 +108,35 @@ public class UserWebtoonService {
                 query,
                 webtoonPage.getTotalElements());
 
-        return webtoonPage.map(webtoon ->
-                ContentSearchResponse.fromEntity(webtoon, "webtoons")
+        return webtoonPage.map(ContentResponse.Search::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getRecentWebtoons(Pageable pageable) {
+
+        LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
+
+        Page<Webtoon> webtoonPage = webtoonRepository.findRecentWebtoons(since, pageable);
+
+        return webtoonPage.map(ContentResponse.Simple::fromEntity);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getRecommendKeywordWebtoons(Pageable pageable) {
+        LocalDate currentDate = LocalDate.now();
+        Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
+                () -> new CustomException(ErrorCode.INVALID_KEYWORD)
         );
+
+        Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
+        Page<ContentResponse.Simple> responses = webtoons.map(ContentResponse.Simple::fromEntity);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("keyword", keyword.getName());
+        result.put("contents", new PageResponse<>(responses));
+
+        return result;
     }
 
 }

@@ -74,6 +74,8 @@ public enum ErrorCode {
     EPISODE_ALREADY_PURCHASE("이미 구매한 에피소드입니다.", HttpStatus.CONFLICT),
     EPISODE_ALREADY_RENTAL("이미 대여한 에피소드입니다.", HttpStatus.CONFLICT),
     INVALID_PURCHASE_TYPE("해당 구매 방식은 지원하지 않습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_KEYWORD("유효한 키워드가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+
     ;
 
 

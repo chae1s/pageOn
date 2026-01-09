@@ -5,6 +5,7 @@ import * as S from "../Styles/SearchContents.styles"
 import { keyboard } from "@testing-library/user-event/dist/keyboard";
 import FullStarIcon from "../../assets/fullStarIcon.png";
 import { formatDate } from "../../utils/formatData";
+import { formatKorean, formatUrl } from "../../utils/formatContentType";
 
 interface Props {
     contents?: SearchContent[];
@@ -24,7 +25,7 @@ function SearchContentList({contents, totalElements = 0}: Props) {
     const handleKeywordClick = (contentType: string, name: string) => {
         const params = new URLSearchParams();
         
-        params.append("type", contentType)
+        params.append("type", formatUrl(contentType))
         params.append("q", name);
 
         
@@ -41,18 +42,18 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                             <S.ContentSearchWrapper>
                                 <S.ContentSearchItemCoverSection>
                                     <S.ContentCoverWrapper>
-                                        <S.ContentCoverImage src={content.cover} alt={content.title}/>
+                                        <S.ContentCoverImage src={content.cover} alt={content.contentTitle}/>
                                     </S.ContentCoverWrapper>
                                 </S.ContentSearchItemCoverSection>
                                 <S.ContentSearchItemInfoSection>
                                     <S.ContentInfoWrapper>
                                         <S.ContentTitleWrapper>
-                                            <S.ContentTitle to={`/${content.contentType}/${content.id}`}>{content.title}</S.ContentTitle>
+                                            <S.ContentTitle to={`/${formatUrl(content.contentType)}/${content.contentId}`}>{content.contentTitle}</S.ContentTitle>
                                         </S.ContentTitleWrapper>
                                         <S.ContentAuthorWrapper>
                                             <S.ContentAuthor>{content.author}</S.ContentAuthor>
                                             <S.ContentSeparate>ㆍ</S.ContentSeparate>
-                                            <S.ContentType>{content.contentType === 'webnovels' ? '웹소설' : '웹툰'}</S.ContentType>
+                                            <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                                         </S.ContentAuthorWrapper>
                                         <S.EpisodeInfoContainer>
                                             <S.ContentEpisodeCount>총 {content.episodeCount}화</S.ContentEpisodeCount>
@@ -64,7 +65,7 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                                             <S.ContentRatingScore>{Number(content.totalAverageRating ?? 0).toFixed(1)}</S.ContentRatingScore>
                                             <S.ContentRatingCount>({content.totalRatingCount ?? 0})</S.ContentRatingCount>
                                         </S.ContentRatingContainer>
-                                        <S.ContentDescriptionLink to={`/${content.contentType}/${content.id}`}>
+                                        <S.ContentDescriptionLink to={`/${formatUrl(content.contentType)}/${content.contentId}`}>
                                         <S.ContentDescription>{content.description}</S.ContentDescription>
                                         </S.ContentDescriptionLink>
                                         <S.ContentKeywordContainer>

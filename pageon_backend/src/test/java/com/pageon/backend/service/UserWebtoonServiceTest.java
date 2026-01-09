@@ -7,6 +7,7 @@ import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
+import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.WebtoonRepository;
 import com.pageon.backend.security.PrincipalUser;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +44,8 @@ class UserWebtoonServiceTest {
     private WebtoonRepository webtoonRepository;
     @Mock
     private KeywordService keywordService;
+    @Mock
+    private ContentRepository contentRepository;
 
     private PrincipalUser mockPrincipalUser;
 
@@ -79,13 +82,13 @@ class UserWebtoonServiceTest {
         List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
         doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
-        when(webtoonRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(webtoon));
+        when(contentRepository.findByIdWithDetailInfo(1L)).thenReturn(Optional.of(webtoon));
         //when
-        UserWebtoonResponse response = userWebtoonService.getWebtoonById(1L, mockPrincipalUser);
+        ContentResponse.Detail response = userWebtoonService.getWebtoonById(1L, mockPrincipalUser);
 
         // then
-        assertEquals(webtoon.getId(), response.getId());
-        assertEquals(webtoon.getTitle(), response.getTitle());
+        assertEquals(webtoon.getId(), response.getContentId());
+        assertEquals(webtoon.getTitle(), response.getContentTitle());
         assertEquals(webtoon.getCreator().getPenName(), response.getAuthor());
 
     }
@@ -94,7 +97,7 @@ class UserWebtoonServiceTest {
     @DisplayName("DB에 존재하지 않는 웹툰일 경우 CustomException 발생")
     void getWebnovelById_whenInvalidWebnovelId_shouldThrowCustomException() {
         // given
-        when(webtoonRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+        when(contentRepository.findByIdWithDetailInfo(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception =  assertThrows(CustomException.class, () -> {
@@ -167,12 +170,12 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(webtoons.subList(0, 18));
 
         //when
-        List<ContentSimpleResponse> result = userWebtoonService.getWebtoonsByDay(serialDay);
+        List<ContentResponse.Simple> result = userWebtoonService.getWebtoonsByDay(serialDay);
 
         // then
         assertEquals(18, result.size());
-        assertEquals("웹툰1", result.get(0).getTitle());
-        assertEquals("웹툰18", result.get(17).getTitle());
+        assertEquals("웹툰1", result.get(0).getContentTitle());
+        assertEquals("웹툰18", result.get(17).getContentTitle());
 
     }
 
@@ -186,7 +189,7 @@ class UserWebtoonServiceTest {
         Pageable pageable = PageRequest.of(0, 18);
         when(webtoonRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(Collections.emptyList());
         //when
-        List<ContentSimpleResponse> result = userWebtoonService.getWebtoonsByDay(serialDay);
+        List<ContentResponse.Simple> result = userWebtoonService.getWebtoonsByDay(serialDay);
 
         // then
         assertEquals(0, result.size());
@@ -211,13 +214,13 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1, webtoon2), pageable, 2));
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
 
         // then
         assertEquals(2, results.getContent().size());
         assertTrue(results.getContent().stream()
-                .allMatch(w -> w.getTitle().equals("고양")));
+                .allMatch(w -> w.getContentTitle().equals("고양")));
 
     }
 
@@ -233,7 +236,7 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -252,7 +255,7 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(Page.empty());
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(0, results.getContent().size());
@@ -277,7 +280,7 @@ class UserWebtoonServiceTest {
         when(webtoonRepository.findByTitleOrPenNameContaining(query, pageable)).thenReturn(new PageImpl<>(List.of(webtoon1), pageable, 1));
 
         //when
-        Page<ContentSearchResponse> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
+        Page<ContentResponse.Search> results = userWebtoonService.getWebtoonsByTitleOrCreator(query, pageable);
 
         // then
         assertEquals(1, results.getContent().size());

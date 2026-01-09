@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.EpisodeListResponse;
 import com.pageon.backend.dto.response.EpisodePurchaseResponse;
@@ -27,29 +28,25 @@ public class WebtoonEpisodeService {
     private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final ReadingHistoryService readingHistoryService;
+    private final ActionLogService actionLogService;
 
-    @Transactional(readOnly = true)
-    public List<EpisodeListResponse> getEpisodesByWebtoonId(Long webtoonId) {
-        List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
-
-        return webtoonEpisodes.stream()
-                .map(episode -> EpisodeListResponse.fromEntity(
-                        episode, null))
-                .toList();
-    }
 
     @Transactional(readOnly = true)
     public List<EpisodeListResponse> getEpisodesByWebtoonId(Long userId, Long webtoonId) {
         List<WebtoonEpisode> webtoonEpisodes = webtoonEpisodeRepository.findByWebtoonId(webtoonId);
 
-        return webtoonEpisodes.stream().map(episode -> {
-            EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, ContentType.WEBTOON, episode.getId()).orElse(null);
-            if (episodePurchase == null) {
-                return EpisodeListResponse.fromEntity(episode, null);
-            } else {
-                return EpisodeListResponse.fromEntity(episode, EpisodePurchaseResponse.fromEntity(episodePurchase));
-            }
-        }).toList();
+        if (userId == null) {
+            return webtoonEpisodes.stream()
+                    .map(episode -> EpisodeListResponse.fromEntity(episode, null)).toList();
+        } else {
+            return webtoonEpisodes.stream().map(episode -> {
+                EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, webtoonId, episode.getId()).orElse(null);
+                return EpisodeListResponse.fromEntity(
+                        episode,
+                        (episodePurchase != null) ? EpisodePurchaseResponse.fromEntity(episodePurchase) : null
+                );
+            }).toList();
+        }
     }
 
     @Transactional
@@ -66,6 +63,10 @@ public class WebtoonEpisodeService {
         Integer userScore = webtoonEpisodeRatingRepository.findScoreByWebtoonEpisodeAndUser(userId, episode.getId());
 
         readingHistoryService.checkReadingHistory(userId, episode.getWebtoon().getId(), episodeId);
+
+        actionLogService.createActionLog(userId, episode.getWebtoon().getId(), ContentType.WEBTOON, ActionType.VIEW, 0);
+
+        episode.getWebtoon().updateViewCount();
 
         return WebtoonEpisodeDetailResponse.fromEntity(
                 episode, episode.getWebtoon().getTitle(), webtoonImages,

@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
@@ -33,6 +34,7 @@ public class WebtoonEpisodeCommentService {
     private final UserRepository userRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final WebtoonEpisodeCommentLikeRepository webtoonEpisodeCommentLikeRepository;
+    private final ActionLogService actionLogService;
 
     @Transactional
     public void createComment(Long userId, Long episodeId, ContentEpisodeCommentRequest commentRequest) {
@@ -58,6 +60,7 @@ public class WebtoonEpisodeCommentService {
                 .build();
 
         webtoonEpisodeCommentRepository.save(comment);
+        actionLogService.createActionLog(userId, webtoonEpisode.getWebtoon().getId(), ContentType.WEBTOON, ActionType.COMMENT, 0);
         log.info("[SUCCESS] createComment committed: userId = {}, episodeId = {}", userId, episodeId);
 
     }

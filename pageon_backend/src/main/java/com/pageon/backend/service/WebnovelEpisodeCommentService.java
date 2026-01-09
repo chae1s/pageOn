@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
@@ -34,6 +35,7 @@ public class WebnovelEpisodeCommentService {
     private final UserRepository userRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebnovelEpisodeCommentLikeRepository webnovelEpisodeCommentLikeRepository;
+    private final ActionLogService actionLogService;
 
     @Transactional
     public void createComment(Long userId, Long episodeId, ContentEpisodeCommentRequest commentRequest) {
@@ -58,6 +60,8 @@ public class WebnovelEpisodeCommentService {
                 .build();
 
         webnovelEpisodeCommentRepository.save(comment);
+
+        actionLogService.createActionLog(userId, webnovelEpisode.getWebnovel().getId(), ContentType.WEBNOVEL, ActionType.COMMENT, 0);
         log.info("[SUCCESS] createComment committed: userId = {}, episodeId = {}", userId, episodeId);
 
     }

@@ -1,4 +1,4 @@
-export interface UserKeywordResponse {
+export interface Keyword {
     categoryId: number;
     name: string;
 }

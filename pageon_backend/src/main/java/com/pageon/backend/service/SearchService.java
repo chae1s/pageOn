@@ -1,7 +1,7 @@
 package com.pageon.backend.service;
 
 import com.pageon.backend.common.utils.PageableUtil;
-import com.pageon.backend.dto.response.ContentSearchResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +27,26 @@ public class SearchService {
 
 
     @Transactional(readOnly = true)
-    public Page<ContentSearchResponse> getContentsByTitleOrCreator(String contentType, String query, String sort, Pageable pageable) {
+    public Page<ContentResponse.Search> getContentsByKeyword(String contentType, String query, String sort, Pageable pageable) {
+        Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
+
+        switch (contentType) {
+            case "webnovels" -> {
+                return userWebnovelService.getWebnovelsByKeyword(query, sortedPageable);
+            }
+            case "webtoons" -> {
+                return userWebtoonService.getWebtoonsByKeyword(query, sortedPageable);
+            }
+        }
+
+        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Search> getContentsByTitleOrCreator(String contentType, String query, String sort, Pageable pageable) {
 
         Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
-        List<String> contentTypes = List.of("webnovels", "webtoons", "all");
-
 
         switch (contentType) {
             case "webnovels" -> {

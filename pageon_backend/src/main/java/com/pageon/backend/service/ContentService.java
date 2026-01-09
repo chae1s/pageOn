@@ -1,6 +1,6 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.response.ContentSearchResponse;
+import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.repository.ContentRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -15,7 +18,8 @@ import org.springframework.stereotype.Service;
 public class ContentService {
     private final ContentRepository contentRepository;
 
-    public Page<ContentSearchResponse> getContentsByTitleOrCreator(String query, Pageable sortedPageable) {
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Search> getContentsByTitleOrCreator(String query, Pageable sortedPageable) {
 
         log.debug("Entering getContentsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
         Page<Content> contentPage = contentRepository.findByTitleOrPenNameContaining(query, sortedPageable);
@@ -24,11 +28,9 @@ public class ContentService {
                 query,
                 contentPage.getTotalElements());
 
-        return contentPage.map(content -> {
-            String contentType = content.getDtype().equals("WEBNOVEL") ? "webnovels" : "webtoons";
-            return ContentSearchResponse.fromEntity(content, contentType);
-        });
+        return contentPage.map(ContentResponse.Search::fromEntity);
     }
+
 
 
 }

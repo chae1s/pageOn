@@ -18,22 +18,22 @@ function MyPageSimpleContentItem({content} : Props) {
     }
 
     return (
-        <S.ContentItem>
-            <S.ContentImageCover onClick={handleContentClick(content.contentType, content.id)}>
+        <S.MyPageContentItem>
+            <S.ContentImageCover onClick={handleContentClick(content.contentType, content.contentId)}>
                 <S.ContentImage
                     src={content.cover || "https://via.placeholder.com/140x200"}
-                    alt={content.title}
+                    alt={content.contentTitle}
                 />
             </S.ContentImageCover>
             <S.ContentInfoCover>
-                <S.ContentTitle onClick={handleContentClick(content.contentType, content.id)}>{content.title}</S.ContentTitle>
+                <S.ContentTitle onClick={handleContentClick(content.contentType, content.contentId)}>{content.contentTitle}</S.ContentTitle>
                 <S.ContentInfoWrapper>
                     <S.ContentAuthor>{content.author}</S.ContentAuthor>
                     <S.ContentSeparate>ㆍ</S.ContentSeparate>
                     <S.ContentType>{formatKorean(content.contentType)}</S.ContentType>
                 </S.ContentInfoWrapper>
             </S.ContentInfoCover>
-        </S.ContentItem>
+        </S.MyPageContentItem>
     )
 }
 

@@ -1,9 +1,9 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.base.EpisodeBase;
+import com.pageon.backend.entity.EpisodeBase;
+import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.PurchaseType;
-import com.pageon.backend.common.enums.TransactionType;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -23,12 +21,11 @@ import java.util.Map;
 public class EpisodePurchaseService {
 
     private final UserRepository userRepository;
-    private final WebnovelRepository webnovelRepository;
-    private final WebtoonRepository webtoonRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final PointTransactionService pointTransactionService;
+    private final ActionLogService actionLogService;
 
 
     private record EpisodeInfo(Long contentId, String contentTitle, Integer episodePrice, EpisodeBase episodeBase) {}
@@ -70,8 +67,8 @@ public class EpisodePurchaseService {
 
     }
 
-    public Boolean checkPurchaseHistory(Long userId, ContentType contentType, Long episodeId) {
-        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(userId, contentType, episodeId).orElse(null);
+    public Boolean checkPurchaseHistory(Long userId, Long contentId, Long episodeId) {
+        EpisodePurchase episodePurchase = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(userId, contentId, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             return false;
@@ -161,13 +158,13 @@ public class EpisodePurchaseService {
         log.info("Validate episode purchase or rent: userId = {}, contentType = {}, episodeId = {}", user.getId(), contentType, episodeId);
 
         EpisodePurchase episodePurchase
-                = episodePurchaseRepository.findByUser_IdAndContentTypeAndEpisodeId(user.getId(), contentType, episodeId).orElse(null);
+                = episodePurchaseRepository.findByUser_IdAndContentIdAndEpisodeId(user.getId(), contentId, episodeId).orElse(null);
 
         if (episodePurchase == null) {
             if (purchaseType == PurchaseType.OWN) {
-                return purchaseEpisode(user, contentType, contentId, episodeId);
+                return purchaseEpisode(user, contentId, contentType, episodeId);
             } else {
-                return rentEpisode(user, contentType, contentId, episodeId);
+                return rentEpisode(user, contentId, contentType, episodeId);
             }
         } else {
             if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
@@ -182,6 +179,7 @@ public class EpisodePurchaseService {
                         episodePurchase.upgradeToPurchase();
                     } else {
                         episodePurchase.extendRental(LocalDateTime.now().plusDays(3));
+                        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL, 0);
                     }
                 }
             }
@@ -192,30 +190,32 @@ public class EpisodePurchaseService {
 
     }
 
-    private EpisodePurchase purchaseEpisode(User user, ContentType contentType, Long contentId, Long episodeId) {
+    private EpisodePurchase purchaseEpisode(User user, Long contentId, ContentType contentType, Long episodeId) {
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
-                .contentType(contentType)
                 .contentId(contentId)
                 .episodeId(episodeId)
                 .purchaseType(PurchaseType.OWN)
                 .build();
 
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.PURCHASE, 0);
+
         return episodePurchaseRepository.save(episodePurchase);
 
     }
 
-    private EpisodePurchase rentEpisode(User user, ContentType contentType, Long contentId, Long episodeId) {
+    private EpisodePurchase rentEpisode(User user, Long contentId, ContentType contentType, Long episodeId) {
         LocalDateTime expiredAt = LocalDateTime.now().plusDays(3);
 
         EpisodePurchase episodePurchase = EpisodePurchase.builder()
                 .user(user)
-                .contentType(contentType)
                 .contentId(contentId)
                 .episodeId(episodeId)
                 .purchaseType(PurchaseType.RENT)
                 .expiredAt(expiredAt)
                 .build();
+
+        actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL, 0);
 
         return episodePurchaseRepository.save(episodePurchase);
     }

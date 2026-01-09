@@ -56,7 +56,7 @@ function ContentDetailLayout({content}: Props) {
 
         try {
 
-            await api.post(`/interests/${content.id}`, {})
+            await api.post(`/interests/${content.contentId}`, {})
             
             setIsInterested(true);
             setNotificationMessage("관심 작품에 등록되었습니다.");
@@ -74,7 +74,7 @@ function ContentDetailLayout({content}: Props) {
 
     const DeleteInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
         try {
-            await api.delete(`/interests/${content.id}`, {})
+            await api.delete(`/interests/${content.contentId}`, {})
 
             setIsInterested(false);
             setNotificationMessage("관심 작품에서 삭제되었습니다.");
@@ -105,11 +105,11 @@ function ContentDetailLayout({content}: Props) {
         <>
             <S.ContentDetailHeader>
                 <S.ContentImageContainer>
-                    <S.ContentImage src={content.cover} alt={content.title} />
+                    <S.ContentImage src={content.cover} alt={content.contentTitle} />
                 </S.ContentImageContainer>
                 <S.ContentInfoContainer>
                     <S.ContentTitleWrapper>
-                        <S.ContentTitle className="detail-title">{content.title}</S.ContentTitle>
+                        <S.ContentTitle className="detail-title">{content.contentTitle}</S.ContentTitle>
                         <S.ContentStatus $status={content.status}>{statusMap[content.status]}</S.ContentStatus>
                         <S.ContentLikeBtnContainer>
                             {isInterested ? (

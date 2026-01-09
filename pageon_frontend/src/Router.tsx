@@ -24,13 +24,16 @@ import CreatorDashbord from "./pages/Creators/CreatorDashbord";
 import WebnovelHome from "./pages/Home/WebnovelHome";
 import WebtoonHome from "./pages/Home/WebtoonHome";
 import WebnovelDetailPage from "./pages/Contents/WebnovelDetailPage";
-import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage ";
+import WebtoonDetailPage from "./pages/Contents/WebtoonDetailPage";
 import WebnovelViewer from "./pages/Contents/WebnovelViewer";
 import WebtoonViewer from "./pages/Contents/WebtoonViewer";
 import KeywordSearch from "./pages/Search/KeywordSearch";
 import TitleCreatorSearch from "./pages/Search/TitleCreatorSearch";
 import EpisodeCommentsPage from "./pages/Contents/EpisodeCommentsPage";
 import PointTransactionPage from "./pages/Users/PointTransactionPage";
+import NewContents from "./pages/Contents/NewContents";
+import MasterpieceContents from "./pages/Contents/MasterpieceContents";
+import RecommendKeywordContents from "./pages/Contents/RecommendKeywordContents";
 
 function Router() {
     const location = useLocation();
@@ -53,6 +56,13 @@ function Router() {
             <Route path="/" element={<Home />} />
             <Route path="/webnovels" element={<WebnovelHome />} />
             <Route path="/webtoons" element={<WebtoonHome />} />
+            <Route path="/webnovels/new" element={<NewContents contentType="WEBNOVEL"/>} />
+            <Route path="/webtoons/new" element={<NewContents contentType="WEBTOON"/>} />
+            <Route path="/contents/masterpiece" element={<MasterpieceContents contentType="ALL"/>} />
+            <Route path="/webnovels/masterpiece" element={<MasterpieceContents contentType="WEBNOVEL"/>} />
+            <Route path="/webtoons/masterpiece" element={<MasterpieceContents contentType="WEBTOON"/>} />
+            <Route path="/webnovels/recommend/by-keyword" element={<RecommendKeywordContents contentType="WEBNOVEL" />} />
+            <Route path="/webtoons/recommend/by-keyword" element={<RecommendKeywordContents contentType="WEBTOON" />} />
             <Route path="/webnovels/:contentId" element={<WebnovelDetailPage />} />
             <Route path="/webtoons/:contentId" element={<WebtoonDetailPage />} />
             <Route path="/search/keyword" element={<KeywordSearch/>} />
