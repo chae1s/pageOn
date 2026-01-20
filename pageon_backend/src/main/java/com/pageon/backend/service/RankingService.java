@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ public class RankingService {
     @Transactional
     @Scheduled(cron = "0 0 * * * *")
     public void updateHourlyRanking() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         LocalDateTime now = LocalDateTime.now();
 
         LocalDateTime rankingHour = now.withMinute(0).withSecond(0).withNano(0);
@@ -54,6 +57,8 @@ public class RankingService {
 
         rankingRepository.saveAll(rankings);
 
+        stopWatch.stop();
+        log.info("실시간 랭킹 콘텐츠 저장 소요 시간: {}ms", stopWatch.getTotalTimeMillis());
 
     }
 
@@ -95,6 +100,8 @@ public class RankingService {
     @Transactional(readOnly = true)
     public List<ContentResponse.Simple> getHourlyRankingContents(String contentType) {
 
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         LocalDateTime rankingHour = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         List<ContentRanking> contentRankings;
         switch (contentType) {
@@ -104,6 +111,8 @@ public class RankingService {
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         }
 
+        stopWatch.stop();
+        log.info("실시간 랭킹 콘텐츠 조회 소요 시간: {}ms", stopWatch.getTotalTimeMillis());
         return contentRankings.stream().map(contentRanking -> ContentResponse.Simple.fromEntity(contentRanking.getContent())).toList();
     }
 }

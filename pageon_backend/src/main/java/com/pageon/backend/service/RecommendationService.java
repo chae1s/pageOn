@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.PageResponse;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,45 +34,55 @@ public class RecommendationService {
     private final WebtoonRepository webtoonRepository;
     private final KeywordRepository keywordRepository;
 
+    @ExecutionTimer
     @Transactional(readOnly = true)
     public Page<ContentResponse.Simple> getMasterpiecesContents(String contentType, Pageable pageable) {
 
+        Page<ContentResponse.Simple> contents;
         switch (contentType) {
             case "all" -> {
-                Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
-                return contents.map(ContentResponse.Simple::fromEntity);
+                Page<Content> contentPage = contentRepository.findCompletedMasterpieces(pageable);
+                contents = contentPage.map(ContentResponse.Simple::fromEntity);
             }
             case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
-                return webnovels.map(ContentResponse.Simple::fromEntity);
+                Page<Webnovel> webnovelPage = webnovelRepository.findCompletedMasterpieces(pageable);
+                contents = webnovelPage.map(ContentResponse.Simple::fromEntity);
             }
             case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
-                return webtoons.map(ContentResponse.Simple::fromEntity);
+                Page<Webtoon> webtoonPage = webtoonRepository.findCompletedMasterpieces(pageable);
+                contents = webtoonPage.map(ContentResponse.Simple::fromEntity);
             }
+            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
 
         };
 
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        return contents;
     }
 
+    @ExecutionTimer
     @Transactional(readOnly = true)
     public Page<ContentResponse.Simple> getRecentContents(String contentType, Pageable pageable) {
 
+        Page<ContentResponse.Simple> contents;
         LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
         switch (contentType) {
             case "webnovels" -> {
                 Page<Webnovel> webnovelPage = webnovelRepository.findRecentWebnovels(since, pageable);
-                return webnovelPage.map(ContentResponse.Simple::fromEntity);
-            } case "webtoons" -> {
-                Page<Webtoon> webtoonPage = webtoonRepository.findRecentWebtoons(since, pageable);
-                return webtoonPage.map(ContentResponse.Simple::fromEntity);
+                contents = webnovelPage.map(ContentResponse.Simple::fromEntity);
             }
+            case "webtoons" -> {
+                Page<Webtoon> webtoonPage = webtoonRepository.findRecentWebtoons(since, pageable);
+                contents = webtoonPage.map(ContentResponse.Simple::fromEntity);
+            }
+            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         }
 
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+
+        return contents;
+
     }
 
+    @ExecutionTimer
     @Transactional(readOnly = true)
     public Map<String, Object> getRecommendKeywordContents(String contentType, Pageable pageable) {
         LocalDate currentDate = LocalDate.now();
@@ -96,6 +108,7 @@ public class RecommendationService {
         Map<String, Object> result = new HashMap<>();
         result.put("keyword", keyword.getName());
         result.put("contents", new PageResponse<>(responses));
+
 
         return result;
 

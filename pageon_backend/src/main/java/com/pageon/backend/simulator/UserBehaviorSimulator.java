@@ -41,7 +41,7 @@ public class UserBehaviorSimulator {
     private final InterestService interestService;
 
 
-    @Scheduled(fixedDelay = 1000)
+//    @Scheduled(fixedDelay = 1000)
     public void simulateRandomActivity() {
 
         Long userId = random.nextLong(10000) + 1;

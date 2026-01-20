@@ -193,7 +193,7 @@ public class InitUserData implements ApplicationRunner {
                     .password(passwordEncoder.encode(line[1]))
                     .nickname(line[2])
                     .birthDate(birthDate)
-                    .pointBalance(Integer.valueOf(line[4]))
+                    .pointBalance(100000)
                     .oAuthProvider(OAuthProvider.EMAIL)
                     .gender(Gender.valueOf(line[5]))
                     .termsAgreed(true)
