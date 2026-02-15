@@ -26,7 +26,8 @@ function WebtoonHome() {
 
     const [activeDay, setActiveDay] = useState<string>(initialDay);
     
-
+    
+    
     useEffect(() => {
         async function fetchData() {
             try {
@@ -37,17 +38,21 @@ function WebtoonHome() {
                 }
 
                 const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
-                    api.get(`/webtoons/daily/${initialDayEng}`),
-                    api.get('/recommendation/recent', {
+                    api.get(`/contents/daily/${initialDayEng}`, {
+                        params: {
+                            contentType: 'webtoons'
+                        }
+                    }),
+                    api.get('/contents/recent', {
                         params: params
                     }), 
-                    api.get('/recommendation/masterpiece', {
+                    api.get('/contents/masterpiece', {
                         params: params
                     }), 
-                    api.get('/recommendation/by-keyword', {
+                    api.get('/contents/by-keyword', {
                         params: params
                     }), 
-                    api.get('/recommendation/hourly-ranking', {
+                    api.get('/contents/hourly-ranking', {
                         params: {
                             contentType: 'webtoons'
                         }
@@ -82,7 +87,11 @@ function WebtoonHome() {
         setDailyContents([]);
 
         try {
-            const response = await axios.get(`/api/webtoons/daily/${day}`);
+            const response = await api.get(`/contents/daily/${day}`, {
+                params: {
+                    contentType: 'webtoons'
+                }
+            })
             console.log("요일별 웹툰 데이터: ", response.data);
             setDailyContents(response.data);
         } catch (error) {

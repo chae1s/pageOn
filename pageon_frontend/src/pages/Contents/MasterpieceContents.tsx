@@ -30,7 +30,7 @@ function MasterpieceContents({contentType} : Props) {
                 contentType: formatUrl(contentType)
             }
             try {
-                const response = await api.get('/recommendation/masterpiece', {
+                const response = await api.get('/contents/masterpiece', {
                     params: params
                 });
 

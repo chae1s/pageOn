@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,18 +68,6 @@ public class UserWebnovelService {
 
         return webnovels.stream()
                 .map(ContentResponse.Summary::fromEntity)
-                .toList();
-    }
-
-    @ExecutionTimer
-    @Transactional(readOnly = true)
-    public List<ContentResponse.Simple> getWebnovelsByDay(String serialDay) {
-        Pageable pageable = PageRequest.of(0, 18);
-        List<Webnovel> webnovels = webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable);
-        log.info("{} 웹소설 검색", serialDay);
-
-        return webnovels.stream()
-                .map(ContentResponse.Simple::fromEntity)
                 .toList();
     }
 

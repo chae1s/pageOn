@@ -42,11 +42,6 @@ public class UserWebtoonController {
         return ResponseEntity.ok(userWebtoonService.getWebtoons());
     }
 
-    @GetMapping("/daily/{day}")
-    public ResponseEntity<List<ContentResponse.Simple>> getWebtoonsByDay(@PathVariable String day) {
-
-        return ResponseEntity.ok(userWebtoonService.getWebtoonsByDay(day));
-    }
 
     @PostMapping("/{webtoonId}/interests")
     public ResponseEntity<Void> registerInterest(

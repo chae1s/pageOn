@@ -21,25 +21,25 @@ function Home() {
         async function fetchData() {
             try {
                 const [masterpieceRes, webnovelKeywordRes, webtoonKeywordRes, rankingRes] = await Promise.all([
-                    api.get('/recommendation/masterpiece', {
+                    api.get('/contents/masterpiece', {
                         params: {
                             size: 6, 
                             contentType: 'all'
                         }
                     }), 
-                    api.get('/recommendation/by-keyword', {
+                    api.get('/contents/by-keyword', {
                         params: {
                             size: 6,
                             contentType: 'webnovels'
                         }
                     }), 
-                    api.get('/recommendation/by-keyword', {
+                    api.get('/contents/by-keyword', {
                         params: {
                             size: 6,
                             contentType: 'webtoons'
                         }
                     }), 
-                    api.get('/recommendation/hourly-ranking', {
+                    api.get('/contents/hourly-ranking', {
                         params: {
                             contentType: 'all'
                         }

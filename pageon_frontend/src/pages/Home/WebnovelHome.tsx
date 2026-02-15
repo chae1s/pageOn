@@ -39,17 +39,22 @@ function WebnovelHome() {
                 }
                 
                 const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
-                    api.get(`/webnovels/daily/${initialDayEng}`),
-                    api.get('/recommendation/recent', {
+                    api.get(`/contents/daily/${initialDayEng}`, {
+                        params: {
+                            size: 18,
+                            contentType: 'webnovels'
+                        }
+                    }),
+                    api.get('/contents/recent', {
                         params: params
                     }),
-                    api.get('/recommendation/masterpiece', {
+                    api.get('/contents/masterpiece', {
                         params: params
                     }), 
-                    api.get('/recommendation/by-keyword', {
+                    api.get('/contents/by-keyword', {
                         params: params
                     }), 
-                    api.get('/recommendation/hourly-ranking', {
+                    api.get('/contents/hourly-ranking', {
                         params: {
                             contentType: 'webnovels'
                         }
@@ -57,7 +62,7 @@ function WebnovelHome() {
                 ]);
                 
                 setDailyContents(dailyRes.data);
-
+                console.log(dailyRes.data);
                 setNewContents(newRes.data.content);
 
                 setMasterpieceContents(masterpieceRes.data.content);
@@ -65,7 +70,7 @@ function WebnovelHome() {
                 setKeywordName(keywordRes.data.keyword);
 
                 setKeywordContents(keywordRes.data.contents.content);
-                console.log(rankingRes.data);
+                
                 setRankingContents(rankingRes.data);
             } catch (error) {
                 console.error("웹소설 데이터 조회 실패: ", error);

@@ -41,11 +41,6 @@ public class UserWebnovelController {
         return ResponseEntity.ok(userWebnovelService.getWebnovels());
     }
 
-    @GetMapping("/daily/{day}")
-    public ResponseEntity<List<ContentResponse.Simple>> getWebnovelsByDay(@PathVariable String day) {
-
-        return ResponseEntity.ok(userWebnovelService.getWebnovelsByDay(day));
-    }
 
     @PostMapping("/{webnovelId}/interests")
     public ResponseEntity<Void> RegisterInterest(

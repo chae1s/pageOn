@@ -28,8 +28,11 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     List<Webtoon> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webtoon w WHERE w.serialDay = :serialDay AND w.status = 'ONGOING' AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
-    List<Webtoon> findDailyRanking(SerialDay serialDay, Pageable pageable);
+    @Query("SELECT w FROM Webtoon w " +
+            "JOIN FETCH w.creator c " +
+            "WHERE w.serialDay = :serialDay AND w.status = 'ONGOING' " +
+            "AND w.deletedAt IS NULL")
+    Page<Webtoon> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT w FROM Webtoon w " +
             "JOIN FETCH w.creator c " +

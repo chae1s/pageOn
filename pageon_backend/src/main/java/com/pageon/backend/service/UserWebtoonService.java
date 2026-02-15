@@ -77,18 +77,6 @@ public class UserWebtoonService {
         return webnovelListResponses;
     }
 
-    @ExecutionTimer
-    @Transactional(readOnly = true)
-    public List<ContentResponse.Simple> getWebtoonsByDay(String serialDay) {
-        Pageable pageable = PageRequest.of(0, 18);
-        List<Webtoon> webtoons = webtoonRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable);
-        log.info("{} 웹툰 검색", serialDay);
-
-        return webtoons.stream()
-                .map(ContentResponse.Simple::fromEntity)
-                .toList();
-    }
-
     @Transactional(readOnly = true)
     public Page<ContentResponse.Search> getWebtoonsByKeyword(String keywordName, Pageable sortedPageable) {
 

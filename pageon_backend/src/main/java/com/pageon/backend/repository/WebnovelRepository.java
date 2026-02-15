@@ -28,8 +28,11 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     List<Webnovel> findByDeletedAtIsNull();
 
-    @Query("SELECT w FROM Webnovel w WHERE w.serialDay = :serialDay AND w.status = 'ONGOING' AND w.deletedAt IS NULL ORDER BY w.viewCount DESC")
-    List<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
+    @Query(value = "SELECT w FROM Webnovel w " +
+            "JOIN FETCH w.creator c " +
+            "WHERE w.serialDay = :serialDay AND w.status = 'ONGOING' " +
+            "AND w.deletedAt IS NULL")
+    Page<Webnovel> findDailyRanking(SerialDay serialDay, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT w FROM Webnovel w " +
             "JOIN FETCH w.creator c " +

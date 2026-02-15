@@ -29,7 +29,7 @@ public class PageableUtil {
     public static Pageable createReadingHistory(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
-            // [TODO] 최근에 읽은 순, 업데이트 순으로 sort 기준 변경
+
             case "recently_read" -> Sort.by(Sort.Order.desc("r.lastReadAt"));
             default -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
         };
