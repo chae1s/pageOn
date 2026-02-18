@@ -62,13 +62,13 @@ function WebtoonHome() {
                 
                 setDailyContents(dailyRes.data);
                 
-                setNewContents(newRes.data.content);
+                setNewContents(newRes.data);
 
-                setMasterpieceContents(masterpieceRes.data.content);
+                setMasterpieceContents(masterpieceRes.data);
 
                 setKeywordName(keywordRes.data.keyword);
 
-                setKeywordContents(keywordRes.data.contents.content);
+                setKeywordContents(keywordRes.data.contents);
 
                 setRankingContents(rankingRes.data);
             } catch (error) {

@@ -111,20 +111,49 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public Page<ContentResponse.Simple> getMasterpiecesContents(String contentType, Pageable pageable) {
+    public List<ContentResponse.Simple> getMasterpiecesContents(String contentType) {
+
+        String keyName = String.format("contents:masterpiece:%s", contentType);
+        try {
+            List<ContentResponse.Simple> contents = (List<ContentResponse.Simple>) redisTemplate.opsForValue().get(keyName);
+
+            if (contents == null) {
+                return fetchContentsFromDbByMasterpiece(contentType);
+            }
+
+            return contents;
+        } catch (Exception e) {
+            return fetchContentsFromDbByMasterpiece(contentType);
+        }
+
+    }
+
+    private List<ContentResponse.Simple> fetchContentsFromDbByMasterpiece(String contentType) {
+        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
+
+        String keyName = String.format("contents:masterpiece:%s", contentType);
 
         switch (contentType) {
             case "all" -> {
                 Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
-                return contents.map(ContentResponse.Simple::fromEntity);
+                List<ContentResponse.Simple> contentList = contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
+                redisTemplate.opsForValue().set(keyName, contentList);
+                return contentList;
             }
             case "webnovels" -> {
                 Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
-                return webnovels.map(ContentResponse.Simple::fromEntity);
+                List<ContentResponse.Simple> webnovelList = webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
+                redisTemplate.opsForValue().set(keyName, webnovelList);
+                return webnovelList;
             }
             case "webtoons" -> {
                 Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
-                return webtoons.map(ContentResponse.Simple::fromEntity);
+                List<ContentResponse.Simple> webtoonList = webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
+                redisTemplate.opsForValue().set(keyName, webtoonList);
+                return webtoonList;
             }
 
         };
@@ -134,17 +163,48 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public Page<ContentResponse.Simple> getRecentContents(String contentType, Pageable pageable) {
+    public List<ContentResponse.Simple> getRecentContents(String contentType) {
+
+        LocalDate now = LocalDate.now();
+
+        String keyName = String.format("contents:recent:%s:%s", contentType, now);
+
+        try {
+            List<ContentResponse.Simple> contents = (List<ContentResponse.Simple>) redisTemplate.opsForValue().get(keyName);
+
+            if (contents == null) {
+                return fetchContentsFromDbByRecent(contentType);
+            }
+
+            return contents;
+        } catch (Exception e) {
+            return fetchContentsFromDbByRecent(contentType);
+        }
+
+
+    }
+
+    private List<ContentResponse.Simple> fetchContentsFromDbByRecent(String contentType) {
+        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("createdAt")));
 
         LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
+        LocalDate now = LocalDate.now();
+
+        String keyName = String.format("contents:recent:%s:%s", contentType, now);
         switch (contentType) {
             case "webnovels" -> {
                 Page<Webnovel> webnovels = webnovelRepository.findRecentWebnovels(since, pageable);
-                return webnovels.map(ContentResponse.Simple::fromEntity);
+                List<ContentResponse.Simple> webnovelList = webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
+                redisTemplate.opsForValue().set(keyName, webnovelList);
+                return webnovelList;
             }
             case "webtoons" -> {
                 Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
-                return webtoons.map(ContentResponse.Simple::fromEntity);
+                List<ContentResponse.Simple> webtoonList = webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
+                redisTemplate.opsForValue().set(keyName, webtoonList);
+                return webtoonList;
             }
         }
 
@@ -152,46 +212,95 @@ public class ContentService {
 
     }
 
+
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public Map<String, Object> getRecommendKeywordContents(String contentType, Pageable pageable) {
-        LocalDate currentDate = LocalDate.now();
+    public Map<String, Object> getRecommendKeywordContents(String contentType) {
 
+        String keyName = String.format("contents:keyword:%s", contentType);
+        try {
+            Map<String, Object> contents = (Map<String, Object>) redisTemplate.opsForValue().get(keyName);
+
+            if (contents == null) {
+                log.info("데이터 없음");
+                return fetchContentsFromDbByKeyword(contentType);
+            }
+
+            return contents;
+        } catch (Exception e) {
+            log.error("REDIS 작업 중 에러 발생: ", e);
+            return fetchContentsFromDbByKeyword(contentType);
+        }
+
+    }
+
+    private Map<String, Object> fetchContentsFromDbByKeyword(String contentType) {
+        LocalDate currentDate = LocalDate.now();
+        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
+
+        log.info("here");
         Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
                 () -> new CustomException(ErrorCode.INVALID_KEYWORD)
         );
 
-        Page<ContentResponse.Simple> responses;
+        List<ContentResponse.Simple> contents;
+
+        String keyName = String.format("contents:keyword:%s", contentType);
 
         switch (contentType) {
             case "webnovels" -> {
                 Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keyword.getName(), pageable);
-                responses = webnovels.map(ContentResponse.Simple::fromEntity);
+                contents = webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+
             }
             case "webtoons" -> {
                 Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
-                responses = webtoons.map(ContentResponse.Simple::fromEntity);
+                contents = webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
             }
             default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
         }
 
         Map<String, Object> result = new HashMap<>();
         result.put("keyword", keyword.getName());
-        result.put("contents", new PageResponse<>(responses));
+        result.put("contents", contents);
 
+        redisTemplate.opsForValue().set(keyName, result);
 
         return result;
 
     }
 
     @ExecutionTimer
-    @Scheduled(cron = "0 3 15 * * *")
-    public void saveDailyContents() {
-        Pageable pageable = PageRequest.of(0, 18, Sort.by(Sort.Order.desc("viewCount")));
+    @Scheduled(cron = "0 50 23 * * 0")
+    public void saveContentsInRedis() {
+        Pageable dailyPageable = PageRequest.of(0, 18, Sort.by(Sort.Order.desc("viewCount")));
+        Pageable recommendationPageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
 
-        saveDailyWebnovels(pageable);
-        saveDailyWebtoons(pageable);
+        LocalDate currentDate = LocalDate.now();
 
+        Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
+                () -> new CustomException(ErrorCode.INVALID_KEYWORD)
+        );
+
+        saveDailyWebnovels(dailyPageable);
+        saveDailyWebtoons(dailyPageable);
+        saveMasterpiecesAll(recommendationPageable);
+        saveMasterpiecesWebnovels(recommendationPageable);
+        saveMasterpiecesWebtoons(recommendationPageable);
+        saveRecommendKeywordWebnovels(recommendationPageable, keyword.getName());
+        saveRecommendKeywordWebtoons(recommendationPageable, keyword.getName());
+
+    }
+
+    @ExecutionTimer
+    @Scheduled(cron = "0 50 23 * * *")
+    public void saveContents() {
+        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("createdAt")));
+        LocalDateTime since = LocalDateTime.now().minusDays(180).with(LocalTime.MIN);
+
+
+        saveRecentWebnovels(pageable, since);
+        saveRecentWebtoons(pageable, since);
     }
 
     private void saveDailyWebnovels(Pageable pageable) {
@@ -227,6 +336,85 @@ public class ContentService {
 
     }
 
+    private void saveMasterpiecesAll(Pageable pageable) {
+
+        Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
+        redisTemplate.opsForValue().set(
+                "contents:masterpiece:all",
+                contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+
+    }
+
+    private void saveMasterpiecesWebnovels(Pageable pageable) {
+        Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
+        redisTemplate.opsForValue().set(
+                "contents:masterpiece:webnovels",
+                webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+    }
+
+    private void saveMasterpiecesWebtoons(Pageable pageable) {
+        Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
+        redisTemplate.opsForValue().set(
+                "contents:masterpiece:webtoons",
+                webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+    }
+    
+    private void saveRecentWebnovels(Pageable pageable, LocalDateTime since) {
+
+        LocalDate keyDate = LocalDate.now().plusDays(1);
+        String keyName = String.format("contents:recent:webnovels:%s", keyDate);
+        
+        Page<Webnovel> webnovels = webnovelRepository.findRecentWebnovels(since, pageable);
+        redisTemplate.opsForValue().set(
+                keyName,
+                webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+    }
+    
+    private void saveRecentWebtoons(Pageable pageable, LocalDateTime since) {
+        LocalDate keyDate = LocalDate.now().plusDays(1);
+
+        String keyName = String.format("contents:recent:webtoons:%s", keyDate);
+        Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
+        redisTemplate.opsForValue().set(
+                keyName,
+                webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+    }
+
+    private void saveRecommendKeywordWebnovels(Pageable pageable, String keywordName) {
+
+        Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keywordName, pageable);
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("keyword", keywordName);
+        result.put(
+                "contents",
+                webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+
+        redisTemplate.opsForValue().set("contents:keyword:webnovels", result);
+
+    }
+
+    private void saveRecommendKeywordWebtoons(Pageable pageable, String keywordName) {
+
+        Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keywordName, pageable);
+
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("keyword", keywordName);
+        result.put(
+                "contents",
+                webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList())
+        );
+
+        redisTemplate.opsForValue().set("contents:keyword:webtoons", result);
+    }
 
 
 }

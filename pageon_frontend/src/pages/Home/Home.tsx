@@ -47,7 +47,7 @@ function Home() {
 
                 ]);
                 
-                setMasterpieceContents(masterpieceRes.data.content);
+                setMasterpieceContents(masterpieceRes.data);
 
                 setWebnovelKeywordName(webnovelKeywordRes.data.keyword);
                 setWebnovelKeywordContents(webnovelKeywordRes.data.contents.content);

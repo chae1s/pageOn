@@ -38,32 +38,29 @@ public class ContentController {
 
 
     @GetMapping("/recent")
-    public ResponseEntity<PageResponse<ContentResponse.Simple>> getRecentContents(
-            @RequestParam String contentType,
-            @PageableDefault(size = 60, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    public ResponseEntity<List<ContentResponse.Simple>> getRecentContents(
+            @RequestParam String contentType
     ) {
 
         log.info("getRecentContents");
-        Page<ContentResponse.Simple> contents = contentService.getRecentContents(contentType, pageable);
+        List<ContentResponse.Simple> contents = contentService.getRecentContents(contentType);
 
-        return ResponseEntity.ok(new PageResponse<>(contents));
+        return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/masterpiece")
-    public ResponseEntity<PageResponse<ContentResponse.Simple>> getMasterpiecesContents(
-            @RequestParam("contentType") String contentType,
-            @PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable
+    public ResponseEntity<List<ContentResponse.Simple>> getMasterpiecesContents(
+            @RequestParam("contentType") String contentType
     ) {
-        Page<ContentResponse.Simple> contents = contentService.getMasterpiecesContents(contentType, pageable);
-        return ResponseEntity.ok(new PageResponse<>(contents));
+        List<ContentResponse.Simple> contents = contentService.getMasterpiecesContents(contentType);
+        return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/by-keyword")
     public ResponseEntity<Map<String, Object>> getRecommendKeywordContents(
-            @RequestParam String contentType,
-            @PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam String contentType
     ) {
-        Map<String, Object> result = contentService.getRecommendKeywordContents(contentType, pageable);
+        Map<String, Object> result = contentService.getRecommendKeywordContents(contentType);
 
         return ResponseEntity.ok(result);
     }
