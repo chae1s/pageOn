@@ -14,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class ContentController {
     ) {
 
         log.info("getRecentContents");
-        List<ContentResponse.Simple> contents = contentService.getRecentContents(contentType);
+        List<ContentResponse.Simple> contents = contentService.getRecentContents(contentType, LocalDate.now());
 
         return ResponseEntity.ok(contents);
     }

@@ -87,7 +87,12 @@ function WebnovelHome() {
         setDailyContents([]);
 
         try {
-            const response = await axios.get(`/api/webnovels/daily/${day}`);
+            const response = await api.get(`/contents/daily/${day}`, {
+                params: {
+                    size: 18,
+                    contentType: 'webnovels'
+                }
+            })
             
             setDailyContents(response.data);
         } catch (error) {

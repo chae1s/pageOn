@@ -50,10 +50,10 @@ function Home() {
                 setMasterpieceContents(masterpieceRes.data);
 
                 setWebnovelKeywordName(webnovelKeywordRes.data.keyword);
-                setWebnovelKeywordContents(webnovelKeywordRes.data.contents.content);
+                setWebnovelKeywordContents(webnovelKeywordRes.data.contents);
 
                 setWebtoonKeywordName(webtoonKeywordRes.data.keyword);
-                setWebtoonKeywordContents(webtoonKeywordRes.data.contents.content);
+                setWebtoonKeywordContents(webtoonKeywordRes.data.contents);
 
                 setRankingContents(rankingRes.data);
             } catch (error) {
