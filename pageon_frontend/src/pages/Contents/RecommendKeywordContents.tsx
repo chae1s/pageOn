@@ -23,15 +23,16 @@ function RecommendKeywordContents ({contentType} : Props) {
 
     useEffect(() => {
         
-        console.log(contentType);
         async function fetchData() {
             const params: any = {
                 page: page, 
-                contentType: formatUrl(contentType)
+                contentType: formatUrl(contentType), 
+                isMore: true
             }
             try {
-                const response = await api.get('/recommendation/by-keyword', {params: params});
+                const response = await api.get('/contents/by-keyword', {params: params});
 
+                console.log(response.data);
                 setKeywordName(response.data.keyword);
 
                 setKeywordContents(response.data.contents.content);

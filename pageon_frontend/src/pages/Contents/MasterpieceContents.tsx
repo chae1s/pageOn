@@ -27,7 +27,8 @@ function MasterpieceContents({contentType} : Props) {
         async function fetchData() {
             const params: any = {
                 page: page,
-                contentType: formatUrl(contentType)
+                contentType: formatUrl(contentType), 
+                isMore: true
             }
             try {
                 const response = await api.get('/contents/masterpiece', {

@@ -39,31 +39,55 @@ public class ContentController {
 
 
     @GetMapping("/recent")
-    public ResponseEntity<List<ContentResponse.Simple>> getRecentContents(
-            @RequestParam String contentType
+    public ResponseEntity<?> getRecentContents(
+            @RequestParam String contentType,
+            @PageableDefault(size = 60, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean isMore
     ) {
 
-        log.info("getRecentContents");
+        if (isMore) {
+            Page<ContentResponse.Simple> contents = contentService.getRecentContents(contentType, pageable);
+
+            return ResponseEntity.ok(new PageResponse<>(contents));
+        }
+
         List<ContentResponse.Simple> contents = contentService.getRecentContents(contentType, LocalDate.now());
 
         return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/masterpiece")
-    public ResponseEntity<List<ContentResponse.Simple>> getMasterpiecesContents(
-            @RequestParam("contentType") String contentType
+    public ResponseEntity<?> getMasterpiecesContents(
+            @RequestParam("contentType") String contentType,
+            @PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean isMore
     ) {
+
+        if (isMore) {
+            Page<ContentResponse.Simple> contents = contentService.getMasterpiecesContents(contentType, pageable);
+
+            return ResponseEntity.ok(new PageResponse<>(contents));
+        }
+
         List<ContentResponse.Simple> contents = contentService.getMasterpiecesContents(contentType);
         return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/by-keyword")
     public ResponseEntity<Map<String, Object>> getRecommendKeywordContents(
-            @RequestParam String contentType
+            @RequestParam String contentType,
+            @PageableDefault(size = 60, sort = "viewCount", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean isMore
     ) {
-        Map<String, Object> result = contentService.getRecommendKeywordContents(contentType);
+        Map<String, Object> contents;
 
-        return ResponseEntity.ok(result);
+        if (isMore) {
+            contents = contentService.getRecommendKeywordContents(contentType, pageable);
+        } else {
+            contents = contentService.getRecommendKeywordContents(contentType);
+        }
+
+        return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/hourly-ranking")

@@ -23,15 +23,16 @@ function NewContents({contentType} : NewContentsProps) {
 
     useEffect(() => {
         
-        console.log(contentType);
         async function fetchData() {
             const params: any = {
                 page: page, 
-                contentType: formatUrl(contentType)
+                contentType: formatUrl(contentType), 
+                isMore: true
             }
             try {
-                const response = await api.get('/recommendation/recent', {params: params});
+                const response = await api.get('/contents/recent', {params: params});
 
+                console.log(response.data);
                 setNewContents(response.data.content);
                 setPageData(response.data);
             } catch (error) {

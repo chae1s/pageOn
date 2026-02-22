@@ -3,6 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.ContentResponse;
+import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
@@ -110,6 +111,32 @@ public class ContentService {
         throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
     }
 
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getMasterpiecesContents(String contentType, Pageable pageable) {
+
+        switch (contentType) {
+            case "all" -> {
+                Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
+
+                return contents.map(ContentResponse.Simple::fromEntity);
+            }
+            case "webnovels" -> {
+                Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
+
+                return webnovels.map(ContentResponse.Simple::fromEntity);
+            }
+            case "webtoons" -> {
+                Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
+
+                return webtoons.map(ContentResponse.Simple::fromEntity);
+            }
+
+        };
+
+        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+    }
+
 
     @ExecutionTimer
     @Transactional(readOnly = true)
@@ -129,6 +156,27 @@ public class ContentService {
             case "webtoons" -> {
                 Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
                 return webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+            }
+        }
+
+        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+
+    }
+
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getRecentContents(String contentType, Pageable pageable) {
+
+        LocalDateTime since = LocalDate.now().minusDays(180).atStartOfDay();
+
+        switch (contentType) {
+            case "webnovels" -> {
+                Page<Webnovel> webnovels = webnovelRepository.findRecentWebnovels(since, pageable);
+                return webnovels.map(ContentResponse.Simple::fromEntity);
+            }
+            case "webtoons" -> {
+                Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
+                return webtoons.map(ContentResponse.Simple::fromEntity);
             }
         }
 
@@ -169,6 +217,38 @@ public class ContentService {
         result.put("contents", contents);
 
         return result;
+
+    }
+
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+    public Map<String, Object> getRecommendKeywordContents(String contentType, Pageable pageable) {
+
+        LocalDate currentDate = LocalDate.now();
+
+        Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
+                () -> new CustomException(ErrorCode.INVALID_KEYWORD)
+        );
+
+        Page<ContentResponse.Simple> contents;
+
+        switch (contentType) {
+            case "webnovels" -> {
+                Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keyword.getName(), pageable);
+                contents = webnovels.map(ContentResponse.Simple::fromEntity);
+
+            }
+            case "webtoons" -> {
+                Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
+                contents = webtoons.map(ContentResponse.Simple::fromEntity);
+            }
+            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        }
+
+        return Map.of(
+                "keyword", keyword.getName(),
+                "contents", new PageResponse<>(contents)
+        );
 
     }
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import * as S from "../Styles/ContentDetail.styles"
 import api from '../../api/axiosInstance';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { formatUrl } from '../../utils/formatContentType';
 
 interface Props {
     content: ContentDetail;
@@ -93,7 +94,7 @@ function ContentDetailLayout({content}: Props) {
     const handleKeywordClick = (contentType: string, name: string) => {
         const params = new URLSearchParams();
         
-        params.append("type", contentType)
+        params.append("type", formatUrl(contentType))
         params.append("q", name);
 
 

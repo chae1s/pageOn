@@ -7,6 +7,7 @@ import * as S from "./Search.styles"
 import { SearchContent } from "../../types/Content";
 import SearchContentList from "../../components/Contents/SearchContentList";
 import { Pagination } from "../../types/Page";
+import { formatUrl } from "../../utils/formatContentType";
 
 function KeywordSearch() {
 
@@ -69,7 +70,7 @@ function KeywordSearch() {
                     }
                 });
                 
-                console.log(response.data)
+                console.log(type)
                 setPageData(response.data)
 
             } catch (error) {
