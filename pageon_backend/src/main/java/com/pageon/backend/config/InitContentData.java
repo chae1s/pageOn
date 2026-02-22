@@ -39,6 +39,7 @@ public class InitContentData implements ApplicationRunner {
     private final WebtoonRepository webtoonRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
+    private final ContentKeywordRepository contentKeywordRepository;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -140,7 +141,6 @@ public class InitContentData implements ApplicationRunner {
                 Webnovel webnovel = Webnovel.builder()
                         .title(line[0])
                         .description(line[1])
-                        .keywords(separateKeywords(line[2]))
                         .creator(creator)
                         .cover(s3Url)
                         .serialDay(SerialDay.valueOf(line[6]))
@@ -149,6 +149,8 @@ public class InitContentData implements ApplicationRunner {
                         .build();
 
                 webnovels.add(webnovel);
+
+                separateKeywords(webnovel, line[2]);
             }
 
             webnovelRepository.saveAll(webnovels);
@@ -181,7 +183,6 @@ public class InitContentData implements ApplicationRunner {
                 Webtoon webtoon = Webtoon.builder()
                         .title(line[0])
                         .description(line[1])
-                        .keywords(separateKeywords(line[2]))
                         .creator(creator)
                         .cover(s3Url)
                         .serialDay(SerialDay.valueOf(line[5]))
@@ -191,6 +192,7 @@ public class InitContentData implements ApplicationRunner {
 
                 webtoons.add(webtoon);
 
+                separateKeywords(webtoon, line[2]);
             }
 
             webtoonRepository.saveAll(webtoons);
@@ -202,7 +204,7 @@ public class InitContentData implements ApplicationRunner {
 
     }
 
-    private List<Keyword> separateKeywords(String line) {
+    private void separateKeywords(Content content, String line) {
         String[] words = line.replaceAll("\\s", "").split(",");
         LinkedHashMap<String, Keyword> keywordMap = new LinkedHashMap<>();
 
@@ -219,11 +221,17 @@ public class InitContentData implements ApplicationRunner {
                 );
 
                 keywordMap.put(word, keyword);
+                ContentKeyword contentKeyword = ContentKeyword.builder()
+                        .content(content)
+                        .keyword(keyword)
+                        .build();
+
+                contentKeywordRepository.save(contentKeyword);
             }
 
         }
 
-        return new ArrayList<>(keywordMap.values());
+
     }
 
     public void initWebnovelEpisode() {

@@ -38,14 +38,9 @@ public abstract class Content extends BaseTimeEntity {
     @JoinColumn(name = "creator_id")
     private Creator creator;
 
-    @ManyToMany
-    @JoinTable(
-            name = "content_keyword",
-            joinColumns = @JoinColumn(name = "content_id"),
-            inverseJoinColumns = @JoinColumn(name = "keyword_id")
-    )
     @Builder.Default
-    private List<Keyword> keywords = new ArrayList<>();
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
+    private List<ContentKeyword> contentKeywords = new ArrayList<>();
 
     private String cover;
     // 연재 요일
@@ -83,8 +78,7 @@ public abstract class Content extends BaseTimeEntity {
 
     public void updateKeywords(List<Keyword> keywords) {
         if (keywords != null) {
-            this.keywords.clear();
-            this.keywords.addAll(keywords);
+
         }
     }
 

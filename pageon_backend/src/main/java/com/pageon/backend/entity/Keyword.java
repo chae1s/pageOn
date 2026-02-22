@@ -26,8 +26,8 @@ public class Keyword {
     private String name;
 
     @Builder.Default
-    @ManyToMany(mappedBy = "keywords")
-    private List<Content> contents = new ArrayList<>();
+    @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL)
+    private List<ContentKeyword> contentKeywords = new ArrayList<>();
 
     private LocalDate startDate;
     private LocalDate endDate;
