@@ -124,14 +124,11 @@ class UserWebnovelServiceTest {
                 .aiPolicyAgreedAt(LocalDateTime.now())
                 .build();
 
-        List<Keyword> kewords = createKeywords("하나,둘,셋,넷");
-
         Webnovel webnovel1 = Webnovel.builder()
                 .id(1L)
                 .title("테스트")
                 .description("테스트")
                 .creator(creator)
-                .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
@@ -141,16 +138,13 @@ class UserWebnovelServiceTest {
                 .title("테스트2")
                 .description("테스트2")
                 .creator(creator)
-                .keywords(kewords)
                 .serialDay(SerialDay.MONDAY)
                 .status(SeriesStatus.ONGOING)
                 .build();
 
         webnovels.add(webnovel1);
         webnovels.add(webnovel2);
-        List<UserKeywordResponse> userKeywordResponses = createUserKeywords(kewords);
 
-        doReturn(userKeywordResponses).when(keywordService).getKeywordsExceptCategory(kewords);
         when(webnovelRepository.findByDeletedAtIsNull()).thenReturn(webnovels);
         //when
         List<UserContentListResponse> listResponses = userWebnovelService.getWebnovels();
@@ -171,7 +165,7 @@ class UserWebnovelServiceTest {
         when(webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(webnovels.subList(0, 18));
 
         //when
-        List<ContentResponse.Simple> result = userWebnovelService.getWebnovelsByDay(serialDay);
+        List<ContentResponse.Simple> result = userWebnovelService.get(serialDay);
         
         // then
         assertEquals(18, result.size());
@@ -188,7 +182,7 @@ class UserWebnovelServiceTest {
         String serialDay = "FRIDAY";
         List<Webnovel> webnovels = createMockWebnovels();
         Pageable pageable = PageRequest.of(0, 18);
-        when(webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(Collections.emptyList());
+        when(webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable)).thenReturn(Page.empty());
         //when
         List<ContentResponse.Simple> result = userWebnovelService.getWebnovelsByDay(serialDay);
 

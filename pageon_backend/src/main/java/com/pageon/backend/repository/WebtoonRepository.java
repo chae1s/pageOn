@@ -20,7 +20,6 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     @Query("SELECT w FROM Webtoon w " +
             "JOIN FETCH w.creator " +
-            "JOIN FETCH w.keywords " +
             "WHERE w.id = :webtoonId")
     Optional<Webtoon> findByIdWithDetailInfo(@Param("webtoonId") Long webtoonId);
 
@@ -36,21 +35,21 @@ public interface WebtoonRepository extends JpaRepository<Webtoon, Long> {
 
     @Query(value = "SELECT DISTINCT w FROM Webtoon w " +
             "JOIN FETCH w.creator c " +
-            "JOIN FETCH w.keywords k " +
-            "WHERE k.name = :keywordName",
+            "JOIN w.contentKeywords k " +
+            "WHERE k.keyword.name = :keywordName",
             countQuery = "SELECT DISTINCT COUNT(w.id) FROM Webtoon w " +
-                    "JOIN w.keywords k " +
-                    "WHERE k.name = :keywordName"
+                    "JOIN w.contentKeywords k " +
+                    "WHERE k.keyword.name = :keywordName"
     )
     Page<Webtoon> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT c FROM Webtoon c " +
             "JOIN FETCH c.creator " +
-            "JOIN FETCH c.keywords k " +
+            "JOIN c.contentKeywords k " +
             "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
             "AND c.deletedAt IS NULL",
             countQuery = "SELECT COUNT(DISTINCT c.id) FROM Webtoon c " +
-                    "JOIN c.keywords k " +
+                    "JOIN c.contentKeywords k " +
                     "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
                     "AND c.deletedAt IS NULL "
     )

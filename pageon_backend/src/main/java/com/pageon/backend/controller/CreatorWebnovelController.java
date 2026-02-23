@@ -31,11 +31,11 @@ public class CreatorWebnovelController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{webnovelId}")
-    public ResponseEntity<CreatorWebnovelResponse> getContentById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
-
-        return ResponseEntity.ok(creatorWebnovelService.getContentById(principalUser, webnovelId));
-    }
+//    @GetMapping("/{webnovelId}")
+//    public ResponseEntity<CreatorWebnovelResponse> getContentById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webnovelId) {
+//
+//        return ResponseEntity.ok(creatorWebnovelService.getContentById(principalUser, webnovelId));
+//    }
 
     @GetMapping()
     public ResponseEntity<List<CreatorContentListResponse>> getMyContents(@AuthenticationPrincipal PrincipalUser principalUser) {

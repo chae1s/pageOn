@@ -2,8 +2,10 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.CreatorKeywordResponse;
+import com.pageon.backend.dto.response.KeywordResponse;
 import com.pageon.backend.dto.response.UserKeywordResponse;
 import com.pageon.backend.entity.Category;
+import com.pageon.backend.entity.ContentKeyword;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.repository.CategoryRepository;
 import com.pageon.backend.repository.KeywordRepository;
@@ -52,14 +54,14 @@ public class KeywordService {
         return creatorKeywordResponses;
     }
 
-    public List<UserKeywordResponse> getKeywordsExceptCategory(List<Keyword> keywords) {
-        List<UserKeywordResponse> userKeywordResponses = new ArrayList<>();
-        for (Keyword keyword : keywords) {
-            if (!keyword.getCategory().getId().equals(6L)) {
-                userKeywordResponses.add(UserKeywordResponse.fromEntity(keyword));
+    public List<KeywordResponse> getKeywordsExceptCategory(List<ContentKeyword> keywords) {
+        List<KeywordResponse> keywordResponses = new ArrayList<>();
+        for (ContentKeyword keyword : keywords) {
+            if (!keyword.getKeyword().getCategory().getId().equals(6L)) {
+                keywordResponses.add(KeywordResponse.fromEntity(keyword));
             }
         }
-        return userKeywordResponses;
+        return keywordResponses;
     }
 
 }

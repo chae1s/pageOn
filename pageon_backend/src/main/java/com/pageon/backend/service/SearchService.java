@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.exception.CustomException;
@@ -26,6 +27,7 @@ public class SearchService {
     private final ContentService contentService;
 
 
+    @ExecutionTimer
     @Transactional(readOnly = true)
     public Page<ContentResponse.Search> getContentsByKeyword(String contentType, String query, String sort, Pageable pageable) {
         Pageable sortedPageable = PageableUtil.createContentPageable(pageable, sort);
@@ -43,6 +45,7 @@ public class SearchService {
 
     }
 
+    @ExecutionTimer
     @Transactional(readOnly = true)
     public Page<ContentResponse.Search> getContentsByTitleOrCreator(String contentType, String query, String sort, Pageable pageable) {
 

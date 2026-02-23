@@ -17,7 +17,7 @@ function PageNavigator({ pageData, handlePageChange }: PaginationProps) {
         const totalPages = pageData.totalPages;
 
         // 한 번에 보여줄 페이지 번호 개수
-        const pageBlockSize = 6;
+        const pageBlockSize = 10;
 
         const startPage = Math.floor(currentPage / pageBlockSize) * pageBlockSize;
 

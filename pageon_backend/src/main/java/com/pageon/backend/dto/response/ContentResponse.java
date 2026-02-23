@@ -72,7 +72,7 @@ public class ContentResponse {
                     .serialDay(content.getSerialDay())
                     .status(content.getStatus())
                     .viewCount(content.getViewCount())
-                    .keywords(content.getKeywords().stream().map(KeywordResponse::fromEntity).toList())
+                    .keywords(content.getContentKeywords().stream().map(KeywordResponse::fromEntity).toList())
                     .build();
         }
     }
@@ -113,7 +113,7 @@ public class ContentResponse {
                     .serialDay(content.getSerialDay())
                     .status(content.getStatus())
                     .viewCount(content.getViewCount())
-                    .keywords(content.getKeywords().stream().map(KeywordResponse::fromEntity).toList())
+                    .keywords(content.getContentKeywords().stream().map(KeywordResponse::fromEntity).toList())
                     .episodes(episodes)
                     .isInterested(isInterested)
                     .build();
@@ -149,7 +149,7 @@ public class ContentResponse {
                     .episodeUpdatedAt(content.getEpisodeUpdatedAt())
                     .totalAverageRating(content.getTotalAverageRating())
                     .totalRatingCount(content.getTotalRatingCount())
-                    .keywords(content.getKeywords().stream().map(KeywordResponse::fromEntity).collect(Collectors.toList()))
+                    .keywords(content.getContentKeywords().stream().map(KeywordResponse::fromEntity).collect(Collectors.toList()))
                     .build();
         }
     }

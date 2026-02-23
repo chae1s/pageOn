@@ -25,7 +25,7 @@ public class SearchController {
 
     @GetMapping("/keywords")
     public ResponseEntity<PageResponse<ContentResponse.Search>> getContentsByKeyword(
-            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 50) Pageable pageable) {
 
         Page<ContentResponse.Search> contents = searchService.getContentsByKeyword(contentType, query, sort, pageable);
 
@@ -34,7 +34,7 @@ public class SearchController {
 
     @GetMapping
     public ResponseEntity<PageResponse<ContentResponse.Search>> getContentsByTitleOrCreator(
-            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 20) Pageable pageable
+            @RequestParam("type") String contentType, @RequestParam("q") String query, @RequestParam("sort") String sort, @PageableDefault(size = 50) Pageable pageable
     ) {
         Page<ContentResponse.Search> contents = searchService.getContentsByTitleOrCreator(contentType, query, sort, pageable);
 

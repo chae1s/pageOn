@@ -19,14 +19,14 @@ public class UserContentListResponse {
     private String description;
     private String coverUrl;
     private String penName;
-    private List<UserKeywordResponse> keywords;
+    private List<KeywordResponse> keywords;
     private SerialDay serialDay;
     private SeriesStatus status;
     private Integer episodeCount;
     private Integer averageRating;
     private Long viewCount;
 
-    public static UserContentListResponse fromWebnovel(Webnovel webnovel, List<UserKeywordResponse> keywords, int episodeCount, int averageRating) {
+    public static UserContentListResponse fromWebnovel(Webnovel webnovel, List<KeywordResponse> keywords, int episodeCount, int averageRating) {
         UserContentListResponse userContentListResponse = new UserContentListResponse();
         userContentListResponse.setId(webnovel.getId());
         userContentListResponse.setTitle(webnovel.getTitle());
@@ -44,7 +44,7 @@ public class UserContentListResponse {
 
     }
 
-    public static UserContentListResponse fromWebtoon(Webtoon webtoon, List<UserKeywordResponse> keywords, int episodeCount, int averageRating) {
+    public static UserContentListResponse fromWebtoon(Webtoon webtoon, List<KeywordResponse> keywords, int episodeCount, int averageRating) {
         UserContentListResponse userContentListResponse = new UserContentListResponse();
         userContentListResponse.setId(webtoon.getId());
         userContentListResponse.setTitle(webtoon.getTitle());

@@ -20,7 +20,6 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query("SELECT w FROM Webnovel w " +
             "JOIN FETCH w.creator " +
-            "JOIN FETCH w.keywords " +
             "WHERE w.id = :webnovelId")
     Optional<Webnovel> findByIdWithDetailInfo(@Param("webnovelId") Long webnovelId);
 
@@ -36,21 +35,21 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
 
     @Query(value = "SELECT DISTINCT w FROM Webnovel w " +
             "JOIN FETCH w.creator c " +
-            "JOIN FETCH w.keywords k " +
-            "WHERE k.name = :keywordName",
+            "JOIN w.contentKeywords k " +
+            "WHERE k.keyword.name = :keywordName",
             countQuery = "SELECT DISTINCT COUNT(w.id) FROM Webnovel w " +
-                    "JOIN w.keywords k " +
-                    "WHERE k.name = :keywordName"
+                    "JOIN w.contentKeywords k " +
+                    "WHERE k.keyword.name = :keywordName"
     )
     Page<Webnovel> findByKeywordName(@Param("keywordName") String keywordName, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT c FROM Webnovel c " +
             "JOIN FETCH c.creator " +
-            "JOIN FETCH c.keywords k " +
+            "JOIN c.contentKeywords k " +
             "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
             "AND c.deletedAt IS NULL",
             countQuery = "SELECT COUNT(DISTINCT c.id) FROM Webnovel c " +
-                    "JOIN c.keywords k " +
+                    "JOIN c.contentKeywords k " +
                     "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
                     "AND c.deletedAt IS NULL "
     )

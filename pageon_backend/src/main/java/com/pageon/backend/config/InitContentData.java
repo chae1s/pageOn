@@ -9,6 +9,7 @@ import com.pageon.backend.repository.*;
 import com.pageon.backend.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -48,8 +49,8 @@ public class InitContentData implements ApplicationRunner {
         initKeywords();
         initWebnovels();
         initWebtoons();
-        initWebnovelEpisode();
         initWebtoonEpisode();
+        initWebnovelEpisode();
     }
 
     private void initCreators() {
@@ -124,6 +125,7 @@ public class InitContentData implements ApplicationRunner {
         if (webnovelRepository.count() > 0) {
             return;
         }
+
         InputStream inputStream = getClass().getResourceAsStream("/data/webnovels.csv");
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
@@ -133,11 +135,15 @@ public class InitContentData implements ApplicationRunner {
         int i = 1;
         try {
             while ((line = csvReader.readNext()) != null) {
-
                 Creator creator = creatorRepository.findById(Long.parseLong(line[3])).orElseThrow(() -> new CustomException(ErrorCode.CREATER_NOT_FOUND));
-                File file = new File(String.format("/Users/user/Desktop/project/pageon_images/webnovels/%s", line[4]));
-                String s3Url = fileUploadService.localFileUpload(file, String.format("webnovels/%d", i++));
 
+                String absolutePath = "C:/Users/user/Desktop/project/pageon_images/webnovels/" + line[4];
+                File file = new File(absolutePath);
+                log.info("file");
+                String s3Url = fileUploadService.localFileUpload(file, String.format("webnovels/%d", i++));
+                log.info("s3Url");
+
+                log.info("s3 저장 후");
                 Webnovel webnovel = Webnovel.builder()
                         .title(line[0])
                         .description(line[1])
@@ -148,12 +154,11 @@ public class InitContentData implements ApplicationRunner {
                         .viewCount(Long.parseLong(line[5]))
                         .build();
 
-                webnovels.add(webnovel);
+                webnovelRepository.save(webnovel);
 
                 separateKeywords(webnovel, line[2]);
             }
 
-            webnovelRepository.saveAll(webnovels);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();
@@ -170,14 +175,15 @@ public class InitContentData implements ApplicationRunner {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
         CSVReader csvReader = new CSVReader(inputStreamReader);
-        List<Webtoon> webtoons = new ArrayList<>();
+
         String[] line;
         int i = 1;
         try {
             while ((line = csvReader.readNext()) != null) {
 
                 Creator creator = creatorRepository.findById(Long.parseLong(line[3])).orElseThrow(() -> new CustomException(ErrorCode.CREATER_NOT_FOUND));
-                File file = new File(String.format("/Users/user/Desktop/project/pageon_images/webtoons/%s", line[4]));
+                String absolutePath = "C:/Users/user/Desktop/project/pageon_images/webtoons/" + line[4];
+                File file = new File(absolutePath);
                 String s3Url = fileUploadService.localFileUpload(file, String.format("webtoons/%d", i++));
 
                 Webtoon webtoon = Webtoon.builder()
@@ -190,12 +196,11 @@ public class InitContentData implements ApplicationRunner {
                         .viewCount(Long.parseLong(line[7]))
                         .build();
 
-                webtoons.add(webtoon);
+                webtoonRepository.save(webtoon);
 
                 separateKeywords(webtoon, line[2]);
             }
 
-            webtoonRepository.saveAll(webtoons);
         } catch (Exception e) {
             log.error("에러 발생: {}", e.getMessage());
             throw new RuntimeException();
@@ -207,6 +212,7 @@ public class InitContentData implements ApplicationRunner {
     private void separateKeywords(Content content, String line) {
         String[] words = line.replaceAll("\\s", "").split(",");
         LinkedHashMap<String, Keyword> keywordMap = new LinkedHashMap<>();
+        log.info("content Id: {}", content.getId());
 
         Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
         for (String word : words) {

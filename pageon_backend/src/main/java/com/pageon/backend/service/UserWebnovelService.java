@@ -1,7 +1,5 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.common.annotation.ExecutionTimer;
-import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
@@ -14,7 +12,6 @@ import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +36,7 @@ public class UserWebnovelService {
     @Transactional(readOnly = true)
     public ContentResponse.Detail getWebnovelById(Long webnovelId, PrincipalUser principalUser) {
 
+        log.info("Getting Webnovel by id {}", webnovelId);
         Webnovel webnovel = webnovelRepository.findByIdWithDetailInfo(webnovelId).orElseThrow(
                 () -> new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND)
         );
@@ -49,7 +47,6 @@ public class UserWebnovelService {
 
         if (principalUser != null) {
             Long userId = principalUser.getId();
-            log.info("UserWebnovelService.getWebnovelById: userId = " + userId);
             episodes = webnovelEpisodeService.getEpisodesByWebnovelId(principalUser.getId(), webnovelId);
             isInterested = interestRepository.existsByUser_IdAndContentId(userId, webnovelId);
         } else {
@@ -57,6 +54,10 @@ public class UserWebnovelService {
         }
 
         log.info("IsInterested: {}", isInterested);
+
+        ContentResponse.Detail detail = ContentResponse.Detail.fromEntity(webnovel, episodes, isInterested);
+
+        log.info("detail: {}", webnovel.getContentKeywords());
 
         return ContentResponse.Detail.fromEntity(webnovel, episodes, isInterested);
     }
@@ -76,8 +77,7 @@ public class UserWebnovelService {
 
         Page<Webnovel> webnovelPage = webnovelRepository.findByKeywordName(keywordName, sortedPageable);
 
-        return webnovelPage.map(ContentResponse.Search::fromEntity
-        );
+        return webnovelPage.map(ContentResponse.Search::fromEntity);
     }
 
     @Transactional(readOnly = true)

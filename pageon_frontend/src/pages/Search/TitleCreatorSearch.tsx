@@ -6,6 +6,7 @@ import * as S from "./Search.styles"
 import { SearchContent } from "../../types/Content";
 import SearchContentList from "../../components/Contents/SearchContentList";
 import { Pagination } from "../../types/Page";
+import PageNavigator from "../../components/Pagination/PageNavigator";
 
 function TitleCreatorSearch() {
 
@@ -127,37 +128,7 @@ function TitleCreatorSearch() {
                 )}
 
                 {pageData && pageData.totalPages > 0 && (
-                    <S.PaginationContainer>
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber - 1)}
-                            disabled={pageData.first}
-                        >
-                            <PrevIcon />
-                        </S.PaginationIconWrapper>
-
-                        <S.PaginationNumberList>
-                            
-                            {pageNumbers.map((number) => (
-                                <S.PaginationNumberListItem key={number}>
-                                    <S.PaginationNumberBtn
-                                        $active={pageData.pageNumber === number}
-                                        onClick={() => handlePageChange(number)}
-                                    >
-                                        {number + 1}
-                                    </S.PaginationNumberBtn>
-                                </S.PaginationNumberListItem>
-                            ))}
-                        </S.PaginationNumberList>
-
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber + 1)}
-                            disabled={pageData.last}
-                        >
-                            <NextIcon />
-                        </S.PaginationIconWrapper>
-                    </S.PaginationContainer>
+                    <PageNavigator pageData={pageData} handlePageChange={handlePageChange} />
                 )}
             </NoSidebarMain>
         </MainContainer>

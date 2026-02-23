@@ -15,17 +15,17 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 
     @Query("SELECT c FROM Content c " +
             "JOIN FETCH c.creator " +
-            "JOIN FETCH c.keywords " +
+            "JOIN c.contentKeywords " +
             "WHERE c.id = :contentId")
     Optional<Content> findByIdWithDetailInfo(Long contentId);
 
     @Query(value = "SELECT DISTINCT c FROM Content c " +
             "JOIN FETCH c.creator " +
-            "JOIN FETCH c.keywords k " +
+            "JOIN c.contentKeywords k " +
             "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
             "AND c.deletedAt IS NULL",
             countQuery = "SELECT COUNT(DISTINCT c.id) FROM Content c " +
-                    "JOIN c.keywords k " +
+                    "JOIN c.contentKeywords k " +
                     "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
                     "AND c.deletedAt IS NULL "
     )

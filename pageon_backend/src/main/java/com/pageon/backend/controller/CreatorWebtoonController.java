@@ -31,11 +31,11 @@ public class CreatorWebtoonController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{webtoonId}")
-    public ResponseEntity<CreatorWebtoonResponse> getContentById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId) {
-
-        return ResponseEntity.ok(creatorWebtoonService.getContentById(principalUser, webtoonId));
-    }
+//    @GetMapping("/{webtoonId}")
+//    public ResponseEntity<CreatorWebtoonResponse> getContentById(@AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long webtoonId) {
+//
+//        return ResponseEntity.ok(creatorWebtoonService.getContentById(principalUser, webtoonId));
+//    }
 
     @GetMapping()
     public ResponseEntity<List<CreatorContentListResponse>> getMyContents(@AuthenticationPrincipal PrincipalUser principalUser) {

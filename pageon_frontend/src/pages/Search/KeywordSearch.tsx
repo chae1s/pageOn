@@ -8,6 +8,7 @@ import { SearchContent } from "../../types/Content";
 import SearchContentList from "../../components/Contents/SearchContentList";
 import { Pagination } from "../../types/Page";
 import { formatUrl } from "../../utils/formatContentType";
+import PageNavigator from "../../components/Pagination/PageNavigator";
 
 function KeywordSearch() {
 
@@ -70,7 +71,7 @@ function KeywordSearch() {
                     }
                 });
                 
-                console.log(type)
+                console.log(response.data);
                 setPageData(response.data)
 
             } catch (error) {
@@ -173,37 +174,7 @@ function KeywordSearch() {
                 )}
 
                 {pageData && pageData.totalPages > 0 && (
-                    <S.PaginationContainer>
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber - 1)}
-                            disabled={pageData.first}
-                        >
-                            <PrevIcon />
-                        </S.PaginationIconWrapper>
-
-                        <S.PaginationNumberList>
-                            
-                            {pageNumbers.map((number) => (
-                                <S.PaginationNumberListItem key={number}>
-                                    <S.PaginationNumberBtn
-                                        $active={pageData.pageNumber === number}
-                                        onClick={() => handlePageChange(number)}
-                                    >
-                                        {number + 1}
-                                    </S.PaginationNumberBtn>
-                                </S.PaginationNumberListItem>
-                            ))}
-                        </S.PaginationNumberList>
-
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber + 1)}
-                            disabled={pageData.last}
-                        >
-                            <NextIcon />
-                        </S.PaginationIconWrapper>
-                    </S.PaginationContainer>
+                    <PageNavigator pageData={pageData} handlePageChange={handlePageChange} />
                 )}
                 
                 

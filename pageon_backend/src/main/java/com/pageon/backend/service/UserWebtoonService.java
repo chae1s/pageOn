@@ -70,7 +70,7 @@ public class UserWebtoonService {
         List<UserContentListResponse> webnovelListResponses = new ArrayList<>();
 
         for (Webtoon webtoon : webtoons) {
-            List<UserKeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getKeywords());
+            List<KeywordResponse> keywords = keywordService.getKeywordsExceptCategory(webtoon.getContentKeywords());
             webnovelListResponses.add(UserContentListResponse.fromWebtoon(webtoon, keywords, 0, 0));
         }
 
