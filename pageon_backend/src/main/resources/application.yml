@@ -99,6 +99,13 @@ spring:
     init:
       mode: always
 
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+
+topic:
+  name: pageon-log-topic
+
 cdn:
   cloudfront:
     domain: d2ge55k9wic00e.cloudfront.net
