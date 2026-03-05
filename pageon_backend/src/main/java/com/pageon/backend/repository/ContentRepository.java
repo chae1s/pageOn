@@ -29,11 +29,11 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
                     "WHERE (c.title LIKE %:query% OR c.creator.penName LIKE %:query%) " +
                     "AND c.deletedAt IS NULL "
     )
-    Page<Content> findByTitleOrPenNameContaining(@Param("query") String query, Pageable pageable);
+    Page<Content> searchByTitleOrPenName(@Param("query") String query, Pageable pageable);
 
 
     @Query(value = "SELECT DISTINCT c FROM Content c " +
             "JOIN FETCH c.creator " +
-            "WHERE c.status = 'COMPLETED' AND c.totalAverageRating >= 0 AND c.deletedAt IS NULL")
-    Page<Content> findCompletedMasterpieces(Pageable pageable);
+            "WHERE c.status = 'COMPLETED' AND c.totalAverageRating >= 8 AND c.deletedAt IS NULL")
+    Page<Content> findTopRatedCompleted(Pageable pageable);
 }

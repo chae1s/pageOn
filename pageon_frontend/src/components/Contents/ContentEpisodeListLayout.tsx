@@ -97,7 +97,7 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
         const { episode } = purchasePrompt;
 
         try {
-            await api.post(`/${type}/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
+            await api.post(`/${type}/${contentId}/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
             closePurchasePrompt();
             navigate(`/${type}/${contentId}/viewer/${episode.id}`);
         } catch (error) {
@@ -128,11 +128,7 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
         }
 
         try {
-            const response = await api.get(`/${type}/episodes/${episodeId}/subscribe`, {
-                params: {
-                    contentId: contentId,
-                }
-            });
+            const response = await api.get(`/${type}/${contentId}/episodes/${episodeId}/subscribe`);
 
             console.log(response.data)
             if (!response.data) {

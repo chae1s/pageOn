@@ -21,29 +21,10 @@ function Home() {
         async function fetchData() {
             try {
                 const [masterpieceRes, webnovelKeywordRes, webtoonKeywordRes, rankingRes] = await Promise.all([
-                    api.get('/contents/masterpiece', {
-                        params: {
-                            size: 6, 
-                            contentType: 'all'
-                        }
-                    }), 
-                    api.get('/contents/by-keyword', {
-                        params: {
-                            size: 6,
-                            contentType: 'webnovels'
-                        }
-                    }), 
-                    api.get('/contents/by-keyword', {
-                        params: {
-                            size: 6,
-                            contentType: 'webtoons'
-                        }
-                    }), 
-                    api.get('/contents/hourly-ranking', {
-                        params: {
-                            contentType: 'all'
-                        }
-                    })
+                    api.get('/all/completed'), 
+                    api.get('/webnovels/keyword'), 
+                    api.get('/webtoons/keyword'), 
+                    api.get('/all/hourly-ranking')
 
                 ]);
                 
@@ -54,7 +35,7 @@ function Home() {
 
                 setWebtoonKeywordName(webtoonKeywordRes.data.keyword);
                 setWebtoonKeywordContents(webtoonKeywordRes.data.contents);
-
+                console.log(rankingRes.data);
                 setRankingContents(rankingRes.data);
             } catch (error) {
                 console.error("작품 데이터 조회 실패: ", error);

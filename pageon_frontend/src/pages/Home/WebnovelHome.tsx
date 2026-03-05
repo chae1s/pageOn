@@ -32,33 +32,13 @@ function WebnovelHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-
-                const params = {
-                    size: 6,
-                    contentType: 'webnovels'
-                }
                 
                 const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
-                    api.get(`/contents/daily/${initialDayEng}`, {
-                        params: {
-                            size: 18,
-                            contentType: 'webnovels'
-                        }
-                    }),
-                    api.get('/contents/recent', {
-                        params: params
-                    }),
-                    api.get('/contents/masterpiece', {
-                        params: params
-                    }), 
-                    api.get('/contents/by-keyword', {
-                        params: params
-                    }), 
-                    api.get('/contents/hourly-ranking', {
-                        params: {
-                            contentType: 'webnovels'
-                        }
-                    })
+                    api.get(`/webnovels/daily/${initialDayEng}`),
+                    api.get('/webnovels/new'),
+                    api.get('/webnovels/completed'), 
+                    api.get('/webnovels/keyword'), 
+                    api.get('/webnovels/hourly-ranking')
                 ]);
                 
                 setDailyContents(dailyRes.data);
@@ -87,12 +67,7 @@ function WebnovelHome() {
         setDailyContents([]);
 
         try {
-            const response = await api.get(`/contents/daily/${day}`, {
-                params: {
-                    size: 18,
-                    contentType: 'webnovels'
-                }
-            })
+            const response = await api.get(`/webnovels/daily/${day}`)
             
             setDailyContents(response.data);
         } catch (error) {

@@ -32,31 +32,12 @@ function WebtoonHome() {
         async function fetchData() {
             try {
 
-                const params = {
-                    size: 6,
-                    contentType: 'webtoons'
-                }
-
                 const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
-                    api.get(`/contents/daily/${initialDayEng}`, {
-                        params: {
-                            contentType: 'webtoons'
-                        }
-                    }),
-                    api.get('/contents/recent', {
-                        params: params
-                    }), 
-                    api.get('/contents/masterpiece', {
-                        params: params
-                    }), 
-                    api.get('/contents/by-keyword', {
-                        params: params
-                    }), 
-                    api.get('/contents/hourly-ranking', {
-                        params: {
-                            contentType: 'webtoons'
-                        }
-                    })
+                    api.get(`/webtoons/daily/${initialDayEng}`),
+                    api.get('/webtoons/new'), 
+                    api.get('/webtoons/completed'), 
+                    api.get('/webtoons/keyword'), 
+                    api.get('/webtoons/hourly-ranking')
 
                 ]);
                 
@@ -87,11 +68,7 @@ function WebtoonHome() {
         setDailyContents([]);
 
         try {
-            const response = await api.get(`/contents/daily/${day}`, {
-                params: {
-                    contentType: 'webtoons'
-                }
-            })
+            const response = await api.get(`/webtoons/daily/${day}`)
             console.log("요일별 웹툰 데이터: ", response.data);
             setDailyContents(response.data);
         } catch (error) {

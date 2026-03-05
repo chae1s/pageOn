@@ -25,8 +25,8 @@ function SearchContentList({contents, totalElements = 0}: Props) {
     const handleKeywordClick = (contentType: string, name: string) => {
         const params = new URLSearchParams();
         
-        params.append("type", formatUrl(contentType))
-        params.append("q", name);
+        params.append("contentType", formatUrl(contentType))
+        params.append("keyword", name);
 
         
         navigate(`/search/keyword?${params}`)

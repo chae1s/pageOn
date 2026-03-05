@@ -13,18 +13,17 @@ function TitleCreatorSearch() {
     const [pageData, setPageData] = useState<Pagination<SearchContent> | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const type = searchParams.get("type") || "all";
-    const q = searchParams.get("q") || "";
+    let contentType = searchParams.get("contentType") || "all";
+    const query = searchParams.get("query") || "";
     const sort = searchParams.get("sort") || "popular";
     const page = parseInt(searchParams.get("page") || "0", 10) ;
 
     useEffect(() => {
         async function fetchSearchResults() {
             try {
-                const response = await api.get("/search", {
+                const response = await api.get(`/${contentType}`, {
                     params: {
-                        type: type,
-                        q: q,
+                        query: query,
                         sort: sort,
                         page: page,
                     }
@@ -39,18 +38,11 @@ function TitleCreatorSearch() {
         }
 
         fetchSearchResults();
-    }, [type, q, sort, page])
-    const NextIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M8 5l4 5-4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
+    }, [contentType, query, sort, page])
 
-    const PrevIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 5l-4 5 4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
+    const handleContentTypeChange = (newContentType: string) => {
+        contentType = newContentType;
+    }
 
     const handleParamClick = (newKey: string, newValue: string) => {
         const newParams = new URLSearchParams(searchParams);
@@ -98,17 +90,17 @@ function TitleCreatorSearch() {
             <NoSidebarMain>
                 <S.ContentTypeListInSearch>
                     <S.ContentTypeItemInSearch>
-                        <S.ContentTypeBtnInSearch $active={type === "all"} onClick={() => handleParamClick("type", "all")}>
+                        <S.ContentTypeBtnInSearch $active={contentType === "all"} onClick={() => handleContentTypeChange("all")}>
                             전체
                         </S.ContentTypeBtnInSearch>
                     </S.ContentTypeItemInSearch>
                     <S.ContentTypeItemInSearch>
-                        <S.ContentTypeBtnInSearch $active={type === "webtoons"} onClick={() => handleParamClick("type", "webtoons")}>
+                        <S.ContentTypeBtnInSearch $active={contentType === "webtoons"} onClick={() => handleContentTypeChange("webtoons")}>
                             웹툰
                         </S.ContentTypeBtnInSearch>
                     </S.ContentTypeItemInSearch>
                     <S.ContentTypeItemInSearch>
-                        <S.ContentTypeBtnInSearch $active={type === "webnovels"} onClick={() => handleParamClick("type", "webnovels")}>
+                        <S.ContentTypeBtnInSearch $active={contentType === "webnovels"} onClick={() => handleContentTypeChange("webnovels")}>
                             웹소설
                         </S.ContentTypeBtnInSearch>
                     </S.ContentTypeItemInSearch>

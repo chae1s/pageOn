@@ -35,7 +35,7 @@ function PointTransactionPage() {
             };
 
             try {
-                const response = await api.get("/points/history", {params: params});
+                const response = await api.get("/users/points/history", {params: params});
                 
                 setPointTransactions(response.data.content);
                 setPageData(response.data);

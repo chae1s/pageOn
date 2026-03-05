@@ -2,6 +2,7 @@ package com.pageon.backend.scheduler;
 
 import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.service.ContentCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +22,7 @@ public class ContentScheduler {
     @ExecutionTimer
     @Scheduled(cron = "0 50 23 * * 0")
     public void updateDailyContents() {
-        Pageable pageable = PageRequest.of(0, 18, Sort.by(Sort.Order.desc("viewCount")));
+        Pageable pageable = PageableUtil.redisPageable(18, "viewCount");
 
         for (SerialDay serialDay : SerialDay.values()) {
             contentCacheService.refreshDailyWebnovels(pageable, serialDay);
@@ -34,11 +35,11 @@ public class ContentScheduler {
     @Scheduled(cron = "0 50 23 * * 0")
     public void updateMasterpieceContents() {
 
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
+        Pageable pageable = PageableUtil.redisPageable(6, "viewCount");
 
-        contentCacheService.refreshMasterpiecesAll(pageable);
-        contentCacheService.refreshMasterpiecesWebnovels(pageable);
-        contentCacheService.refreshMasterpiecesWebtoons(pageable);
+        contentCacheService.refreshCompletedAll(pageable);
+        contentCacheService.refreshCompletedWebnovels(pageable);
+        contentCacheService.refreshCompletedWebtoons(pageable);
 
     }
 
@@ -46,7 +47,7 @@ public class ContentScheduler {
     @Scheduled(cron = "0 50 23 * * 0")
     public void updateKeywordContents() {
 
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
+        Pageable pageable = PageableUtil.redisPageable(6, "viewCount");
 
         contentCacheService.refreshKeywordWebnovels(pageable);
         contentCacheService.refreshKeywordWebtoons(pageable);
@@ -57,12 +58,12 @@ public class ContentScheduler {
     @Scheduled(cron = "0 50 23 * * *")
     public void updateRecentContents() {
 
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("createdAt")));
+        Pageable pageable = PageableUtil.redisPageable(6, "createdAt");
 
         LocalDate baseline = LocalDate.now().plusDays(1);
 
-        contentCacheService.refreshRecentWebnovels(pageable, baseline);
-        contentCacheService.refreshRecentWebtoons(pageable, baseline);
+        contentCacheService.refreshNewWebnovels(pageable, baseline);
+        contentCacheService.refreshNewWebtoons(pageable, baseline);
     }
 
 

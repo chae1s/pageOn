@@ -4,9 +4,7 @@ import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.*;
 import com.pageon.backend.security.PrincipalUser;
-import com.pageon.backend.service.InterestService;
-import com.pageon.backend.service.ReadingHistoryService;
-import com.pageon.backend.service.UserService;
+import com.pageon.backend.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -14,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,8 +28,10 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final InterestService interestService;
     private final ReadingHistoryService readingHistoryService;
+    private final EpisodeCommentService episodeCommentService;
+    private final PointTransactionService pointTransactionService;
+    private final ContentService contentService;
 
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest signupDto) {
@@ -111,28 +112,28 @@ public class UserController {
         return ResponseEntity.ok(userService.checkIdentityVerification(principalUser));
     }
 
-    @GetMapping("/interests")
-    public ResponseEntity<PageResponse<ContentResponse.InterestContent>> getInterests(
-            @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
+    @GetMapping("/comments")
+    public ResponseEntity<PageResponse<CommentResponse.MyComment>> getMyComments(
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @PageableDefault(size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam("contentType") String contentType
     ) {
+        Page<CommentResponse.MyComment> comments = episodeCommentService.getMyComments(principalUser.getId(), contentType, pageable);
 
-        log.info("My Interests request received. Type: [{}], Sort: [{}], Page: {}, size: {}",
-                contentType, sort, pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<ContentResponse.InterestContent> interestContents = interestService.getInterestedContents(principalUser.getId(), contentType, sort, pageable);
-
-        return ResponseEntity.ok(new PageResponse<>(interestContents));
+        return ResponseEntity.ok(new PageResponse<>(comments));
     }
 
-    @GetMapping("/comments")
-    public ResponseEntity<PageResponse<MyCommentResponse>> getCommentsByUserId(
+    @GetMapping("/{contentType}/interests")
+    public ResponseEntity<PageResponse<ContentResponse.InterestContent>> getMyInterests(
             @AuthenticationPrincipal PrincipalUser principalUser,
-            @PageableDefault(size = 15) Pageable pageable,
-            @RequestParam("type") String contentType
+            @PathVariable String contentType,
+            Pageable pageable,
+            @RequestParam("sort") String sort
     ) {
-        Page<MyCommentResponse> commentResponses = userService.getCommentsByUserId(principalUser.getId(), pageable, contentType);
 
-        return ResponseEntity.ok(new PageResponse<>(commentResponses));
+        Page<ContentResponse.InterestContent> contents = contentService.getInterestContents(principalUser.getId(), contentType, pageable, sort);
+
+        return ResponseEntity.ok(new PageResponse<>(contents));
     }
 
     @GetMapping("/reading-histories")
@@ -151,5 +152,16 @@ public class UserController {
         List<ContentResponse.Simple> contentSimpleResponses = readingHistoryService.getTodayReadingHistory(principalUser.getId());
 
         return ResponseEntity.ok(contentSimpleResponses);
+    }
+
+    @GetMapping("/points/history")
+    public ResponseEntity<PageResponse<PointTransactionResponse>> getPointHistory (
+            @AuthenticationPrincipal PrincipalUser principalUser,
+            @RequestParam("type") String transactionType,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<PointTransactionResponse> pointTransactionResponses = pointTransactionService.getPointHistory(principalUser.getId(), transactionType, pageable);
+
+        return ResponseEntity.ok(new PageResponse<>(pointTransactionResponses));
     }
 }

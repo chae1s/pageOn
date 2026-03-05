@@ -96,9 +96,9 @@ public class ContentResponse {
         private Long viewCount;
         private Boolean isInterested;
         private List<KeywordResponse> keywords;
-        private List<EpisodeListResponse> episodes;
+        private List<EpisodeResponse.Summary> episodes;
 
-        public static Detail fromEntity(Content content, List<EpisodeListResponse> episodes, Boolean isInterested) {
+        public static Detail fromEntity(Content content, List<EpisodeResponse.Summary> episodes, Boolean isInterested) {
 
             return Detail.builder()
                     .contentId(content.getId())
@@ -210,6 +210,22 @@ public class ContentResponse {
                     .serialDay(content.getSerialDay())
                     .status(content.getStatus())
                     .episodeUpdatedAt(content.getEpisodeUpdatedAt())
+                    .build();
+        }
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class KeywordContent<T> {
+        private String keyword;
+        private T contents;
+
+        public static <T> KeywordContent<T> fromEntity(String keyword, T contents) {
+            return KeywordContent.<T>builder()
+                    .keyword(keyword)
+                    .contents(contents)
                     .build();
         }
     }

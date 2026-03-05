@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.OAuthProvider;
-import com.pageon.backend.dto.request.ContentEpisodeRatingRequest;
+import com.pageon.backend.dto.request.EpisodeRatingRequest;
 import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
@@ -73,7 +73,7 @@ class RatingServiceTest {
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -114,7 +114,7 @@ class RatingServiceTest {
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -148,7 +148,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBNOVEL, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.empty());
@@ -179,7 +179,7 @@ class RatingServiceTest {
                 .deleted(false)
                 .build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBTOON, 100L, 5);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.empty());
@@ -219,7 +219,7 @@ class RatingServiceTest {
 
         WebtoonEpisodeRating.builder().user(user).webtoonEpisode(webtoonEpisode).score(score).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, score);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBTOON, episodeId, score);
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
 
@@ -263,7 +263,7 @@ class RatingServiceTest {
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).averageRating(averageRating).ratingCount(ratingCount).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
 
 
 
@@ -308,7 +308,7 @@ class RatingServiceTest {
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).averageRating(averageRating).ratingCount(ratingCount).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -345,7 +345,7 @@ class RatingServiceTest {
 
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).episodeTitle("고양이").webnovel(webnovel).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBNOVEL, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -383,7 +383,7 @@ class RatingServiceTest {
 
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).episodeTitle("모두의 빛").webtoon(webtoon).build();
 
-        ContentEpisodeRatingRequest contentEpisodeRatingRequest = new ContentEpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
+        EpisodeRatingRequest contentEpisodeRatingRequest = new EpisodeRatingRequest(ContentType.WEBTOON, episodeId, newScore);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));

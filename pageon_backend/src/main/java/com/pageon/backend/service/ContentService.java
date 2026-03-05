@@ -2,254 +2,263 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.enums.SerialDay;
+import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
+import com.pageon.backend.dto.response.EpisodeListResponse;
+import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.entity.Content;
+import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.Keyword;
-import com.pageon.backend.entity.Webnovel;
-import com.pageon.backend.entity.Webtoon;
+import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.ContentRepository;
-import com.pageon.backend.repository.KeywordRepository;
-import com.pageon.backend.repository.WebnovelRepository;
-import com.pageon.backend.repository.WebtoonRepository;
+import com.pageon.backend.repository.*;
+import com.pageon.backend.security.PrincipalUser;
+import com.pageon.backend.service.provider.ContentProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContentService {
+    private final List<ContentProvider> providers;
+    private final InterestRepository interestRepository;
     private final ContentRepository contentRepository;
-    private final WebnovelRepository webnovelRepository;
-    private final WebtoonRepository webtoonRepository;
     private final KeywordRepository keywordRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<ContentResponse.Search> getContentsByTitleOrCreator(String query, Pageable sortedPageable) {
+    public ContentResponse.Detail getContentDetail(PrincipalUser principalUser, String contentType, Long contentId) {
 
-        log.debug("Entering getContentsByTitleOrCreator. Query = [{}], Pageable = {}", query, sortedPageable);
-        Page<Content> contents = contentRepository.findByTitleOrPenNameContaining(query, sortedPageable);
+        log.info("Fetching {} details for content ID: {}", contentType, contentId);
+        ContentProvider provider = getProvider(contentType);
 
-        log.info("Content search by title/creator successful. Query: [{}]. Found {} total results.",
-                query,
-                contents.getTotalElements());
+        Content content = provider.findById(contentId).orElseThrow(
+                () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
+        );
+
+        Long userId = (principalUser != null) ? principalUser.getId() : null;
+        List<EpisodeResponse.Summary> episodes = provider.findEpisodes(userId, contentId);
+
+        Boolean isInterested = (userId != null) && interestRepository.existsByUser_IdAndContentId(userId, contentId);
+
+        log.info("Successfully retrieved {}: {} (ID: {})", contentType, content.getTitle(), contentId);
+        return ContentResponse.Detail.fromEntity(content, episodes, isInterested);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Search> searchContentsByKeyword(String contentType, String keyword, Pageable pageable, String sort) {
+        log.info("Searching for {} with keyword: '{}'", contentType, keyword);
+        ContentProvider provider = getProvider(contentType);
+        Pageable searchPageable = PageableUtil.searchPageable(pageable, sort);
+        Page<? extends Content> contents = provider.findByKeyword(keyword, searchPageable);
+
+        log.info("Search completed. Found {} {} for keyword: '{}'", contents.getTotalElements(), contentType, keyword);
+        return contents.map(ContentResponse.Search::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Search> searchContentsByTitleOrAuthor(String contentType, String query, Pageable pageable, String sort) {
+        log.info("Searching for {} with title or creator: '{}'", contentType, query);
+
+        Pageable searchPageable = PageableUtil.searchPageable(pageable, sort);
+        ContentProvider provider = getProvider(contentType);
+
+        Page<? extends Content> contents = provider.findByTitleOrPenName(query, searchPageable);
+
+        log.info("Search completed. Found {} {} for title or creator: '{}'", contents.getTotalElements(), contentType, query);
 
         return contents.map(ContentResponse.Search::fromEntity);
     }
 
-    @ExecutionTimer
-    @Transactional(readOnly = true)
-    @Cacheable(value = "contents:daily", key = "#contentType + ':' + #serialDay")
-    public List<ContentResponse.Simple> getContentsByDate(String serialDay, String contentType) {
-
-        log.info("[DailyContents] No cache found for {}:{} - Fetching from Database", contentType, serialDay);
-        Pageable pageable = PageRequest.of(0, 18, Sort.by(Sort.Order.desc("viewCount")));
-
-        switch (contentType) {
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable);
-
-                return webnovels.getContent().stream()
-                        .map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findDailyRanking(SerialDay.valueOf(serialDay), pageable);
-
-                return webtoons.getContent().stream()
-                        .map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-        }
-
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-
-    }
-
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    @Cacheable(value = "contents:masterpiece", key = "#contentType")
-    public List<ContentResponse.Simple> getMasterpiecesContents(String contentType) {
+//    @Cacheable(value = "contents:new", key = "#contentType + ':' + #date")
+    public List<ContentResponse.Simple> getNewArrivalList(String contentType, LocalDate date) {
 
-        log.info("[MasterpieceContents] No cache found for {} - Fetching from Database", contentType);
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
-
-        switch (contentType) {
-            case "all" -> {
-                Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
-
-                return contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
-
-                return webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
-
-                return webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-
-        };
-
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-    }
-
-    @ExecutionTimer
-    @Transactional(readOnly = true)
-    public Page<ContentResponse.Simple> getMasterpiecesContents(String contentType, Pageable pageable) {
-
-        switch (contentType) {
-            case "all" -> {
-                Page<Content> contents = contentRepository.findCompletedMasterpieces(pageable);
-
-                return contents.map(ContentResponse.Simple::fromEntity);
-            }
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findCompletedMasterpieces(pageable);
-
-                return webnovels.map(ContentResponse.Simple::fromEntity);
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findCompletedMasterpieces(pageable);
-
-                return webtoons.map(ContentResponse.Simple::fromEntity);
-            }
-
-        };
-
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-    }
-
-
-    @ExecutionTimer
-    @Transactional(readOnly = true)
-    @Cacheable(value = "contents:recent", key = "#contentType + ':' + #date")
-    public List<ContentResponse.Simple> getRecentContents(String contentType, LocalDate date) {
-
-        log.info("[RecentContents] No cache found for {}:{} - Fetching from Database", contentType, date);
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("createdAt")));
+        log.info("Cache miss for new contents. Fetching the standard 6 {} from DB.", contentType);
+        Pageable pageable = PageableUtil.redisPageable(6, "createdAt");
+        ContentProvider provider = getProvider(contentType);
 
         LocalDateTime since = date.minusDays(180).atStartOfDay();
+        Page<? extends Content> contents = provider.findNewArrivals(since, pageable);
 
-        switch (contentType) {
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findRecentWebnovels(since, pageable);
-                return webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
-                return webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-        }
-
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-
+        log.info("Successfully retrieved all 6 {} for new from DB.", contentType);
+        return contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
     }
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public Page<ContentResponse.Simple> getRecentContents(String contentType, Pageable pageable) {
+    public Page<ContentResponse.Simple> getNewArrivalPage(String contentType, Pageable pageable) {
 
+        log.info("Fetching the 'See More' list of latest {} (Page: {})",
+                contentType, pageable.getPageNumber() + 1);
+        ContentProvider provider = getProvider(contentType);
         LocalDateTime since = LocalDate.now().minusDays(180).atStartOfDay();
 
-        switch (contentType) {
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findRecentWebnovels(since, pageable);
-                return webnovels.map(ContentResponse.Simple::fromEntity);
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findRecentWebtoons(since, pageable);
-                return webtoons.map(ContentResponse.Simple::fromEntity);
-            }
-        }
+        Pageable moreContentPageable = PageableUtil.moreContentPageable(pageable, "createdAt");
+        Page<? extends Content> contents = provider.findNewArrivals(since, moreContentPageable);
 
-        throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
+        log.info("Successfully retrieved {} latest {} for page {}",
+                contents.getNumberOfElements(), contentType, pageable.getPageNumber());
 
+        return contents.map(ContentResponse.Simple::fromEntity);
     }
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    @Cacheable(value = "contents:keyword", key = "#contentType")
-    public Map<String, Object> getRecommendKeywordContents(String contentType) {
+//    @Cacheable(value = "contents:daily", key = "#contentType + ':' + #serialDay")
+    public List<ContentResponse.Simple> getDailyScheduleList(String contentType, String serialDay) {
 
-        log.info("[KeywordContents] No cache found for {} - Fetching from Database", contentType);
+        log.info("Cache miss for {} contents. Fetching the standard 18 {} from DB.", serialDay, contentType);
+        ContentProvider provider = getProvider(contentType);
+        Pageable pageable = PageableUtil.redisPageable(18, "viewCount");
+
+        Page<? extends Content> contents = provider.findBySerialDay(SerialDay.valueOf(serialDay), pageable);
+
+        log.info("Successfully retrieved all 18 {} for {} from DB.", contentType, serialDay);
+
+        return contents.stream()
+                .map(ContentResponse.Simple::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+//    @Cacheable(value = "contents:completed", key = "#contentType")
+    public List<ContentResponse.Simple> getBestCompletedList(String contentType) {
+
+        log.info("Cache miss for completed contents. Fetching the standard 6 {} from DB.", contentType);
+        Pageable pageable = PageableUtil.redisPageable(6, "viewCount");
+
+        ContentProvider provider = getProvider(contentType);
+        Page<? extends Content> contents = provider.findByStatusCompleted(pageable);
+
+        log.info("Successfully retrieved all 6 {} for completed from DB.", contentType);
+        return contents.stream()
+                .map(ContentResponse.Simple::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.Simple> getBestCompletedPage(String contentType, Pageable pageable) {
+
+        log.info("Fetching the 'See More' list of completed {} (Page: {})",
+                contentType, pageable.getPageNumber() + 1);
+        Pageable moreContentPageable = PageableUtil.moreContentPageable(pageable, "viewCount");
+        ContentProvider provider = getProvider(contentType);
+
+        Page<? extends Content> contents = provider.findByStatusCompleted(moreContentPageable);
+
+        log.info("Successfully retrieved {} recommended completed {} for page {}",
+                contents.getNumberOfElements(), contentType, pageable.getPageNumber());
+        return contents.map(ContentResponse.Simple::fromEntity);
+    }
+
+    @ExecutionTimer
+    @Transactional(readOnly = true)
+//    @Cacheable(value = "contents:keyword", key = "#contentType")
+    public ContentResponse.KeywordContent<?> getFeaturedKeywordContentsList(String contentType) {
+
+        log.info("Cache miss for keyword contents. Fetching the standard 6 {} from DB.", contentType);
         LocalDate currentDate = LocalDate.now();
-        Pageable pageable = PageRequest.of(0, 6, Sort.by(Sort.Order.desc("viewCount")));
+        Pageable pageable = PageableUtil.redisPageable(6, "viewCount");
 
         Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
                 () -> new CustomException(ErrorCode.INVALID_KEYWORD)
         );
 
-        List<ContentResponse.Simple> contents;
+        ContentProvider provider = getProvider(contentType);
+        Page<? extends Content> contents = provider.findByKeyword(keyword.getName(), pageable);
+        List<ContentResponse.Simple> contentsList = contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
 
-        switch (contentType) {
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keyword.getName(), pageable);
-                contents = webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+        log.info("Successfully retrieved all 6 {} for keyword from DB.", contentType);
 
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
-                contents = webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
-            }
-            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-        }
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("keyword", keyword.getName());
-        result.put("contents", contents);
-
-        return result;
+        return ContentResponse.KeywordContent.fromEntity(keyword.getName(), contentsList);
 
     }
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public Map<String, Object> getRecommendKeywordContents(String contentType, Pageable pageable) {
+    public ContentResponse.KeywordContent<?> getFeaturedKeywordContentsPage(String contentType, Pageable pageable) {
 
+        log.info("Fetching the 'See More' list of keyword {} (Page: {})",
+                contentType, pageable.getPageNumber() + 1);
         LocalDate currentDate = LocalDate.now();
 
         Keyword keyword = keywordRepository.findValidKeyword(currentDate).orElseThrow(
                 () -> new CustomException(ErrorCode.INVALID_KEYWORD)
         );
 
-        Page<ContentResponse.Simple> contents;
+        ContentProvider provider = getProvider(contentType);
+        Page<? extends Content> contents = provider.findByKeyword(keyword.getName(), pageable);
 
-        switch (contentType) {
-            case "webnovels" -> {
-                Page<Webnovel> webnovels = webnovelRepository.findByKeywordName(keyword.getName(), pageable);
-                contents = webnovels.map(ContentResponse.Simple::fromEntity);
+        Page<ContentResponse.Simple> contentsList = contents.map(ContentResponse.Simple::fromEntity);
 
-            }
-            case "webtoons" -> {
-                Page<Webtoon> webtoons = webtoonRepository.findByKeywordName(keyword.getName(), pageable);
-                contents = webtoons.map(ContentResponse.Simple::fromEntity);
-            }
-            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-        }
+        log.info("Successfully retrieved {} recommended keyword {} for page {}",
+                contents.getNumberOfElements(), contentType, pageable.getPageNumber());
 
-        return Map.of(
-                "keyword", keyword.getName(),
-                "contents", new PageResponse<>(contents)
+        return ContentResponse.KeywordContent.fromEntity(
+                keyword.getName(),
+                new PageResponse<>(contentsList)
         );
 
+    }
+
+    @Transactional
+    public void toggleInterest(Long userId, Long contentId) {
+        log.info("Toggling interest status for User ID: {} and Content ID: {}", userId, contentId);
+        Optional<Interest> existingInterest = interestRepository.findByUser_IdAndContentId(userId, contentId);
+
+        if (existingInterest.isPresent()) {
+            interestRepository.delete(existingInterest.get());
+            log.info("Successfully REMOVED interest for User: {} on Content: {}", userId, contentId);
+        } else {
+            User user = userRepository.getReferenceById(userId);
+            Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(
+                    () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
+            );
+
+            Interest interest = Interest.builder()
+                    .user(user)
+                    .content(content)
+                    .build();
+
+            interestRepository.save(interest);
+            log.info("Successfully ADDED interest for User: {} on Content: {}", userId, contentId);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.InterestContent> getInterestContents(Long userId, String contentType, Pageable pageable, String sort) {
+        Pageable interestPageable = PageableUtil.interestPageable(pageable, sort);
+        ContentProvider provider = getProvider(contentType);
+
+        Page<Interest> interests = provider.findByInterest(userId, interestPageable);
+
+        return interests.map(interest -> ContentResponse.InterestContent.fromEntity(interest.getContent()));
+    }
+
+    private ContentProvider getProvider(String contentType) {
+        return providers.stream()
+                .filter(p -> p.supports(contentType))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CONTENT_TYPE));
     }
 
 }

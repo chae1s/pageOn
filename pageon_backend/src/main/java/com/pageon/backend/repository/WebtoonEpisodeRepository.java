@@ -15,7 +15,7 @@ public interface WebtoonEpisodeRepository extends JpaRepository<WebtoonEpisode, 
     Optional<WebtoonEpisode> findById(Long id);
 
     @Query("SELECT w FROM WebtoonEpisode w JOIN FETCH w.webtoon WHERE w.id = :episodeId")
-    Optional<WebtoonEpisode> findByIdWithWebtoon(@Param("episodeId") Long episodeId);
+    Optional<WebtoonEpisode> findWithWebtoonById(@Param("episodeId") Long episodeId);
 
     @Query("""
         SELECT e.id FROM WebtoonEpisode e 

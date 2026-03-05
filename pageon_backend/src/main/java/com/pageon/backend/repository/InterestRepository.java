@@ -24,7 +24,7 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
             countQuery = "SELECT COUNT(DISTINCT i.id) FROM Interest i " +
                     "WHERE i.user.id = :userId"
     )
-    Page<Interest> findAllInterests(@Param("userId") Long userId, Pageable pageable);
+    Page<Interest> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT i FROM Interest i " +
             "JOIN FETCH i.content c " +
@@ -34,7 +34,7 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
                     "JOIN i.content c " +
                     "WHERE i.user.id = :userId AND TYPE(c) = Webnovel "
     )
-    Page<Interest> findWebnovelInterests(@Param("userId") Long userId, Pageable pageable);
+    Page<Interest> findWebnovelsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query(value = "SELECT DISTINCT i FROM Interest i " +
             "JOIN FETCH i.content c " +
@@ -44,7 +44,7 @@ public interface InterestRepository extends JpaRepository<Interest, Long> {
                     "JOIN i.content c " +
                     "WHERE i.user.id = :userId AND TYPE(c) = Webtoon "
     )
-    Page<Interest> findWebtoonInterests(@Param("userId") Long userId, Pageable pageable);
+    Page<Interest> findWebtoonsByUserId(@Param("userId") Long userId, Pageable pageable);
 
 
 }

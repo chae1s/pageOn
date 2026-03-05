@@ -1,6 +1,6 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.entity.EpisodeBase;
+import com.pageon.backend.entity.base.EpisodeBase;
 import com.pageon.backend.common.enums.ActionType;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.PurchaseType;
@@ -8,18 +8,21 @@ import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
+import com.pageon.backend.service.provider.ContentProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EpisodePurchaseService {
 
+    private final List<ContentProvider> providers;
     private final UserRepository userRepository;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
@@ -28,21 +31,21 @@ public class EpisodePurchaseService {
     private final ActionLogService actionLogService;
 
 
-    private record EpisodeInfo(Long contentId, String contentTitle, Integer episodePrice, EpisodeBase episodeBase) {}
+    public record EpisodeInfo(Long contentId, String contentTitle, Integer episodePrice, EpisodeBase episodeBase) {}
 
     @Transactional
-    public void createPurchaseHistory(Long userId, ContentType contentType, Long episodeId, PurchaseType purchaseType) {
+    public void createPurchaseHistory(Long userId, String contentType, Long episodeId, PurchaseType purchaseType) {
 
         log.info("[START] createPurchaseHistory: userId = {}, contentType = {}, episodeId = {}, purchaseType = {}",
                 userId, contentType, episodeId, purchaseType
         );
 
-        // 사용자 정보 가져오기 (pointBalance)
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        EpisodeInfo episodeInfo = getEpisode(contentType, episodeId, purchaseType);
+        ContentProvider provider = getProvider(contentType);
+        EpisodeInfo episodeInfo = provider.getEpisodeInfo(episodeId, purchaseType);
 
         Integer episodePrice = episodeInfo.episodePrice;
 
@@ -53,7 +56,7 @@ public class EpisodePurchaseService {
         }
 
         // 구매, 대여, 재대여 구분
-        EpisodePurchase episodePurchase = validateEpisodePurchase(user, contentType, contentId, episodeId, purchaseType);
+        EpisodePurchase episodePurchase = validateEpisodePurchase(user, ContentType.fromUrlPath(contentType), contentId, episodeId, purchaseType);
 
         String description = String.format("%s %d화 %s",
                 episodeInfo.contentTitle,
@@ -74,6 +77,7 @@ public class EpisodePurchaseService {
             return false;
         }
 
+        log.info("에피소드 구매 확인: {}", episodePurchase.getPurchaseType());
         if (episodePurchase.getPurchaseType() == PurchaseType.OWN) {
             return true;
         } else {
@@ -83,76 +87,6 @@ public class EpisodePurchaseService {
         }
     }
 
-
-    private EpisodeInfo getEpisode(ContentType contentType, Long episodeId, PurchaseType purchaseType) {
-
-        if (contentType == ContentType.WEBNOVEL) {
-            WebnovelEpisode webnovelEpisode = webnovelEpisodeRepository.findByIdWithWebnovel(episodeId).orElseThrow(
-                    () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
-            );
-
-            if (webnovelEpisode.getWebnovel() == null) {
-                throw new CustomException(ErrorCode.WEBNOVEL_NOT_FOUND);
-            }
-
-            if (webnovelEpisode.getWebnovel().getDeletedAt() != null) {
-                throw new CustomException(ErrorCode.CONTENT_IS_DELETED);
-            }
-
-            if (webnovelEpisode.getDeletedAt() != null) {
-                throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
-            }
-
-            Integer episodePrice = getEpisodePrice(purchaseType, webnovelEpisode);
-            Long webnovelId = webnovelEpisode.getWebnovel().getId();
-            String contentTitle = webnovelEpisode.getWebnovel().getTitle();
-
-            return new EpisodeInfo(webnovelId, contentTitle, episodePrice, webnovelEpisode);
-
-
-        } else if (contentType == ContentType.WEBTOON) {
-            WebtoonEpisode webtoonEpisode = webtoonEpisodeRepository.findByIdWithWebtoon(episodeId).orElseThrow(
-                    () -> new CustomException(ErrorCode.EPISODE_NOT_FOUND)
-            );
-
-            if (webtoonEpisode.getWebtoon() == null) {
-                throw new CustomException(ErrorCode.WEBTOON_NOT_FOUND);
-            }
-
-            if (webtoonEpisode.getWebtoon().getDeletedAt() != null) {
-                throw new CustomException(ErrorCode.CONTENT_IS_DELETED);
-            }
-
-            if (webtoonEpisode.getDeletedAt() != null) {
-                throw new CustomException(ErrorCode.EPISODE_IS_DELETED);
-            }
-
-            Integer episodePrice = getEpisodePrice(purchaseType, webtoonEpisode);
-            Long webtoonId = webtoonEpisode.getWebtoon().getId();
-            String contentTitle = webtoonEpisode.getWebtoon().getTitle();
-
-            return new EpisodeInfo(webtoonId, contentTitle, episodePrice, webtoonEpisode);
-
-        } else {
-            throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-        }
-
-    }
-
-    private Integer getEpisodePrice(PurchaseType purchaseType, EpisodeBase episode) {
-
-        if (purchaseType == PurchaseType.OWN) {
-            return episode.getPurchasePrice();
-        }
-
-        Integer rentalPrice = episode.getRentalPrice();
-
-        if (rentalPrice == null) {
-            throw new CustomException(ErrorCode.INVALID_PURCHASE_TYPE);
-        }
-
-        return rentalPrice;
-    }
 
     private EpisodePurchase validateEpisodePurchase(User user, ContentType contentType, Long contentId, Long episodeId, PurchaseType purchaseType) {
         log.info("Validate episode purchase or rent: userId = {}, contentType = {}, episodeId = {}", user.getId(), contentType, episodeId);
@@ -218,6 +152,13 @@ public class EpisodePurchaseService {
         actionLogService.createActionLog(user.getId(), contentId, contentType, ActionType.RENTAL, 0);
 
         return episodePurchaseRepository.save(episodePurchase);
+    }
+
+    private ContentProvider getProvider(String contentType) {
+        return providers.stream()
+                .filter(p -> p.supports(contentType))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CONTENT_TYPE));
     }
 
 

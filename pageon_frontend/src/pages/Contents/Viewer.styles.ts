@@ -36,7 +36,6 @@ export const WebnovelTitle = styled(Link)`
     font-weight: 700;
     line-height: 19px;
     min-width: 0px;
-    flex: 1 1 0px;
     white-space: nowrap;
     color: #444;
     transition: color 0.2s
