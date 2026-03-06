@@ -2,8 +2,8 @@ package com.pageon.backend.simulator;
 
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.PurchaseType;
-import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
-import com.pageon.backend.dto.request.ContentEpisodeRatingRequest;
+import com.pageon.backend.dto.request.EpisodeCommentRequest;
+import com.pageon.backend.dto.request.EpisodeRatingRequest;
 import com.pageon.backend.dto.request.ContentInfoRequest;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.WebnovelEpisode;
@@ -16,7 +16,6 @@ import com.pageon.backend.repository.WebtoonEpisodeRepository;
 import com.pageon.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,19 +28,16 @@ public class UserBehaviorSimulator {
 
 
     private final ContentRepository contentRepository;
-    private final WebnovelEpisodeService webnovelEpisodeService;
+    private final EpisodeService episodeService;
+    private final EpisodeCommentService episodeCommentService;
     private final WebnovelEpisodeRepository webnovelEpisodeRepository;
     private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final EpisodePurchaseService episodePurchaseService;
-    private final WebtoonEpisodeService webtoonEpisodeService;
     private final Random random = new Random();
-    private final WebtoonEpisodeCommentService webtoonEpisodeCommentService;
-    private final WebnovelEpisodeCommentService webnovelEpisodeCommentService;
-    private final RatingService ratingService;
-    private final InterestService interestService;
+    private final ContentService contentService;
 
 
-    @Scheduled(fixedDelay = 1000)
+    //    @Scheduled(fixedDelay = 1000)
     public void simulateRandomActivity() {
 
         Long userId = random.nextLong(10000) + 1;
@@ -135,9 +131,9 @@ public class UserBehaviorSimulator {
         } else {
             // 에피소드 페이지로 이동
             if (contentInfo.getContentType() == ContentType.WEBNOVEL) {
-                webnovelEpisodeService.getWebnovelEpisodeById(userId, contentInfo.getEpisodeId());
+                episodeService.getEpisodeDetail(userId, "webnovels", contentInfo.getEpisodeId());
             } else {
-                webtoonEpisodeService.getWebtoonEpisodeById(userId, contentInfo.getEpisodeId());
+                episodeService.getEpisodeDetail(userId, "webtoons", contentInfo.getEpisodeId());
             }
         }
 
@@ -168,12 +164,12 @@ public class UserBehaviorSimulator {
         // 댓글 작성
         boolean isSpoiler = random.nextBoolean();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(getRandomComment(), isSpoiler);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(getRandomComment(), isSpoiler);
 
         if (contentInfo.getContentType() == ContentType.WEBTOON) {
-            webtoonEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+            episodeCommentService.createComment(userId, "webnovels", contentInfo.getEpisodeId(), commentRequest);
         } else {
-            webnovelEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+            episodeCommentService.createComment(userId, "webtoons", contentInfo.getEpisodeId(), commentRequest);
         }
     }
 
@@ -185,28 +181,29 @@ public class UserBehaviorSimulator {
 
         // 별점 입력
         int randomScore = random.nextInt(5) + 6;
-        ContentEpisodeRatingRequest ratingRequest = new ContentEpisodeRatingRequest(contentInfo.getContentType(), contentInfo.getEpisodeId(), randomScore);
+        EpisodeRatingRequest ratingRequest = new EpisodeRatingRequest(randomScore);
         if (contentInfo.getContentType() == ContentType.WEBTOON) {
-            ratingService.createWebtoonRating(userId, ratingRequest);
+            episodeService.rateEpisode(userId, "webtoons", contentInfo.getEpisodeId(),  ratingRequest);
         } else {
-            ratingService.createWebnovelRating(userId, ratingRequest);
+            episodeService.rateEpisode(userId, "webnovels", contentInfo.getEpisodeId(), ratingRequest);
         }
     }
 
     private void actionContentsInterest(Long userId, ContentInfoRequest contentInfo) {
         // 콘텐츠 관심 등록
-        interestService.registerInterest(userId, contentInfo.getContentId());
+        contentService.toggleInterest(userId, contentInfo.getContentId());
     }
 
     private void actionContentsRental(Long userId, ContentInfoRequest contentInfo) {
         // 구매 내역 확인
         boolean purchaseCheck = episodePurchaseService.checkPurchaseHistory(userId, contentInfo.getContentId(), contentInfo.getEpisodeId());
         // 구매 내역 없으면 에피소드 대여
+        String contentType = contentInfo.getContentType().toString().toLowerCase() + "s";
         if (!purchaseCheck) {
-            episodePurchaseService.createPurchaseHistory(userId, contentInfo.getContentType(), contentInfo.getEpisodeId(), PurchaseType.RENT);
+            episodePurchaseService.createPurchaseHistory(userId, contentType, contentInfo.getEpisodeId(), PurchaseType.RENT);
         }
         // 에피소드 페이지로 이동
-        webtoonEpisodeService.getWebtoonEpisodeById(userId, contentInfo.getEpisodeId());
+        episodeService.getEpisodeDetail(userId, contentType, contentInfo.getEpisodeId());
     }
 
     private void actionContentsPurchase(Long userId, ContentInfoRequest contentInfo) {
@@ -214,28 +211,30 @@ public class UserBehaviorSimulator {
         boolean purchaseCheck = episodePurchaseService.checkPurchaseHistory(userId, contentInfo.getContentId(), contentInfo.getEpisodeId());
         boolean actionCheck = random.nextBoolean();
 
+        String contentType = contentInfo.getContentType().toString().toLowerCase() + "s";
+
         int randomScore = random.nextInt(5) + 6;
-        ContentEpisodeRatingRequest ratingRequest = new ContentEpisodeRatingRequest(contentInfo.getContentType(), contentInfo.getEpisodeId(), randomScore);
+        EpisodeRatingRequest ratingRequest = new EpisodeRatingRequest(randomScore);
 
         boolean isSpoiler = random.nextBoolean();
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(getRandomComment(), isSpoiler);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(getRandomComment(), isSpoiler);
         // 구매 내역 없으면 에피소드 구매
         if (!purchaseCheck) {
-            episodePurchaseService.createPurchaseHistory(userId, contentInfo.getContentType(), contentInfo.getEpisodeId(), PurchaseType.OWN);
+            episodePurchaseService.createPurchaseHistory(userId, contentType, contentInfo.getEpisodeId(), PurchaseType.OWN);
         }
 
         // 에피소드 페이지로 이동
         if (contentInfo.getContentType() == ContentType.WEBTOON) {
-            webtoonEpisodeService.getWebtoonEpisodeById(userId, contentInfo.getEpisodeId());
+            episodeService.getEpisodeDetail(userId, contentType, contentInfo.getEpisodeId());
             if (actionCheck) {
-                ratingService.createWebtoonRating(userId, ratingRequest);
-                webtoonEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+                episodeService.rateEpisode(userId, contentType, contentInfo.getEpisodeId(), ratingRequest);
+                episodeCommentService.createComment(userId, contentType, contentInfo.getEpisodeId(), commentRequest);
             }
         } else {
-            webnovelEpisodeService.getWebnovelEpisodeById(userId, contentInfo.getEpisodeId());
+            episodeService.getEpisodeDetail(userId, contentType, contentInfo.getEpisodeId());
             if (actionCheck) {
-                ratingService.createWebnovelRating(userId, ratingRequest);
-                webnovelEpisodeCommentService.createComment(userId, contentInfo.getEpisodeId(), commentRequest);
+                episodeService.rateEpisode(userId, contentType, contentInfo.getEpisodeId(), ratingRequest);
+                episodeCommentService.createComment(userId, contentType, contentInfo.getEpisodeId(), commentRequest);
             }
 
         }

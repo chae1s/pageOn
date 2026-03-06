@@ -1,6 +1,6 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
+import com.pageon.backend.dto.request.EpisodeCommentRequest;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
 import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.*;
@@ -62,7 +62,7 @@ class WebtoonEpisodeCommentServiceTest {
         Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -96,7 +96,7 @@ class WebtoonEpisodeCommentServiceTest {
         Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.empty());
@@ -128,7 +128,7 @@ class WebtoonEpisodeCommentServiceTest {
         Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -160,7 +160,7 @@ class WebtoonEpisodeCommentServiceTest {
         Webtoon webtoon = Webtoon.builder().id(webtoonId).title("테스트 웹툰").build();
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webtoonEpisodeRepository.findByIdWithWebtoon(episodeId)).thenReturn(Optional.of(webtoonEpisode));
@@ -432,7 +432,7 @@ class WebtoonEpisodeCommentServiceTest {
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -462,7 +462,7 @@ class WebtoonEpisodeCommentServiceTest {
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.empty());
 
@@ -499,7 +499,7 @@ class WebtoonEpisodeCommentServiceTest {
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(writer).webtoonEpisode(webtoonEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -534,7 +534,7 @@ class WebtoonEpisodeCommentServiceTest {
         WebtoonEpisode webtoonEpisode = WebtoonEpisode.builder().id(episodeId).webtoon(webtoon).episodeTitle("테스트 웹툰 에피소드").deletedAt(LocalDateTime.now()).build();
         WebtoonEpisodeComment comment = WebtoonEpisodeComment.builder().id(commentId).text(oldText).user(user).webtoonEpisode(webtoonEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webtoonEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 

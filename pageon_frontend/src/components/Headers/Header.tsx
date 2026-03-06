@@ -19,8 +19,8 @@ function Header() {
         e.preventDefault();
 
         const params = new URLSearchParams();
-        params.append("type", "all");
-        params.append("q", query);
+        params.append("contentType", "all");
+        params.append("query", query);
         params.append("sort", "popular");
         params.append("page", "0");
 

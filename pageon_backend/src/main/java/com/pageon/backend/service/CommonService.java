@@ -6,7 +6,6 @@ import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.CreatorRepository;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.security.PrincipalUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -43,7 +43,7 @@ function EpisodeCommentsPage() {
 
     const getComments = useCallback(async () => {
         try {
-            const response = await api.get(`/${contentType}/episodes/${episodeId}/comments`, {
+            const response = await api.get(`/${contentType}/${contentId}/episodes/${episodeId}/comments`, {
                 params: {
                     sort: sort, 
                     page: page,
@@ -88,7 +88,7 @@ function EpisodeCommentsPage() {
         console.log(newComment)
 
         try {
-            await api.post(`/${contentType}/episodes/${episodeId}/comments`, newComment);
+            await api.post(`/${contentType}/${contentId}/episodes/${episodeId}/comments`, newComment);
                 
             setCommentText("");
             setIsSpoiler(false);
@@ -152,7 +152,7 @@ function EpisodeCommentsPage() {
         }
 
         try {
-            await api.patch(`/${contentType}/comments/${commentId}`, updateComment);
+            await api.patch(`/${contentType}/${contentId}/episodes/${episodeId}/comments/${commentId}`, updateComment);
             
             setEditingCommentId(null);
             setEditingCommentText("");
@@ -171,7 +171,7 @@ function EpisodeCommentsPage() {
         
         
         try {
-            await api.delete(`${contentType}/comments/${commentId}`)
+            await api.delete(`${contentType}/${contentId}/episodes/${episodeId}/comments/${commentId}`)
 
             getComments();
 
@@ -209,7 +209,7 @@ function EpisodeCommentsPage() {
 
     const handleLikeComment = async (commentId: number) => {
         try {
-            await api.post(`/${contentType}/comments/${commentId}/likes`)
+            await api.post(`/${contentType}/${contentId}/episodes/${episodeId}/comments/${commentId}/likes`)
 
             setEpisodeComments((prevComments) =>
                 prevComments.map((comment) =>
@@ -227,7 +227,7 @@ function EpisodeCommentsPage() {
 
     const handleDeleteLikeComment = async (commentId: number) => {
         try {
-            await api.delete(`/${contentType}/comments/${commentId}/likes`)
+            await api.post(`/${contentType}/${contentId}/episodes/${episodeId}/comments/${commentId}/likes`)
             
             setEpisodeComments((prevComments) =>
                 prevComments.map((comment) =>
@@ -338,7 +338,7 @@ function EpisodeCommentsPage() {
                                                     </C.CommentInputFlex>
                                                     {editingCommentText.trim().length > 0 && (
                                                         <C.CommentInputBtn onClick={() => handleUpdateComment(comment.id)}>
-                                                            저장
+                                                            수정
                                                         </C.CommentInputBtn>
                                                     )}
                                                 </C.CommentInputWrap>

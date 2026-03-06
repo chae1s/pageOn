@@ -47,7 +47,7 @@ public class CreatorWebnovelService implements CreatorContentService {
                 .title(contentCreateRequest.getTitle())
                 .description(contentCreateRequest.getDescription())
                 .creator(creator)
-                .keywords(keywordService.separateKeywords(contentCreateRequest.getKeywords()))
+                // 키워드 코드 수정 .keywords(keywordService.separateKeywords(contentCreateRequest.getKeywords()))
                 .serialDay(SerialDay.valueOf(contentCreateRequest.getSerialDay()))
                 .build();
 
@@ -59,6 +59,7 @@ public class CreatorWebnovelService implements CreatorContentService {
     }
 
     // 내가 작성한 웹소설의 정보를 가져오는 메소드
+    /*
     @Transactional
     public CreatorWebnovelResponse getContentById(PrincipalUser principalUser, Long webnovelId) {
         // 로그인한 유저에게서 가져온 creator 정보
@@ -75,6 +76,8 @@ public class CreatorWebnovelService implements CreatorContentService {
 
         return CreatorWebnovelResponse.fromEntity(webnovel, keywordService.getKeywords(webnovel.getKeywords()));
     }
+
+     */
 
     // 내가 작성한 웹소설 리스트를 가져오는 메소드
     @Override

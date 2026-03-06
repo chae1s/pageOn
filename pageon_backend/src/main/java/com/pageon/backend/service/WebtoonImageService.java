@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.dto.response.WebtoonImagesResponse;
 import com.pageon.backend.entity.WebtoonImage;
 import com.pageon.backend.repository.WebtoonImageRepository;
@@ -16,16 +17,16 @@ public class WebtoonImageService {
     private final WebtoonImageRepository webtoonImageRepository;
     private final CloudFrontSignerService cloudFrontSignerService;
 
-    public List<WebtoonImagesResponse> getWebtoonImages(Long episodeId) {
-        List<WebtoonImagesResponse> webtoonImagesResponses = new ArrayList<>();
+    public List<EpisodeResponse.EpisodeImage> getWebtoonImages(Long episodeId) {
+        List<EpisodeResponse.EpisodeImage> images = new ArrayList<>();
 
         List<WebtoonImage> webtoonImages = webtoonImageRepository.findByWebtoonEpisodeIdOrderBySequenceAsc(episodeId);
 
         for (WebtoonImage webtoonImage : webtoonImages) {
-            webtoonImagesResponses.add(WebtoonImagesResponse.fromEntity(webtoonImage, cloudFrontSignerService.signUrl(webtoonImage.getImageUrl())));
+            images.add(EpisodeResponse.EpisodeImage.fromEntity(webtoonImage, cloudFrontSignerService.signUrl(webtoonImage.getImageUrl())));
         }
 
-        return webtoonImagesResponses;
+        return images;
     }
 
 

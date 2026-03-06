@@ -4,6 +4,7 @@ import axios from "axios";
 import * as S from "../Styles/ContentDetail.styles"
 import api from '../../api/axiosInstance';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { formatUrl } from '../../utils/formatContentType';
 
 interface Props {
     content: ContentDetail;
@@ -52,49 +53,37 @@ function ContentDetailLayout({content}: Props) {
         </svg>
     )
 
-    const RegisterInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
-
+    const handleToggleInterest = async () => {
         try {
-
-            await api.post(`/interests/${content.contentId}`, {})
+            // 백엔드의 토글 API 호출 (동일한 URL로 POST 요청)
+            await api.post(`/${formatUrl(content.contentType)}/${content.contentId}/interest`, {});
+    
+            // 성공 시 상태 반전
+            const newStatus = !isInterested;
+            setIsInterested(newStatus);
+    
+            // 상태에 따른 메시지 설정
+            setNotificationMessage(
+                newStatus ? "관심 작품에 등록되었습니다." : "관심 작품에서 삭제되었습니다."
+            );
             
-            setIsInterested(true);
-            setNotificationMessage("관심 작품에 등록되었습니다.");
             setShowNotification(true);
-            
+    
             // 3초 후 알림 메시지 숨기기
             setTimeout(() => {
                 setShowNotification(false);
             }, 3000);
-            
+    
         } catch (error) {
-            console.error(error);
+            console.error("관심 등록 토글 실패:", error);
         }
-    }
-
-    const DeleteInterest = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-            await api.delete(`/interests/${content.contentId}`, {})
-
-            setIsInterested(false);
-            setNotificationMessage("관심 작품에서 삭제되었습니다.");
-            setShowNotification(true);
-
-            // 3초 후 알림 메시지 숨기기
-            setTimeout(() => {
-                setShowNotification(false);
-            }, 3000);
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    };
 
     const handleKeywordClick = (contentType: string, name: string) => {
         const params = new URLSearchParams();
         
-        params.append("type", contentType)
-        params.append("q", name);
+        params.append("contentType", formatUrl(contentType))
+        params.append("keyword", name);
 
 
         navigate(`/search/keyword?${params}`)
@@ -113,12 +102,12 @@ function ContentDetailLayout({content}: Props) {
                         <S.ContentStatus $status={content.status}>{statusMap[content.status]}</S.ContentStatus>
                         <S.ContentLikeBtnContainer>
                             {isInterested ? (
-                                <S.ContentInterestBtn type='button' onClick={DeleteInterest}>
+                                <S.ContentInterestBtn type='button' onClick={handleToggleInterest}>
                                     <CheckIcon />
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
                                 </S.ContentInterestBtn>
                             ):(
-                                <S.ContentInterestRegisterBtn type="button" onClick={RegisterInterest}>
+                                <S.ContentInterestRegisterBtn type="button" onClick={handleToggleInterest}>
                                     <PlusIcon /> 
                                     <S.ContentLikeBtnText>관심</S.ContentLikeBtnText>
                                 </S.ContentInterestRegisterBtn>

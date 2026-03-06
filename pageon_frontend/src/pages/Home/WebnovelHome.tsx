@@ -32,40 +32,25 @@ function WebnovelHome() {
     useEffect(() => {
         async function fetchData() {
             try {
-
-                const params = {
-                    size: 6,
-                    contentType: 'webnovels'
-                }
                 
                 const [dailyRes, newRes, masterpieceRes, keywordRes, rankingRes] = await Promise.all([
                     api.get(`/webnovels/daily/${initialDayEng}`),
-                    api.get('/recommendation/recent', {
-                        params: params
-                    }),
-                    api.get('/recommendation/masterpiece', {
-                        params: params
-                    }), 
-                    api.get('/recommendation/by-keyword', {
-                        params: params
-                    }), 
-                    api.get('/recommendation/hourly-ranking', {
-                        params: {
-                            contentType: 'webnovels'
-                        }
-                    })
+                    api.get('/webnovels/new'),
+                    api.get('/webnovels/completed'), 
+                    api.get('/webnovels/keyword'), 
+                    api.get('/webnovels/hourly-ranking')
                 ]);
                 
                 setDailyContents(dailyRes.data);
+                console.log(dailyRes.data);
+                setNewContents(newRes.data);
 
-                setNewContents(newRes.data.content);
-
-                setMasterpieceContents(masterpieceRes.data.content);
+                setMasterpieceContents(masterpieceRes.data);
 
                 setKeywordName(keywordRes.data.keyword);
 
-                setKeywordContents(keywordRes.data.contents.content);
-                console.log(rankingRes.data);
+                setKeywordContents(keywordRes.data.contents);
+                
                 setRankingContents(rankingRes.data);
             } catch (error) {
                 console.error("웹소설 데이터 조회 실패: ", error);
@@ -82,7 +67,7 @@ function WebnovelHome() {
         setDailyContents([]);
 
         try {
-            const response = await axios.get(`/api/webnovels/daily/${day}`);
+            const response = await api.get(`/webnovels/daily/${day}`)
             
             setDailyContents(response.data);
         } catch (error) {

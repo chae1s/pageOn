@@ -7,6 +7,7 @@ import * as S from "./Search.styles"
 import { SearchContent } from "../../types/Content";
 import SearchContentList from "../../components/Contents/SearchContentList";
 import { Pagination } from "../../types/Page";
+import PageNavigator from "../../components/Pagination/PageNavigator";
 
 function KeywordSearch() {
 
@@ -23,22 +24,10 @@ function KeywordSearch() {
 
     const [pageData, setPageData] = useState<Pagination<SearchContent> | null>(null);
 
-    const type = searchParams.get("type") || "webtoons";
-    const q = searchParams.get("q") || "SF";
+    const contentType = searchParams.get("contentType") || "webtoons";
+    const query = searchParams.get("keyword") || "SF";
     const sort = searchParams.get("sort") || "popular"
     const page = parseInt(searchParams.get("page") || "0", 10);
-
-    const NextIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M8 5l4 5-4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
-
-    const PrevIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 5l-4 5 4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
 
     useEffect(() => {
         async function fetchCategoryKeywords() {
@@ -60,16 +49,14 @@ function KeywordSearch() {
     useEffect(() => {
         async function fetchSearchResults() {
             try {
-                const response = await api.get("/search/keywords", {
+                const response = await api.get(`/${contentType}`, {
                     params: {
-                        type: type,
-                        q: q,
+                        keyword: query,
                         sort: sort,
                         page: page,
                     }
                 });
                 
-                console.log(response.data)
                 setPageData(response.data)
 
             } catch (error) {
@@ -77,11 +64,11 @@ function KeywordSearch() {
             }
         }
 
-        if (q) {
+        if (query) {
             fetchSearchResults();
         }
         
-    }, [type, q, sort, page]); 
+    }, [contentType, query, sort, page]); 
 
     const handleParamClick = (newKey: string, newValue: string) => {
         const newParams = new URLSearchParams(searchParams);
@@ -96,6 +83,7 @@ function KeywordSearch() {
         newParams.set("page", newPage.toString());
         setSearchParams(newParams);
     }
+
 
     const getPageNumbers = () => {
         if (!pageData) return [];
@@ -129,12 +117,12 @@ function KeywordSearch() {
             <NoSidebarMain>
                 <S.ContentTypeList>
                     <S.ContentTypeItem>
-                        <S.ContentTypeBtn $active={type === "webtoons"} onClick={() => handleParamClick("type", "webtoons")}>
+                        <S.ContentTypeBtn $active={contentType === "webtoons"} onClick={() => handleParamClick("contentType", "webtoons")}>
                             웹툰
                         </S.ContentTypeBtn>
                     </S.ContentTypeItem>
                     <S.ContentTypeItem>
-                        <S.ContentTypeBtn $active={type === "webnovels"} onClick={() => handleParamClick("type", "webnovels")}>
+                        <S.ContentTypeBtn $active={contentType === "webnovels"} onClick={() => handleParamClick("contentType", "webnovels")}>
                             웹소설
                         </S.ContentTypeBtn>
                     </S.ContentTypeItem>
@@ -147,7 +135,7 @@ function KeywordSearch() {
                                 <S.KeywordItemWrap>
                                     {category.keywords.map((keyword) => (
                                         <S.KeywordItem key={keyword.id}>
-                                            <S.KeywordBtn $active={q === `${keyword.name}`} onClick={() => handleParamClick("q", `${keyword.name}`)}>
+                                            <S.KeywordBtn $active={query === `${keyword.name}`} onClick={() => handleParamClick("keyword", `${keyword.name}`)}>
                                                 {keyword.name}
                                             </S.KeywordBtn>
                                         </S.KeywordItem>
@@ -172,37 +160,7 @@ function KeywordSearch() {
                 )}
 
                 {pageData && pageData.totalPages > 0 && (
-                    <S.PaginationContainer>
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber - 1)}
-                            disabled={pageData.first}
-                        >
-                            <PrevIcon />
-                        </S.PaginationIconWrapper>
-
-                        <S.PaginationNumberList>
-                            
-                            {pageNumbers.map((number) => (
-                                <S.PaginationNumberListItem key={number}>
-                                    <S.PaginationNumberBtn
-                                        $active={pageData.pageNumber === number}
-                                        onClick={() => handlePageChange(number)}
-                                    >
-                                        {number + 1}
-                                    </S.PaginationNumberBtn>
-                                </S.PaginationNumberListItem>
-                            ))}
-                        </S.PaginationNumberList>
-
-                        
-                        <S.PaginationIconWrapper
-                            onClick={() => handlePageChange(pageData.pageNumber + 1)}
-                            disabled={pageData.last}
-                        >
-                            <NextIcon />
-                        </S.PaginationIconWrapper>
-                    </S.PaginationContainer>
+                    <PageNavigator pageData={pageData} handlePageChange={handlePageChange} />
                 )}
                 
                 

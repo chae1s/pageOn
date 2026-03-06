@@ -11,14 +11,14 @@ import java.util.Optional;
 
 public interface WebtoonEpisodeCommentRepository extends JpaRepository<WebtoonEpisodeComment, Long> {
 
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {"user", "webtoonEpisode", "webtoonEpisode.webtoon"})
     Page<WebtoonEpisodeComment> findAllByWebtoonEpisode_IdAndDeletedAtNull(Long episodeId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"webtoonEpisode", "webtoonEpisode.webtoon", "user"})
     Page<WebtoonEpisodeComment> findAllByUser_IdAndDeletedAtNull(Long userId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"user", "webtoonEpisode"})
-    Optional<WebtoonEpisodeComment> findById(Long commentId);
+    Optional<WebtoonEpisodeComment> findByIdAndUser_Id(Long userId, Long commentId);
 
     Optional<WebtoonEpisodeComment> findFirstByWebtoonEpisode_IdAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(Long episodeId);
 

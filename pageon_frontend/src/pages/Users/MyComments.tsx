@@ -12,6 +12,7 @@ import { MyComment } from "../../types/Comments";
 import { Pagination } from "../../types/Page";
 import { formatDate } from "../../utils/formatData";
 import PageNavigator from "../../components/Pagination/PageNavigator";
+import { formatUrl } from "../../utils/formatContentType";
 
 function MyComments() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -38,7 +39,7 @@ function MyComments() {
         try {
             const response = await api.get("/users/comments", {
                 params: {
-                    type: type,
+                    contentType: type,
                     page: page
                 }
             })
@@ -88,7 +89,7 @@ function MyComments() {
         }
 
         try {
-            await api.patch(`/${contentType}/comments/${comment.id}`, updateComment);
+            await api.patch(`/${contentType}/${comment.contentId}/episodes/${comment.episodeId}/comments/${comment.id}`, updateComment);
             
             setEditingCommentId(null);
             setEditingCommentText("");
@@ -106,7 +107,7 @@ function MyComments() {
         }
         
         try {
-            await api.delete(`/${type}/comments/${comment.id}`)
+            await api.delete(`/${formatUrl(type)}/${comment.contentId}/episodes/${comment.episodeId}/comments/${comment.id}`)
 
             getMyComments();
 

@@ -1,6 +1,6 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.request.ContentEpisodeCommentRequest;
+import com.pageon.backend.dto.request.EpisodeCommentRequest;
 import com.pageon.backend.dto.response.EpisodeCommentResponse;
 import com.pageon.backend.dto.response.MyCommentResponse;
 import com.pageon.backend.entity.User;
@@ -65,7 +65,7 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -99,7 +99,7 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.empty());
@@ -131,7 +131,7 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -163,7 +163,7 @@ class WebnovelEpisodeCommentServiceTest {
         Webnovel webnovel = Webnovel.builder().id(webnovelId).title("테스트 웹소설").build();
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").deletedAt(LocalDateTime.now()).build();
 
-        ContentEpisodeCommentRequest request = new ContentEpisodeCommentRequest(text, false);
+        EpisodeCommentRequest request = new EpisodeCommentRequest(text, false);
 
         when(userRepository.getReferenceById(userId)).thenReturn(user);
         when(webnovelEpisodeRepository.findByIdWithWebnovel(episodeId)).thenReturn(Optional.of(webnovelEpisode));
@@ -426,7 +426,7 @@ class WebnovelEpisodeCommentServiceTest {
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -456,7 +456,7 @@ class WebnovelEpisodeCommentServiceTest {
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.empty());
 
@@ -493,7 +493,7 @@ class WebnovelEpisodeCommentServiceTest {
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(writer).webnovelEpisode(webnovelEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -528,7 +528,7 @@ class WebnovelEpisodeCommentServiceTest {
         WebnovelEpisode webnovelEpisode = WebnovelEpisode.builder().id(episodeId).webnovel(webnovel).episodeTitle("테스트 웹소설 에피소드").build();
         WebnovelEpisodeComment comment = WebnovelEpisodeComment.builder().id(commentId).text(oldText).user(user).webnovelEpisode(webnovelEpisode).build();
 
-        ContentEpisodeCommentRequest commentRequest = new ContentEpisodeCommentRequest(newText, false);
+        EpisodeCommentRequest commentRequest = new EpisodeCommentRequest(newText, false);
 
         when(webnovelEpisodeCommentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 

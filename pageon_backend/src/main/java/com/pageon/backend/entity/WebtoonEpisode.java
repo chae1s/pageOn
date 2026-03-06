@@ -1,5 +1,6 @@
 package com.pageon.backend.entity;
 
+import com.pageon.backend.entity.base.EpisodeBase;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,7 +22,6 @@ public class WebtoonEpisode extends EpisodeBase {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "webtoon_id")
     private Webtoon webtoon;
-
 
     @Builder.Default
     @OneToMany(mappedBy = "webtoonEpisode", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -48,4 +48,8 @@ public class WebtoonEpisode extends EpisodeBase {
         image.addEpisode(this);
     }
 
+    @Override
+    public Content getParerntContent() {
+        return this.webtoon;
+    }
 }

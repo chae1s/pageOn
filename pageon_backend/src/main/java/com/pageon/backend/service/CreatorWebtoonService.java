@@ -34,6 +34,7 @@ public class CreatorWebtoonService implements CreatorContentService{
     private final CommonService commonService;
     private final ContentDeleteRepository  contentDeleteRepository;
 
+
     @Override
     @Transactional
     public void createContent(PrincipalUser principalUser, ContentCreateRequest contentCreateRequest) {
@@ -48,7 +49,7 @@ public class CreatorWebtoonService implements CreatorContentService{
                 .title(contentCreateRequest.getTitle())
                 .description(contentCreateRequest.getDescription())
                 .creator(creator)
-                .keywords(keywordService.separateKeywords(contentCreateRequest.getKeywords()))
+                // 키워드 코드 수정 .keywords(keywordervice.separateKeywords(contentCreateRequest.getKeywords()))
                 .serialDay(SerialDay.valueOf(contentCreateRequest.getSerialDay()))
                 .build();
 
@@ -59,6 +60,7 @@ public class CreatorWebtoonService implements CreatorContentService{
         webtoon.updateCover(s3Url);
     }
 
+    /*
     public CreatorWebtoonResponse getContentById(PrincipalUser principalUser, Long contentId) {
         User user = userRepository.getReferenceById(principalUser.getId());
         Creator creator = commonService.findCreatorByUser(user);
@@ -72,6 +74,8 @@ public class CreatorWebtoonService implements CreatorContentService{
 
         return CreatorWebtoonResponse.fromEntity(webtoon, keywordService.getKeywords(webtoon.getKeywords()));
     }
+
+     */
 
     @Override
     public List<CreatorContentListResponse> getMyContents(PrincipalUser principalUser) {

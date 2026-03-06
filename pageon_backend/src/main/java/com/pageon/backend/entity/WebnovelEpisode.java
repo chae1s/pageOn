@@ -1,5 +1,6 @@
 package com.pageon.backend.entity;
 
+import com.pageon.backend.entity.base.EpisodeBase;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -34,6 +35,8 @@ public class WebnovelEpisode extends EpisodeBase {
     @OneToMany(mappedBy = "webnovelEpisode", cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<WebnovelEpisodeComment> webnovelEpisodeComments = new ArrayList<>();
 
-
-
+    @Override
+    public Content getParerntContent() {
+        return this.webnovel;
+    }
 }

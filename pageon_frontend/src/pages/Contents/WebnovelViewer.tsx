@@ -34,7 +34,7 @@ function WebnovelViewer() {
             
             const savedY = window.scrollY;
             try {
-                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/webnovels/${contentId}/episodes/${episodeId}`);
 
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
@@ -119,7 +119,7 @@ function WebnovelViewer() {
         const { episode } = purchasePrompt;
 
         try {
-            await api.post(`/webnovels/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
+            await api.post(`/webnovels/${contentId}/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
             closePurchasePrompt();
             navigate(`/webnovels/${contentId}/viewer/${episode.id}`);
         } catch (error) {
@@ -135,8 +135,9 @@ function WebnovelViewer() {
         if (!checkLogin()) return;
 
         try {
-            const response = await api.get(`/webnovels/episodes/${targetEpisodeId}/subscribe`);
+            const response = await api.get(`/webnovels/${contentId}/episodes/${targetEpisodeId}/subscribe`);
 
+            console.log(response)
             if (response.data) {
                 navigate(`/webnovels/${contentId}/viewer/${targetEpisodeId}`);
                 return;
@@ -195,14 +196,12 @@ function WebnovelViewer() {
             return;
         }
         try {
-            await api.post("/rating", {
-                contentType: "WEBNOVEL",
-                episodeId: episodeData?.id,
+            await api.post(`/webnovels/${contentId}/episodes/${episodeId}/rating`, {
                 score: selectedScore
             });
             // 최신 평점 반영 및 스크롤 유지
             if (episodeId) {
-                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/webnovels/${contentId}/episodes/${episodeId}`);
                 setEpisodeData(response.data);
             }
         } catch (error) {
@@ -222,13 +221,11 @@ function WebnovelViewer() {
             return;
         }
         try {
-            await api.patch("/rating", {
-                contentType: "WEBNOVEL",
-                episodeId: episodeData?.id,
+            await api.patch(`/webnovels/${contentId}/episodes/${episodeId}/rating`, {
                 score: selectedScore
             });
             if (episodeId) {
-                const response = await api.get(`/episodes/webnovel/${episodeId}`);
+                const response = await api.get(`/webnovels/${contentId}/episodes/${episodeId}`);
                 setEpisodeData(response.data);
                 setSelectedScore(response.data.userScore ?? 0);
             }

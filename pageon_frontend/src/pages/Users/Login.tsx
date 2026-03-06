@@ -87,7 +87,7 @@ function Login() {
             });
 
             const jwtInfo = response.data.success;
-            console.log(jwtInfo)
+            
             if(jwtInfo && jwtInfo.isLogin) {
                 login(jwtInfo.accessToken, jwtInfo.userRoles, jwtInfo.oauthProvider);
 

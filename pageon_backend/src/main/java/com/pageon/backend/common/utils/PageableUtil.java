@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort;
 
 public class PageableUtil {
 
-    public static Pageable createContentPageable(Pageable pageable, String sort) {
+    public static Pageable searchPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
             case "latest" -> Sort.by(Sort.Order.desc("episodeUpdatedAt"));
             case "rating" -> Sort.by(Sort.Order.desc("totalAverageRating"));
@@ -16,7 +16,7 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createInterestPageable(Pageable pageable, String sort) {
+    public static Pageable interestPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
             case "update" -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
             case "title" -> Sort.by(Sort.Order.asc("c.title"));
@@ -29,7 +29,7 @@ public class PageableUtil {
     public static Pageable createReadingHistory(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
-            // [TODO] 최근에 읽은 순, 업데이트 순으로 sort 기준 변경
+
             case "recently_read" -> Sort.by(Sort.Order.desc("r.lastReadAt"));
             default -> Sort.by(Sort.Order.desc("c.episodeUpdatedAt"));
         };
@@ -37,7 +37,7 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createCommentPageable(Pageable pageable, String sort) {
+    public static Pageable commentPageable(Pageable pageable, String sort) {
         Sort sortOrder = switch (sort) {
             case "latest" -> Sort.by(Sort.Order.desc("createdAt"));
             default -> Sort.by(Sort.Order.desc("likeCount"));
@@ -46,10 +46,16 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createCreatedAtPageable(Pageable pageable) {
-        Sort sortOrder = Sort.by(Sort.Order.desc("createdAt"));
+    public static Pageable redisPageable(int size, String sort) {
+        Sort sortOrder = Sort.by(Sort.Order.desc(sort));
 
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+        return PageRequest.of(0, size, sortOrder);
+    }
+
+    public static Pageable moreContentPageable(Pageable pageable, String sort) {
+        Sort sortOrder = Sort.by(Sort.Order.desc(sort));
+
+        return PageRequest.of(pageable.getPageNumber(), 60, sortOrder);
     }
 
 
