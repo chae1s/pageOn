@@ -4,7 +4,6 @@ import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
-import com.pageon.backend.dto.response.EpisodeListResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.entity.Content;
@@ -87,7 +86,7 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-//    @Cacheable(value = "contents:new", key = "#contentType + ':' + #date")
+    @Cacheable(value = "contents:new", key = "#contentType + ':' + #date")
     public List<ContentResponse.Simple> getNewArrivalList(String contentType, LocalDate date) {
 
         log.info("Cache miss for new contents. Fetching the standard 6 {} from DB.", contentType);
@@ -121,7 +120,7 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-//    @Cacheable(value = "contents:daily", key = "#contentType + ':' + #serialDay")
+    @Cacheable(value = "contents:daily", key = "#contentType + ':' + #serialDay")
     public List<ContentResponse.Simple> getDailyScheduleList(String contentType, String serialDay) {
 
         log.info("Cache miss for {} contents. Fetching the standard 18 {} from DB.", serialDay, contentType);
@@ -139,7 +138,7 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-//    @Cacheable(value = "contents:completed", key = "#contentType")
+    @Cacheable(value = "contents:completed", key = "#contentType")
     public List<ContentResponse.Simple> getBestCompletedList(String contentType) {
 
         log.info("Cache miss for completed contents. Fetching the standard 6 {} from DB.", contentType);
@@ -172,7 +171,7 @@ public class ContentService {
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-//    @Cacheable(value = "contents:keyword", key = "#contentType")
+    @Cacheable(value = "contents:keyword", key = "#contentType")
     public ContentResponse.KeywordContent<?> getFeaturedKeywordContentsList(String contentType) {
 
         log.info("Cache miss for keyword contents. Fetching the standard 6 {} from DB.", contentType);
