@@ -129,3 +129,12 @@ coolsms:
   api-secret:
   domain: https://api.solapi.com
   set-from:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    tags:
+      application: pageon-backend
