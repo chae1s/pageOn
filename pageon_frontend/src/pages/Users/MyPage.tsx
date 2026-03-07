@@ -311,11 +311,11 @@ function MyPage() {
                                     </MypageSummaryIcon>
                                     <MypageSummaryLabel>내 포인트</MypageSummaryLabel>
                                     <MypageSummaryValueWrap>
-                                        <MypageSummaryValue>{userInfo?.pointBalance}</MypageSummaryValue>
+                                        <MypageSummaryValue>{userInfo?.pointBalance.toLocaleString()}</MypageSummaryValue>
                                         <MypageSummaryValueUnit>P</MypageSummaryValueUnit>
                                     </MypageSummaryValueWrap>
                                     <MypageChargeLinkWrap>
-                                        <MypageChargeLink to={"#charge"}>충전하기</MypageChargeLink>
+                                        <MypageChargeLink to={"/points/history?type=CHARGE"}>충전내역</MypageChargeLink>
                                     </MypageChargeLinkWrap>
                                 </MypageSummaryItem>
                                 <MypageSummaryItem>

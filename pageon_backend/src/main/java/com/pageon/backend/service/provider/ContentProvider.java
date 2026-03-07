@@ -4,7 +4,6 @@ import com.pageon.backend.common.enums.PurchaseType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.request.EpisodeRatingRequest;
 import com.pageon.backend.dto.response.CommentResponse;
-import com.pageon.backend.dto.response.EpisodeListResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Interest;

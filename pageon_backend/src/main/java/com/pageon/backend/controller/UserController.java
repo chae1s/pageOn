@@ -164,4 +164,12 @@ public class UserController {
 
         return ResponseEntity.ok(new PageResponse<>(pointTransactionResponses));
     }
+
+    @GetMapping("/points/me")
+    public ResponseEntity<Integer> getMyPoint (@AuthenticationPrincipal PrincipalUser principalUser) {
+
+        Integer pointBalance = userService.getMyPoint(principalUser.getId());
+
+        return ResponseEntity.ok(pointBalance);
+    }
 }

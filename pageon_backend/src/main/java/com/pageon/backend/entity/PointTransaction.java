@@ -1,11 +1,13 @@
 package com.pageon.backend.entity;
 
 import com.pageon.backend.common.base.BaseTimeEntity;
-import com.pageon.backend.common.enums.ContentType;
+import com.pageon.backend.common.enums.TransactionStatus;
 import com.pageon.backend.common.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -25,11 +27,31 @@ public class PointTransaction extends BaseTimeEntity {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionStatus transactionStatus;
     private Integer amount;
     private Integer balance;
     private String description;
 
+    @Column(unique = true)
+    private String orderId;
+
     private Long domainId;
+
+    private LocalDateTime paidAt;
+
+    public void completedCharge(LocalDateTime paidAt, Integer balance) {
+        transactionStatus = TransactionStatus.COMPLETED;
+        this.paidAt = paidAt;
+        this.balance = balance;
+    }
+
+    public void failedCharge() {
+        transactionStatus = TransactionStatus.FAILED;
+    }
 
 }

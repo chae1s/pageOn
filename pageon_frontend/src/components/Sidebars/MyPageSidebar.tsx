@@ -71,7 +71,7 @@ function Sidebar() {
                                     <S.SidebarNavLink to={"/points/history"} className="sidebar-nav-link">내 포인트 내역</S.SidebarNavLink>
                                 </S.SidebarNavItemLi>
                                 <S.SidebarNavItemLi>
-                                    <S.SidebarNavLink to={"/library/recent-view"} className="sidebar-nav-link">이용권 내역</S.SidebarNavLink>
+                                    <S.SidebarNavLink to={"/points/charge"} className="sidebar-nav-link">포인트 충전</S.SidebarNavLink>
                                 </S.SidebarNavItemLi>
                             </S.SidebarNavItemUl>
                         </S.SidebarNavSectionLi>

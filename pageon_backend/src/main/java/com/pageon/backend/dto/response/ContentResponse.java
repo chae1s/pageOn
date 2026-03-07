@@ -218,12 +218,12 @@ public class ContentResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class KeywordContent<T> {
+    public static class KeywordContent {
         private String keyword;
-        private T contents;
+        private PageResponse<ContentResponse.Simple> contents;
 
-        public static <T> KeywordContent<T> fromEntity(String keyword, T contents) {
-            return KeywordContent.<T>builder()
+        public static KeywordContent fromEntity(String keyword, PageResponse<ContentResponse.Simple> contents) {
+            return KeywordContent.builder()
                     .keyword(keyword)
                     .contents(contents)
                     .build();

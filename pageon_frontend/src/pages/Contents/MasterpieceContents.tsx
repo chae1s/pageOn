@@ -26,12 +26,10 @@ function MasterpieceContents({contentType} : Props) {
         console.log(contentType);
         async function fetchData() {
             const params: any = {
-                page: page,
-                contentType: formatUrl(contentType), 
-                isMore: true
+                page: page
             }
             try {
-                const response = await api.get('/contents/masterpiece', {
+                const response = await api.get(`/${formatUrl(contentType)}/completed/more`, {
                     params: params
                 });
 

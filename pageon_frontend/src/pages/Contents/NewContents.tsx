@@ -26,11 +26,9 @@ function NewContents({contentType} : NewContentsProps) {
         async function fetchData() {
             const params: any = {
                 page: page, 
-                contentType: formatUrl(contentType), 
-                isMore: true
             }
             try {
-                const response = await api.get('/contents/recent', {params: params});
+                const response = await api.get(`/${formatUrl(contentType)}/new/more`, {params: params});
 
                 console.log(response.data);
                 setNewContents(response.data.content);

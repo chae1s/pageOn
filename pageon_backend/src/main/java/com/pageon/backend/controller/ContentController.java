@@ -113,18 +113,18 @@ public class ContentController {
     }
 
     @GetMapping("/keyword")
-    public ResponseEntity<ContentResponse.KeywordContent<?>> getFeaturedByKeyword(@PathVariable String contentType) {
-        ContentResponse.KeywordContent<?> contents = contentService.getFeaturedKeywordContentsList(contentType);
+    public ResponseEntity<ContentResponse.KeywordContent> getFeaturedByKeyword(@PathVariable String contentType) {
+        ContentResponse.KeywordContent contents = contentService.getFeaturedKeywordContentsList(contentType);
 
         return ResponseEntity.ok(contents);
     }
 
     @GetMapping("/keyword/more")
-    public ResponseEntity<ContentResponse.KeywordContent<?>> getFeaturedByKeyword(
+    public ResponseEntity<ContentResponse.KeywordContent> getFeaturedByKeyword(
             @PathVariable String contentType,
             Pageable pageable
     ) {
-        ContentResponse.KeywordContent<?> contents = contentService.getFeaturedKeywordContentsPage(contentType, pageable);
+        ContentResponse.KeywordContent contents = contentService.getFeaturedKeywordContentsPage(contentType, pageable);
 
         return ResponseEntity.ok(contents);
     }

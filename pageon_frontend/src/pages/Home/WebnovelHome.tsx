@@ -42,14 +42,15 @@ function WebnovelHome() {
                 ]);
                 
                 setDailyContents(dailyRes.data);
-                console.log(dailyRes.data);
+                
                 setNewContents(newRes.data);
 
                 setMasterpieceContents(masterpieceRes.data);
 
+                console.log(keywordRes)
                 setKeywordName(keywordRes.data.keyword);
 
-                setKeywordContents(keywordRes.data.contents);
+                setKeywordContents(keywordRes.data.contents.content);
                 
                 setRankingContents(rankingRes.data);
             } catch (error) {
