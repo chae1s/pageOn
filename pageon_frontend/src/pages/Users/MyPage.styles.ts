@@ -173,6 +173,7 @@ export const PointTransactionTableHead = styled.thead`
 export const PointTransactionTheadTr = styled.tr`
     border-bottom: solid 1px #e5e5e5;
     font-size: 13px;
+    cursor: default;
 `
 
 export const PointTransactionThDate = styled.th`
@@ -195,7 +196,7 @@ export const PointTransactionThBalance = styled.th`
 `
 
 export const PointTransactionTableBody = styled.tbody`
-
+    cursor: default;
 `
 
 export const PointTransactionTbodyTr = styled.tr`
@@ -214,6 +215,7 @@ export const PointTransactionTdTitle = styled.td`
     padding: 13px 15px 12px 14px;
     font-size: 14px;
     line-height: 14px;
+    sursor: pointer;
 `
 
 export const PointTransactionTdAmount = styled.td`
@@ -233,11 +235,36 @@ export const PointTransactionTdBalance = styled.td`
     text-align: right;
 `
 
+export const PointTransactionDetailTr = styled.tr`
+    border-bottom: solid 1px #e6e6e6;
+`
+
+export const PointTransactionDetailTd = styled.td`
+    padding: 10px 15px 12px 25px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #555;
+`
+
 export const PointTransactionEmpty = styled.div`
     text-align: center;
     padding: 20px 0;
     font-size: 14px;
     color: #666;
+`
+
+export const PointTransactionDetailContent = styled.div`
+
+`
+
+export const RefundBtnWrapper = styled.div`
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+`
+
+export const RefundBtn = styled.button`
+    color: var(--error-color);
 `
 
 export const LibraryContentListWrapper = styled.div`

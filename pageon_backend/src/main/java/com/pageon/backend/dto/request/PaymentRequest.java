@@ -11,6 +11,7 @@ public class PaymentRequest {
     @AllArgsConstructor
     public static class Ready {
         private Integer amount;
+        private Integer point;
         private String description;
     }
 

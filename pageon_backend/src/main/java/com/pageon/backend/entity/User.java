@@ -153,11 +153,7 @@ public class User {
         this.gender = gender;
     }
 
-    public void usePoints(int amount) {
-        this.pointBalance -= amount;
-    }
-
-    public void chargePoints(int amount) {
+    public void changePoints(int amount) {
         this.pointBalance += amount;
     }
 

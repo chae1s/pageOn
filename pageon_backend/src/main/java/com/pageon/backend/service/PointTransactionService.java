@@ -22,14 +22,14 @@ public class PointTransactionService {
     private final PointTransactionRepository pointTransactionRepository;
 
     @Transactional
-    public void usePoint(User user, int amount, String description, Long domainId) {
-        user.usePoints(amount);
+    public void usePoint(User user, int point, String description, Long domainId) {
+        user.changePoints(-point);
 
         PointTransaction pointTransaction = PointTransaction.builder()
                 .user(user)
                 .transactionType(TransactionType.USE)
                 .transactionStatus(TransactionStatus.COMPLETED)
-                .amount(amount)
+                .point(point)
                 .balance(user.getPointBalance())
                 .description(description)
                 .domainId(domainId)
@@ -44,7 +44,7 @@ public class PointTransactionService {
 
         TransactionType transactionType = TransactionType.valueOf(type);
         Page<PointTransaction> pointPage
-                = pointTransactionRepository.findAllByUser_IdAndTransactionTypeAndTransactionStatus(userId, transactionType, TransactionStatus.COMPLETED, pageable);
+                = pointTransactionRepository.findAllByTransactionStatus(userId, transactionType, pageable);
 
         return pointPage.map(PointTransactionResponse::fromEntity);
 

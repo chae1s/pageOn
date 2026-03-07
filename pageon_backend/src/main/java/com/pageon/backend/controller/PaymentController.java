@@ -7,10 +7,7 @@ import com.pageon.backend.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -38,6 +35,15 @@ public class PaymentController {
         PaymentResponse.Result result = paymentService.confirmPayment(principalUser.getId(), request);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/cancel/{transactionId}")
+    public ResponseEntity<String> cancelPayment(
+            @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long transactionId
+    ) {
+        String message = paymentService.cancelPayment(principalUser.getId(), transactionId);
+
+        return ResponseEntity.ok(message);
     }
 
 

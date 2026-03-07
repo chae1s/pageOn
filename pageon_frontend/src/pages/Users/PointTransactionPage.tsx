@@ -18,13 +18,25 @@ function PointTransactionPage() {
 
     const [pointTransactions, setPointTransactions] = useState<PointTransaction[]>([]);
     const [ pageData, setPageData ] = useState<Pagination<PointTransaction> | null>(null);
+    const [isChargeOpen, setIsChargeOpen] = useState<boolean>(true);
+    const [openTransactionId, setOpenTransactionId] = useState<number | null>(null);
     
     const handleParamClick = (newKey: string, newValue: string) => {
         const newParams = new URLSearchParams(searchParams);
 
+        // type 이 CHARGE 인 상태에서 다시 "충전내역"을 누르면 토글로 여닫기
+        if (newKey === "type" && newValue === "CHARGE" && type === "CHARGE") {
+            setIsChargeOpen((prev) => !prev);
+            return;
+        }
+
         newParams.set(newKey, newValue);
         newParams.set("page", "0");
         setSearchParams(newParams);
+
+        if (newKey === "type" && newValue === "CHARGE") {
+            setIsChargeOpen(true);
+        }
     }
 
     useEffect(() => {
@@ -46,6 +58,7 @@ function PointTransactionPage() {
         }
 
         fetchData();
+        setOpenTransactionId(null);
     }, [type, page]);
 
     const handlePageChange = (newPage: number) => {
@@ -81,18 +94,23 @@ function PointTransactionPage() {
 
     const pageNumbers = getPageNumbers();
 
-    const NextIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M8 5l4 5-4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
+    const handleRefundClick = async () => {
+        try {
 
-    const PrevIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M12 5l-4 5 4 5" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-    )
+            const isConfirmed = window.confirm(
+                "환불하시겠습니까?"
+            );
 
+            if (!isConfirmed) return;
+
+            const response = await api.post(`/payments/cancel/${openTransactionId}`);
+
+            console.log(response.data);
+            window.location.reload();
+        } catch (error) {
+            console.error("결제 취소 실패: ", error);
+        }
+    };
 
     return (
         <MainContainer>
@@ -121,41 +139,114 @@ function PointTransactionPage() {
                                 
                             ) : (
                              <>
-                                <M.PointTransactionTable>
-                                    <colgroup>
-                                        <M.PointTransactionColDate></M.PointTransactionColDate>
-                                        <M.PointTransactionColTitle></M.PointTransactionColTitle>
-                                        <M.PointTransactionColAmount></M.PointTransactionColAmount>
-                                        <M.PointTransactionColBalance></M.PointTransactionColBalance>
-                                    </colgroup>
-                                    <M.PointTransactionTableHead>
-                                        {type === 'use' ? (
-                                            <M.PointTransactionTheadTr>
-                                                <M.PointTransactionThDate>구매일</M.PointTransactionThDate>
-                                                <M.PointTransactionThTitle>결제 내역</M.PointTransactionThTitle>
-                                                <M.PointTransactionThAmount>결제 금액</M.PointTransactionThAmount>
-                                                <M.PointTransactionThBalance>잔액</M.PointTransactionThBalance>
-                                            </M.PointTransactionTheadTr>
-                                        ) : (
-                                            <M.PointTransactionTheadTr>
-                                                <M.PointTransactionThDate>충전일</M.PointTransactionThDate>
-                                                <M.PointTransactionThTitle>충전 내역</M.PointTransactionThTitle>
-                                                <M.PointTransactionThAmount>충전 금액</M.PointTransactionThAmount>
-                                                <M.PointTransactionThBalance>잔액</M.PointTransactionThBalance>
-                                            </M.PointTransactionTheadTr>
-                                        )}
-                                    </M.PointTransactionTableHead>
-                                    <M.PointTransactionTableBody>
-                                        {pointTransactions.map((transaction) => (
-                                            <M.PointTransactionTbodyTr>
-                                                <M.PointTransactionTdDate>{formatDateAndTime(transaction.createdAt)}</M.PointTransactionTdDate>
-                                                <M.PointTransactionTdTitle>{transaction.description}</M.PointTransactionTdTitle>
-                                                <M.PointTransactionTdAmount>{transaction.amount}P</M.PointTransactionTdAmount>
-                                                <M.PointTransactionTdBalance>{formatNumber(transaction.balance)}P</M.PointTransactionTdBalance>
-                                            </M.PointTransactionTbodyTr>
-                                        ))}
-                                    </M.PointTransactionTableBody>
-                                </M.PointTransactionTable>
+                                {(type !== "CHARGE" || isChargeOpen) && (
+                                    <M.PointTransactionTable>
+                                        <colgroup>
+                                            <M.PointTransactionColDate></M.PointTransactionColDate>
+                                            <M.PointTransactionColTitle></M.PointTransactionColTitle>
+                                            <M.PointTransactionColAmount></M.PointTransactionColAmount>
+                                            <M.PointTransactionColBalance></M.PointTransactionColBalance>
+                                        </colgroup>
+                                        <M.PointTransactionTableHead>
+                                            {type === 'USE' ? (
+                                                <M.PointTransactionTheadTr>
+                                                    <M.PointTransactionThDate>구매일</M.PointTransactionThDate>
+                                                    <M.PointTransactionThTitle>결제 내역</M.PointTransactionThTitle>
+                                                    <M.PointTransactionThAmount>결제 금액</M.PointTransactionThAmount>
+                                                    <M.PointTransactionThBalance>잔액</M.PointTransactionThBalance>
+                                                </M.PointTransactionTheadTr>
+                                            ) : (
+                                                <M.PointTransactionTheadTr>
+                                                    <M.PointTransactionThDate>충전일</M.PointTransactionThDate>
+                                                    <M.PointTransactionThTitle>충전 내역</M.PointTransactionThTitle>
+                                                    <M.PointTransactionThAmount>충전 금액</M.PointTransactionThAmount>
+                                                    <M.PointTransactionThBalance>잔액</M.PointTransactionThBalance>
+                                                </M.PointTransactionTheadTr>
+                                            )}
+                                        </M.PointTransactionTableHead>
+                                        <M.PointTransactionTableBody>
+                                            {pointTransactions.map((transaction) => {
+                                                const isOpen = type === "CHARGE" && openTransactionId === transaction.id;
+                                                const isRefunded = transaction.transactionStatus?.toLowerCase() === "refunded";
+                                                const baseDate = isRefunded && transaction.cancelledAt
+                                                    ? transaction.cancelledAt
+                                                    : transaction.paidAt;
+                                                const createdAtDate = new Date(baseDate);
+                                                const now = new Date();
+                                                const diffMs = now.getTime() - createdAtDate.getTime();
+                                                const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+                                                const isRefundAvailable = diffMs <= sevenDaysMs;
+                                                const refundedStyle = isRefunded
+                                                    ? { textDecoration: "line-through", color: "#999" }
+                                                    : undefined;
+
+                                                return (
+                                                    <React.Fragment key={transaction.id}>
+                                                        <M.PointTransactionTbodyTr
+                                                            style={isOpen ? { borderBottom: "none" } : undefined}
+                                                        >
+                                                            <M.PointTransactionTdDate style={refundedStyle}>
+                                                                {formatDateAndTime(baseDate)}
+                                                            </M.PointTransactionTdDate>
+                                                            <M.PointTransactionTdTitle
+                                                                onClick={() => {
+                                                                    if (type === "CHARGE") {
+                                                                        setOpenTransactionId((prev) =>
+                                                                            prev === transaction.id ? null : transaction.id
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                style={
+                                                                    type === "CHARGE"
+                                                                        ? { cursor: "pointer", ...(refundedStyle || {}) }
+                                                                        : refundedStyle
+                                                                }
+                                                            >
+                                                                {transaction.description}
+                                                            </M.PointTransactionTdTitle>
+                                                            <M.PointTransactionTdAmount style={refundedStyle}>
+                                                                {transaction.point}P
+                                                            </M.PointTransactionTdAmount>
+                                                            <M.PointTransactionTdBalance style={refundedStyle}>
+                                                                {formatNumber(transaction.balance)}P
+                                                            </M.PointTransactionTdBalance>
+                                                        </M.PointTransactionTbodyTr>
+                                                        {isOpen && (
+                                                            <M.PointTransactionDetailTr>
+                                                                <M.PointTransactionDetailTd colSpan={4}>
+                                                                    <M.PointTransactionDetailContent>
+                                                                        충전 금액: {formatNumber(transaction.amount)}원
+                                                                    </M.PointTransactionDetailContent>
+                                                                    <M.PointTransactionDetailContent>
+                                                                        충전 후 잔액: {formatNumber(transaction.balance)}P
+                                                                    </M.PointTransactionDetailContent>
+                                                                    <M.PointTransactionDetailContent>
+                                                                        결제 수단: {transaction.paymentMethod}
+                                                                    </M.PointTransactionDetailContent>
+                                                                    <M.PointTransactionDetailContent>
+                                                                        {isRefunded
+                                                                            ? `결제 취소일: ${formatDateAndTime(baseDate)}`
+                                                                            : `충전일: ${formatDateAndTime(baseDate)}`}
+                                                                    </M.PointTransactionDetailContent>
+                                                                    <M.RefundBtnWrapper>
+                                                                        {isRefundAvailable && !isRefunded && (
+                                                                            <M.RefundBtn
+                                                                                type="button"
+                                                                                onClick={handleRefundClick}
+                                                                            >
+                                                                                결제 취소
+                                                                            </M.RefundBtn>
+                                                                        )}
+                                                                    </M.RefundBtnWrapper>
+                                                                </M.PointTransactionDetailTd>
+                                                            </M.PointTransactionDetailTr>
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </M.PointTransactionTableBody>
+                                    </M.PointTransactionTable>
+                                )}
                              </>
                             )}
                             {pageData && pageData.totalPages > 0 && (

@@ -52,6 +52,7 @@ function PointCharge() {
         try {
             const response = await api.post("/payments/ready", {
                 amount: selectedOption.amount,
+                point: selectedOption.point,
                 description: `pageon ${selectedOption.point.toLocaleString()}포인트 충전`
             })
 

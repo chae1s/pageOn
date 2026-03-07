@@ -5,6 +5,7 @@ import * as M from "./MyPage.styles"
 import { UserProfile, DeleteRequest } from "../../types/User";
 import axios from "axios";
 import Sidebar from "../../components/Sidebars/MyPageSidebar";
+import api from "../../api/axiosInstance";
 
 const WithdrawWarning = styled.div`
     padding: 20px;
@@ -143,12 +144,7 @@ function Withdraw() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get("/api/users/me", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                    },
-                    withCredentials: true
-                });
+                const response = await api.get("/users/me");
     
                 setUserInfo(response.data);
                 console.log(userInfo)

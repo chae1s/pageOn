@@ -1,5 +1,5 @@
 package com.pageon.backend.common.enums;
 
 public enum TransactionStatus {
-    PENDING, COMPLETED, FAILED
+    PENDING, COMPLETED, FAILED, REFUNDED
 }
