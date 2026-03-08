@@ -43,7 +43,7 @@ public class EpisodePurchaseService {
                 userId, contentType, episodeId, purchaseType
         );
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findByIdWithLock(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

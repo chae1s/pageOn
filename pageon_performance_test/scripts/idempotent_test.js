@@ -10,7 +10,7 @@ const tokenData = new SharedArray('user tokens', function () {
 });
 
 export let options = {
-    vus: 1,
+    vus: 3,
     duration: '1s'
 }
 
@@ -26,9 +26,6 @@ export default function () {
         },
     };
 
-    const ratingPayload = JSON.stringify({
-        score: 10
-    });
 
-    http.post(`http://localhost:8080/api/webnovels/1/episodes/10/rating`, ratingPayload, params);
+    http.post(`http://localhost:8080/api/webnovels/1/episodes/30/subscribe?purchaseType=OWN`,null, params);
 }

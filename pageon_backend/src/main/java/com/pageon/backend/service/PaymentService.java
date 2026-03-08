@@ -49,7 +49,7 @@ public class PaymentService {
         String[] key = {String.valueOf(userId), "ready",request.getAmount().toString()};
         idempotentService.isValidIdempotent(Arrays.asList(key));
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findByIdWithLock(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -85,11 +85,11 @@ public class PaymentService {
         String[] key = {String.valueOf(userId), confirm.getOrderId(), confirm.getAmount().toString()};
         idempotentService.isValidIdempotent(Arrays.asList(key));
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findByIdWithLock(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        PointTransaction transaction = pointTransactionRepository.findByUser_IdAndOrderId(userId, confirm.getOrderId()).orElseThrow(
+        PointTransaction transaction = pointTransactionRepository.findByUserAndOrderIdWithLock(userId, confirm.getOrderId()).orElseThrow(
                 () -> new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND)
         );
 
@@ -196,7 +196,7 @@ public class PaymentService {
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        PointTransaction transaction = pointTransactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(
+        PointTransaction transaction = pointTransactionRepository.findByIdAndUserWithLock(transactionId, userId).orElseThrow(
                 () -> new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND)
         );
 
