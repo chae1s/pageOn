@@ -172,7 +172,7 @@ public class ContentService {
     @ExecutionTimer
     @Transactional(readOnly = true)
     @Cacheable(value = "contents:keyword", key = "#contentType")
-    public ContentResponse.KeywordContent<?> getFeaturedKeywordContentsList(String contentType) {
+    public ContentResponse.KeywordContent getFeaturedKeywordContentsList(String contentType) {
 
         log.info("Cache miss for keyword contents. Fetching the standard 6 {} from DB.", contentType);
         LocalDate currentDate = LocalDate.now();
@@ -184,17 +184,19 @@ public class ContentService {
 
         ContentProvider provider = getProvider(contentType);
         Page<? extends Content> contents = provider.findByKeyword(keyword.getName(), pageable);
-        List<ContentResponse.Simple> contentsList = contents.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+        Page<ContentResponse.Simple> contentsList = contents.map(ContentResponse.Simple::fromEntity);
 
         log.info("Successfully retrieved all 6 {} for keyword from DB.", contentType);
 
-        return ContentResponse.KeywordContent.fromEntity(keyword.getName(), contentsList);
+        return ContentResponse.KeywordContent.fromEntity(
+                keyword.getName(), new PageResponse<>(contentsList)
+        );
 
     }
 
     @ExecutionTimer
     @Transactional(readOnly = true)
-    public ContentResponse.KeywordContent<?> getFeaturedKeywordContentsPage(String contentType, Pageable pageable) {
+    public ContentResponse.KeywordContent getFeaturedKeywordContentsPage(String contentType, Pageable pageable) {
 
         log.info("Fetching the 'See More' list of keyword {} (Page: {})",
                 contentType, pageable.getPageNumber() + 1);
@@ -204,8 +206,10 @@ public class ContentService {
                 () -> new CustomException(ErrorCode.INVALID_KEYWORD)
         );
 
+        Pageable moreContentPageable = PageableUtil.moreContentPageable(pageable, "viewCount");
+
         ContentProvider provider = getProvider(contentType);
-        Page<? extends Content> contents = provider.findByKeyword(keyword.getName(), pageable);
+        Page<? extends Content> contents = provider.findByKeyword(keyword.getName(), moreContentPageable);
 
         Page<ContentResponse.Simple> contentsList = contents.map(ContentResponse.Simple::fromEntity);
 

@@ -31,10 +31,10 @@ function Home() {
                 setMasterpieceContents(masterpieceRes.data);
 
                 setWebnovelKeywordName(webnovelKeywordRes.data.keyword);
-                setWebnovelKeywordContents(webnovelKeywordRes.data.contents);
+                setWebnovelKeywordContents(webnovelKeywordRes.data.contents.content);
 
                 setWebtoonKeywordName(webtoonKeywordRes.data.keyword);
-                setWebtoonKeywordContents(webtoonKeywordRes.data.contents);
+                setWebtoonKeywordContents(webtoonKeywordRes.data.contents.content);
                 console.log(rankingRes.data);
                 setRankingContents(rankingRes.data);
             } catch (error) {

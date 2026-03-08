@@ -70,6 +70,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private IdentityProvider identityProvider;
 
+    private String customerKey;
+
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Creator creator;
@@ -151,8 +153,12 @@ public class User {
         this.gender = gender;
     }
 
-    public void usePoints(int amount) {
-        this.pointBalance -= amount;
+    public void changePoints(int amount) {
+        this.pointBalance += amount;
+    }
+
+    public void assignCustomerKey(String customerKey) {
+        this.customerKey = customerKey;
     }
 
 

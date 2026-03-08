@@ -78,6 +78,10 @@ public enum ErrorCode {
 
     //
     INVALID_SERIALDAY("해당하는 요일이 없습니다.", HttpStatus.BAD_REQUEST),
+
+    POINT_TRANSACTION_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ALREADY_PAYMENT_CONFIRM("이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
+    AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     ;
 
 

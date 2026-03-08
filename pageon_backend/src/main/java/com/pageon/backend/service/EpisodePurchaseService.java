@@ -67,7 +67,6 @@ public class EpisodePurchaseService {
 
         pointTransactionService.usePoint(user, episodePrice, description, episodePurchase.getId());
 
-
     }
 
     public Boolean checkPurchaseHistory(Long userId, Long contentId, Long episodeId) {

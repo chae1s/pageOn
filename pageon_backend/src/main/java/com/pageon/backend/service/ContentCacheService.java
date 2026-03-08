@@ -2,6 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.dto.response.ContentResponse;
+import com.pageon.backend.dto.response.PageResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.entity.Webnovel;
@@ -98,7 +99,7 @@ public class ContentCacheService {
     }
 
     @CachePut(value = "contents:keyword", key = "'webnovels'")
-    public ContentResponse.KeywordContent<?> refreshKeywordWebnovels(Pageable pageable) {
+    public ContentResponse.KeywordContent refreshKeywordWebnovels(Pageable pageable) {
 
         log.info("Redis cache WARM-UP starting for keyword webnovels (Target: 6 items)");
         LocalDate date = LocalDate.now();
@@ -107,15 +108,17 @@ public class ContentCacheService {
         );
 
         Page<Webnovel> webnovels = webnovelRepository.findAllByKeyword(keyword.getName(), pageable);
-        List<ContentResponse.Simple> contents = webnovels.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+        Page<ContentResponse.Simple> contents = webnovels.map(ContentResponse.Simple::fromEntity);
 
         log.info("Successfully prepared 6 keyword webnovels for cache update.");
-        return ContentResponse.KeywordContent.fromEntity(keyword.getName(), contents);
+        return ContentResponse.KeywordContent.fromEntity(
+                keyword.getName(), new PageResponse<>(contents)
+        );
 
     }
 
     @CachePut(value = "contents:keyword", key = "'webtoons'")
-    public ContentResponse.KeywordContent<?> refreshKeywordWebtoons(Pageable pageable) {
+    public ContentResponse.KeywordContent refreshKeywordWebtoons(Pageable pageable) {
 
         log.info("Redis cache WARM-UP starting for keyword webtoons (Target: 6 items)");
         LocalDate date = LocalDate.now();
@@ -124,10 +127,12 @@ public class ContentCacheService {
         );
 
         Page<Webtoon> webtoons = webtoonRepository.findAllByKeyword(keyword.getName(), pageable);
-        List<ContentResponse.Simple> contents = webtoons.stream().map(ContentResponse.Simple::fromEntity).collect(Collectors.toList());
+        Page<ContentResponse.Simple> contents = webtoons.map(ContentResponse.Simple::fromEntity);
 
         log.info("Successfully prepared 6 keyword webtoons for cache update.");
-        return ContentResponse.KeywordContent.fromEntity(keyword.getName(), contents);
+        return ContentResponse.KeywordContent.fromEntity(
+                keyword.getName(), new PageResponse<>(contents)
+        );
     }
 
     @CachePut(value = "contents:new", key = "'webnovels:' + #date")

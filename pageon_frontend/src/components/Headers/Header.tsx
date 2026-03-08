@@ -85,7 +85,7 @@ function Header() {
                         <H.HeaderEtcLink to={"/"}>
                             <H.HeaderEtcLinkText>알림</H.HeaderEtcLinkText>
                         </H.HeaderEtcLink>
-                        <H.HeaderEtcLink to={"/"}>
+                        <H.HeaderEtcLink to={"/points/charge"}>
                             <H.HeaderEtcLinkText>포인트충전</H.HeaderEtcLinkText>
                         </H.HeaderEtcLink>
                     </H.HeaderEtcLinkList>

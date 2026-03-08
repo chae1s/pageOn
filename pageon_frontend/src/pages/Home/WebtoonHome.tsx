@@ -49,7 +49,7 @@ function WebtoonHome() {
 
                 setKeywordName(keywordRes.data.keyword);
 
-                setKeywordContents(keywordRes.data.contents);
+                setKeywordContents(keywordRes.data.contents.content);
 
                 setRankingContents(rankingRes.data);
             } catch (error) {

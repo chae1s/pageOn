@@ -372,4 +372,11 @@ public class UserService {
         throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED_TO_REGISTER_AS_CREATOR);
     }
 
+    public Integer getMyPoint(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        return user.getPointBalance();
+    }
 }

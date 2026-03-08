@@ -173,6 +173,7 @@ export const PointTransactionTableHead = styled.thead`
 export const PointTransactionTheadTr = styled.tr`
     border-bottom: solid 1px #e5e5e5;
     font-size: 13px;
+    cursor: default;
 `
 
 export const PointTransactionThDate = styled.th`
@@ -195,7 +196,7 @@ export const PointTransactionThBalance = styled.th`
 `
 
 export const PointTransactionTableBody = styled.tbody`
-
+    cursor: default;
 `
 
 export const PointTransactionTbodyTr = styled.tr`
@@ -214,6 +215,7 @@ export const PointTransactionTdTitle = styled.td`
     padding: 13px 15px 12px 14px;
     font-size: 14px;
     line-height: 14px;
+    sursor: pointer;
 `
 
 export const PointTransactionTdAmount = styled.td`
@@ -233,11 +235,36 @@ export const PointTransactionTdBalance = styled.td`
     text-align: right;
 `
 
+export const PointTransactionDetailTr = styled.tr`
+    border-bottom: solid 1px #e6e6e6;
+`
+
+export const PointTransactionDetailTd = styled.td`
+    padding: 10px 15px 12px 25px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #555;
+`
+
 export const PointTransactionEmpty = styled.div`
     text-align: center;
     padding: 20px 0;
     font-size: 14px;
     color: #666;
+`
+
+export const PointTransactionDetailContent = styled.div`
+
+`
+
+export const RefundBtnWrapper = styled.div`
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+`
+
+export const RefundBtn = styled.button`
+    color: var(--error-color);
 `
 
 export const LibraryContentListWrapper = styled.div`
@@ -255,4 +282,127 @@ export const LibraryContentList = styled.div`
 
 export const EmptyListText = styled.div`
     margin: 10px auto;
+`
+
+export const PointChargeTitle = styled.div`
+    width: 100%;
+    height: 50px;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 50px;
+    padding-left: 8px;
+`
+
+export const PointChargeSection = styled.section`
+    width: 100%;
+    padding-left: 10px;
+`
+
+export const PointChargeTable = styled.table`
+    width: 100%;
+    margin-bottom: 40px;
+`
+
+export const PointChargeTheadTr = styled.tr`
+    border-bottom: solid 1px #e5e5e5;
+    font-size: 14px;
+    font-weight: 600;
+
+`
+
+export const MyPointText = styled.div`
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 16px;
+`
+
+export const MyPoint = styled.span`
+    padding: 9px;
+    color: #69a3ff;
+    font-size: 16px;
+`
+
+export const PointChargeColAmount = styled.col`
+
+`
+
+export const PointChargeColPoint = styled.col`
+
+`
+
+export const PointChargeTableHead = styled.thead`
+
+`
+
+export const PointChargeThAmount = styled.th`
+    padding: 12px 71px;
+    text-align: left;
+`
+
+export const PointChargeThPoint = styled.th`
+    padding: 12px 50px;
+    text-align: right;
+`
+
+export const PointChargeTableBody = styled.tbody`
+    width: 100%;
+    font-size: 13px;
+`
+
+export const PointChargeTbodyTr = styled.tr`
+    border-bottom: solid 1px #e6e6e6;
+    line-height: 30px;
+    
+`
+
+
+export const PointChargeTdAmount = styled.td`
+    padding: 10px 50px;
+    text-align: left;
+`
+
+export const PointChargeTdPoint = styled.td`
+    padding: 10px 50px;
+    text-align: right;
+    font-weight: 600;
+    color: #69a3ff;
+`
+
+export const PointChargeSummary = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 0.96rem;
+    color: #444;
+`
+
+export const PointChargeSummaryValue = styled.span`
+    font-weight: 700;
+    font-size: 1.05rem;
+`
+
+export const PointChargeBtn = styled.button`
+    width: 200px;
+    padding: 14px;
+    background-color: #528efa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 24px auto;
+
+    &:disabled {
+        background-color: var(--accent-color);
+    }
+`
+
+export const PointChargeBtnWrapper = styled.div`
+    display: flex;
+    justify-content: center; /* 가로 중앙 정렬 */
+    width: 100%;
 `

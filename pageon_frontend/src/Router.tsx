@@ -34,15 +34,21 @@ import PointTransactionPage from "./pages/Users/PointTransactionPage";
 import NewContents from "./pages/Contents/NewContents";
 import MasterpieceContents from "./pages/Contents/MasterpieceContents";
 import RecommendKeywordContents from "./pages/Contents/RecommendKeywordContents";
+import PointCharge from "./pages/Users/PointCharge";
+import PaymentSuccess from "./pages/Payments/PaymentSuccess";
+import PaymentFail from "./pages/Payments/PaymentFail";
 
 function Router() {
     const location = useLocation();
     const hideHeaderFooter =
         location.pathname === "/mock-verify" ||
+        location.pathname === "/payment/success" ||
+        location.pathname === "/payment/fail" ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname) ||       // 웹소설 댓글 페이지
-        /^\/webtoons\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname);   
+        /^\/webtoons\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname)
+        ;   
 
     const creatorHeader = location.pathname.startsWith("/creators");
     const isAuthenticated = !!localStorage.getItem("accessToken");
@@ -88,6 +94,9 @@ function Router() {
                 <Route path="/webnovels/:contentId/viewer/:episodeId" element={<WebnovelViewer />} />
                 <Route path="/webtoons/:contentId/viewer/:episodeId" element={<WebtoonViewer />} />
                 <Route path="/:contentType/:contentId/viewer/:episodeId/comments" element={<EpisodeCommentsPage />} />
+                <Route path="/points/charge" element={<PointCharge />} />
+                <Route path="/payment/success" element={<PaymentSuccess/>} />
+                <Route path="/payment/fail" element={<PaymentFail/>} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={["ROLE_CREATOR"]}/>}>

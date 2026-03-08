@@ -50,8 +50,13 @@ export interface DeleteRequest {
 }
 
 export interface PointTransaction {
-    createdAt: string;
+    id: number;
+    paidAt: string;
+    cancelledAt: string;
     description: string;
     amount: number;
+    point: number;
     balance: number;
+    transactionStatus: string;
+    paymentMethod: string;
 }
