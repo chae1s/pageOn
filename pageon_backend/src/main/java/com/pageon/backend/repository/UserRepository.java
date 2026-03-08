@@ -2,8 +2,10 @@ package com.pageon.backend.repository;
 
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,6 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :userId")
+    Optional<User> findByIdWithLock(Long userId);
+
     Boolean existsByEmail(String email);
 
     Boolean existsByNickname(String nickname);

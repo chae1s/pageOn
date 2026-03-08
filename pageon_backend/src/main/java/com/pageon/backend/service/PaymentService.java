@@ -26,6 +26,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -37,13 +38,18 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final PointTransactionRepository pointTransactionRepository;
     private final ObjectMapper objectMapper;
+    private final IdempotentService idempotentService;
 
     @Value("${payment.secret.key}")
     private String secretKey;
 
     @Transactional
     public PaymentResponse.Ready readyPayment(Long userId, PaymentRequest.Ready request) {
-        User user = userRepository.findById(userId).orElseThrow(
+
+        String[] key = {String.valueOf(userId), "ready",request.getAmount().toString()};
+        idempotentService.isValidIdempotent(Arrays.asList(key));
+
+        User user = userRepository.findByIdWithLock(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -75,11 +81,15 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse.Result confirmPayment(Long userId, PaymentRequest.Confirm confirm) {
-        User user = userRepository.findById(userId).orElseThrow(
+
+        String[] key = {String.valueOf(userId), confirm.getOrderId(), confirm.getAmount().toString()};
+        idempotentService.isValidIdempotent(Arrays.asList(key));
+
+        User user = userRepository.findByIdWithLock(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        PointTransaction transaction = pointTransactionRepository.findByUser_IdAndOrderId(userId, confirm.getOrderId()).orElseThrow(
+        PointTransaction transaction = pointTransactionRepository.findByUserAndOrderIdWithLock(userId, confirm.getOrderId()).orElseThrow(
                 () -> new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND)
         );
 
@@ -178,11 +188,15 @@ public class PaymentService {
 
     @Transactional
     public String cancelPayment(Long userId, Long transactionId) {
+
+        String[] key = {String.valueOf(userId), "cancel",transactionId.toString()};
+        idempotentService.isValidIdempotent(Arrays.asList(key));
+
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        PointTransaction transaction = pointTransactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(
+        PointTransaction transaction = pointTransactionRepository.findByIdAndUserWithLock(transactionId, userId).orElseThrow(
                 () -> new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND)
         );
 

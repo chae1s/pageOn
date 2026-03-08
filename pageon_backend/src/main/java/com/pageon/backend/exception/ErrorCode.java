@@ -55,6 +55,7 @@ public enum ErrorCode {
 
     // request
     INVALID_INPUT("입력값이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATION_REQUEST("중복된 요청입니다.", HttpStatus.BAD_REQUEST),
 
     // 작품
     WEBNOVEL_NOT_FOUND("존재하지 않는 웹소설입니다.", HttpStatus.NOT_FOUND),
