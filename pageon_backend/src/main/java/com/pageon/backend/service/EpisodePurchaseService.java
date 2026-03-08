@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -24,17 +25,19 @@ public class EpisodePurchaseService {
 
     private final List<ContentProvider> providers;
     private final UserRepository userRepository;
-    private final WebnovelEpisodeRepository webnovelEpisodeRepository;
-    private final WebtoonEpisodeRepository webtoonEpisodeRepository;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final PointTransactionService pointTransactionService;
     private final ActionLogService actionLogService;
+    private final IdempotentService idempotentService;
 
 
     public record EpisodeInfo(Long contentId, String contentTitle, Integer episodePrice, EpisodeBase episodeBase) {}
 
     @Transactional
     public void createPurchaseHistory(Long userId, String contentType, Long episodeId, PurchaseType purchaseType) {
+
+        String[] key = {String.valueOf(userId), contentType, purchaseType.toString()};
+        idempotentService.isValidIdempotent(Arrays.asList(key));
 
         log.info("[START] createPurchaseHistory: userId = {}, contentType = {}, episodeId = {}, purchaseType = {}",
                 userId, contentType, episodeId, purchaseType

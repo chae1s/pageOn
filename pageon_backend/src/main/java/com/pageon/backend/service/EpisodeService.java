@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -19,6 +20,7 @@ import java.util.List;
 public class EpisodeService {
     private final List<ContentProvider> providers;
     private final UserRepository userRepository;
+    private final IdempotentService idempotentService;
 
     @Transactional
     public Object getEpisodeDetail(Long userId, String contentType, Long episodeId) {
@@ -29,6 +31,9 @@ public class EpisodeService {
 
     @Transactional
     public void rateEpisode(Long userId, String contentType, Long episodeId, EpisodeRatingRequest request) throws CustomException {
+
+        String[] key = {userId.toString(), contentType, request.getScore().toString()};
+        idempotentService.isValidIdempotent(Arrays.asList(key));
 
         final Integer score = request.getScore();
         User user = userRepository.getReferenceById(userId);
