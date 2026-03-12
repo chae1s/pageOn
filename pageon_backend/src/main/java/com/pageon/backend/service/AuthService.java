@@ -2,7 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.ReissuedTokenResponse;
-import com.pageon.backend.dto.response.UserRoleResponse;
+import com.pageon.backend.dto.request.TempCodeRequest;
 import com.pageon.backend.dto.token.TokenInfo;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.RoleType;
@@ -16,11 +16,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -75,6 +77,47 @@ public class AuthService {
         }
         return null;
 
+    }
+
+    public JwtTokenResponse exchangeCode(HttpServletResponse response, TempCodeRequest tempCodeRequest) {
+        String redisKey = String.format("user:oauth:code:%d", tempCodeRequest.getUserId());
+
+        String tempCode = (String) redisTemplate.opsForValue().getAndDelete(redisKey);
+
+        if (!tempCodeRequest.getTempCode().equals(tempCode)) {
+            throw new CustomException(ErrorCode.INVALID_TEMP_CODE);
+        }
+        log.info("userId: {}", tempCodeRequest.getUserId());
+
+        User user = userRepository.findWithRolesById(tempCodeRequest.getUserId()).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        List<RoleType> roleTypes = user.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getRoleType())
+                .collect(Collectors.toList());
+
+        String accessToken = jwtProvider.generateAccessToken(user.getEmail(), roleTypes);
+        String refreshToken = jwtProvider.generateRefreshToken(user.getEmail());
+
+        List<String> userRoles = new ArrayList<>();
+        for (RoleType roleType : roleTypes) {
+            userRoles.add(roleType.toString());
+        }
+
+        jwtProvider.sendTokens(response, accessToken, refreshToken);
+        setRefreshToken(user, refreshToken);
+
+        return new JwtTokenResponse(true, accessToken, user.getOAuthProvider(), userRoles);
+
+    }
+
+    private void setRefreshToken(User users, String refreshToken) {
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+
+        // refresh token 저장
+        TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(users.getId(), users.getEmail());
+        valueOperations.set(refreshToken, tokenInfo);
     }
 
 }

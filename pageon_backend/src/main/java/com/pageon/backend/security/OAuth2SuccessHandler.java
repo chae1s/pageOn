@@ -21,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,35 +39,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
 
+        String redisKey = String.format("user:oauth:code:%d", principalUser.getId());
+        String tempCode = UUID.randomUUID().toString().substring(0, 12);
 
-        /* 소셜 로그인 사용자 정보 조회 */
-        OAuthProvider provider = principalUser.getProvider();
-        String providerId = principalUser.getProviderId();
+        redisTemplate.opsForValue().set(redisKey, tempCode, 10L, TimeUnit.SECONDS);
 
-
-        log.info("{} 로그인 성공", provider);
-
-        User user = userRepository.findWithRolesByProviderAndProviderId(provider, providerId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        List<RoleType> roleTypes = user.getUserRoles().stream().map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
-        log.info(principalUser.getName());
-        String accessToken = jwtProvider.generateAccessToken(user.getEmail(), roleTypes);
-        String refreshToken = jwtProvider.generateRefreshToken(user.getEmail());
-
-        log.info("소셜로그인 토큰 발행");
-
-        List<String> userRoles = new ArrayList<>();
-        for (RoleType roleType : roleTypes) {
-            userRoles.add(roleType.toString());
-        }
-
-        jwtProvider.sendTokens(response, accessToken, refreshToken);
-        setRefreshToken(user, refreshToken);
         String redirectUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:3000/oauth/callback")
-                .queryParam("accessToken", accessToken)
-                .queryParam("provider", provider)
-                .queryParam("userRoles", userRoles)
+                .queryParam("userId", principalUser.getId())
+                .queryParam("tempCode", tempCode)
                 .build()
                 .toUriString();
 
@@ -73,12 +55,5 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     }
 
-    private void setRefreshToken(User users, String refreshToken) {
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-
-        // refresh token 저장
-        TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(users.getId(), users.getEmail());
-        valueOperations.set(refreshToken, tokenInfo);
-    }
 
 }

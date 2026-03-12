@@ -1,35 +1,58 @@
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect } from "react";
+import axios from "axios";
 
 const OAuthRedirectHandler: React.FC = () => {
-
-    const {login} = useAuth();
+    const { login } = useAuth();
     const [searchParams] = useSearchParams();
 
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        const accessToken = searchParams.get("accessToken");
-        const provider = searchParams.get("provider");
-        let rolesArray = searchParams.getAll("userRoles");
+        const fetchToken = async () => {
+            const userId = searchParams.get("userId");
+            const tempCode = searchParams.get("tempCode");
 
-        if (accessToken && provider && rolesArray.length > 0) {
-            login(accessToken, rolesArray, provider);
+            if (userId && tempCode) {
+                try {
+                    const tempRequest = {
+                        userId: userId,
+                        tempCode: tempCode,
+                    };
+                    const response = await axios.post("/api/auth/exchange", tempRequest);
+                    
+                    const jwtInfo = response.data;
 
-            const savedPath = localStorage.getItem("redirectPath") || "/";
-            localStorage.removeItem("redirectPath"); // 사용 후 반드시 삭제
+                    if (jwtInfo && jwtInfo.isLogin) {
+                        console.log(jwtInfo)
+                        login(jwtInfo.accessToken, jwtInfo.userRoles, jwtInfo.oauthProvider);
 
-            navigate(savedPath, { replace: true });
-        } else {
-            alert("로그인에 실패하였습니다.");
-            navigate("/login");
-        }
+                        const savedPath = localStorage.getItem("redirectPath") || "/";
+                        localStorage.removeItem("redirectPath");
+
+                        navigate(savedPath, { replace: true });
+                    } else {
+                        alert("로그인에 실패하였습니다.");
+                        navigate("/users/login");
+                    }
+                } catch (error) {
+                    console.log(error)
+                    alert("로그인에 실패하였습니다.");
+                    navigate("/users/login");
+                }
+            } else {
+                alert("로그인에 실패하였습니다.");
+                navigate("/users/login");
+            }
+        };
+
+        fetchToken();
+        
     }, []);
 
-    return <div></div>
-}
+    return <div></div>;
+};
 
 export default OAuthRedirectHandler;
-

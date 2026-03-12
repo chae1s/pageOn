@@ -45,6 +45,7 @@ function Router() {
         location.pathname === "/mock-verify" ||
         location.pathname === "/payment/success" ||
         location.pathname === "/payment/fail" ||
+        location.pathname === "/oauth/callback" ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname) ||       // 웹소설 댓글 페이지

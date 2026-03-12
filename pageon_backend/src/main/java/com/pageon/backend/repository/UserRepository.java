@@ -25,6 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.oAuthProvider = :oAuthProvider AND u.providerId = :providerId")
     Optional<User> findWithRolesByProviderAndProviderId(@Param("oAuthProvider") OAuthProvider oAuthProvider, @Param("providerId") String providerId);
 
+    @Query("SELECT u FROM User u JOIN FETCH u.userRoles ur JOIN FETCH ur.role WHERE u.id = :userId")
+    Optional<User> findWithRolesById(Long userId);
 
     @EntityGraph(attributePaths = {
             "userRoles", "userRoles.role"

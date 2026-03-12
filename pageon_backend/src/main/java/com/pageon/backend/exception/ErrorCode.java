@@ -85,7 +85,7 @@ public enum ErrorCode {
     AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     PAYMENT_FAILED("결제에 실패하였습니다.", HttpStatus.PAYMENT_REQUIRED),
     JSON_PARSE_FAILED("데이터 형식이 올바르지 않아 처리에 실패하였습니다.", HttpStatus.BAD_REQUEST),
-    ;
+    INVALID_TEMP_CODE("임시 코드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
 
 
     private final String errorMessage;
