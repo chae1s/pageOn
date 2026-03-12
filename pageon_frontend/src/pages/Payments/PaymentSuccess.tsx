@@ -16,18 +16,18 @@ function PaymentSuccess() {
         async function PaymentConfirm() {
             try {
 
-                const response = await api.post('/payments/confirm', requestData)
+                await api.post('/payments/confirm', requestData)
 
-                if (response.data.success) {
-                    alert(response.data.message)
+                alert("결제가 완료되었습니다.")
 
-                    navigate("/points/charge", {replace: true})
-                } else {
-                    navigate("/payment/fail")
-                }
+                navigate("/points/charge", {replace: true})
                 
-            } catch (error) {
-                console.error("결제 승인 실패: ", error);
+            } catch (error: any) {
+                
+                const errorMessage = error.response.data.errorMessage;
+                console.error("결제 승인 실패: ", errorMessage);
+                
+                alert("결제에 실패하였습니다.");
                 navigate("/payment/fail")
             }
             

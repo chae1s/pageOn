@@ -34,7 +34,7 @@ export const options = {
             executor: 'constant-arrival-rate',
             rate: 50, 
             timeUnit: '1s',
-            duration: '10m',
+            duration: '5m',
             preAllocatedVUs: 100,
             maxVUs: 1000,
         },
@@ -63,7 +63,7 @@ const commentList = [
 ]
 export default function () {
     // 임의의 유저(1~10만) 및 콘텐츠 선택
-    const userRow = tokenData[(__VU - 1) % tokenData.length];
+    const userRow = tokenData[Math.floor(Math.random() * tokenData.length)];
     const authToken = userRow.token;
 
     const content = contentData[Math.floor(Math.random() * contentData.length)];

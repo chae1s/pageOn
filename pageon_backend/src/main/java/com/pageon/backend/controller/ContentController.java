@@ -129,7 +129,7 @@ public class ContentController {
         return ResponseEntity.ok(contents);
     }
 
-    @PostMapping("/{contentId}/interest")
+    @PostMapping("/{contentId}/interests")
     public ResponseEntity<Void> handleInterest(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @PathVariable String contentType,

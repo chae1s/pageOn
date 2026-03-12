@@ -26,7 +26,7 @@ public class PageableUtil {
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
     }
 
-    public static Pageable createReadingHistory(Pageable pageable, String sort) {
+    public static Pageable readingHistoryPageable(Pageable pageable, String sort) {
 
         Sort sortOrder = switch (sort) {
 

@@ -38,6 +38,7 @@ public class WebnovelProvider implements ContentProvider{
     private final WebnovelEpisodeRatingRepository webnovelEpisodeRatingRepository;
     private final WebnovelEpisodeCommentRepository webnovelEpisodeCommentRepository;
     private final WebnovelEpisodeCommentLikeRepository webnovelEpisodeCommentLikeRepository;
+    private final ReadingHistoryRepository readingHistoryRepository;
 
     @Override
     public boolean supports(String contentType) {
@@ -95,6 +96,11 @@ public class WebnovelProvider implements ContentProvider{
     @Override
     public Page<Interest> findByInterest(Long userId, Pageable pageable) {
         return interestRepository.findWebnovelsByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<ReadingHistory> findByReadingHistory(Long userId, Pageable pageable) {
+        return readingHistoryRepository.findWebnovelReadingHistories(userId, pageable);
     }
 
     @Override

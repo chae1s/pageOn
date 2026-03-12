@@ -83,6 +83,8 @@ public enum ErrorCode {
     POINT_TRANSACTION_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_PAYMENT_CONFIRM("이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
     AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    PAYMENT_FAILED("결제에 실패하였습니다.", HttpStatus.PAYMENT_REQUIRED),
+    JSON_PARSE_FAILED("데이터 형식이 올바르지 않아 처리에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     ;
 
 

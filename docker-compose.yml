@@ -75,5 +75,8 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports: 
       - "9090:9090"
+    command: # <--- 여기서부터 추가
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
 volumes:
   mysql_data:

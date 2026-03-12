@@ -39,6 +39,7 @@ public class WebtoonProvider implements ContentProvider {
     private final WebtoonImageService webtoonImageService;
     private final WebtoonEpisodeCommentRepository webtoonEpisodeCommentRepository;
     private final WebtoonEpisodeCommentLikeRepository webtoonEpisodeCommentLikeRepository;
+    private final ReadingHistoryRepository readingHistoryRepository;
 
     @Override
     public boolean supports(String contentType) {
@@ -97,6 +98,11 @@ public class WebtoonProvider implements ContentProvider {
     @Override
     public Page<Interest> findByInterest(Long userId, Pageable pageable) {
         return interestRepository.findWebtoonsByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<ReadingHistory> findByReadingHistory(Long userId, Pageable pageable) {
+        return readingHistoryRepository.findWebtoonReadingHistories(userId, pageable);
     }
 
     @Override

@@ -3,8 +3,9 @@ import { ContentType, ContentStatus, ContentDetail } from '../../types/Content';
 import axios from "axios";
 import * as S from "../Styles/ContentDetail.styles"
 import api from '../../api/axiosInstance';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { formatUrl } from '../../utils/formatContentType';
+import { useAuthCheck } from './Hooks/useAuthCheck';
 
 interface Props {
     content: ContentDetail;
@@ -12,6 +13,7 @@ interface Props {
 
 
 function ContentDetailLayout({content}: Props) {
+
     const dayKoMap: Record<string, string> = {
         MONDAY: "월요일",
         TUESDAY: "화요일",
@@ -28,6 +30,7 @@ function ContentDetailLayout({content}: Props) {
         REST: "휴재"
     }
 
+    const { checkLogin } = useAuthCheck();
     const navigate = useNavigate();
 
     const [isInterested, setIsInterested] = useState(content.isInterested);
@@ -53,10 +56,15 @@ function ContentDetailLayout({content}: Props) {
         </svg>
     )
 
+
     const handleToggleInterest = async () => {
         try {
+
+            if (!checkLogin()) {
+                return;
+            }
             // 백엔드의 토글 API 호출 (동일한 URL로 POST 요청)
-            await api.post(`/${formatUrl(content.contentType)}/${content.contentId}/interest`, {});
+            await api.post(`/${formatUrl(content.contentType)}/${content.contentId}/interests`, {});
     
             // 성공 시 상태 반전
             const newStatus = !isInterested;

@@ -32,7 +32,7 @@ function ReadingHistoryContents() {
             };
 
             try {
-                const response = await api.get("/users/reading-histories", {params: params})
+                const response = await api.get(`/users/reading-histories/${type}`, {params: params})
 
                 setRecentReadContents(response.data.content);
                 setPageData(response.data);

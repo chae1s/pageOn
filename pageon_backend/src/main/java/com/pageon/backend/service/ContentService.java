@@ -6,10 +6,7 @@ import com.pageon.backend.common.utils.PageableUtil;
 import com.pageon.backend.dto.response.ContentResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.dto.response.PageResponse;
-import com.pageon.backend.entity.Content;
-import com.pageon.backend.entity.Interest;
-import com.pageon.backend.entity.Keyword;
-import com.pageon.backend.entity.User;
+import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
@@ -38,6 +35,7 @@ public class ContentService {
     private final ContentRepository contentRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
+    private final ReadingHistoryRepository readingHistoryRepository;
 
     @Transactional(readOnly = true)
     public ContentResponse.Detail getContentDetail(PrincipalUser principalUser, String contentType, Long contentId) {
@@ -255,6 +253,26 @@ public class ContentService {
         Page<Interest> interests = provider.findByInterest(userId, interestPageable);
 
         return interests.map(interest -> ContentResponse.InterestContent.fromEntity(interest.getContent()));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContentResponse.RecentRead> getReadingHistory(Long userId, String contentType, String sort, Pageable pageable) {
+        Pageable readingHistoryPageable = PageableUtil.readingHistoryPageable(pageable, sort);
+        ContentProvider provider = getProvider(contentType);
+
+        Page<ReadingHistory> histories = provider.findByReadingHistory(userId, readingHistoryPageable);
+
+        return histories.map(ContentResponse.RecentRead::fromEntity);
+    }
+
+    public List<ContentResponse.Simple> getTodayReadingHistory(Long userId) {
+        SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
+
+        List<ReadingHistory> histories = readingHistoryRepository.findWithContentByUserIdAndSerialDay(userId, today);
+
+        return histories.stream()
+                .map(h -> ContentResponse.Simple.fromEntity(h.getContent()))
+                .toList();
     }
 
     private ContentProvider getProvider(String contentType) {

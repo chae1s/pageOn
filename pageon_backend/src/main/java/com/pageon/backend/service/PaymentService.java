@@ -16,6 +16,7 @@ import com.pageon.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,7 @@ public class PaymentService {
 
     @Value("${payment.secret.key}")
     private String secretKey;
+    private RedisTemplate<String, PointTransaction> redisTemplate;
 
     @Transactional
     public PaymentResponse.Ready readyPayment(Long userId, PaymentRequest.Ready request) {
@@ -70,7 +72,8 @@ public class PaymentService {
                 .orderId(orderId)
                 .build();
 
-        pointTransactionRepository.save(pointTransaction);
+        String redisKey = String.format("point:payment:%d:%s", userId, orderId);
+        redisTemplate.opsForValue().set(redisKey, pointTransaction);
 
         return PaymentResponse.Ready.builder()
                 .orderId(orderId)
@@ -80,7 +83,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponse.Result confirmPayment(Long userId, PaymentRequest.Confirm confirm) {
+    public void confirmPayment(Long userId, PaymentRequest.Confirm confirm) {
 
         String[] key = {String.valueOf(userId), confirm.getOrderId(), confirm.getAmount().toString()};
         idempotentService.isValidIdempotent(Arrays.asList(key));
@@ -89,27 +92,22 @@ public class PaymentService {
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        PointTransaction transaction = pointTransactionRepository.findByUserAndOrderIdWithLock(userId, confirm.getOrderId()).orElseThrow(
-                () -> new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND)
-        );
+        String redisKey = String.format("point:payment:%d:%s", userId, confirm.getOrderId());
+        PointTransaction transaction = redisTemplate.opsForValue().getAndDelete(redisKey);
+        if (transaction == null) {
+            throw new CustomException(ErrorCode.POINT_TRANSACTION_NOT_FOUND);
+        }
 
         if (transaction.getTransactionStatus() != TransactionStatus.PENDING) {
-            return PaymentResponse.Result.builder()
-                    .success(false)
-                    .message(ErrorCode.ALREADY_PAYMENT_CONFIRM.getErrorMessage())
-                    .build();
+            throw new CustomException(ErrorCode.ALREADY_PAYMENT_CONFIRM);
         }
 
         if (!transaction.getAmount().equals(confirm.getAmount())) {
             transaction.failedPayment();
-            return PaymentResponse.Result.builder()
-                    .success(false)
-                    .message(ErrorCode.AMOUNT_NOT_MATCH.getErrorMessage())
-                    .build();
+            throw new CustomException(ErrorCode.AMOUNT_NOT_MATCH);
         }
 
-        PaymentResponse.ConnectionData data = confirmConnection(transaction, confirm);
-        Map<String, Object> result = data.getResult();
+        Map<String, Object> result = confirmConnection(transaction, confirm);
 
         String paidAtStr = result.get("approvedAt").toString();
         LocalDateTime paidAt = OffsetDateTime.parse(paidAtStr).toLocalDateTime();
@@ -120,11 +118,7 @@ public class PaymentService {
 
         transaction.completedPayment(paidAt, user.getPointBalance(), confirm.getPaymentKey(), paymentMethod);
 
-        return PaymentResponse.Result
-                .builder()
-                .success(data.getSuccess())
-                .message(data.getMessage())
-                .build();
+        pointTransactionRepository.save(transaction);
 
     }
 
@@ -132,11 +126,11 @@ public class PaymentService {
         try {
             return objectMapper.writeValueAsString(confirm);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new CustomException(ErrorCode.JSON_PARSE_FAILED);
         }
     }
 
-    private PaymentResponse.ConnectionData confirmConnection(PointTransaction transaction, PaymentRequest.Confirm confirm) {
+    private Map<String, Object> confirmConnection(PointTransaction transaction, PaymentRequest.Confirm confirm) {
         try {
             String jsonBody = requestToJson(confirm);
             HttpRequest request = HttpRequest.newBuilder()
@@ -147,20 +141,11 @@ public class PaymentService {
                     .build();
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
-            return PaymentResponse.ConnectionData.builder()
-                    .success(true)
-                    .result(jsonToMap(response.body()))
-                    .message("결제가 완료되었습니다.")
-                    .build();
+            return jsonToMap(response.body());
 
         } catch (Exception e) {
-
             transaction.failedPayment();
-            return PaymentResponse.ConnectionData.builder()
-                    .success(false)
-                    .result(null)
-                    .message("결제에 실패하였습니다.")
-                    .build();
+            throw new CustomException(ErrorCode.PAYMENT_FAILED);
         }
     }
 
@@ -169,7 +154,7 @@ public class PaymentService {
             return objectMapper.readValue(response, new TypeReference<Map<String, Object>>() {});
         } catch (Exception e) {
             log.error("json to map exception", e);
-            throw new RuntimeException(e);
+            throw new CustomException(ErrorCode.JSON_PARSE_FAILED);
         }
     }
 

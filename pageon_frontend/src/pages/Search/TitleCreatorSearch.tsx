@@ -116,6 +116,7 @@ function TitleCreatorSearch() {
                     <SearchContentList 
                         contents={pageData.content} 
                         totalElements={pageData.totalElements} 
+                        type="title"
                     />
                 )}
 
