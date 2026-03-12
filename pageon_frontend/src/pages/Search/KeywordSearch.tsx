@@ -31,6 +31,8 @@ function KeywordSearch() {
 
     useEffect(() => {
         async function fetchCategoryKeywords() {
+            window.scrollTo(0, 0);
+
             try {
 
                 const response = await api.get("/keywords");
@@ -44,7 +46,7 @@ function KeywordSearch() {
 
         fetchCategoryKeywords();
         
-    }, []);
+    }, [query]);
 
     useEffect(() => {
         async function fetchSearchResults() {
@@ -156,6 +158,7 @@ function KeywordSearch() {
                     <SearchContentList 
                         contents={pageData.content} 
                         totalElements={pageData.totalElements} 
+                        type="keyword"
                     />
                 )}
 

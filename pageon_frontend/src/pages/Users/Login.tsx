@@ -3,7 +3,7 @@ import styled from "styled-components";
 import * as U from "./Users.styles"
 import { MainContainer, NoSidebarMain } from "../../styles/Layout.styles";
 import { LoginRequest } from "../../types/User";
-import { useNavigate, Link} from "react-router-dom";
+import { useNavigate, Link, useLocation} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 
@@ -65,6 +65,9 @@ function Login() {
 
     const [error, setError] = useState<string>("");
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from || "/";
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
@@ -92,7 +95,8 @@ function Login() {
                 login(jwtInfo.accessToken, jwtInfo.userRoles, jwtInfo.oauthProvider);
 
                 alert("로그인에 성공하였습니다.");
-                navigate("/");
+                console.log(from);
+                navigate(from, { replace: true });
             } else {
                 setError("이메일 또는 비밀번호가 올바르지 않습니다.");
             }
@@ -102,14 +106,17 @@ function Login() {
     };
 
     const handleKakaoLogin = () => {
+        localStorage.setItem("redirectPath", from);
         window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
     };
 
     const handleNaverLogin = () => {
+        localStorage.setItem("redirectPath", from);
         window.location.href = "http://localhost:8080/oauth2/authorization/naver";
     };
 
     const handleGoogleLogin = () => {
+        localStorage.setItem("redirectPath", from);
         window.location.href = "http://localhost:8080/oauth2/authorization/google";
     };
 

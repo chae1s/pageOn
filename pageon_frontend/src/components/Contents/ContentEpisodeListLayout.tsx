@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import * as S from "../Styles/ContentDetail.styles";
 import { EpisodeSummary, PurchaseTargetEpisode } from '../../types/Episodes';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
 import { expirationCheck, expirationDate } from '../../utils/rentalEpisodeFormat';
 import PurchaseModal from '../Modals/PurchaseModal';
+import { useAuthCheck } from './Hooks/useAuthCheck';
 
 interface Props {
     type: string,
@@ -14,10 +15,6 @@ interface Props {
     episodes: EpisodeSummary[];
 }
 
-// 임시 로그인 여부 함수
-function isLoggedIn() {
-    return !!localStorage.getItem('accessToken');
-}
 
 type PurchaseModalMode = 'OWN' | 'RENT' | 'SELECT';
 
@@ -26,6 +23,7 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
     const [sort, setSort] = useState<string>("recent") // first | recent
     const [showAll, setShowAll] = useState<boolean>(false);
     const [purchasePrompt, setPurchasePrompt] = useState<{ episode: PurchaseTargetEpisode; mode: PurchaseModalMode; allowRent: boolean } | null>(null);
+    const { checkLogin } = useAuthCheck();
     const navigate = useNavigate();
     const normalizedType = type.toLowerCase();
     const isWebtoonType = normalizedType === 'webtoon' || normalizedType === 'webtoons';
@@ -73,16 +71,6 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
         }
     };
 
-    // 구매/대여 버튼 클릭시 로그인 체크
-    const checkLogin = (): boolean => {
-        if (!isLoggedIn()) {
-            alert('로그인이 필요합니다.');
-            navigate("/users/login");
-            return false; // 로그인 실패
-        }
-        return true; // 로그인 성공
-    };
-
     
     const openPurchasePrompt = (episode: PurchaseTargetEpisode, mode: PurchaseModalMode, allowRent: boolean = false) => {
         setPurchasePrompt({ episode, mode, allowRent });
@@ -100,8 +88,16 @@ function ContentEpisodeListLayout( {type, contentId, contentTitle, episodes}: Pr
             await api.post(`/${type}/${contentId}/episodes/${episode.id}/subscribe?purchaseType=${purchaseType}`);
             closePurchasePrompt();
             navigate(`/${type}/${contentId}/viewer/${episode.id}`);
-        } catch (error) {
-            console.error("에피소드 구매 실패 : ", error);
+        } catch (error: any) {
+            closePurchasePrompt();
+            console.error("에피소드 구매 실패 : ", error.response.data);
+
+            const errorCode = error.response.data.errorCode;
+            const errorMessage = error.response.data.errorMessage;
+            if (errorCode === 'INSUFFICIENT_POINTS') {
+                alert(errorMessage);
+                navigate("/points/charge")
+            }
         }
     };
 

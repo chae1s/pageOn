@@ -10,9 +10,10 @@ import { formatKorean, formatUrl } from "../../utils/formatContentType";
 interface Props {
     contents?: SearchContent[];
     totalElements?: number;
+    type: string;
 }
 
-function SearchContentList({contents, totalElements = 0}: Props) {
+function SearchContentList({contents, totalElements = 0, type}: Props) {
 
     const navigate = useNavigate();
 
@@ -81,7 +82,12 @@ function SearchContentList({contents, totalElements = 0}: Props) {
                     ) : (
                         <S.NoResultsWrapper>
                             <S.NoResultsText>
-                                해당 키워드를 가진 작품이 없습니다.
+                                {type === "keyword"
+                                    ? "해당 키워드를 가진 작품이 없습니다."
+                                    : type === "title"
+                                        ? "검색 결과가 없습니다."
+                                        : "검색 결과가 없습니다."
+                                }
                             </S.NoResultsText>
                         </S.NoResultsWrapper>
 

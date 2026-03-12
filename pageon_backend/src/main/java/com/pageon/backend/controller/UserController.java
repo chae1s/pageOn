@@ -123,7 +123,7 @@ public class UserController {
         return ResponseEntity.ok(new PageResponse<>(comments));
     }
 
-    @GetMapping("/{contentType}/interests")
+    @GetMapping("/interests/{contentType}")
     public ResponseEntity<PageResponse<ContentResponse.InterestContent>> getMyInterests(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @PathVariable String contentType,
@@ -136,12 +136,12 @@ public class UserController {
         return ResponseEntity.ok(new PageResponse<>(contents));
     }
 
-    @GetMapping("/reading-histories")
+    @GetMapping("/reading-histories/{contentType}")
     public ResponseEntity<PageResponse<ContentResponse.RecentRead>> getReadingHistories(
-            @AuthenticationPrincipal PrincipalUser principalUser, @RequestParam("type") String contentType, @RequestParam("sort") String sort, Pageable pageable
+            @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable String contentType, @RequestParam("sort") String sort, Pageable pageable
     ) {
 
-        Page<ContentResponse.RecentRead> readingContents = readingHistoryService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
+        Page<ContentResponse.RecentRead> readingContents = contentService.getReadingHistory(principalUser.getId(), contentType, sort, pageable);
 
         return ResponseEntity.ok(new PageResponse<>(readingContents));
     }
@@ -149,7 +149,7 @@ public class UserController {
     @GetMapping("/reading-histories/today")
     public ResponseEntity<List<ContentResponse.Simple>> getReadingHistoriesToday(@AuthenticationPrincipal PrincipalUser principalUser) {
 
-        List<ContentResponse.Simple> contentSimpleResponses = readingHistoryService.getTodayReadingHistory(principalUser.getId());
+        List<ContentResponse.Simple> contentSimpleResponses = contentService.getTodayReadingHistory(principalUser.getId());
 
         return ResponseEntity.ok(contentSimpleResponses);
     }

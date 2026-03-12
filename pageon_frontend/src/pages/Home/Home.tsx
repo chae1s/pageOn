@@ -76,14 +76,14 @@ function Home() {
                 <H.SectionBookList>
                     <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>추천 {webnovelKeywordName} 웹소설</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"/webnovels/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={`/search/keyword?contentType=webnovels&keyword=${webnovelKeywordName}`}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={webnovelKeywordContents} />
                 </H.SectionBookList>
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>추천 {webtoonKeywordName} 웹툰</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"/webtoons/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={`/search/keyword?contentType=webtoons&keyword=${webtoonKeywordName}`}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={webtoonKeywordContents} />
                 </H.SectionBookList>

@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/users/signup", "/api/users/check-email", "/api/users/check-nickname",
-                                "/api/users/login", "/api/users/find-password", "/api/auth/refresh",
+                                "/api/users/login", "/api/users/find-password", "/api/auth/refresh", "/api/auth/exchange",
                                 "/api/webnovels", "/api/webnovels/**", "/api/webtoons", "/api/webtoons/**", "/api/episodes/**", "/api/webnovels/daily/*", "/api/webtoons/daily/*",
                                 "/api/keywords", "/api/search/**", "/api/contents/**", "/error", "/api/kafka", "/api/all", "/api/all/**",
                                 "/actuator/prometheus"

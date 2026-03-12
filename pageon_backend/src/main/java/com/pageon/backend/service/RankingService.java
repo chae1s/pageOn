@@ -1,5 +1,6 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.common.annotation.ExecutionTimer;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.dto.response.ActionCountResponse;
 import com.pageon.backend.dto.response.ContentResponse;
@@ -36,6 +37,7 @@ public class RankingService {
     private final RankingRepository rankingRepository;
 
     @Transactional
+    @ExecutionTimer
     @Scheduled(cron = "0 0 * * * *")
     public void updateHourlyRanking() {
         StopWatch stopWatch = new StopWatch();

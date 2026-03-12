@@ -7,6 +7,7 @@ import com.pageon.backend.dto.response.CommentResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Interest;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.base.EpisodeCommentBase;
 import com.pageon.backend.service.EpisodePurchaseService;
@@ -33,6 +34,7 @@ public interface ContentProvider {
     Page<? extends Content> findBySerialDay(SerialDay serialDay, Pageable pageable);
 
     Page<Interest> findByInterest(Long userId, Pageable pageable);
+    Page<ReadingHistory> findByReadingHistory(Long userId, Pageable pageable);
 
     Object findEpisodeDetail(Long userId, Long episodeId);
 

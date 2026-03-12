@@ -123,7 +123,7 @@ function WebtoonHome() {
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>추천 {keywordName} 웹툰</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"/webtoons/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={`/search/keyword?contentType=webtoons&keyword=${keywordName}`}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={keywordContents} />   
                 </H.SectionBookList>

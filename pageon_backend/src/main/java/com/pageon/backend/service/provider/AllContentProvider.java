@@ -6,10 +6,12 @@ import com.pageon.backend.dto.response.CommentResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Interest;
+import com.pageon.backend.entity.ReadingHistory;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.entity.base.EpisodeCommentBase;
 import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.InterestRepository;
+import com.pageon.backend.repository.ReadingHistoryRepository;
 import com.pageon.backend.service.EpisodePurchaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ import java.util.Set;
 public class AllContentProvider implements ContentProvider {
     private final ContentRepository contentRepository;
     private final InterestRepository interestRepository;
+    private final ReadingHistoryRepository readingHistoryRepository;
 
     @Override
     public boolean supports(String contentType) {
@@ -70,6 +73,11 @@ public class AllContentProvider implements ContentProvider {
     @Override
     public Page<Interest> findByInterest(Long userId, Pageable pageable) {
         return interestRepository.findAllByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<ReadingHistory> findByReadingHistory(Long userId, Pageable pageable) {
+        return readingHistoryRepository.findAllReadingHistories(userId, pageable);
     }
 
     @Override

@@ -66,26 +66,4 @@ public class ReadingHistoryService {
         readingHistory.updateEpisodeId(episodeId);
     }
 
-    @Transactional(readOnly = true)
-    public Page<ContentResponse.RecentRead> getReadingHistory(Long userId, String contentType, String sort, Pageable pageable) {
-        Pageable sortedPageable = PageableUtil.createReadingHistory(pageable, sort);
-
-        log.info("contentType: {}", contentType);
-        return switch (contentType) {
-            case "all" -> readingHistoryRepository.findAllReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
-            case "webnovels" -> readingHistoryRepository.findWebnovelReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
-            case "webtoons" -> readingHistoryRepository.findWebtoonReadingHistories(userId, sortedPageable).map(ContentResponse.RecentRead::fromEntity);
-            default -> throw new CustomException(ErrorCode.INVALID_CONTENT_TYPE);
-        };
-    }
-
-    public List<ContentResponse.Simple> getTodayReadingHistory(Long userId) {
-        SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
-
-        List<ReadingHistory> histories = readingHistoryRepository.findWithContentByUserIdAndSerialDay(userId, today);
-
-        return histories.stream()
-                .map(h -> ContentResponse.Simple.fromEntity(h.getContent()))
-                .toList();
-    }
 }

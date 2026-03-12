@@ -125,7 +125,7 @@ function WebnovelHome() {
                 <H.SectionBookList>
                      <H.SectionBookTitleWrapper>
                         <H.SectionBookListTitle>추천 {keywordName} 웹소설</H.SectionBookListTitle>
-                        <H.SectionBookListMoreViewLink to={"/webnovels/recommend/by-keyword"}>더보기</H.SectionBookListMoreViewLink>
+                        <H.SectionBookListMoreViewLink to={`/search/keyword?contentType=webnovels&keyword=${keywordName}`}>더보기</H.SectionBookListMoreViewLink>
                     </H.SectionBookTitleWrapper>
                     <ThumbnailContentList contents={ keywordContents } />    
                 </H.SectionBookList>

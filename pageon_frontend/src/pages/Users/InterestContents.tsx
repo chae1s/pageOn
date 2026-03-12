@@ -30,7 +30,7 @@ function InterestContents() {
 
             try {
                 
-                const response = await api.get(`/users/${contentType}/interests`, {params: params})    
+                const response = await api.get(`/users/interests/${contentType}`, {params: params})    
                 
                 setInterestContents(response.data.content);
                 setPageData(response.data);

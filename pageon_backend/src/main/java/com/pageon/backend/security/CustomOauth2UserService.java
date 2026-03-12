@@ -54,6 +54,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
             }
             case "naver" -> {
                 Object response = oAuth2User.getAttributes().get("response");
+                log.info(response.toString());
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
 
@@ -75,14 +76,15 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
     }
 
     private User existingUser(OAuthUserInfoResponse response) {
-        log.info(response.getEmail());
-
+        log.info(response.toString());
         Optional<User> user = userRepository.findWithRolesByProviderAndProviderId(response.getOAuthProvider(), response.getProviderId());
 
         if (user.isPresent()) {
+            log.info("user is present");
             return user.get();
         }
 
+        log.info("user is not present");
         return signupSocial(response);
     }
 
@@ -94,7 +96,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .nickname(generateRandomNickname())
                 .oAuthProvider(response.getOAuthProvider())
                 .providerId(response.getProviderId())
-                .deleted(false)
+                .termsAgreed(true)
                 .build();
 
         roleService.assignDefaultRole(users);

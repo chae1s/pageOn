@@ -28,13 +28,13 @@ public class PaymentController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<PaymentResponse.Result> confirmPayment(
+    public ResponseEntity<Void> confirmPayment(
             @AuthenticationPrincipal PrincipalUser principalUser,
             @RequestBody PaymentRequest.Confirm request
     ) {
-        PaymentResponse.Result result = paymentService.confirmPayment(principalUser.getId(), request);
+        paymentService.confirmPayment(principalUser.getId(), request);
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/cancel/{transactionId}")

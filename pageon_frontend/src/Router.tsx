@@ -37,6 +37,7 @@ import RecommendKeywordContents from "./pages/Contents/RecommendKeywordContents"
 import PointCharge from "./pages/Users/PointCharge";
 import PaymentSuccess from "./pages/Payments/PaymentSuccess";
 import PaymentFail from "./pages/Payments/PaymentFail";
+import OAuthRedirectHandler from "./pages/Users/OAuthRedirectHandler";
 
 function Router() {
     const location = useLocation();
@@ -44,6 +45,7 @@ function Router() {
         location.pathname === "/mock-verify" ||
         location.pathname === "/payment/success" ||
         location.pathname === "/payment/fail" ||
+        location.pathname === "/oauth/callback" ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webtoons\/[^/]+\/viewer\/[^/]+$/.test(location.pathname) ||
         /^\/webnovels\/[^/]+\/viewer\/[^/]+\/comments$/.test(location.pathname) ||       // 웹소설 댓글 페이지
@@ -73,6 +75,7 @@ function Router() {
             <Route path="/webtoons/:contentId" element={<WebtoonDetailPage />} />
             <Route path="/search/keyword" element={<KeywordSearch/>} />
             <Route path="/search" element={<TitleCreatorSearch />} />
+            <Route path="/oauth/callback" element={< OAuthRedirectHandler />} />
             <Route element={<PublicOnlyRoute/>} >
                 <Route path="/users/login" element={<Login />} />
                 <Route path="/users/signup" element={<Signup />} />
