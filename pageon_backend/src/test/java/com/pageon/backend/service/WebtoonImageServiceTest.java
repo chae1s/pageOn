@@ -3,7 +3,7 @@ package com.pageon.backend.service;
 import com.pageon.backend.common.enums.ContentType;
 import com.pageon.backend.common.enums.SerialDay;
 import com.pageon.backend.common.enums.SeriesStatus;
-import com.pageon.backend.dto.response.WebtoonImagesResponse;
+import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.entity.Creator;
 import com.pageon.backend.entity.Webtoon;
 import com.pageon.backend.entity.WebtoonEpisode;
@@ -51,7 +51,7 @@ class WebtoonImageServiceTest {
         when(webtoonImageRepository.findByWebtoonEpisodeIdOrderBySequenceAsc(1L)).thenReturn(webtoonImages);
 
         //when
-        List<WebtoonImagesResponse> result = webtoonImageService.getWebtoonImages(1L);
+        List<EpisodeResponse.EpisodeImage> result = webtoonImageService.getWebtoonImages(1L);
 
         // then
         assertEquals(webtoonImages.size(), result.size());

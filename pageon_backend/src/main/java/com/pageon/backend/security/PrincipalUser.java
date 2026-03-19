@@ -18,12 +18,41 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PrincipalUser implements UserDetails, OAuth2User {
     private final User users;
+    private final Long id;
+    private final String email;
+    private final List<RoleType> roleTypes;
     private final OAuthUserInfoResponse oAuthUserInfoResponse;
 
+    // 1. 폼 로그인용 (DB 엔티티 기반)
     public PrincipalUser(User user) {
         this.users = user;
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.roleTypes = user.getUserRoles().stream()
+                .map(ur -> ur.getRole().getRoleType())
+                .collect(Collectors.toList());
         this.oAuthUserInfoResponse = null;
     }
+
+    // 2. OAuth 로그인용
+    public PrincipalUser(User user, OAuthUserInfoResponse oAuthUserInfoResponse) {
+        this.users = user;
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.roleTypes = user.getUserRoles().stream()
+                .map(ur -> ur.getRole().getRoleType())
+                .collect(Collectors.toList());
+        this.oAuthUserInfoResponse = oAuthUserInfoResponse;
+    }
+
+    public PrincipalUser(Long id, String email, List<RoleType> roleTypes) {
+        this.users = null;
+        this.id = id;
+        this.email = email;
+        this.roleTypes = roleTypes;
+        this.oAuthUserInfoResponse = null;
+    }
+
 
     public User getUsers() {
         return users;
@@ -42,7 +71,7 @@ public class PrincipalUser implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        return this.users.getEmail();
+        return (users != null) ? users.getEmail() : this.email;
     }
 
     public OAuthProvider getProvider() {
@@ -75,27 +104,32 @@ public class PrincipalUser implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.users.getUserRoles().stream()
-                .map(userRole -> new SimpleGrantedAuthority(userRole.getRole().getRoleType().name())).collect(Collectors.toList());
+        return this.roleTypes.stream()
+                .map(roleType -> new SimpleGrantedAuthority(roleType.name()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String getPassword() {
-        return this.users.getPassword();
+        return (users != null) ? users.getPassword() : null;
     }
 
     @Override
     public String getUsername() {
-        return this.users.getEmail();
+        return (users != null) ? users.getEmail() : this.email;
     }
 
     public Long getId() {
-        return this.users.getId();
+        return (users != null) ? users.getId() : this.id;
     }
 
     public List<RoleType> getRoleType() {
-        return this.users.getUserRoles().stream()
-                .map(userRole -> userRole.getRole().getRoleType()).collect(Collectors.toList());
+        if (users != null) {
+            return users.getUserRoles().stream()
+                    .map(ur -> ur.getRole().getRoleType())
+                    .collect(Collectors.toList());
+        }
+        return this.roleTypes;
     }
 
 }

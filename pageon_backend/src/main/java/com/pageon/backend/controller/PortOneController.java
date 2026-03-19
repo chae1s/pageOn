@@ -23,7 +23,7 @@ public class PortOneController {
     @PostMapping("/api/identity-verifications")
     public ResponseEntity<IdentityVerificationIdResponse> createIdentityVerificationId(@AuthenticationPrincipal PrincipalUser principalUser) {
 
-        return ResponseEntity.ok(portOneService.createIdentityVerificationId(principalUser));
+        return ResponseEntity.ok(portOneService.createIdentityVerificationId(principalUser.getId()));
     }
 
     @PostMapping("/api/identity-verifications/{identityVerificationId}/send")
@@ -33,7 +33,7 @@ public class PortOneController {
             @RequestBody IdentityVerificationRequest request
     ) {
 
-        return ResponseEntity.ok(portOneService.createAndStoreOtp(identityVerificationId, principalUser, request));
+        return ResponseEntity.ok(portOneService.createAndStoreOtp(identityVerificationId, principalUser.getId(), request));
     }
 
     @PostMapping("/api/identity-verifications/{identityVerificationId}/confirm")
@@ -43,7 +43,7 @@ public class PortOneController {
             @RequestBody IdentityVerificationResultRequest request
     ) {
 
-        return ResponseEntity.ok(portOneService.verifyOtpAndUpdateUser(identityVerificationId, principalUser, request));
+        return ResponseEntity.ok(portOneService.verifyOtpAndUpdateUser(identityVerificationId, principalUser.getId(), request));
     }
 
 }

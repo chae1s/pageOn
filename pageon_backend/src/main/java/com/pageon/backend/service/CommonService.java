@@ -13,16 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CommonService {
 
-    private final UserRepository userRepository;
     private final CreatorRepository creatorRepository;
-
-    public User findUserByEmail(String email) {
-        User user = userRepository.findByEmailAndDeleted(email, false).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        );
-
-        return user;
-    }
 
     public Creator findCreatorByUser(User user) {
         Creator creator = creatorRepository.findByUser(user).orElseThrow(

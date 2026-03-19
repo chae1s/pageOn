@@ -13,14 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class KeywordResponse {
 
-    private Long categoryId;
     private Long id;
     private String name;
 
     public static KeywordResponse fromEntity(Keyword keyword) {
 
         return KeywordResponse.builder()
-                .categoryId(keyword.getCategory().getId())
                 .id(keyword.getId())
                 .name(keyword.getName())
                 .build();
@@ -29,7 +27,6 @@ public class KeywordResponse {
     public static KeywordResponse fromEntity(ContentKeyword contentKeyword) {
 
         return KeywordResponse.builder()
-                .categoryId(contentKeyword.getKeyword().getCategory().getId())
                 .id(contentKeyword.getKeyword().getId())
                 .name(contentKeyword.getKeyword().getName())
                 .build();

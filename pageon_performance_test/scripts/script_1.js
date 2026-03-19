@@ -32,20 +32,17 @@ export const options = {
   scenarios: {
     realistic_webtoon_load: {
       executor: 'ramping-arrival-rate',
-      startRate: 100,
-      timeUnit: '20s', // 20초 단위로 rate 계산
-      preAllocatedVUs: 100, // 가상 유저 미리 할당
-      maxVUs: 1000, // numUsers 변수 대신 기존에 쓰시던 1000으로 고정
+      startRate: 20,
+      timeUnit: '1s',
+      preAllocatedVUs: 50,
+      maxVUs: 100, 
       stages: [
-          { target: 100, duration: '20s' },
-          { target: 10000, duration: '1m' },
-          { target: 10000, duration: '1m' }, 
-          { target: 100, duration: '20s' },
+        { target: 20, duration: '20m' },  // 17개/초 고정 유지
       ]
     },
   },
   thresholds: {
-    http_req_duration: ['p(99)<1000'], // 99%의 요청이 1초(1000ms) 이내에 처리되어야 성공으로 간주
+    http_req_duration: ['p(99)<1000'],
   },
 };
 // 로컬 개발 환경 주소
@@ -105,8 +102,8 @@ export default function () {
 
     // --- [액션 3] 미구독 시 구매/대여 ---
     if (!isSubscribed) {
-        let purchaseType = 'OWN'; // 기본값
-        if (content.contentType === 'WEBTOON') {
+        let purchaseType = 'OWN';
+        if (content.urlType === 'webtoons') {
             purchaseType = Math.random() < 0.7 ? 'RENT' : 'OWN';
         }
 
@@ -120,39 +117,48 @@ export default function () {
 
         if (buyRes.status === 200) {
             isSubscribed = true;
-            justPurchased = true;
         }
     }
 
-    // --- [액션 4] 에피소드 기반 액션 (구독 상태일 때만) ---
+    // --- [액션 4] 구독 상태면 에피소드 읽기 ---
     if (isSubscribed) {
+        check(http.get(
+            `${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}`, 
+            getParams('GET_Episode_Read')
+        ), { 
+            'GET_Episode_Read is 2xx': (r) => r.status >= 200 && r.status < 300 
+        });
+
+        // --- [액션 5] 읽은 후 댓글 or 별점 ---
         const actionType = Math.random();
 
-        if (justPurchased || actionType < 0.6) {
-            // 에피소드 읽기 (60%)
-            check(http.get(`${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}`, getParams('GET_Episode_Read')), { 
-                'GET_Episode_Read is 2xx': (r) => r.status >= 200 && r.status < 300 
-            });
-        } else if (actionType < 0.8) {
-            // 에피소드 별점 (20%, RequestDto)
-            const randomScore = Math.floor(Math.random() * (10 - 8 + 1)) + 8; // 8~10점
-
+        if (actionType < 0.2) {
+            // 별점 (20%)
             const ratingPayload = JSON.stringify({
-                score: randomScore
+                score: Math.floor(Math.random() * (10 - 8 + 1)) + 8
             });
-            check(http.post(`${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}/rating`, ratingPayload, getParams('POST_Rating')), { 
+            check(http.post(
+                `${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}/rating`, 
+                ratingPayload, 
+                getParams('POST_Rating')
+            ), { 
                 'POST_Rating is 2xx': (r) => r.status >= 200 && r.status < 300 
             });
 
-        } else {
-            // 에피소드 댓글 (20%, RequestDto)
+        } else if (actionType < 0.4) {
+            // 댓글 (20%)
             const commentPayload = JSON.stringify({
                 text: commentList[Math.floor(Math.random() * commentList.length)],
-                isSpoiler: Math.random() < 0.1 // 10% 확률로 스포일러 체크
+                isSpoiler: Math.random() < 0.1
             });
-            check(http.post(`${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}/comments`, commentPayload, getParams('POST_Comment')), { 
+            check(http.post(
+                `${BASE_URL}/${content.urlType}/${content.contentId}/episodes/${episodeId}/comments`, 
+                commentPayload, 
+                getParams('POST_Comment')
+            ), { 
                 'POST_Comment is 2xx': (r) => r.status >= 200 && r.status < 300 
             });
         }
+        // 나머지 60%는 읽기만 하고 종료
     }
 }

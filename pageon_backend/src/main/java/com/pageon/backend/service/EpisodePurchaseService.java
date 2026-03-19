@@ -8,7 +8,7 @@ import com.pageon.backend.entity.*;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.*;
-import com.pageon.backend.service.provider.ContentProvider;
+import com.pageon.backend.service.provider.EpisodeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EpisodePurchaseService {
 
-    private final List<ContentProvider> providers;
+    private final List<EpisodeProvider> providers;
     private final UserRepository userRepository;
     private final EpisodePurchaseRepository episodePurchaseRepository;
     private final PointTransactionService pointTransactionService;
@@ -36,7 +36,7 @@ public class EpisodePurchaseService {
     @Transactional
     public void createPurchaseHistory(Long userId, String contentType, Long episodeId, PurchaseType purchaseType) {
 
-        String[] key = {String.valueOf(userId), contentType, purchaseType.toString()};
+        String[] key = {String.valueOf(userId), contentType, purchaseType.toString(), String.valueOf(episodeId)};
         idempotentService.isValidIdempotent(Arrays.asList(key));
 
         log.info("[START] createPurchaseHistory: userId = {}, contentType = {}, episodeId = {}, purchaseType = {}",
@@ -47,7 +47,7 @@ public class EpisodePurchaseService {
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         EpisodeInfo episodeInfo = provider.getEpisodeInfo(episodeId, purchaseType);
 
         Integer episodePrice = episodeInfo.episodePrice;
@@ -156,7 +156,7 @@ public class EpisodePurchaseService {
         return episodePurchaseRepository.save(episodePurchase);
     }
 
-    private ContentProvider getProvider(String contentType) {
+    private EpisodeProvider getProvider(String contentType) {
         return providers.stream()
                 .filter(p -> p.supports(contentType))
                 .findFirst()

@@ -5,7 +5,7 @@ import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.service.provider.ContentProvider;
+import com.pageon.backend.service.provider.EpisodeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EpisodeService {
-    private final List<ContentProvider> providers;
+    private final List<EpisodeProvider> providers;
     private final UserRepository userRepository;
     private final IdempotentService idempotentService;
 
     @Transactional
     public Object getEpisodeDetail(Long userId, String contentType, Long episodeId) {
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
 
         return provider.findEpisodeDetail(userId, episodeId);
     }
@@ -38,7 +38,7 @@ public class EpisodeService {
         final Integer score = request.getScore();
         User user = userRepository.getReferenceById(userId);
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         provider.rateEpisode(user, episodeId, score);
     }
 
@@ -47,13 +47,13 @@ public class EpisodeService {
 
         final Integer newScore = request.getScore();
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         provider.updateEpisodeRating(userId, commentId, newScore);
 
     }
 
 
-    private ContentProvider getProvider(String contentType) {
+    private EpisodeProvider getProvider(String contentType) {
         return providers.stream()
                 .filter(p -> p.supports(contentType))
                 .findFirst()

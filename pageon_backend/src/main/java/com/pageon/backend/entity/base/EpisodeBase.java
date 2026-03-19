@@ -38,7 +38,7 @@ public abstract class EpisodeBase extends BaseTimeEntity {
     @Setter(AccessLevel.PROTECTED)
     private Long ratingCount = 0L;
 
-    public abstract Content getParerntContent();
+    public abstract Content getParentContent();
 
     public void addRating(Integer score) {
         double totalScore = this.averageRating * this.ratingCount;

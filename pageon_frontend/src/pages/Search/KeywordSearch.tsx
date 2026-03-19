@@ -38,7 +38,6 @@ function KeywordSearch() {
                 const response = await api.get("/keywords");
                 
                 setCategories(response.data);
-                console.log(categories);
             } catch (error) {
                 console.error("카테고리 별 키워드 조회 실패: ", error);
             }
@@ -132,7 +131,7 @@ function KeywordSearch() {
                 <S.KeywordTable>
                     {categories.map((category) => (
                         <S.CategoryWithKeywords key={category.id}>
-                            <S.CategoryName>{categoryMap[category.name]}</S.CategoryName>
+                            <S.CategoryName>{category.name}</S.CategoryName>
                             <S.KeywordList>
                                 <S.KeywordItemWrap>
                                     {category.keywords.map((keyword) => (
@@ -158,7 +157,7 @@ function KeywordSearch() {
                     <SearchContentList 
                         contents={pageData.content} 
                         totalElements={pageData.totalElements} 
-                        type="keyword"
+                        emptyMessage="해당 키워드를 가진 작품이 없습니다."
                     />
                 )}
 

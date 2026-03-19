@@ -1,6 +1,8 @@
 package com.pageon.backend.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pageon.backend.common.enums.RoleType;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -25,18 +28,29 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
-    private final UserDetailsService userDetailsService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/actuator");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         String token = jwtProvider.resolveToken(request);
 
         try {
-            if (token != null && jwtProvider.validateToken(token)) {
-                String username = jwtProvider.getUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (token != null) {
+                Claims claims = jwtProvider.validateAndGetClaims(token);
+                Long userId = claims.get("userId", Long.class);
+                String username = claims.get("email", String.class);
+                List<RoleType> roles = jwtProvider.getRolesFromClaims(claims);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                PrincipalUser principalUser = new PrincipalUser(userId, username, roles);
+
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(principalUser, null, principalUser.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

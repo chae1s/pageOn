@@ -59,6 +59,10 @@ public class ContentService {
     @Transactional(readOnly = true)
     public Page<ContentResponse.Search> searchContentsByKeyword(String contentType, String keyword, Pageable pageable, String sort) {
         log.info("Searching for {} with keyword: '{}'", contentType, keyword);
+        if (keyword.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_KEYWORD);
+        }
+
         ContentProvider provider = getProvider(contentType);
         Pageable searchPageable = PageableUtil.searchPageable(pageable, sort);
         Page<? extends Content> contents = provider.findByKeyword(keyword, searchPageable);
@@ -70,7 +74,9 @@ public class ContentService {
     @Transactional(readOnly = true)
     public Page<ContentResponse.Search> searchContentsByTitleOrAuthor(String contentType, String query, Pageable pageable, String sort) {
         log.info("Searching for {} with title or creator: '{}'", contentType, query);
-
+        if (query.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_SEARCH_QUERY);
+        }
         Pageable searchPageable = PageableUtil.searchPageable(pageable, sort);
         ContentProvider provider = getProvider(contentType);
 
@@ -122,6 +128,7 @@ public class ContentService {
     public List<ContentResponse.Simple> getDailyScheduleList(String contentType, String serialDay) {
 
         log.info("Cache miss for {} contents. Fetching the standard 18 {} from DB.", serialDay, contentType);
+        SerialDay.from(serialDay);
         ContentProvider provider = getProvider(contentType);
         Pageable pageable = PageableUtil.redisPageable(18, "viewCount");
 
@@ -230,7 +237,9 @@ public class ContentService {
             interestRepository.delete(existingInterest.get());
             log.info("Successfully REMOVED interest for User: {} on Content: {}", userId, contentId);
         } else {
-            User user = userRepository.getReferenceById(userId);
+            User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+                    () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+            );
             Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(
                     () -> new CustomException(ErrorCode.CONTENT_NOT_FOUND)
             );
@@ -265,6 +274,7 @@ public class ContentService {
         return histories.map(ContentResponse.RecentRead::fromEntity);
     }
 
+    @Transactional(readOnly = true)
     public List<ContentResponse.Simple> getTodayReadingHistory(Long userId) {
         SerialDay today = SerialDay.valueOf(LocalDate.now().getDayOfWeek().name());
 

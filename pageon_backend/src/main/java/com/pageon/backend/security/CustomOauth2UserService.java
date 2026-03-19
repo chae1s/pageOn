@@ -8,9 +8,10 @@ import com.pageon.backend.dto.oauth.KakaoSignupRequest;
 import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.User;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.service.RoleService;
-import jakarta.transaction.Transactional;
+import com.pageon.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,8 +25,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -34,8 +33,9 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final DefaultOAuth2UserService delegate;
     private final UserRepository userRepository;
-    private final RoleService roleService;
+    private final UserService userService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -44,91 +44,42 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuthUserInfoResponse userInfoResponse = null;
-        User users = null;
-
-        switch (registrationId) {
-            case "kakao" -> {
-                userInfoResponse = new KakaoSignupRequest(oAuth2User.getAttributes());
-                users = existingUser(userInfoResponse);
-            }
+        OAuthUserInfoResponse userInfoResponse = switch (registrationId) {
+            case "kakao" -> new KakaoSignupRequest(oAuth2User.getAttributes());
             case "naver" -> {
                 Object response = oAuth2User.getAttributes().get("response");
-                log.info(response.toString());
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> attribute = mapper.convertValue(response, new TypeReference<>() {});
+                Map<String, Object> attribute = objectMapper.convertValue(response, new TypeReference<>() {});
 
-                userInfoResponse = new NaverSignupRequest(attribute);
-                users = existingUser(userInfoResponse);
+                yield new NaverSignupRequest(attribute);
             }
-            case "google" -> {
-                userInfoResponse = new GoogleSignupRequest(oAuth2User.getAttributes());
+            case "google" -> new GoogleSignupRequest(oAuth2User.getAttributes());
+            default -> throw new CustomException(ErrorCode.INVALID_PROVIDER_TYPE);
+        };
 
-                users = existingUser(userInfoResponse);
-            }
+        User user = existingUser(userInfoResponse);
 
-            default -> throw new RuntimeException("소셜 로그인 실패");
-
-        }
-
-        setAccessToken(userRequest.getAccessToken(), users);
-        return new PrincipalUser(users, userInfoResponse);
+        setAccessToken(userRequest.getAccessToken(), user);
+        return new PrincipalUser(user, userInfoResponse);
     }
+
 
     private User existingUser(OAuthUserInfoResponse response) {
-        log.info(response.toString());
-        Optional<User> user = userRepository.findWithRolesByProviderAndProviderId(response.getOAuthProvider(), response.getProviderId());
 
-        if (user.isPresent()) {
-            log.info("user is present");
-            return user.get();
-        }
-
-        log.info("user is not present");
-        return signupSocial(response);
-    }
-
-    @Transactional
-    public User signupSocial(OAuthUserInfoResponse response) {
-
-        User users = User.builder()
-                .email(response.getEmail())
-                .nickname(generateRandomNickname())
-                .oAuthProvider(response.getOAuthProvider())
-                .providerId(response.getProviderId())
-                .termsAgreed(true)
-                .build();
-
-        roleService.assignDefaultRole(users);
-
-        userRepository.save(users);
-
-        log.info("소셜 회원가입 성공 email: {}, 닉네임: {}, provider: {}", users.getEmail(), users.getNickname(), users.getOAuthProvider());
-
-        return users;
+        return userRepository.findWithRolesByProviderAndProviderId(
+                response.getOAuthProvider(), response.getProviderId()
+        ).orElseGet(() -> userService.signupSocial(response));
 
     }
 
-    private String generateRandomNickname() {
-        String alphabet = "abcdefghijklmnopqrstuvwxyz";
-        Random random = new Random();
-        int randomLength = random.nextInt(5) + 6;
-        StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < randomLength; i++) {
-            int index = random.nextInt(alphabet.length());
-            sb.append(alphabet.charAt(index));
-        }
-
-        return sb.toString();
-    }
-
-    private void setAccessToken(OAuth2AccessToken oAuth2AccessToken, User users) {
+    private void setAccessToken(OAuth2AccessToken oAuth2AccessToken, User user) {
         String accessToken = oAuth2AccessToken.getTokenValue();
 
+        String redisKey = String.format("user:oauth:token:%s:%d", user.getOAuthProvider().toString(), user.getId());
+
         ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-        AccessToken socialAccessToken = new AccessToken().updateAccessToken(users.getId(), accessToken);
-        valueOperations.set(String.format("%d_%s_accessToken", users.getId(), users.getProviderId()), socialAccessToken);
+        AccessToken socialAccessToken = new AccessToken().updateAccessToken(user.getId(), accessToken);
+        valueOperations.set(redisKey, socialAccessToken);
     }
 
 }

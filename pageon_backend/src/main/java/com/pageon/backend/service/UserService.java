@@ -2,6 +2,7 @@ package com.pageon.backend.service;
 
 import com.pageon.backend.common.enums.Gender;
 import com.pageon.backend.common.enums.RoleType;
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
@@ -33,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -83,10 +85,49 @@ public class UserService {
                 .birthDate(birthDate)
                 .gender(Gender.valueOf(request.getGender()))
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .deleted(false)
                 .termsAgreed(request.getTermsAgreed())
                 .build();
 
+    }
+
+    @Transactional
+    public User signupSocial(OAuthUserInfoResponse response) {
+        User user = User.builder()
+                .email(response.getEmail())
+                .nickname(generateRandomNickname())
+                .oAuthProvider(response.getOAuthProvider())
+                .providerId(response.getProviderId())
+                .termsAgreed(true)
+                .build();
+
+        roleService.assignDefaultRole(user);
+
+        userRepository.save(user);
+
+        return user;
+    }
+
+    private String generateRandom() {
+        String alphabet = "abcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        int randomLength = random.nextInt(5) + 6;
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < randomLength; i++) {
+            int index = random.nextInt(alphabet.length());
+            sb.append(alphabet.charAt(index));
+        }
+
+        return sb.toString();
+    }
+
+    private String generateRandomNickname() {
+        String nickname;
+        do {
+            nickname = generateRandom();
+        } while (userRepository.existsByNickname(nickname));
+
+        return nickname;
     }
 
 
@@ -110,35 +151,44 @@ public class UserService {
         PrincipalUser principalUser = (PrincipalUser) authentication.getPrincipal();
 
         // 로그인 시 토큰 생성
-        String accessToken = jwtProvider.generateAccessToken(principalUser.getUsername(), principalUser.getRoleType());
-        String refreshToken = jwtProvider.generateRefreshToken(principalUser.getUsername());
-        if (accessToken == null || refreshToken == null) {
-            throw new CustomException(ErrorCode.TOKEN_GENERATION_FAILED);
-        }
+        String accessToken = generateToken(principalUser, response);
 
-        try {
-            // refresh token 저장
-            TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(principalUser.getId(), principalUser.getUsername());
-            redisTemplate.opsForValue().set(refreshToken, tokenInfo, Duration.ofDays(180));
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
-        }
         List<String> userRoles = new ArrayList<>();
         for (RoleType roleType : principalUser.getRoleType()) {
             userRoles.add(roleType.toString());
         }
 
-        JwtTokenResponse jwtTokenResponse = new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider(), userRoles);
+
+        return new JwtTokenResponse(true, accessToken, principalUser.getUsers().getOAuthProvider(), userRoles);
+
+    }
+
+    private String generateToken(PrincipalUser principalUser, HttpServletResponse response) {
+        String accessToken = jwtProvider.generateAccessToken(principalUser.getId(), principalUser.getUsername(), principalUser.getRoleType());
+        String refreshToken = jwtProvider.generateRefreshToken(principalUser.getUsername());
+        if (accessToken == null || refreshToken == null) {
+            throw new CustomException(ErrorCode.TOKEN_GENERATION_FAILED);
+        }
+
+        TokenInfo tokenInfo = new TokenInfo().updateTokenInfo(principalUser.getId(), principalUser.getUsername());
+        saveRefreshTokenInRedis(tokenInfo, refreshToken);
 
         jwtProvider.sendTokens(response, accessToken, refreshToken);
 
 
-        return jwtTokenResponse;
+        return accessToken;
+    }
 
+    private void saveRefreshTokenInRedis(TokenInfo tokenInfo, String refreshToken) {
+        try {
+            redisTemplate.opsForValue().set(refreshToken, tokenInfo, Duration.ofDays(180));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
     }
 
     public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
-        User user = userRepository.findByIdAndDeleted(principalUser.getId(), false).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNotNull(principalUser.getId()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -165,16 +215,19 @@ public class UserService {
     private void deleteToken(String refreshToken, User user) {
 
         TokenInfo tokenInfo = (TokenInfo) redisTemplate.opsForValue().get(refreshToken);
+        if (tokenInfo == null) return;
 
-        if (tokenInfo.getUserId().equals(user.getId())) {
-            redisTemplate.delete(refreshToken);
+        if (!tokenInfo.getUserId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
+
+        redisTemplate.delete(refreshToken);
     }
 
     @Transactional
     public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
         Map<String, String> result = new HashMap<>();
-        Optional<User> optionalUsers = userRepository.findByEmailAndDeleted(passwordDto.getEmail(), false);
+        Optional<User> optionalUsers = userRepository.findByEmailAndDeletedAtIsNotNull(passwordDto.getEmail());
         if (optionalUsers.isPresent()) {
             User user = optionalUsers.get();
             if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
@@ -198,8 +251,11 @@ public class UserService {
     }
 
     private String generateRandomPassword() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-        Random random = new Random();
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        String unicodeChars = "!@#$%^&-";
+        String numberChars = "0123456789";
+
+        SecureRandom random = new SecureRandom();
 
         StringBuilder sb = new StringBuilder();
 
@@ -207,17 +263,22 @@ public class UserService {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
 
+        sb.append(unicodeChars.charAt(random.nextInt(unicodeChars.length())));
+        sb.append(numberChars.charAt(random.nextInt(numberChars.length())));
+
         return sb.toString();
     }
 
-    public UserInfoResponse getMyInfo(PrincipalUser principalUser) {
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+    public UserInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         return UserInfoResponse.fromEntity(user);
     }
 
     public boolean checkPassword(Long id, String password) {
-        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -226,10 +287,10 @@ public class UserService {
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
-        log.info(request.getNickname());
+
         if (request.getNickname() != null && !request.getNickname().isBlank()) {
             user.updateNickname(request.getNickname());
         }
@@ -249,7 +310,7 @@ public class UserService {
 
     @Transactional
     public Map<String, Object> deleteAccount(Long id, UserDeleteRequest userDeleteRequest, HttpServletRequest request) {
-        User user = userRepository.findByIdAndDeleted(id, false).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -281,8 +342,12 @@ public class UserService {
     // provider가 email이 아닐때 즉, 소셜로그인일 때 계정 삭제 메소드
     private Map<String, Object> deleteSocialAccount(User user, HttpServletRequest request) {
         log.info("소셜 계정 삭제");
-        String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
+        String redisKey = String.format("user:oauth:token:%s:%d", user.getOAuthProvider().toString(), user.getId());
         AccessToken accessToken = (AccessToken) redisTemplate.opsForValue().get(redisKey);
+
+        if (accessToken == null) {
+            throw new CustomException(ErrorCode.OAUTH_ACCESS_TOKEN_NOT_FOUND);
+        }
         switch (user.getOAuthProvider()) {
             case KAKAO -> {
                 unlinkKakao(accessToken.getAccessToken());
@@ -296,7 +361,7 @@ public class UserService {
                 unlinkGoogle(accessToken.getAccessToken());
                 return softDeleteAccount(user, "구글 계정이 삭제되었습니다.", redisKey, request);
             }
-            default -> throw new CustomException(ErrorCode.OAUTH_PROVIDER_MISMATCH);
+            default -> throw new CustomException(ErrorCode.INVALID_PROVIDER_TYPE);
         }
     }
 
@@ -364,8 +429,8 @@ public class UserService {
         }
     }
 
-    public boolean checkIdentityVerification(PrincipalUser principalUser) {
-        if (userRepository.existsByEmailAndIsPhoneVerifiedTrue(principalUser.getUsername())) {
+    public boolean checkIdentityVerification(Long userId) {
+        if (userRepository.existsByIdAndIsPhoneVerifiedTrue(userId)) {
             return true;
         }
 

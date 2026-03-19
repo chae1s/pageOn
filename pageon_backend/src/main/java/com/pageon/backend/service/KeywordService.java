@@ -1,10 +1,10 @@
 package com.pageon.backend.service;
 
-import com.pageon.backend.dto.response.CreatorKeywordResponse;
-import com.pageon.backend.dto.response.KeywordResponse;
+
 import com.pageon.backend.entity.Category;
-import com.pageon.backend.entity.ContentKeyword;
 import com.pageon.backend.entity.Keyword;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.CategoryRepository;
 import com.pageon.backend.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,20 +18,23 @@ public class KeywordService {
 
     private final KeywordRepository keywordRepository;
     private final CategoryRepository categoryRepository;
+    private static final Long UNCATEGORIZED_CATEGORY_ID = 6L;
 
     public List<Keyword> separateKeywords(String line) {
+        if (line == null || line.isBlank()) {
+            return new ArrayList<>();
+        }
+
         String[] words = line.replaceAll("\\s", "").split(",");
         LinkedHashMap<String, Keyword> keywordMap = new LinkedHashMap<>();
-        Category category = categoryRepository.findById(6L).orElseThrow(() -> new RuntimeException());
+        Category category = categoryRepository.findById(UNCATEGORIZED_CATEGORY_ID).orElseThrow(
+                () -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)
+        );
+
         for (String word : words) {
             if (!keywordMap.containsKey(word)) {
                 Keyword keyword = keywordRepository.findByName(word).orElseGet(
-                        () -> {
-                            Keyword newKeyword = new Keyword(category, word);
-                            keywordRepository.save(newKeyword);
-
-                            return newKeyword;
-                        }
+                        () -> keywordRepository.save(new Keyword(category, word))
                 );
 
                 keywordMap.put(word, keyword);
@@ -39,25 +42,6 @@ public class KeywordService {
 
         }
         return new ArrayList<>(keywordMap.values());
-    }
-
-    public List<CreatorKeywordResponse> getKeywords(List<Keyword> keywords) {
-        List<CreatorKeywordResponse> creatorKeywordResponses = new ArrayList<>();
-        for (Keyword keyword : keywords) {
-            creatorKeywordResponses.add(CreatorKeywordResponse.fromEntity(keyword));
-        }
-
-        return creatorKeywordResponses;
-    }
-
-    public List<KeywordResponse> getKeywordsExceptCategory(List<ContentKeyword> keywords) {
-        List<KeywordResponse> keywordResponses = new ArrayList<>();
-        for (ContentKeyword keyword : keywords) {
-            if (!keyword.getKeyword().getCategory().getId().equals(6L)) {
-                keywordResponses.add(KeywordResponse.fromEntity(keyword));
-            }
-        }
-        return keywordResponses;
     }
 
 }

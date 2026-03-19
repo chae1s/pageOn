@@ -36,7 +36,7 @@ public class WebnovelEpisode extends EpisodeBase {
     private List<WebnovelEpisodeComment> webnovelEpisodeComments = new ArrayList<>();
 
     @Override
-    public Content getParerntContent() {
+    public Content getParentContent() {
         return this.webnovel;
     }
 }

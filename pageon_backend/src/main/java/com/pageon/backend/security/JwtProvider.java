@@ -2,6 +2,7 @@ package com.pageon.backend.security;
 
 
 import com.pageon.backend.common.enums.RoleType;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -49,25 +51,30 @@ public class JwtProvider {
 
 
     /* Access Token 발급 */
-    public String generateAccessToken(String email, List<RoleType> roleTypes) {
+    public String generateAccessToken(Long userId, String email, List<RoleType> roleTypes) {
         Date now = new Date();
+        List<String> roles = roleTypes.stream()
+                .map(RoleType::name)
+                .collect(Collectors.toList());
+
         return Jwts.builder()
                 .setSubject(email)
+                .claim("userId", userId)
                 .claim("email", email)
-                .claim("roles", roleTypes)
+                .claim("roles", roles)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRES_IN))
                 .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        Jwts.parserBuilder()
+    public Claims validateAndGetClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(accessKey)
                 .build()
-                .parseClaimsJws(token);
+                .parseClaimsJws(token)
+                .getBody();
 
-        return true;
     }
 
     public boolean validateRefreshToken(String refreshToken) {
@@ -79,6 +86,15 @@ public class JwtProvider {
         return true;
     }
 
+    public Long getUserId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(accessKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", Long.class);
+    }
+
     public String getUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(accessKey)
@@ -86,6 +102,15 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("email", String.class);
+    }
+
+    public List<RoleType> getRolesFromClaims(Claims claims) {
+
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(RoleType::valueOf)
+                .collect(Collectors.toList());
     }
 
     public String getUsernameRefreshToken(String refreshToken) {
