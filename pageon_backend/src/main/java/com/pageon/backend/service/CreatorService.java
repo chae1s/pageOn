@@ -34,7 +34,7 @@ public class CreatorService {
     @Transactional
     public void registerCreator(Long userId, RegisterCreatorRequest creatorRequest) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

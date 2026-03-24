@@ -157,35 +157,6 @@ public class UserServiceTest {
         
         assertNull(savedUser.getProviderId(), "이메일 가입 시 ProviderId가 null이어야 함.");
     }
-
-    @ParameterizedTest
-    @MethodSource("socialSignupSource")
-    @DisplayName("소셜 로그인 회원이 존재하지 않으면 신규 가입")
-    void signupSocial_shouldCreateNewUser(OAuthUserInfoResponse response, String expectedEmail, OAuthProvider expectedProvider) {
-
-        //when
-        User newUser = userService.signupSocial(response);
-
-        // then
-        assertEquals(expectedEmail, newUser.getEmail());
-        assertEquals(expectedProvider, newUser.getOAuthProvider());
-        verify(roleService).assignDefaultRole(newUser);
-        verify(userRepository).save(newUser);
-    }
-
-    private static Stream<Arguments> socialSignupSource() {
-        Map<String, Object> kakaoAttr = Map.of(
-                "id", "providerId",
-                "kakao_account", Map.of("email", "test@kakao.com")
-        );
-
-        return Stream.of(
-                Arguments.of(new KakaoSignupRequest(kakaoAttr), "test@kakao.com", OAuthProvider.KAKAO),
-                Arguments.of(Map.of("id", "providerId", "email", "test@naver.com"), OAuthProvider.NAVER),
-                Arguments.of(Map.of("id", "providerId", "email", "test@google.com"), OAuthProvider.GOOGLE)
-        );
-
-    }
     
     @Test
     @DisplayName("이메일이 중복이 아닐 때 false 리턴")
@@ -376,7 +347,7 @@ public class UserServiceTest {
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         when(request.getCookies()).thenReturn(new Cookie[]{
                 new Cookie("refreshToken", "sample-refresh-token")
@@ -392,7 +363,7 @@ public class UserServiceTest {
         userService.logout(mockPrincipalUser, request, response);
         
         // then
-        verify(userRepository).findByIdAndDeletedAtIsNotNull(userId);
+        verify(userRepository).findByIdAndDeletedAtIsNull(userId);
         verify(valueOperations).get("sample-refresh-token");
         verify(redisTemplate).delete("sample-refresh-token");
 
@@ -410,7 +381,7 @@ public class UserServiceTest {
         Long userId = 1L;
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class,
@@ -433,7 +404,7 @@ public class UserServiceTest {
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         when(request.getCookies()).thenReturn(new Cookie[]{
                 new Cookie("refreshToken", "sample-refresh-token")
@@ -458,7 +429,7 @@ public class UserServiceTest {
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         Cookie cookie = new Cookie("NoRefreshToken", "sample-refresh-token");
         when(request.getCookies()).thenReturn(new Cookie[]{
@@ -484,7 +455,7 @@ public class UserServiceTest {
         User user = User.builder().id(userId).build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         when(request.getCookies()).thenReturn(new Cookie[]{
                 new Cookie("refreshToken", "sample-refresh-token")
@@ -517,7 +488,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
 
-        when(userRepository.findByEmailAndDeletedAtIsNotNull(email)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(any())).thenReturn("encodedTempPassword");
 
         //when
@@ -545,7 +516,7 @@ public class UserServiceTest {
                 .oAuthProvider(provider)
                 .build();
 
-        when(userRepository.findByEmailAndDeletedAtIsNotNull(email)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.of(user));
         //when
         Map<String, String> result = userService.passwordFind(new FindPasswordRequest(email));
 
@@ -561,7 +532,7 @@ public class UserServiceTest {
         // given
         String email = "test@mail.com";
 
-        when(userRepository.findByEmailAndDeletedAtIsNotNull(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.empty());
 
         //when
         Map<String, String> result = userService.passwordFind(new FindPasswordRequest(email));
@@ -586,7 +557,7 @@ public class UserServiceTest {
                 .pointBalance(0)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         //when
         UserInfoResponse userInfoResponse = userService.getMyInfo(userId);
@@ -601,7 +572,7 @@ public class UserServiceTest {
     @DisplayName("존재하지 않는 사용자 조회 시 CustomException 발생")
     void getMyInfo_withInvalidUserId_shouldThrowCustomException() {
         // given
-        when(userRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class,
@@ -626,7 +597,7 @@ public class UserServiceTest {
                 .password(password)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(password, "encodePassword")).thenReturn(true);
         //when
         boolean result = userService.checkPassword(1L, password);
@@ -642,7 +613,7 @@ public class UserServiceTest {
         // given
         String password = "encodePassword";
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.checkPassword(1L, password);
@@ -665,7 +636,7 @@ public class UserServiceTest {
                 .password(password)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
         //when
         boolean result = userService.checkPassword(1L, password);
@@ -688,7 +659,7 @@ public class UserServiceTest {
                 .build();
 
         String newNickname = "newNick";
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(null, newNickname);
 
         //when
@@ -711,7 +682,7 @@ public class UserServiceTest {
                 .nickname("nickname")
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(null, " ");
 
         //when
@@ -735,7 +706,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn(encodeNewPassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", null);
@@ -759,7 +730,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(" ", null);
 
@@ -789,7 +760,7 @@ public class UserServiceTest {
                 .pointBalance(0)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode(anyString())).thenReturn(newEncodePassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", newNickname);
@@ -808,7 +779,7 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         //when
@@ -834,7 +805,7 @@ public class UserServiceTest {
                 .nickname("nickname")
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         String invalidPassword = "abc1234";
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(invalidPassword, null);
@@ -866,7 +837,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(true);
 
         Cookie cookie = new Cookie("refreshToken", "sample-refresh-token");
@@ -910,7 +881,7 @@ public class UserServiceTest {
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
 
         //when
@@ -932,7 +903,7 @@ public class UserServiceTest {
         String password = "password";
         request = mock(HttpServletRequest.class);
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class,
@@ -964,7 +935,7 @@ public class UserServiceTest {
 
         AccessToken accessToken = new AccessToken(userId, socialAccessToken);
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(redisKey)).thenReturn(accessToken);
 

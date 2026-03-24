@@ -38,7 +38,7 @@ public class PortOneService {
     //  본인인증 요청 식별 위해 identityVerificationId 발급 후 redis에 저장
     public IdentityVerificationIdResponse createIdentityVerificationId(Long userId) {
 
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -58,7 +58,7 @@ public class PortOneService {
 
     public boolean createAndStoreOtp(String identityVerificationId, Long userId, IdentityVerificationRequest identityVerificationRequest) {
         // 로그인한 유저의 이메일로 db 검색
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -91,7 +91,7 @@ public class PortOneService {
 
     @Transactional
     public boolean verifyOtpAndUpdateUser(String identityVerificationId, Long userId, IdentityVerificationResultRequest request) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

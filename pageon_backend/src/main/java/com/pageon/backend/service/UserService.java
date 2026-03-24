@@ -54,7 +54,6 @@ public class UserService {
     private final RoleService roleService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RestTemplate restTemplate;
-    private final CommonService commonService;
 
     @Value("${spring.security.oauth2.client.registration.naver.client-id}")
     private String naverClientId;
@@ -88,46 +87,6 @@ public class UserService {
                 .termsAgreed(request.getTermsAgreed())
                 .build();
 
-    }
-
-    @Transactional
-    public User signupSocial(OAuthUserInfoResponse response) {
-        User user = User.builder()
-                .email(response.getEmail())
-                .nickname(generateRandomNickname())
-                .oAuthProvider(response.getOAuthProvider())
-                .providerId(response.getProviderId())
-                .termsAgreed(true)
-                .build();
-
-        roleService.assignDefaultRole(user);
-
-        userRepository.save(user);
-
-        return user;
-    }
-
-    private String generateRandom() {
-        String alphabet = "abcdefghijklmnopqrstuvwxyz";
-        Random random = new Random();
-        int randomLength = random.nextInt(5) + 6;
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < randomLength; i++) {
-            int index = random.nextInt(alphabet.length());
-            sb.append(alphabet.charAt(index));
-        }
-
-        return sb.toString();
-    }
-
-    private String generateRandomNickname() {
-        String nickname;
-        do {
-            nickname = generateRandom();
-        } while (userRepository.existsByNickname(nickname));
-
-        return nickname;
     }
 
 
@@ -188,7 +147,7 @@ public class UserService {
     }
 
     public void logout(PrincipalUser principalUser, HttpServletRequest request, HttpServletResponse response) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(principalUser.getId()).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(principalUser.getId()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -227,7 +186,7 @@ public class UserService {
     @Transactional
     public Map<String, String> passwordFind(FindPasswordRequest passwordDto) {
         Map<String, String> result = new HashMap<>();
-        Optional<User> optionalUsers = userRepository.findByEmailAndDeletedAtIsNotNull(passwordDto.getEmail());
+        Optional<User> optionalUsers = userRepository.findByEmailAndDeletedAtIsNull(passwordDto.getEmail());
         if (optionalUsers.isPresent()) {
             User user = optionalUsers.get();
             if (user.getOAuthProvider() == OAuthProvider.EMAIL) {
@@ -270,7 +229,7 @@ public class UserService {
     }
 
     public UserInfoResponse getMyInfo(Long userId) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -278,7 +237,7 @@ public class UserService {
     }
 
     public boolean checkPassword(Long id, String password) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -287,7 +246,7 @@ public class UserService {
 
     @Transactional
     public void updateProfile(Long id, UserUpdateRequest request) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 
@@ -310,7 +269,7 @@ public class UserService {
 
     @Transactional
     public Map<String, Object> deleteAccount(Long id, UserDeleteRequest userDeleteRequest, HttpServletRequest request) {
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(id).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

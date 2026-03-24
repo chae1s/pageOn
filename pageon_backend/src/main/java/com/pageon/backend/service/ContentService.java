@@ -237,7 +237,7 @@ public class ContentService {
             interestRepository.delete(existingInterest.get());
             log.info("Successfully REMOVED interest for User: {} on Content: {}", userId, contentId);
         } else {
-            User user = userRepository.findByIdAndDeletedAtIsNotNull(userId).orElseThrow(
+            User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
                     () -> new CustomException(ErrorCode.USER_NOT_FOUND)
             );
             Content content = contentRepository.findByIdAndDeletedAtIsNull(contentId).orElseThrow(

@@ -53,7 +53,7 @@ class CustomOauth2UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private UserService userService;
+    private SocialUserService socialUserService;
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
     @Mock
@@ -186,7 +186,7 @@ class CustomOauth2UserServiceTest {
                 .termsAgreed(true)
                 .nickname("randomNickname")
                 .build();
-        when(userService.signupSocial(any())).thenReturn(newUser);
+        when(socialUserService.signupSocial(any())).thenReturn(newUser);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -195,7 +195,7 @@ class CustomOauth2UserServiceTest {
 
         // then
         ArgumentCaptor<OAuthUserInfoResponse> captor = ArgumentCaptor.forClass(OAuthUserInfoResponse.class);
-        verify(userService).signupSocial(captor.capture());
+        verify(socialUserService).signupSocial(captor.capture());
 
         OAuthUserInfoResponse capturedResponse = captor.getValue();
         assertEquals("test@kakao.com", capturedResponse.getEmail());

@@ -57,14 +57,14 @@ class PortOneServiceTest {
         Long userId = 1L;
 
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(defaultUser()));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(defaultUser()));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //when
         IdentityVerificationIdResponse result = portOneService.createIdentityVerificationId(userId);
 
         // then
-        assertNotNull(result.getIdentityVerificationId());
+        assertNull(result.getIdentityVerificationId());
         verify(valueOperations).set(
                 eq("user:verification:1"),
                 anyString(),
@@ -84,7 +84,7 @@ class PortOneServiceTest {
                 .isPhoneVerified(true)
                 .build();
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -102,7 +102,7 @@ class PortOneServiceTest {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -126,7 +126,7 @@ class PortOneServiceTest {
 
         String idRedisKey = String.format("user:verification:%d", userId);
         String otpRedisKey = String.format("user:verification:%d:%s", userId, identityVerificationId);
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(defaultUser()));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(defaultUser()));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(idRedisKey)).thenReturn(identityVerificationId);
 
@@ -142,7 +142,7 @@ class PortOneServiceTest {
         verify(valueOperations).set(eq(otpRedisKey), otpCaptor.capture(), eq(Duration.ofMinutes(3)));
 
         OtpVerificationPayload otpPayload = otpCaptor.getValue();
-        assertNotNull(otpPayload.getOtp());
+        assertNull(otpPayload.getOtp());
         assertEquals(6, otpPayload.getOtp().length());
         assertTrue(otpPayload.getOtp().matches("\\d{6}"));
 
@@ -171,7 +171,7 @@ class PortOneServiceTest {
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", phoneNumber, "9604032");
         IdentityVerificationRequest request = new IdentityVerificationRequest(customer, "SMS");
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -192,7 +192,7 @@ class PortOneServiceTest {
         Long userId = 1L;
         String identityVerificationId = "test-verification-id";
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(defaultUser()));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(defaultUser()));
 
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", "010-1111-1111", "9604032");
         IdentityVerificationRequest request = new IdentityVerificationRequest(customer, "NULL");
@@ -215,7 +215,7 @@ class PortOneServiceTest {
         String identityVerificationId = "test-verification-id";
         String redisVerificationId = "redis-verification-id";
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(defaultUser()));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(defaultUser()));
         String idRedisKey = String.format("user:verification:%d", userId);
 
         IdentityVerificationCustomer customer = new IdentityVerificationCustomer("박누구", "010-1111-1111", "9604032");
@@ -253,7 +253,7 @@ class PortOneServiceTest {
         String di = UUID.randomUUID().toString();
         IdentityVerificationResultRequest request = new IdentityVerificationResultRequest(di, sendOtp, "DANAL");
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(idRedisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(otpRedisKey)).thenReturn(payload);
@@ -287,7 +287,7 @@ class PortOneServiceTest {
         String idRedisKey = String.format("user:verification:%d", userId);
         String otpRedisKey = String.format("user:verification:%d:%s", userId, identityVerificationId);
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(idRedisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(otpRedisKey)).thenReturn(null);
@@ -329,7 +329,7 @@ class PortOneServiceTest {
         String di = UUID.randomUUID().toString();
         IdentityVerificationResultRequest request = new IdentityVerificationResultRequest(di, sendOtp, "DANAL");
 
-        when(userRepository.findByIdAndDeletedAtIsNotNull(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(idRedisKey)).thenReturn(identityVerificationId);
         when(valueOperations.get(otpRedisKey)).thenReturn(payload);

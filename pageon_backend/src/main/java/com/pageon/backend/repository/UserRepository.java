@@ -31,9 +31,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {
             "userRoles", "userRoles.role"
     })
-    Optional<User> findByEmailAndDeletedAtIsNotNull(String email);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    Optional<User> findByIdAndDeletedAtIsNotNull(Long id);
+    Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
     Boolean existsByPhoneNumberAndIsPhoneVerifiedTrue(String phoneNumber);
 

@@ -66,7 +66,7 @@ public class InitContentData implements ApplicationRunner {
 
             String [] line;
             while ((line = csvReader.readNext()) != null) {
-                User user = userRepository.findByIdAndDeletedAtIsNotNull(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("user 없음"));
+                User user = userRepository.findByIdAndDeletedAtIsNull(Long.valueOf(line[0])).orElseThrow(() -> new RuntimeException("user 없음"));
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                 LocalDate birthDate = LocalDate.parse(line[5], formatter);
                 user.updateIdentityVerification(line[3], line[4], birthDate, Gender.valueOf(line[6]), line[7], true, IdentityProvider.DANAL);

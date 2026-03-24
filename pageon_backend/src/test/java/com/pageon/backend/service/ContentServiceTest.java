@@ -394,7 +394,7 @@ class ContentServiceTest {
         Content content = mock(Content.class);
 
         when(interestRepository.findByUser_IdAndContentId(1L, 1L)).thenReturn(Optional.empty());
-        when(userRepository.findByIdAndDeletedAtIsNotNull(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(user));
         when(contentRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(content));
 
         // when

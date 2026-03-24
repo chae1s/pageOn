@@ -52,7 +52,7 @@ public class AuthService {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
-        User user = userRepository.findByIdAndDeletedAtIsNotNull(tokenInfo.getUserId()).orElseThrow(
+        User user = userRepository.findByIdAndDeletedAtIsNull(tokenInfo.getUserId()).orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
 

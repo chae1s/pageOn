@@ -88,10 +88,18 @@ public enum ErrorCode {
     POINT_TRANSACTION_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_PAYMENT_CONFIRM("이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
     AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
-    PAYMENT_FAILED("결제에 실패하였습니다.", HttpStatus.PAYMENT_REQUIRED),
-    JSON_PARSE_FAILED("데이터 형식이 올바르지 않아 처리에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    PAYMENT_FAILED("결제 처리에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_TEMP_CODE("임시 코드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    TOSS_CLIENT_ERROR("결제 취소에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_POINTS_FOR_REFUND("환불할 포인트 잔액이 부족합니다.", HttpStatus.BAD_REQUEST),
+    REFUND_PERIOD_EXPIRED("환불 가능 기간이 지났습니다.", HttpStatus.BAD_REQUEST),
+    REFUND_STATUS_INVALID("취소되지 않은 결제입니다.", HttpStatus.BAD_REQUEST),
+    REFUND_API_FAILED("환불 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_API_FAILED("결제 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_NOT_COMPLETED("완료된 결제만 취소할 수 있습니다.", HttpStatus.BAD_REQUEST),
     ;
+
+
 
 
     private final String errorMessage;

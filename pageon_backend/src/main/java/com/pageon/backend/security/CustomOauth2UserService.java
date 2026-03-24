@@ -11,7 +11,7 @@ import com.pageon.backend.entity.User;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.service.UserService;
+import com.pageon.backend.service.SocialUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,7 +33,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final DefaultOAuth2UserService delegate;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final SocialUserService socialUserService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -67,7 +67,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         return userRepository.findWithRolesByProviderAndProviderId(
                 response.getOAuthProvider(), response.getProviderId()
-        ).orElseGet(() -> userService.signupSocial(response));
+        ).orElseGet(() -> socialUserService.signupSocial(response));
 
     }
 
