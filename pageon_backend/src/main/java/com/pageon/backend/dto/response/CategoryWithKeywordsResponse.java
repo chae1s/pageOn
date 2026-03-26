@@ -2,12 +2,14 @@ package com.pageon.backend.dto.response;
 
 import com.pageon.backend.entity.Category;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryWithKeywordsResponse {
@@ -17,15 +19,13 @@ public class CategoryWithKeywordsResponse {
     private List<KeywordResponse> keywords;
 
     public static CategoryWithKeywordsResponse fromEntity(Category category) {
-        CategoryWithKeywordsResponse categoryWithKeywordsResponse = new CategoryWithKeywordsResponse();
-        categoryWithKeywordsResponse.setId(category.getId());
-        categoryWithKeywordsResponse.setName(category.getName());
-        categoryWithKeywordsResponse.setKeywords(category.getKeywords().stream()
-                .map(KeywordResponse::fromEntity)
-                .toList()
-        );
 
-        return categoryWithKeywordsResponse;
+        return CategoryWithKeywordsResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .keywords(category.getKeywords() == null ? List.of() :
+                        category.getKeywords().stream().map(KeywordResponse::fromEntity).toList())
+                .build();
     }
 
 

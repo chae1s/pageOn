@@ -20,7 +20,7 @@ public class CreatorController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerCreator(@AuthenticationPrincipal PrincipalUser principalUser, @Valid @RequestBody RegisterCreatorRequest request) {
-        creatorService.registerCreator(principalUser, request);
+        creatorService.registerCreator(principalUser.getId(), request);
 
         return ResponseEntity.ok().build();
     }

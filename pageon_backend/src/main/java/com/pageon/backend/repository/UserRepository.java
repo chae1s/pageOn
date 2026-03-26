@@ -31,12 +31,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {
             "userRoles", "userRoles.role"
     })
-    Optional<User> findByEmailAndDeleted(String email, boolean deleted);
+    Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    Optional<User> findByIdAndDeleted(Long id, boolean deleted);
+    Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
     Boolean existsByPhoneNumberAndIsPhoneVerifiedTrue(String phoneNumber);
 
-    Boolean existsByEmailAndIsPhoneVerifiedTrue(String email);
+    Boolean existsByIdAndIsPhoneVerifiedTrue(Long userId);
 
 }

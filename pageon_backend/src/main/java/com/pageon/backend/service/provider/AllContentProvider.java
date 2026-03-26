@@ -1,18 +1,13 @@
 package com.pageon.backend.service.provider;
 
-import com.pageon.backend.common.enums.PurchaseType;
 import com.pageon.backend.common.enums.SerialDay;
-import com.pageon.backend.dto.response.CommentResponse;
 import com.pageon.backend.dto.response.EpisodeResponse;
 import com.pageon.backend.entity.Content;
 import com.pageon.backend.entity.Interest;
 import com.pageon.backend.entity.ReadingHistory;
-import com.pageon.backend.entity.User;
-import com.pageon.backend.entity.base.EpisodeCommentBase;
 import com.pageon.backend.repository.ContentRepository;
 import com.pageon.backend.repository.InterestRepository;
 import com.pageon.backend.repository.ReadingHistoryRepository;
-import com.pageon.backend.service.EpisodePurchaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -80,73 +74,4 @@ public class AllContentProvider implements ContentProvider {
         return readingHistoryRepository.findAllReadingHistories(userId, pageable);
     }
 
-    @Override
-    public Object findEpisodeDetail(Long userId, Long episodeId) {
-        return null;
-    }
-
-    @Override
-    public void rateEpisode(User user, Long episodeId, Integer score) {
-
-    }
-
-    @Override
-    public void updateEpisodeRating(Long userId, Long episodeId, Integer newScore) {
-
-    }
-
-    @Override
-    public void saveComment(User user, Long episodeId, String text, Boolean isSpoiler) {
-
-    }
-
-    @Override
-    public void updateComment(Long userId, Long commentId, String text, Boolean isSpoiler) {
-
-    }
-
-    @Override
-    public void deleteComment(Long userId, Long commentId) {
-
-    }
-
-    @Override
-    public Page<? extends EpisodeCommentBase> findComments(Long episodeId, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public Page<? extends EpisodeCommentBase> findMyComments(Long userId, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public CommentResponse.Best findBestComment(Long episodeId) {
-        return null;
-    }
-
-    @Override
-    public Set<Long> getLikedCommentIds(Long userId, List<Long> commentIds) {
-        return Set.of();
-    }
-
-    @Override
-    public Boolean hasLiked(Long userId, Long commentId) {
-        return null;
-    }
-
-    @Override
-    public void saveLike(User user, Long commentId) {
-
-    }
-
-    @Override
-    public void deleteLike(Long userId, Long commentId) {
-
-    }
-
-    @Override
-    public EpisodePurchaseService.EpisodeInfo getEpisodeInfo(Long episodeId, PurchaseType purchaseType) {
-        return null;
-    }
 }

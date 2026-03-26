@@ -12,6 +12,7 @@ function TitleCreatorSearch() {
 
     const [pageData, setPageData] = useState<Pagination<SearchContent> | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
+    const [emptyMessage, setEmptyMessage] = useState<string>("검색 결과가 없습니다.")
 
     let contentType = searchParams.get("contentType") || "all";
     const query = searchParams.get("query") || "";
@@ -32,8 +33,12 @@ function TitleCreatorSearch() {
                 console.log(response.data);
                 setPageData(response.data);
 
-            } catch (error) {
-                console.log("제목 및 작가 검색 결과 조회 실패: ", error);
+            } catch (error: any) {
+                const errorCode = error.response.data.errorCode;
+                if (errorCode === 'INVALID_SEARCH_QUERY') {
+                    setEmptyMessage("검색어를 입력해주세요.");
+                }
+
             }
         }
 
@@ -116,7 +121,7 @@ function TitleCreatorSearch() {
                     <SearchContentList 
                         contents={pageData.content} 
                         totalElements={pageData.totalElements} 
-                        type="title"
+                        emptyMessage={emptyMessage}
                     />
                 )}
 

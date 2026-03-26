@@ -1,5 +1,6 @@
 package com.pageon.backend.entity;
 
+import com.pageon.backend.common.base.BaseTimeEntity;
 import com.pageon.backend.common.enums.Gender;
 import com.pageon.backend.common.enums.IdentityProvider;
 import com.pageon.backend.common.enums.OAuthProvider;
@@ -9,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ import java.util.List;
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,11 +53,6 @@ public class User {
     // 소셜 로그인 시 제공받는 id
     @Column(unique = true)
     private String providerId;
-
-    // Soft Delete
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean deleted = false;
 
     @Column(nullable = false)
     private Boolean termsAgreed;
@@ -118,7 +115,7 @@ public class User {
     }
 
     public void delete() {
-        this.deleted = true;
+        this.setDeletedAt(LocalDateTime.now());
     }
 
     public void deleteEmail(String deleteEmail) {
@@ -146,7 +143,6 @@ public class User {
         this.birthDate = birthDate;
         this.pointBalance = pointBalance;
         this.oAuthProvider = oAuthProvider;
-        this.deleted = false;
         this.userRoles = new ArrayList<>();
         this.termsAgreed = true;
         this.isPhoneVerified = false;

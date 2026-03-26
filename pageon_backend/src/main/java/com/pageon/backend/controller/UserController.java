@@ -79,7 +79,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal PrincipalUser principalUser) {
 
-        return ResponseEntity.ok(userService.getMyInfo(principalUser));
+        return ResponseEntity.ok(userService.getMyInfo(principalUser.getId()));
     }
 
     @PostMapping("/check-password")
@@ -109,7 +109,7 @@ public class UserController {
     @GetMapping("/check-identity")
     public ResponseEntity<Boolean> checkIdentityVerification(@AuthenticationPrincipal PrincipalUser principalUser){
 
-        return ResponseEntity.ok(userService.checkIdentityVerification(principalUser));
+        return ResponseEntity.ok(userService.checkIdentityVerification(principalUser.getId()));
     }
 
     @GetMapping("/comments")

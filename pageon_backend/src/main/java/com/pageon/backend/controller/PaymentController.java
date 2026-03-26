@@ -38,12 +38,12 @@ public class PaymentController {
     }
 
     @PostMapping("/cancel/{transactionId}")
-    public ResponseEntity<String> cancelPayment(
+    public ResponseEntity<Void> cancelPayment(
             @AuthenticationPrincipal PrincipalUser principalUser, @PathVariable Long transactionId
     ) {
-        String message = paymentService.cancelPayment(principalUser.getId(), transactionId);
+        paymentService.cancelPayment(principalUser.getId(), transactionId);
 
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok().build();
     }
 
 

@@ -11,7 +11,7 @@ public enum ErrorCode {
     USER_NOT_FOUND("존재하지 않는 사용자입니다.", HttpStatus.NOT_FOUND),
     ROLE_NOT_FOUND("존재하지 않는 권한입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     PASSWORD_POLICY_VIOLATION("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.", HttpStatus.BAD_REQUEST),
-    OAUTH_PROVIDER_MISMATCH("지원하지 않는 OAuth Provider입니다.", HttpStatus.BAD_REQUEST),
+    INVALID_PROVIDER_TYPE("지원하지 않는 OAuth Provider입니다.", HttpStatus.BAD_REQUEST),
     OAUTH_UNLINK_FAILED("OAuth 연결 해제에 실패했습니다.", HttpStatus.BAD_REQUEST),
     CREATOR_PERMISSION_DENIED("creator 권한이 존재하지 않습니다.", HttpStatus.FORBIDDEN),
     COMMENT_FORBIDDEN("본인 댓글만 수정/삭제할 수 있습니다.", HttpStatus.FORBIDDEN),
@@ -24,6 +24,7 @@ public enum ErrorCode {
     OTP_NOT_MATCH("전달된 OTP가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     IDENTITY_ALREADY_VERIFIED("이미 본인인증을 완료한 사용자입니다.", HttpStatus.CONFLICT),
     PHONE_NUMBER_ALREADY_VERIFIED("해당 전화번호는 이미 본인인증에 사용되었습니다.", HttpStatus.CONFLICT),
+    INVALID_IDENTITY_NUMBER("유효하지 않은 주민등록번호 형식입니다.", HttpStatus.BAD_REQUEST),
 
     // 메세지 전송
     MESSAGE_SEND_FAILED("문자 메시지 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -43,6 +44,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_FOUND("Refresh Token이 존재하지 않습니다.", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN("유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_USER_MISMATCH("토큰 사용자 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    OAUTH_ACCESS_TOKEN_NOT_FOUND("소셜 로그인 Access Token이 존재하지 않습니다.", HttpStatus.NOT_FOUND ),
 
     // 외부 시스템 오류
     REDIS_CONNECTION_FAILED("Redis 연결에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -76,16 +78,28 @@ public enum ErrorCode {
     EPISODE_ALREADY_RENTAL("이미 대여한 에피소드입니다.", HttpStatus.CONFLICT),
     INVALID_PURCHASE_TYPE("해당 구매 방식은 지원하지 않습니다.", HttpStatus.BAD_REQUEST),
     INVALID_KEYWORD("유효한 키워드가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    INVALID_SEARCH_QUERY("유효한 검색어가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND("카테고리가 존재하지 않습니다.", HttpStatus.NOT_FOUND ),
+
 
     //
-    INVALID_SERIALDAY("해당하는 요일이 없습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SERIAL_DAY("해당하는 요일이 없습니다.", HttpStatus.BAD_REQUEST),
 
     POINT_TRANSACTION_NOT_FOUND("결제 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_PAYMENT_CONFIRM("이미 처리된 결제입니다.", HttpStatus.BAD_REQUEST),
     AMOUNT_NOT_MATCH("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
-    PAYMENT_FAILED("결제에 실패하였습니다.", HttpStatus.PAYMENT_REQUIRED),
-    JSON_PARSE_FAILED("데이터 형식이 올바르지 않아 처리에 실패하였습니다.", HttpStatus.BAD_REQUEST),
-    INVALID_TEMP_CODE("임시 코드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
+    PAYMENT_FAILED("결제 처리에 실패하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_TEMP_CODE("임시 코드가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    TOSS_CLIENT_ERROR("결제 취소에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_POINTS_FOR_REFUND("환불할 포인트 잔액이 부족합니다.", HttpStatus.BAD_REQUEST),
+    REFUND_PERIOD_EXPIRED("환불 가능 기간이 지났습니다.", HttpStatus.BAD_REQUEST),
+    REFUND_STATUS_INVALID("취소되지 않은 결제입니다.", HttpStatus.BAD_REQUEST),
+    REFUND_API_FAILED("환불 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_API_FAILED("결제 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_NOT_COMPLETED("완료된 결제만 취소할 수 있습니다.", HttpStatus.BAD_REQUEST),
+    ;
+
+
 
 
     private final String errorMessage;

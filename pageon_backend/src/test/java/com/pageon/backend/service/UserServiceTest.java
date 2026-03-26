@@ -1,29 +1,30 @@
 package com.pageon.backend.service;
 
+import com.pageon.backend.dto.oauth.KakaoSignupRequest;
+import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.dto.request.*;
 import com.pageon.backend.dto.response.JwtTokenResponse;
 import com.pageon.backend.dto.response.UserInfoResponse;
 import com.pageon.backend.dto.token.AccessToken;
 import com.pageon.backend.dto.token.TokenInfo;
-import com.pageon.backend.entity.Role;
-import com.pageon.backend.entity.UserRole;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
 import com.pageon.backend.common.enums.RoleType;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
-import com.pageon.backend.repository.RoleRepository;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.JwtProvider;
 import com.pageon.backend.security.PrincipalUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -36,7 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
@@ -44,13 +44,15 @@ import org.springframework.web.client.RestTemplate;
 import static org.mockito.Mockito.*;
 
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@Transactional
 @ActiveProfiles("test")
 @DisplayName("userService 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -62,8 +64,6 @@ public class UserServiceTest {
     private RoleService roleService;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -83,23 +83,28 @@ public class UserServiceTest {
     private PrincipalUser mockPrincipalUser;
     @Mock
     private ValueOperations<String, Object> valueOperations;
-    @Mock
-    private CommonService commonService;
 
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        roleRepository.save(new Role("ROLE_USER"));
-
         mockPrincipalUser = mock(PrincipalUser.class);
+    }
+
+    private SignupRequest validRequest() {
+        return SignupRequest.builder()
+                .email("test@mail.com")
+                .password("!test1234")
+                .nickname("테스터")
+                .birthDate("19990101")
+                .gender("FEMALE")
+                .termsAgreed(true)
+                .build();
     }
 
     @Test
     @DisplayName("모든 정보가 유효할 때 회원가입 성공")
     void signup_withValidInfo_shouldSucceed() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
         when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(roleService).assignDefaultRole(any(User.class));
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
@@ -107,118 +112,55 @@ public class UserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
         //when
-        userService.signup(signupRequest);
+        userService.signup(validRequest());
         
         // then
-
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
         assertEquals("test@mail.com", savedUser.getEmail());
-        assertEquals("nickname", savedUser.getNickname());
+        assertEquals("테스터", savedUser.getNickname());
         assertEquals("encodePassword", savedUser.getPassword());
-        assertFalse(savedUser.getDeleted());
-        
     }
 
     @Test
-    @DisplayName("ROLE_USER가 DB에 없을 경우 CustomException 발생")
-    void signup_withoutRole_shouldThrowCustomException() {
-        // given
-        roleRepository.deleteAll();
-
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
-
-        doThrow(new CustomException(ErrorCode.ROLE_NOT_FOUND)).when(roleService).assignDefaultRole(any(User.class));
-
-        //when + then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            userService.signup(signupRequest);
-
-        });
-
-        assertEquals("존재하지 않는 권한입니다.", exception.getErrorMessage());
-        assertEquals(ErrorCode.ROLE_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
-
-    }
-    
-    @Test
-    @DisplayName("회원가입 시 기본 권한 UserRole 함께 저장")
+    @DisplayName("회원가입 시 권한 부여 메소드가 호출된다.")
     void signup_shouldCreateUserRoleWithDefaultRole() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
-        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(passwordEncoder.encode(any())).thenReturn("encodePassword");
-        doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            Role dummyRole = Role.builder().roleType(RoleType.ROLE_USER).build();
-            UserRole userRole = UserRole.builder().user(user).role(dummyRole).build();
-            user.getUserRoles().add(userRole);
-            return null;
-        }).when(roleService).assignDefaultRole(any(User.class));
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        when(passwordEncoder.encode(any())).thenReturn("encodePassword");
 
 
         //when
-        userService.signup(signupRequest);
+        userService.signup(validRequest());
         
         // then
-        verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-
-        assertFalse(savedUser.getUserRoles().isEmpty(), "userRole이 저장되지 않았습니다.");
-
-        RoleType roleType = savedUser.getUserRoles().get(0).getRole().getRoleType();
-        assertEquals(RoleType.ROLE_USER, roleType, "기본 권한이 ROLE_USER가 아닙니다.");
+        verify(roleService, times(1)).assignDefaultRole(any(User.class));
     }
 
-    
     @Test
     @DisplayName("회원가입 시 provider는 EMAIL, providerId는 null로 저장")
     void signup_shouldSetProviderAsEmailAndProviderIdAsNull() {
         // given
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
-        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(roleService).assignDefaultRole(any(User.class));
+
         when(passwordEncoder.encode(any())).thenReturn("encodePassword");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         //when
-        userService.signup(signupRequest);
+        userService.signup(validRequest());
         
         // then
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertEquals(savedUser.getOAuthProvider(), OAuthProvider.EMAIL, "Provider가 EMAIL입니다.");
+        assertEquals(OAuthProvider.EMAIL, savedUser.getOAuthProvider(), "이메일 가입 시 OAuthProvider는 EMAIL이어야 함.");
         
-        assertNull(savedUser.getProviderId(), "ProviderId가 null입니다.");
-    }
-
-    @Test
-    @DisplayName("회원가입 시 IsDeleted는 false로 저장")
-    void signup_shouldSetIsDeletedAsFalseByDefault() {
-        SignupRequest signupRequest = new SignupRequest("test@mail.com", "!test1234", "nickname", "19950202", "FEMALE", true);
-        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(roleService).assignDefaultRole(any(User.class));
-        when(passwordEncoder.encode(any())).thenReturn("encodePassword");
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        //when
-        userService.signup(signupRequest);
-
-        // then
-        verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-
-        assertFalse(savedUser.getDeleted(), "회원가입 시 isDeleted는 false여야 합니다.");
-
+        assertNull(savedUser.getProviderId(), "이메일 가입 시 ProviderId가 null이어야 함.");
     }
     
     @Test
     @DisplayName("이메일이 중복이 아닐 때 false 리턴")
-    void isEmailDuplicate_withNonExistingEmail_shouldReturnTrue() {
+    void isEmailDuplicate_withNonExistingEmail_shouldReturnFalse() {
         // given
         String email = "test1@mail.com";
         when(userRepository.existsByEmail(email)).thenReturn(false);
@@ -284,12 +226,7 @@ public class UserServiceTest {
         // given
         User user = User.builder()
                 .email("test@mail.com")
-                .password("encodePassword")
-                .nickname("nickname")
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
@@ -298,50 +235,53 @@ public class UserServiceTest {
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(mockPrincipalUser);
         when(mockPrincipalUser.getUsername()).thenReturn("test@mail.com");
-        when(mockPrincipalUser.getId()).thenReturn(1L);
+        when(mockPrincipalUser.getRoleType()).thenReturn(List.of(RoleType.ROLE_USER));
         when(mockPrincipalUser.getUsers()).thenReturn(user);
 
-        when(jwtProvider.generateAccessToken(any(), any())).thenReturn("access-token");
+        when(jwtProvider.generateAccessToken(any(), any(), any())).thenReturn("access-token");
         when(jwtProvider.generateRefreshToken(any())).thenReturn("refresh-token");
-
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //when
         JwtTokenResponse result = userService.login(loginRequest, response);
 
         // then
-        assertTrue(result.getIsLogin(), "login check는 true여야 합니다.");
-        assertEquals("access-token", result.getAccessToken(), "accessToken이 올바르지 않습니다.");
-        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider(), "provider는 EMAIL이어야 합니다.");
+        assertTrue(result.getIsLogin());
+        assertEquals("access-token", result.getAccessToken());
+        assertEquals(OAuthProvider.EMAIL, result.getOAuthProvider());
+
+        verify(valueOperations).set(
+                eq("refresh-token"),
+                any(TokenInfo.class),
+                eq(Duration.ofDays(180))
+        );
+
+        verify(jwtProvider).sendTokens(eq(response), eq("access-token"), eq("refresh-token"));
 
     }
 
     @Test
-    @DisplayName("유효한 이메일, 비밀번호로 로그인 시 토큰 중 하나라도 발급 실패")
-    void login_withValidEmailAndPasswordButTokenCreationFails_shouldReturnLoginCheckFalse() {
+    @DisplayName("토큰 생성 실패 시 CustomException 발생")
+    void login_whenTokenGenerationFails_shouldThrowCustomException() {
         // given
-        User user = User.builder()
-                .email("test@mail.com")
-                .password("encodePassword")
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
-                .build();
-
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
+
         Authentication authentication = mock(Authentication.class);
 
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(mockPrincipalUser);
+        when(mockPrincipalUser.getId()).thenReturn(1L);
+        when(mockPrincipalUser.getUsername()).thenReturn("test@mail.com");
+        when(mockPrincipalUser.getRoleType()).thenReturn(List.of(RoleType.ROLE_USER));
 
-        when(jwtProvider.generateAccessToken(any(), any())).thenReturn(null);
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(mockPrincipalUser);
+
+        when(jwtProvider.generateAccessToken(any(), any(), any())).thenReturn(null);
         when(jwtProvider.generateRefreshToken(any())).thenReturn("refresh-token");
 
 
         //when
-
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.login(loginRequest, response);
         });
@@ -358,13 +298,12 @@ public class UserServiceTest {
         LoginRequest loginRequest = new LoginRequest("test@mail.com", "!test1234");
 
         when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("잘못된 이메일 또는 비밀번호입니다."));
-        //when
 
+        //when & then
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
             userService.login(loginRequest, response);
         });
 
-        // then
         assertEquals("잘못된 이메일 또는 비밀번호입니다.", exception.getMessage());
         
     }
@@ -381,12 +320,11 @@ public class UserServiceTest {
         when(mockPrincipalUser.getUsername()).thenReturn("test@mail.com");
         when(mockPrincipalUser.getId()).thenReturn(1L);
 
-        when(jwtProvider.generateAccessToken(any(), any())).thenReturn("access-token");
+        when(jwtProvider.generateAccessToken(any(), any(), any())).thenReturn("access-token");
         when(jwtProvider.generateRefreshToken(any())).thenReturn("refresh-token");
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-        when(redisTemplate.opsForValue()).thenThrow(new CustomException(ErrorCode.REDIS_CONNECTION_FAILED));
+        doThrow(new CustomException(ErrorCode.REDIS_CONNECTION_FAILED)).when(valueOperations).set(any(), any(), any());
 
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -406,19 +344,10 @@ public class UserServiceTest {
         Long userId = 1L;
         User user = User.builder()
                 .id(userId)
-                .email("test@mail.com")
-                .password("encodePassword")
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         when(request.getCookies()).thenReturn(new Cookie[]{
                 new Cookie("refreshToken", "sample-refresh-token")
@@ -429,16 +358,16 @@ public class UserServiceTest {
         when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
 
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
-        doNothing().when(response).addCookie(cookieCaptor.capture());
 
         //when
         userService.logout(mockPrincipalUser, request, response);
         
         // then
-        verify(userRepository).findByIdAndDeleted(userId, false);
+        verify(userRepository).findByIdAndDeletedAtIsNull(userId);
         verify(valueOperations).get("sample-refresh-token");
         verify(redisTemplate).delete("sample-refresh-token");
 
+        verify(response).addCookie(cookieCaptor.capture());
         Cookie clearedCookie = cookieCaptor.getValue();
         assertEquals("refreshToken", clearedCookie.getName());
         assertNull(clearedCookie.getValue());
@@ -452,17 +381,41 @@ public class UserServiceTest {
         Long userId = 1L;
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-           userService.logout(mockPrincipalUser, request, response);
-        });
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.logout(mockPrincipalUser, request, response)
+        );
         
         // then
         assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
         assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
         
+    }
+
+    @Test
+    @DisplayName("Redis에 tokenInfo가 없으면 토큰 삭제를 하지 않는다.")
+    void logout_whenTokenInfoNotInRedis_shouldNotDeleteToken() {
+        // given
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .build();
+
+        when(mockPrincipalUser.getId()).thenReturn(userId);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+
+        when(request.getCookies()).thenReturn(new Cookie[]{
+                new Cookie("refreshToken", "sample-refresh-token")
+        });
+
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("sample-refresh-token")).thenReturn(null);
+
+        //when & then
+        assertDoesNotThrow(() -> userService.logout(mockPrincipalUser, request, response));
+        verify(redisTemplate, never()).delete(anyString());
     }
     
     @Test
@@ -473,19 +426,10 @@ public class UserServiceTest {
 
         User user = User.builder()
                 .id(userId)
-                .email("test@mail.com")
-                .password("encodePassword")
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
         when(mockPrincipalUser.getId()).thenReturn(userId);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         Cookie cookie = new Cookie("NoRefreshToken", "sample-refresh-token");
         when(request.getCookies()).thenReturn(new Cookie[]{
@@ -504,32 +448,58 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("token의 userId가 불일치하면 CustomException 발생")
+    void logout_whenUserIdMismatch_shouldThrowCustomException() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).build();
+
+        when(mockPrincipalUser.getId()).thenReturn(userId);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+
+        when(request.getCookies()).thenReturn(new Cookie[]{
+                new Cookie("refreshToken", "sample-refresh-token")
+        });
+        TokenInfo tokenInfo = new TokenInfo(999L, "test2@mail.com");
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
+
+
+        //when
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.logout(mockPrincipalUser, request, response) );
+
+
+        // then
+        assertEquals(ErrorCode.INVALID_TOKEN, ErrorCode.valueOf(exception.getErrorCode()));
+        assertEquals("유효하지 않은 토큰입니다.", exception.getErrorMessage());
+
+    }
+
+    @Test
     @DisplayName("이메일 회원일 경우 임시 비밀번호 발급 후 메일 전송")
     void passwordFind_withExistingEmailUser_shouldSendTempPasswordByEmail() {
         // given
         String email = "test@mail.com";
-        FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
 
         User user = User.builder()
                 .id(1L)
                 .email(email)
-                .password("encodePassword")
-                .nickname("nickname")
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(any())).thenReturn("encodedTempPassword");
 
         //when
-        Map<String, String> result = userService.passwordFind(findPasswordRequest);
+        Map<String, String> result = userService.passwordFind(new FindPasswordRequest(email));
 
         // then
-        verify(mailService).sendTemporaryPassword(eq(email), any());
         assertEquals("email", result.get("type"));
         assertEquals("임시 비밀번호가 메일로 발송되었습니다.", result.get("message"));
+
+        verify(passwordEncoder).encode(any());
+        verify(mailService).sendTemporaryPassword(eq(email), any());
 
     }
 
@@ -539,22 +509,16 @@ public class UserServiceTest {
         // given
         String email = "test@mail.com";
         OAuthProvider provider = OAuthProvider.NAVER;
-        FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
 
         User user = User.builder()
-                .id(1L)
                 .email(email)
                 .password("encodePassword")
-                .nickname("nickname")
                 .oAuthProvider(provider)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.of(user));
         //when
-        Map<String, String> result = userService.passwordFind(findPasswordRequest);
+        Map<String, String> result = userService.passwordFind(new FindPasswordRequest(email));
 
         // then
         assertEquals("social", result.get("type"));
@@ -568,11 +532,10 @@ public class UserServiceTest {
         // given
         String email = "test@mail.com";
 
-        FindPasswordRequest findPasswordRequest = new FindPasswordRequest(email);
-        when(userRepository.findByEmailAndDeleted(email, false)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailAndDeletedAtIsNull(email)).thenReturn(Optional.empty());
 
         //when
-        Map<String, String> result = userService.passwordFind(findPasswordRequest);
+        Map<String, String> result = userService.passwordFind(new FindPasswordRequest(email));
 
         // then
         assertEquals("noUser", result.get("type"));
@@ -584,23 +547,20 @@ public class UserServiceTest {
     @DisplayName("존재하는 사용자의 정보를 조회하면 UserInfoResponse를 리턴")
     void getMyInfo_withValidPrincipal_shouldReturnUserInfoResponse() {
         // given
+        Long userId = 1L;
         String email = "test@mail.com";
         User user = User.builder()
-                .id(1L)
+                .id(userId)
                 .email(email)
-                .password("encodePassword")
                 .nickname("nickname")
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
                 .pointBalance(0)
-                .deleted(false)
-                .isPhoneVerified(false)
                 .build();
 
-        when(commonService.findUserByEmail(mockPrincipalUser.getUsername())).thenReturn(user);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         //when
-        UserInfoResponse userInfoResponse = userService.getMyInfo(mockPrincipalUser);
+        UserInfoResponse userInfoResponse = userService.getMyInfo(userId);
         
         // then
         assertEquals(email, userInfoResponse.getEmail());
@@ -608,24 +568,36 @@ public class UserServiceTest {
         
     }
 
+    @Test
+    @DisplayName("존재하지 않는 사용자 조회 시 CustomException 발생")
+    void getMyInfo_withInvalidUserId_shouldThrowCustomException() {
+        // given
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+
+        //when
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.getMyInfo(1L)
+        );
+
+        // then
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
     
     @Test
     @DisplayName("입력한 비밀번호와 사용자의 정보 속 비밀번호가 일치하면 true 리턴")
     void checkPassword_withCorrectPassword_shouldReturnTrue() {
         // given
+        Long userId = 1L;
         String password = "encodePassword";
         User user = User.builder()
-                .id(1L)
-                .email("test@mail.com")
+                .id(userId)
                 .password(password)
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(user.getId(), false)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(password, "encodePassword")).thenReturn(true);
         //when
         boolean result = userService.checkPassword(1L, password);
@@ -641,7 +613,7 @@ public class UserServiceTest {
         // given
         String password = "encodePassword";
 
-        when(userRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
         //when
         CustomException exception = assertThrows(CustomException.class, () -> {
             userService.checkPassword(1L, password);
@@ -657,20 +629,15 @@ public class UserServiceTest {
     @DisplayName("입력한 비밀번호와 사용자 정보 속 비밀번호가 일치하지 않으면 false 리턴")
     void checkPassword_withWrongPassword_shouldReturnFalse() {
         // given
+        Long userId = 1L;
         String password = "encodePassword";
         User user = User.builder()
-                .id(1L)
-                .email("test@mail.com")
+                .id(userId)
                 .password(password)
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(1L, false)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
         //when
         boolean result = userService.checkPassword(1L, password);
         
@@ -689,14 +656,10 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
         String newNickname = "newNick";
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(null, newNickname);
 
         //when
@@ -708,31 +671,75 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호만 수정할 경우 비밀번호가 정상 변경됨")
-    void updateProfile_withValidPasswordOnly_shouldUpdatePassword() {
+    @DisplayName("닉네임이 빈 문자열이면 닉네임이 변경되지 않는다.")
+    void updateProfile_withBlankNickname_shouldNotUpdateNickname() {
         // given
-        String newPassword = "newPassword";
         Long userId = 1L;
         User user = User.builder()
-                .id(1L)
+                .id(userId)
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(anyString())).thenReturn(newPassword);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest(null, " ");
+
+        //when
+        userService.updateProfile(userId, userUpdateRequest);
+
+        // then
+        assertEquals("nickname", user.getNickname());
+
+    }
+
+    @Test
+    @DisplayName("비밀번호만 수정할 경우 비밀번호가 정상 변경됨")
+    void updateProfile_withValidPasswordOnly_shouldUpdatePassword() {
+        // given
+        String encodeNewPassword = "encodeNewPassword";
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .build();
+
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn(encodeNewPassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", null);
         //when
         userService.updateProfile(userId, userUpdateRequest);
 
         // then
-        assertEquals(newPassword, user.getPassword());
+        assertEquals(encodeNewPassword, user.getPassword());
+
+    }
+
+    @Test
+    @DisplayName("비밀번호가 빈 문자열이면 비밀번호가 변경되지 않는다.")
+    void updateProfile_withBlankPassword_shouldNotUpdatePassword() {
+        // given
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@mail.com")
+                .password("password")
+                .oAuthProvider(OAuthProvider.EMAIL)
+                .build();
+
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest(" ", null);
+
+        //when
+        userService.updateProfile(userId, userUpdateRequest);
+
+        // then
+        assertEquals("password", user.getPassword());
+        verify(passwordEncoder, never()).encode(anyString());
 
     }
 
@@ -741,21 +748,20 @@ public class UserServiceTest {
     void updateProfile_withValidNicknameAndPassword_shouldUpdateBoth() {
         // given
         Long userId = 1L;
-        String newPassword = "newPassword";
+        String newEncodePassword = "newEncodePassword";
         String newNickname = "newNickname";
         User user = User.builder()
-                .id(1L)
+                .id(userId)
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
                 .oAuthProvider(OAuthProvider.EMAIL)
                 .providerId(null)
                 .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-        when(passwordEncoder.encode(anyString())).thenReturn(newPassword);
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn(newEncodePassword);
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest("!test1234", newNickname);
 
@@ -764,7 +770,7 @@ public class UserServiceTest {
 
         // then
         assertEquals(newNickname, user.getNickname());
-        assertEquals(newPassword, user.getPassword());
+        assertEquals(newEncodePassword, user.getPassword());
     }
 
     @Test
@@ -773,13 +779,13 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.empty());
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.empty());
 
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-           userService.updateProfile(userId, userUpdateRequest);
-        });
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updateProfile(userId, userUpdateRequest)
+        );
 
         // then
         assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
@@ -797,21 +803,17 @@ public class UserServiceTest {
                 .email("test@mail.com")
                 .password("password")
                 .nickname("nickname")
-                .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
 
         String invalidPassword = "abc1234";
         UserUpdateRequest userUpdateRequest = new UserUpdateRequest(invalidPassword, null);
 
         //when
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            userService.updateProfile(userId, userUpdateRequest);
-        });
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.updateProfile(userId, userUpdateRequest)
+        );
 
         // then
         assertEquals("비밀번호는 8자 이상, 영문, 숫자, 특수문자(!@-#$%&^)를 모두 포함해야 합니다.", exception.getErrorMessage());
@@ -824,21 +826,19 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        UserDeleteRequest userDeleteRequest = new UserDeleteRequest(password, 1, "", "");
+        String email = "test@mail.com";
+        String nickname = "nickname";
+
         User user = User.builder()
                 .id(userId)
-                .email("test@mail.com")
+                .email(email)
                 .password(password)
-                .nickname("nickname")
+                .nickname(nickname)
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(true);
-        request = mock(HttpServletRequest.class);
 
         Cookie cookie = new Cookie("refreshToken", "sample-refresh-token");
         when(request.getCookies()).thenReturn(new Cookie[]{
@@ -851,12 +851,20 @@ public class UserServiceTest {
         when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
 
         //when
-        Map<String, Object> result = userService.deleteAccount(userId, userDeleteRequest, request);
+        Map<String, Object> result = userService.deleteAccount(
+                userId, new UserDeleteRequest(password, 1, "", ""), request
+        );
 
         // then
         assertTrue((boolean) result.get("isDeleted"));
         assertEquals("계정이 삭제되었습니다.", result.get("message"));
 
+        assertTrue(user.getEmail().startsWith("delete_"));
+        assertTrue(user.getNickname().startsWith("delete_"));
+
+        assertNotNull(user.getDeletedAt());
+
+        verify(redisTemplate).delete("sample-refresh-token");
     }
 
     @Test
@@ -865,24 +873,21 @@ public class UserServiceTest {
         // given
         Long userId = 1L;
         String password = "password";
-        UserDeleteRequest userDeleteRequest = new UserDeleteRequest(password, 1, "", "");
+
         User user = User.builder()
                 .id(userId)
                 .email("test@mail.com")
                 .password(password)
-                .nickname("nickname")
                 .oAuthProvider(OAuthProvider.EMAIL)
-                .providerId(null)
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), eq(password))).thenReturn(false);
 
         //when
-        Map<String, Object> result = userService.deleteAccount(userId, userDeleteRequest, request);
+        Map<String, Object> result = userService.deleteAccount(
+                userId, new UserDeleteRequest(password, 1, "", ""), request
+        );
 
         // then
         assertFalse((boolean) result.get("isDeleted"));
@@ -898,43 +903,39 @@ public class UserServiceTest {
         String password = "password";
         request = mock(HttpServletRequest.class);
 
-        when(userRepository.findByIdAndDeleted(1L, false)).thenThrow(new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+        when(userRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         //when
-        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
-            userService.deleteAccount(userId, new UserDeleteRequest(), request);
-        });
-
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.deleteAccount(userId, new UserDeleteRequest(), request)
+        );
 
         // then
-        assertEquals("존재하지 않는 사용자입니다.", exception.getMessage());
+        assertEquals("존재하지 않는 사용자입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.USER_NOT_FOUND, ErrorCode.valueOf(exception.getErrorCode()));
 
     }
 
-    @Test
-    @DisplayName("카카오 소셜 로그인 유저는 연결 해제 후 계정 삭제된다.")
-    void deleteAccount_withKakaoUser_shouldUnlinkAndDelete() {
+    @ParameterizedTest
+    @DisplayName("소셜 로그인 유저는 연결 해제 후 계정 삭제된다.")
+    @MethodSource("socialProviderSource")
+    void deleteAccount_withSocialUser_shouldUnlinkAndDelete(OAuthProvider provider, String expectedMessage) {
         // given
         Long userId = 1L;
-        String password = "password";
         User user = User.builder()
                 .id(userId)
-                .email("test@kakao.com")
-                .password(password)
+                .email("test@mail.com")
                 .nickname("nickname")
-                .oAuthProvider(OAuthProvider.KAKAO)
+                .oAuthProvider(provider)
                 .providerId("sampleProviderId")
-                .pointBalance(0)
-                .deleted(false)
                 .build();
 
-        request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-
         String socialAccessToken = "social-access-token";
-        String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
+        String redisKey = String.format("user:oauth:token:%s:%d", user.getOAuthProvider().toString(), user.getId());
 
         AccessToken accessToken = new AccessToken(userId, socialAccessToken);
+
+        when(userRepository.findByIdAndDeletedAtIsNull(userId)).thenReturn(Optional.of(user));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(redisKey)).thenReturn(accessToken);
 
@@ -953,102 +954,17 @@ public class UserServiceTest {
 
         // then
         assertTrue((boolean) result.get("isDeleted"));
-        assertEquals("카카오 계정이 삭제되었습니다.", result.get("message"));
+        assertEquals(expectedMessage, result.get("message"));
 
         verify(redisTemplate).delete(redisKey);
     }
 
-    @Test
-    @DisplayName("네이버 소셜 로그인 유저는 연결 해제 후 계정 삭제된다.")
-    void deleteAccount_withNaverUser_shouldUnlinkAndDelete() {
-        // given
-        Long userId = 1L;
-        String password = "password";
-        User user = User.builder()
-                .id(userId)
-                .email("test@naver.com")
-                .password(password)
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.NAVER)
-                .providerId("sampleProviderId")
-                .pointBalance(0)
-                .deleted(false)
-                .build();
-
-        request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-
-        String socialAccessToken = "social-access-token";
-        String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
-
-        AccessToken accessToken = new AccessToken(userId, socialAccessToken);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get(redisKey)).thenReturn(accessToken);
-
-        when(request.getCookies()).thenReturn(new Cookie[]{
-                new Cookie("refreshToken", "sample-refresh-token")
-        });
-
-        TokenInfo tokenInfo = new TokenInfo(1L, "test@mail.com");
-        when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
-
-        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
-                .thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
-
-        //when
-        Map<String, Object> result = userService.deleteAccount(userId, null, request);
-
-        // then
-        assertTrue((boolean) result.get("isDeleted"));
-        assertEquals("네이버 계정이 삭제되었습니다.", result.get("message"));
-
-        verify(redisTemplate).delete(redisKey);
+    static Stream<Arguments> socialProviderSource() {
+        return Stream.of(
+                Arguments.of(OAuthProvider.KAKAO, "카카오 계정이 삭제되었습니다."),
+                Arguments.of(OAuthProvider.NAVER, "네이버 계정이 삭제되었습니다."),
+                Arguments.of(OAuthProvider.GOOGLE, "구글 계정이 삭제되었습니다.")
+        );
     }
 
-    @Test
-    @DisplayName("구글 소셜 로그인 유저는 연결 해제 후 계정 삭제된다.")
-    void deleteAccount_withGoogleUser_shouldUnlinkAndDelete() {
-        // given
-        Long userId = 1L;
-        String password = "password";
-        User user = User.builder()
-                .id(userId)
-                .email("test@gmail.com")
-                .password(password)
-                .nickname("nickname")
-                .oAuthProvider(OAuthProvider.GOOGLE)
-                .providerId("sampleProviderId")
-                .pointBalance(0)
-                .deleted(false)
-                .build();
-
-        request = mock(HttpServletRequest.class);
-        when(userRepository.findByIdAndDeleted(userId, false)).thenReturn(Optional.of(user));
-
-        String socialAccessToken = "social-access-token";
-        String redisKey = String.format("%d_%s_accessToken", user.getId(), user.getProviderId());
-
-        AccessToken accessToken = new AccessToken(userId, socialAccessToken);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get(redisKey)).thenReturn(accessToken);
-
-        when(request.getCookies()).thenReturn(new Cookie[]{
-                new Cookie("refreshToken", "sample-refresh-token")
-        });
-
-        TokenInfo tokenInfo = new TokenInfo(1L, "test@mail.com");
-        when(valueOperations.get("sample-refresh-token")).thenReturn(tokenInfo);
-
-        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
-                .thenReturn(new ResponseEntity<>("ok", HttpStatus.OK));
-
-        //when
-        Map<String, Object> result = userService.deleteAccount(userId, null, request);
-
-        // then
-        assertTrue((boolean) result.get("isDeleted"));
-        assertEquals("구글 계정이 삭제되었습니다.", result.get("message"));
-
-        verify(redisTemplate).delete(redisKey);
-    }
 }

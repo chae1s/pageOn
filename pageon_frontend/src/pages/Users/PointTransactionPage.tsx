@@ -105,7 +105,6 @@ function PointTransactionPage() {
 
             const response = await api.post(`/payments/cancel/${openTransactionId}`);
 
-            console.log(response.data);
             window.location.reload();
         } catch (error) {
             console.error("결제 취소 실패: ", error);

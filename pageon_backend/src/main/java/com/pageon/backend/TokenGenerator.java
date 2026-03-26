@@ -41,9 +41,9 @@ public class TokenGenerator {
             JwtProvider jwtProvider = new JwtProvider(refresh, access);
 
             for (int i = 1; i <= 100000; i++) {
-                String userId = "pageon" + i + "@mail.com";
-                String accessToken = jwtProvider.generateAccessToken(userId, roleTypes);
-                writer.write(userId + "," + accessToken + "\n");
+                String email = "pageon" + i + "@mail.com";
+                String accessToken = jwtProvider.generateAccessToken((long)i -1, email, roleTypes);
+                writer.write(email + ",\"" + accessToken + "\"\n");
 
                 if (i % 10000 == 0) {
                     System.out.println(i + "개 생성 완료...");

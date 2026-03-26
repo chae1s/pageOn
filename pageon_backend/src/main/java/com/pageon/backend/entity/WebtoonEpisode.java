@@ -49,7 +49,7 @@ public class WebtoonEpisode extends EpisodeBase {
     }
 
     @Override
-    public Content getParerntContent() {
+    public Content getParentContent() {
         return this.webtoon;
     }
 }

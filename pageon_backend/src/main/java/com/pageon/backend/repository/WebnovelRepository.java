@@ -35,7 +35,7 @@ public interface WebnovelRepository extends JpaRepository<Webnovel, Long> {
             "JOIN FETCH w.creator c " +
             "JOIN w.contentKeywords k " +
             "WHERE k.keyword.name = :keyword",
-            countQuery = "SELECT DISTINCT COUNT(w.id) FROM Webnovel w " +
+            countQuery = "SELECT COUNT(DISTINCT w.id) FROM Webnovel w " +
                     "JOIN w.contentKeywords k " +
                     "WHERE k.keyword.name = :keyword"
     )

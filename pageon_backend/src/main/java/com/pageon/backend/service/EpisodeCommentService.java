@@ -8,7 +8,7 @@ import com.pageon.backend.entity.base.EpisodeCommentBase;
 import com.pageon.backend.exception.CustomException;
 import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
-import com.pageon.backend.service.provider.ContentProvider;
+import com.pageon.backend.service.provider.EpisodeProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class EpisodeCommentService {
-    private final List<ContentProvider> providers;
+    private final List<EpisodeProvider> providers;
     private final UserRepository userRepository;
 
     @Transactional
@@ -37,7 +37,7 @@ public class EpisodeCommentService {
         }
 
         User user = userRepository.getReferenceById(userId);
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         provider.saveComment(user, episodeId, text, isSpoiler);
 
     }
@@ -50,7 +50,7 @@ public class EpisodeCommentService {
         if (newText.isBlank()) {
             throw new CustomException(ErrorCode.COMMENT_TEXT_IS_BLANK);
         }
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
 
         provider.updateComment(userId, episodeId, newText, isSpoiler);
     }
@@ -58,7 +58,7 @@ public class EpisodeCommentService {
     @Transactional
     public void deleteComment(Long userId, String contentType, Long commentId) {
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         provider.deleteComment(userId, commentId);
 
     }
@@ -67,7 +67,7 @@ public class EpisodeCommentService {
     public Page<CommentResponse.Summary> getComments(Long userId, String contentType, Long episodeId, Pageable pageable, String sort) {
         Pageable commentPageable = PageableUtil.commentPageable(pageable, sort);
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
         Page<? extends EpisodeCommentBase> comments = provider.findComments(episodeId, commentPageable);
 
         Set<Long> likedCommentIds = Collections.emptySet();
@@ -91,7 +91,7 @@ public class EpisodeCommentService {
 
     @Transactional(readOnly = true)
     public Page<CommentResponse.MyComment> getMyComments(Long userId, String contentType, Pageable pageable) {
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
 
         Page<? extends  EpisodeCommentBase> comments = provider.findMyComments(userId, pageable);
 
@@ -102,7 +102,7 @@ public class EpisodeCommentService {
     public void toggleCommentLike(Long userId, String contentType, Long commentId) {
         User user = userRepository.getReferenceById(userId);
 
-        ContentProvider provider = getProvider(contentType);
+        EpisodeProvider provider = getProvider(contentType);
 
         Boolean hasLiked = provider.hasLiked(userId, commentId);
 
@@ -113,7 +113,7 @@ public class EpisodeCommentService {
         }
     }
 
-    private ContentProvider getProvider(String contentType) {
+    private EpisodeProvider getProvider(String contentType) {
         return providers.stream()
                 .filter(p -> p.supports(contentType))
                 .findFirst()

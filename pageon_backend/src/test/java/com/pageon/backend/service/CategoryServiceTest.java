@@ -4,7 +4,6 @@ import com.pageon.backend.dto.response.CategoryWithKeywordsResponse;
 import com.pageon.backend.entity.Category;
 import com.pageon.backend.entity.Keyword;
 import com.pageon.backend.repository.CategoryRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,16 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@Transactional
 @ActiveProfiles("test")
 @DisplayName("CategoryService 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -31,14 +25,10 @@ class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
-    @BeforeEach
-    void setUp() {
-        categoryRepository.deleteAll();
-    }
 
     @Test
-    @DisplayName("이름이 'uncategorized'인 카테고리를 제외한 나머지 카테고리들을 출력한다.")
-    void shouldExcludeUnassignedCategory_whenFetchingCategories() {
+    @DisplayName("uncategorized를 제외한 카테고리 목록을을 반환한다.")
+    void getAllCategoriesWithKeywords_whenFetchingCategories_shouldExcludeUnassignedCategory() {
         // given
 
         Keyword genre1 = Keyword.builder().id(1L).name("SF").build();
@@ -56,9 +46,8 @@ class CategoryServiceTest {
                 .keywords(List.of(theme1))
                 .build();
 
-        List<Category> categories = List.of(category1, category2);
-
-        when(categoryRepository.findAllWithKeywordsExcludingUncategorized()).thenReturn(categories);
+        when(categoryRepository.findAllWithKeywordsExcludingUncategorized())
+                .thenReturn(List.of(category1, category2));
         
         //when
         List<CategoryWithKeywordsResponse> result = categoryService.getAllCategoriesWithKeywords();
@@ -68,6 +57,41 @@ class CategoryServiceTest {
         assertTrue(result.stream().noneMatch(c -> c.getName().equals("uncategorized")));
         assertEquals(2, result.get(0).getKeywords().size());
         assertEquals("SF", result.get(0).getKeywords().get(0).getName());
+    }
+
+    @Test
+    @DisplayName("카테고리가 없으면 빈 리스트를 반환한다.")
+    void getAllCategoriesWithKeywords_whenNoCategoriesExist_shouldReturnEmptyList() {
+        // given
+        when(categoryRepository.findAllWithKeywordsExcludingUncategorized()).thenReturn(List.of());
+
+        //when
+        List<CategoryWithKeywordsResponse> result = categoryService.getAllCategoriesWithKeywords();
+
+        // then
+        assertTrue(result.isEmpty());
+
+    }
+
+    @Test
+    @DisplayName("키워드가 없는 카테고리도 반환한다.")
+    void getAllCategoriesWithKeywords_whenCategoryHasNoKeywords_shouldReturnCategories() {
+        // given
+        Category category = Category.builder()
+                .id(1L)
+                .name("genre")
+                .keywords(List.of())
+                .build();
+
+        when(categoryRepository.findAllWithKeywordsExcludingUncategorized()).thenReturn(List.of(category));
+
+        //when
+        List<CategoryWithKeywordsResponse> result = categoryService.getAllCategoriesWithKeywords();
+
+        // then
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getKeywords().isEmpty());
+
     }
 
 }

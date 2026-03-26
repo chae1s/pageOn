@@ -26,14 +26,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CreatorService {
 
+    private final UserRepository userRepository;
     private final CreatorRepository creatorRepository;
     private final RoleRepository roleRepository;
     private final CommonService commonService;
 
     @Transactional
-    public void registerCreator(PrincipalUser principalUser, RegisterCreatorRequest creatorRequest) {
-        String email = principalUser.getUsername();
-        User user = commonService.findUserByEmail(principalUser.getUsername());
+    public void registerCreator(Long userId, RegisterCreatorRequest creatorRequest) {
+
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         Role role = roleRepository.findByRoleType(RoleType.ROLE_CREATOR).orElseThrow(
                 () -> new CustomException(ErrorCode.ROLE_NOT_FOUND)

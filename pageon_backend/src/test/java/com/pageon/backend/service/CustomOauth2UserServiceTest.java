@@ -1,20 +1,24 @@
 package com.pageon.backend.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pageon.backend.dto.token.AccessToken;
-import com.pageon.backend.dto.oauth.GoogleSignupRequest;
-import com.pageon.backend.dto.oauth.KakaoSignupRequest;
-import com.pageon.backend.dto.oauth.NaverSignupRequest;
 import com.pageon.backend.dto.oauth.OAuthUserInfoResponse;
 import com.pageon.backend.entity.User;
 import com.pageon.backend.common.enums.OAuthProvider;
+import com.pageon.backend.exception.CustomException;
+import com.pageon.backend.exception.ErrorCode;
 import com.pageon.backend.repository.UserRepository;
 import com.pageon.backend.security.CustomOauth2UserService;
 import com.pageon.backend.security.PrincipalUser;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,17 +30,17 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.test.context.ActiveProfiles;
+
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@Transactional
 @ActiveProfiles("test")
 @DisplayName("customOauth2UserService 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -49,94 +53,118 @@ class CustomOauth2UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private RoleService roleService;
+    private SocialUserService socialUserService;
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
     @Mock
     private ValueOperations<String, Object> valueOperations;
     @Mock
     private ClientRegistration clientRegistration;
-
+    @Mock
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-    }
-    @Test
-    @DisplayName("카카오 로그인 회원이 존재하지 않으면 신규 가입")
-    void signupKakao_shouldCreateNewUser() {
-        // given
-        Map<String, Object> kakaoAccount = new HashMap<>();
-        kakaoAccount.put("email", "test@kakao.com");
-
-        Map<String, Object> attribute = new HashMap<>();
-        attribute.put("id", "providerId");
-        attribute.put("kakao_account", kakaoAccount);
-
-        OAuthUserInfoResponse oAuthUserInfoResponse = new KakaoSignupRequest(attribute);
-
-        //when
-        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
-
-        // then
-        assertEquals("test@kakao.com", newUser.getEmail());
-        assertFalse(newUser.getDeleted());
-        assertEquals(OAuthProvider.KAKAO, newUser.getOAuthProvider());
-        verify(roleService).assignDefaultRole(newUser);
-        verify(userRepository).save(newUser);
-    }
-
-    @Test
-    @DisplayName("네이버 로그인 회원이 존재하지 않으면 신규 가입")
-    void signupNaver_shouldCreateNewUser() {
-        // given
-        OAuthUserInfoResponse oAuthUserInfoResponse = new NaverSignupRequest(Map.of(
-                "id", "providerId",
-                "email", "test@naver.com"
-        ));
-
-        //when
-        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
-
-        // then
-        assertEquals("test@naver.com", newUser.getEmail());
-        assertFalse(newUser.getDeleted());
-        assertEquals(OAuthProvider.NAVER, newUser.getOAuthProvider());
-        verify(roleService).assignDefaultRole(newUser);
-        verify(userRepository).save(newUser);
-    }
-
-    @Test
-    @DisplayName("구글 로그인 회원이 존재하지 않으면 신규 가입")
-    void signupGoogle_shouldCreateNewUser() {
-        // given
-        OAuthUserInfoResponse oAuthUserInfoResponse = new GoogleSignupRequest(Map.of(
-                "sub", "providerId",
-                "email", "test@gmail.com"
-        ));
-
-        //when
-        User newUser = customOauth2UserService.signupSocial(oAuthUserInfoResponse);
-
-        // then
-        assertEquals("test@gmail.com", newUser.getEmail());
-        assertFalse(newUser.getDeleted());
-        assertEquals(OAuthProvider.GOOGLE, newUser.getOAuthProvider());
-        verify(roleService).assignDefaultRole(newUser);
-        verify(userRepository).save(newUser);
+        lenient().when(objectMapper.convertValue(any(), any(TypeReference.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
     
-    @Test
-    @DisplayName("카카오 소셜 로그인 성공 시 accessToken 저장 및 기존 사용자 반환")
-    void loadUser_withKakao_shouldStoreAccessTokenAndReturnUser() {
+    @ParameterizedTest
+    @MethodSource("loadUserSource")
+    @DisplayName("소셜 로그인 성공 시 accessToken 저장 및 기존 사용자 반환")
+    void loadUser_shouldStoreAccessTokenAndReturnUser(String registrationId, Map<String, Object> attributes, OAuthProvider provider, String expectedEmail) {
         // given
         OAuth2User oAuth2User = mock(OAuth2User.class);
-        when(oAuth2User.getAttributes()).thenReturn(Map.of(
+
+        OAuth2AccessToken oAuth2AccessToken = new OAuth2AccessToken(
+                OAuth2AccessToken.TokenType.BEARER,
+                "social-access-token",
+                Instant.now(),
+                Instant.now().plusSeconds(3600)
+        );
+
+        when(oAuth2User.getAttributes()).thenReturn(attributes);
+
+        OAuth2UserRequest request = mock(OAuth2UserRequest.class);
+        when(request.getClientRegistration()).thenReturn(clientRegistration);
+        when(clientRegistration.getRegistrationId()).thenReturn(registrationId);
+
+        when(request.getAccessToken()).thenReturn(oAuth2AccessToken);
+
+        when(delegate.loadUser(any())).thenReturn(oAuth2User);
+
+        User user = User.builder()
+                .id(1L)
+                .email(expectedEmail)
+                .oAuthProvider(provider)
+                .providerId("123456")
+                .build();
+
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        when(userRepository.findWithRolesByProviderAndProviderId(provider, "123456")).thenReturn(Optional.of(user));
+        
+        //when
+        OAuth2User result = customOauth2UserService.loadUser(request);
+        
+        // then
+        String redisKey = String.format("user:oauth:token:%s:%d", user.getOAuthProvider().toString(), user.getId());
+        verify(valueOperations).set(eq(redisKey), any(AccessToken.class));
+
+        assertInstanceOf(PrincipalUser.class, result);
+        assertEquals(expectedEmail, ((PrincipalUser)result).getUsername());
+        
+    }
+
+    private static Stream<Arguments> loadUserSource() {
+        Map<String, Object> kakaoAttr = Map.of(
                 "id", "123456",
-                "kakao_account", Map.of(
-                        "email", "test@kakao.com"
-                )
-        ));
+                "kakao_account", Map.of("email", "test@kakao.com")
+        );
+
+        return Stream.of(
+                Arguments.of("kakao", kakaoAttr, OAuthProvider.KAKAO, "test@kakao.com"),
+                Arguments.of("naver",
+                        Map.of("response", Map.of("id", "123456", "email", "test@naver.com")),
+                        OAuthProvider.NAVER, "test@naver.com"),
+                Arguments.of("google",
+                        Map.of("sub", "123456", "email", "test@google.com"),
+                        OAuthProvider.GOOGLE, "test@google.com")
+        );
+    }
+
+    @Test
+    @DisplayName("지원하지 않는 provider면 CustomException 발생")
+    void loadUser_whenUnsupportedProvider_shouldThrowCustomException() {
+        // given
+        OAuth2UserRequest request = mock(OAuth2UserRequest.class);
+        when(delegate.loadUser(any())).thenReturn(mock(OAuth2User.class));
+        when(request.getClientRegistration()).thenReturn(clientRegistration);
+        when(clientRegistration.getRegistrationId()).thenReturn("email");
+
+        //when
+        CustomException exception = assertThrows(CustomException.class,
+                () -> customOauth2UserService.loadUser(request)
+        );
+
+        // then
+        assertEquals("지원하지 않는 OAuth Provider입니다.", exception.getErrorMessage());
+        assertEquals(ErrorCode.INVALID_PROVIDER_TYPE, ErrorCode.valueOf(exception.getErrorCode()));
+
+    }
+
+    @Test
+    @DisplayName("신규 유저 소설 로그인 시 signupSocial() 호출")
+    void loadUser_whenNewSocialUser_shouldCallSignupSocial() {
+        // given
+        Map<String, Object> kakaoAttr = Map.of(
+                "id", "123456",
+                "kakao_account", Map.of("email", "test@kakao.com")
+        );
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        when(delegate.loadUser(any())).thenReturn(oAuth2User);
+        when(oAuth2User.getAttributes()).thenReturn(kakaoAttr);
+
         OAuth2UserRequest request = mock(OAuth2UserRequest.class);
         when(request.getClientRegistration()).thenReturn(clientRegistration);
         when(clientRegistration.getRegistrationId()).thenReturn("kakao");
@@ -149,130 +177,33 @@ class CustomOauth2UserServiceTest {
         );
         when(request.getAccessToken()).thenReturn(oAuth2AccessToken);
 
-        when(delegate.loadUser(any())).thenReturn(oAuth2User);
-
-        User user = User.builder()
+        when(userRepository.findWithRolesByProviderAndProviderId(any(), any())).thenReturn(Optional.empty());
+        User newUser = User.builder()
                 .id(1L)
                 .email("test@kakao.com")
-                .nickname("카카오")
                 .oAuthProvider(OAuthProvider.KAKAO)
                 .providerId("123456")
-                .deleted(false)
+                .termsAgreed(true)
+                .nickname("randomNickname")
                 .build();
+        when(socialUserService.signupSocial(any())).thenReturn(newUser);
 
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.KAKAO, "123456")).thenReturn(Optional.of(user));
-
-        
         //when
-        OAuth2User result = customOauth2UserService.loadUser(request);
-        
-        // then
-        verify(valueOperations).set(eq(String.format("%d_123456_accessToken", 1L)), any(AccessToken.class));
-        assertTrue(result instanceof PrincipalUser);
-        PrincipalUser principal = (PrincipalUser) result;
-        assertEquals("test@kakao.com", principal.getUsername());
-        
-    }
-
-    @Test
-    @DisplayName("네이버 소셜 로그인 성공 시 accessToken 저장 및 기존 사용자 반환")
-    void loadUser_withNaver_shouldStoreAccessTokenAndReturnUser() {
-        // given
-        OAuth2User oAuth2User = mock(OAuth2User.class);
-        when(oAuth2User.getAttributes()).thenReturn(Map.of(
-                "response", Map.of(
-                        "id", "123456",
-                        "email", "test@naver.com"
-                )
-        ));
-        OAuth2UserRequest request = mock(OAuth2UserRequest.class);
-        when(request.getClientRegistration()).thenReturn(clientRegistration);
-        when(clientRegistration.getRegistrationId()).thenReturn("naver");
-
-        OAuth2AccessToken oAuth2AccessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER,
-                "social-access-token",
-                Instant.now(),
-                Instant.now().plusSeconds(3600)
-        );
-        when(request.getAccessToken()).thenReturn(oAuth2AccessToken);
-
-        when(delegate.loadUser(request)).thenReturn(oAuth2User);
-
-        User user = User.builder()
-                .id(1L)
-                .email("test@naver.com")
-                .nickname("네이버")
-                .oAuthProvider(OAuthProvider.NAVER)
-                .providerId("123456")
-                .deleted(false)
-                .build();
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.NAVER, "123456")).thenReturn(Optional.of(user));
-
-
-        //when
-        OAuth2User result = customOauth2UserService.loadUser(request);
+        customOauth2UserService.loadUser(request);
 
         // then
-        verify(valueOperations).set(eq(String.format("%d_123456_accessToken", 1L)), any(AccessToken.class));
-        assertTrue(result instanceof PrincipalUser);
-        PrincipalUser principal = (PrincipalUser) result;
-        assertEquals("test@naver.com", principal.getUsername());
+        ArgumentCaptor<OAuthUserInfoResponse> captor = ArgumentCaptor.forClass(OAuthUserInfoResponse.class);
+        verify(socialUserService).signupSocial(captor.capture());
+
+        OAuthUserInfoResponse capturedResponse = captor.getValue();
+        assertEquals("test@kakao.com", capturedResponse.getEmail());
+        assertEquals(OAuthProvider.KAKAO, capturedResponse.getOAuthProvider());
+        assertEquals("123456", capturedResponse.getProviderId());
 
     }
 
-    @Test
-    @DisplayName("구글 소셜 로그인 성공 시 accessToken 저장 및 기존 사용자 반환")
-    void loadUser_withGoogle_shouldStoreAccessTokenAndReturnUser() {
-        // given
-        OAuth2User oAuth2User = mock(OAuth2User.class);
-        when(oAuth2User.getAttributes()).thenReturn(Map.of(
-                "sub", "123456",
-                "email", "test@google.com"
-        ));
-        OAuth2UserRequest request = mock(OAuth2UserRequest.class);
-        when(request.getClientRegistration()).thenReturn(clientRegistration);
-        when(clientRegistration.getRegistrationId()).thenReturn("google");
-
-        OAuth2AccessToken oAuth2AccessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER,
-                "social-access-token",
-                Instant.now(),
-                Instant.now().plusSeconds(3600)
-        );
-        when(request.getAccessToken()).thenReturn(oAuth2AccessToken);
-
-        when(delegate.loadUser(request)).thenReturn(oAuth2User);
-
-        User user = User.builder()
-                .id(1L)
-                .email("test@google.com")
-                .nickname("구글")
-                .oAuthProvider(OAuthProvider.GOOGLE)
-                .providerId("123456")
-                .deleted(false)
-                .build();
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-        when(userRepository.findWithRolesByProviderAndProviderId(OAuthProvider.GOOGLE, "123456")).thenReturn(Optional.of(user));
-
-
-        //when
-        OAuth2User result = customOauth2UserService.loadUser(request);
-
-        // then
-        verify(valueOperations).set(eq(String.format("%d_123456_accessToken", 1L)), any(AccessToken.class));
-        assertTrue(result instanceof PrincipalUser);
-        PrincipalUser principal = (PrincipalUser) result;
-        assertEquals("test@google.com", principal.getUsername());
-
-    }
 
 
 }

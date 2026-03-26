@@ -63,9 +63,8 @@ public class PointTransaction extends BaseTimeEntity {
         transactionStatus = TransactionStatus.FAILED;
     }
 
-    public void cancelPayment(Integer balance, LocalDateTime cancelledAt) {
+    public void cancelPayment(LocalDateTime cancelledAt) {
         this.transactionStatus = TransactionStatus.REFUNDED;
-        this.balance = balance;
         this.cancelledAt = cancelledAt;
     }
 
